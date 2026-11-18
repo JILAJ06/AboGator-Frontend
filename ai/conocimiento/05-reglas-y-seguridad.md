@@ -6,6 +6,8 @@
 - No modificar archivos fuera del alcance de la tarea (la lista de "archivos permitidos" está en `siguiente.md`).
 
 ## Código
+- **Convención de nombres:** clases, variables y archivos propios en español (`TokensColor`, `RepositorioTarjetas`, `pantalla_prueba.dart`); las APIs de Flutter se dejan como son. Archivos en `snake_case`.
+- Saltos de línea: LF (`.gitattributes` con `* text=auto eol=lf`).
 - Los colores, tamaños de letra y espaciados se toman del tema (`02-diseno-tokens.md`); nada de hex sueltos en pantallas.
 - Los textos visibles van centralizados (para poder traducir o corregir en un solo lugar).
 - La lógica no vive en los widgets: estado y reglas en capas aparte; los widgets solo pintan.

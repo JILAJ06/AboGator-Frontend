@@ -62,8 +62,11 @@ Primaria **Fredoka** (SemiBold/Bold) para logotipo, títulos y botones. Secundar
 ## Lienzo de referencia
 - Móvil: 390 × 844 (barra de estado 48 px arriba, indicador de inicio abajo). Margen lateral habitual 24 px; ancho útil 342 px.
 - Botón principal: 342 × 52. Botón secundario/volver: 342 × 48. Zonas táctiles mínimas de 48 dp.
-- Barra de navegación inferior: 390 × 84, pestañas Inicio, Buzón, Tienda y Perfil.
+- Barra de navegación inferior: 390 × 84, pestañas Mapa, Buzón, Tienda y Perfil.
 - Tablet: frames propios en las páginas "Tablet · …" de Figma (se atienden en la tarea de tablet).
 
-## Pendiente de confirmar (ver reporte)
-Los archivos de Sarko (poses), logotipos (vertical/horizontal), íconos y fuentes deben exportarse de Figma y entregarse al repo; mientras tanto se usan marcadores de posición.
+## Tokens adicionales y componentes
+Tres tokens más (borde/control, estado/condicional, foco/anillo) y las medidas de cada componente están en `07-componentes.md`.
+
+## Assets
+Logos y poses de Sarko: carpeta local `Imegenes/` (entra al repo en T-01 como `assets/imagenes/`). Íconos: paquete Lucide. Fuentes: archivos .ttf en `assets/fuentes/` (T-01).
