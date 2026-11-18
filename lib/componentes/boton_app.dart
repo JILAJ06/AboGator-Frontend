@@ -89,7 +89,6 @@ class _BotonAppState extends State<BotonApp> {
       transform: Matrix4.translationValues(0, bajada, 0),
       constraints: const BoxConstraints(minHeight: BotonApp.alto),
       padding: const EdgeInsets.symmetric(horizontal: BotonApp.rellenoHorizontal, vertical: 8),
-      alignment: widget.expandido ? Alignment.center : null,
       decoration: BoxDecoration(
         color: estilo.fondo,
         borderRadius: BorderRadius.circular(BotonApp.radio),
