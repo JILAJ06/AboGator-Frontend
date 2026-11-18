@@ -3,7 +3,7 @@
 /// En T-00 solo existe [raiz] (pantalla "Tema de prueba"). El resto se
 /// declaran para que cada tarea las implemente sin cambiar los nombres.
 abstract final class Rutas {
-  /// Temporal: pantalla "Tema de prueba" (se reemplaza en T-02 por el Splash).
+  /// Temporal: galería de componentes (se reemplaza en T-02 por el Splash).
   static const String raiz = '/';
 
   // Flujo 1 · Bienvenida y acceso
