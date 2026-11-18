@@ -127,12 +127,17 @@ class _CampoTextoAppState extends State<CampoTextoApp> {
       ),
     );
 
-    final caja = AnimatedContainer(
-      duration: Duration.zero,
+    // El borde va en primer plano para que su grosor (1.5 o 2) no cambie
+    // el alto de la caja entre estados.
+    final caja = Container(
+      key: const ValueKey('caja-campo'),
       constraints: const BoxConstraints(minHeight: CampoTextoApp.altoCaja),
       padding: EdgeInsets.only(left: 16, right: esContrasena ? 0 : 16),
       decoration: BoxDecoration(
         color: tokens.fondoSuperficie,
+        borderRadius: BorderRadius.circular(CampoTextoApp.radio),
+      ),
+      foregroundDecoration: BoxDecoration(
         borderRadius: BorderRadius.circular(CampoTextoApp.radio),
         border: borde,
       ),
