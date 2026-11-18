@@ -95,11 +95,6 @@ class _MuestraColor extends StatelessWidget {
   final String nombre;
   final Color color;
 
-  String get _hex {
-    final rgb = color.toARGB32() & 0xFFFFFF;
-    return '#${rgb.toRadixString(16).padLeft(6, '0').toUpperCase()}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
@@ -119,7 +114,7 @@ class _MuestraColor extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           Expanded(child: Text(nombre, style: estilos.cuerpoEnfasis)),
-          Text(_hex, style: estilos.codigo.copyWith(color: tokens.textoSecundario)),
+          Text(color.comoHex, style: estilos.codigo.copyWith(color: tokens.textoSecundario)),
         ],
       ),
     );

@@ -1,5 +1,13 @@
 import 'package:material_ui/material_ui.dart';
 
+/// Representación `#RRGGBB` de un color (para mostrar o depurar tokens).
+extension ColorComoHex on Color {
+  String get comoHex {
+    final rgb = toARGB32() & 0xFFFFFF;
+    return '#${rgb.toRadixString(16).padLeft(6, '0').toUpperCase()}';
+  }
+}
+
 /// Tokens de color del tema (valores exactos de Figma).
 ///
 /// Se leen desde cualquier widget con `context.tokens`
