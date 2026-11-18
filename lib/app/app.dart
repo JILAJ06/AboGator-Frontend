@@ -3,7 +3,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/tema/modo_tema.dart';
 import '../core/tema/tema_app.dart';
-import '../core/tema/tipografia.dart';
 import '../core/textos/textos.dart';
 import 'enrutador.dart';
 
@@ -16,14 +15,13 @@ class AppAbogator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final modo = ref.watch(modoTemaProvider);
-    final fuente = ref.watch(resolutorFuenteProvider);
     final enrutador = ref.watch(enrutadorProvider);
 
     return MaterialApp.router(
       title: Textos.nombreApp,
       debugShowCheckedModeBanner: false,
-      theme: crearTemaClaro(fuente),
-      darkTheme: crearTemaOscuro(fuente),
+      theme: crearTemaClaro(),
+      darkTheme: crearTemaOscuro(),
       themeMode: modo,
       locale: localeApp,
       supportedLocales: const [localeApp],

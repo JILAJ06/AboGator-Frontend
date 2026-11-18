@@ -1,8 +1,7 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// Familias tipográficas del diseño.
+/// Familias tipográficas del diseño. Los archivos `.ttf` están en
+/// `assets/fuentes/` y se declaran en `pubspec.yaml` (funcionan sin internet).
 abstract final class FamiliasFuente {
   static const String fredoka = 'Fredoka';
   static const String inter = 'Inter';
@@ -12,8 +11,12 @@ abstract final class FamiliasFuente {
 /// Los 11 estilos de texto de Figma, con tamaño e interlineado exactos.
 ///
 /// En Flutter el interlineado se expresa como `height = interlineado / tamaño`.
+/// Botón, Etiqueta y Leyenda llevan `letterSpacing` de 0.2.
 /// Estos estilos no llevan color; el color lo pone [EstilosTexto.crear].
 abstract final class TipografiaBase {
+  /// Tracking de Botón, Etiqueta y Leyenda.
+  static const double tracking = 0.2;
+
   /// Display · Fredoka Bold 34/40
   static const TextStyle display = TextStyle(
     fontFamily: FamiliasFuente.fredoka,
@@ -70,28 +73,31 @@ abstract final class TipografiaBase {
     height: 20 / 14,
   );
 
-  /// Etiqueta · Inter SemiBold 12/16
+  /// Etiqueta · Inter SemiBold 12/16, tracking 0.2
   static const TextStyle etiqueta = TextStyle(
     fontFamily: FamiliasFuente.inter,
     fontWeight: FontWeight.w600,
     fontSize: 12,
     height: 16 / 12,
+    letterSpacing: tracking,
   );
 
-  /// Leyenda · Inter Medium 11/14
+  /// Leyenda · Inter Medium 11/14, tracking 0.2
   static const TextStyle leyenda = TextStyle(
     fontFamily: FamiliasFuente.inter,
     fontWeight: FontWeight.w500,
     fontSize: 11,
     height: 14 / 11,
+    letterSpacing: tracking,
   );
 
-  /// Botón · Fredoka SemiBold 16/20
+  /// Botón · Fredoka SemiBold 16/20, tracking 0.2
   static const TextStyle boton = TextStyle(
     fontFamily: FamiliasFuente.fredoka,
     fontWeight: FontWeight.w600,
     fontSize: 16,
     height: 20 / 16,
+    letterSpacing: tracking,
   );
 
   /// Código · JetBrains Mono Regular 12/18
@@ -103,22 +109,7 @@ abstract final class TipografiaBase {
   );
 }
 
-/// Convierte un estilo base en uno con la fuente real cargada.
-typedef ResolutorFuente = TextStyle Function(TextStyle estilo);
-
-/// Carga la fuente con `google_fonts` (descarga y guarda en caché).
-TextStyle fuenteGoogle(TextStyle estilo) {
-  return GoogleFonts.getFont(estilo.fontFamily!, textStyle: estilo);
-}
-
-/// Deja el estilo tal cual (sin descargar nada). Se usa en pruebas.
-TextStyle fuenteSinDescarga(TextStyle estilo) => estilo;
-
-/// Cómo se resuelven las fuentes. En pruebas se sustituye por
-/// [fuenteSinDescarga] para no depender de internet.
-final resolutorFuenteProvider = Provider<ResolutorFuente>((ref) => fuenteGoogle);
-
-/// Los 11 estilos ya con fuente y color, disponibles en el tema.
+/// Los 11 estilos ya con color, disponibles en el tema.
 ///
 /// Se leen desde cualquier widget con `context.estilos`.
 @immutable
@@ -137,8 +128,8 @@ class EstilosTexto extends ThemeExtension<EstilosTexto> {
     required this.codigo,
   });
 
-  factory EstilosTexto.crear({required Color colorTexto, required ResolutorFuente fuente}) {
-    TextStyle aplicar(TextStyle base) => fuente(base.copyWith(color: colorTexto));
+  factory EstilosTexto.crear({required Color colorTexto}) {
+    TextStyle aplicar(TextStyle base) => base.copyWith(color: colorTexto);
     return EstilosTexto(
       display: aplicar(TipografiaBase.display),
       h1: aplicar(TipografiaBase.h1),

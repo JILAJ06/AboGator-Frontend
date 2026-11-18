@@ -6,12 +6,8 @@ import 'tokens_color.dart';
 /// Construye el `ThemeData` de la app a partir de los tokens.
 ///
 /// No fija la escala de texto: se respeta el texto dinámico del sistema.
-ThemeData crearTema({
-  required TokensColor tokens,
-  required Brightness brillo,
-  required ResolutorFuente fuente,
-}) {
-  final estilos = EstilosTexto.crear(colorTexto: tokens.textoPrimario, fuente: fuente);
+ThemeData crearTema({required TokensColor tokens, required Brightness brillo}) {
+  final estilos = EstilosTexto.crear(colorTexto: tokens.textoPrimario);
   final esquema = ColorScheme(
     brightness: brillo,
     primary: tokens.accionPrimaria,
@@ -26,7 +22,7 @@ ThemeData crearTema({
     onSurface: tokens.textoPrimario,
     onSurfaceVariant: tokens.textoSecundario,
     surfaceContainerHighest: tokens.fondoSuperficieAlt,
-    outline: tokens.bordeDefault,
+    outline: tokens.bordeControl,
     outlineVariant: tokens.bordeDefault,
   );
 
@@ -34,17 +30,19 @@ ThemeData crearTema({
     useMaterial3: true,
     brightness: brillo,
     colorScheme: esquema,
+    fontFamily: FamiliasFuente.inter,
     scaffoldBackgroundColor: tokens.fondoApp,
     dividerColor: tokens.bordeDefault,
+    focusColor: tokens.focoAnillo,
     textTheme: estilos.comoTextTheme(),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: tokens.accionPrimaria,
+      selectionHandleColor: tokens.accionPrimaria,
+    ),
     extensions: [tokens, estilos],
   );
 }
 
-ThemeData crearTemaClaro(ResolutorFuente fuente) {
-  return crearTema(tokens: TokensColor.claro, brillo: Brightness.light, fuente: fuente);
-}
+ThemeData crearTemaClaro() => crearTema(tokens: TokensColor.claro, brillo: Brightness.light);
 
-ThemeData crearTemaOscuro(ResolutorFuente fuente) {
-  return crearTema(tokens: TokensColor.oscuro, brillo: Brightness.dark, fuente: fuente);
-}
+ThemeData crearTemaOscuro() => crearTema(tokens: TokensColor.oscuro, brillo: Brightness.dark);
