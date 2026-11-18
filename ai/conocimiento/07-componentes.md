@@ -15,7 +15,7 @@ Los estilos Botón, Etiqueta y Leyenda llevan `letterSpacing` de 0.2 en los comp
 
 ## Íconos
 - Trazo de 2, esquinas redondeadas, caja de 24×24 (tamaños de uso: 12, 14, 16, 20, 22, 24, 26, 48). Color por defecto: el del texto que lo acompaña, salvo indicación.
-- Nombres (47): heart, coin, flame, star, bulb, home, inbox, store, user, lock, check, x, code, clock, back, chevron, settings, doc, trophy, shield, eye, moon, vibrate, bell, logout, pause, refresh, mail, map, gavel, info, accessibility, type, arrow-up, arrow-down, search, zap, alert, paperclip, highlighter, briefcase, trending-down, building, megaphone, shield-check.
+- Nombres (45): heart, coin, flame, star, bulb, home, inbox, store, user, lock, check, x, code, clock, back, chevron, settings, doc, trophy, shield, eye, moon, vibrate, bell, logout, pause, refresh, mail, map, gavel, info, accessibility, type, arrow-up, arrow-down, search, zap, alert, paperclip, highlighter, briefcase, trending-down, building, megaphone, shield-check.
 - Son del estilo de **Lucide**. Usar el paquete `lucide_icons_flutter` (verificar que exista y su versión). Para los que no tengan equivalente exacto (por ejemplo coin, vibrate, back, chevron, gavel, highlighter), usar el más cercano y listarlos en el reporte. Una sola clase `IconosApp` con una entrada por nombre de Figma y un widget `IconoApp(icono, tamano, color, etiquetaSemantica?)`: decorativo (excluido de semántica) si no recibe etiqueta.
 
 ## Botón (`BotonApp`)
@@ -84,5 +84,15 @@ Imagen de la mascota por **pose/expresión**. Las imágenes están en la carpeta
 ## Galería de componentes (temporal)
 Pantalla de desarrollo que muestra todos los componentes de arriba en todos sus tipos y estados, con interruptor claro/oscuro, para revisarlos de un vistazo. Reemplaza a "Tema de prueba"; se elimina cuando existan las pantallas reales.
 
-## Fuera de T-01 (se especifican en su tarea)
-Botones de veredicto, tarjeta de caso, sellos, snippet de evidencia, nodos del mapa, opciones de justificación, temporizador, panel de retroalimentación, barra de juego, tarjeta de módulo, artículo de tienda, aviso de conexión, barra de comodines, barra del Jefe, notificación y contraargumento.
+## Botón de veredicto (`BotonVeredicto`) — se construye en T-02
+Columna centrada, hueco 6. Círculo de **68** con borde 3 en el color del estado, fondo fondo/superficie, sombra (0, 8, desenfoque 24, #0F294A al 14 %) e ícono de 32 en el mismo color. Debajo, etiqueta en mayúsculas con estilo Etiqueta (Inter SemiBold 12/16, tracking 0.2) en el color del estado.
+| Tipo | Ícono | Etiqueta | Color |
+|---|---|---|---|
+| Ilegal | x | ILEGAL | estado/ilegal |
+| Legal | check | LEGAL | estado/legal |
+| Condicional | arrow-up | CONDICIONAL | estado/condicional (columna de 87 de ancho) |
+| Escalar | arrow-down | ESCALAR | estado/escalar |
+Sin `alPresionar` es decorativo (excluido de semántica); con él, zona táctil completa, anillo de foco y nombre accesible "Veredicto: Legal con condiciones", etc. Agregar el token **estado/escalar** (#6B4BA1 claro; oscuro propuesto #B9A0E8, a verificar por contraste).
+
+## Fuera de T-01/T-02 (se especifican en su tarea)
+Tarjeta de caso, sellos, snippet de evidencia, nodos del mapa, opciones de justificación, temporizador, panel de retroalimentación, barra de juego, tarjeta de módulo, artículo de tienda, aviso de conexión, barra de comodines, barra del Jefe, notificación y contraargumento.

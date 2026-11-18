@@ -6,7 +6,7 @@ Una rama por tarea, desde `develop`. El orden va de lo que todo necesita a lo qu
 |---|---|---|
 | T-00 | `00-base-del-proyecto` | Proyecto Flutter, estructura de carpetas, tema claro/oscuro con los tokens, fuentes, enrutador, capa de repositorios con mocks, pruebas y análisis estático |
 | T-01 | `01-componentes-base` | Tokens faltantes, fuentes locales, íconos, imágenes de Sarko y logos, botón, campo de texto, chip HUD, corazón, indicadores de la Startup, navegación inferior, barra de progreso, paginador, anillo de foco, galería de componentes y plataforma web de desarrollo (ver `07-componentes.md`) |
-| T-02 | `02-bienvenida` | 01 Splash y 02–04 Onboarding (con "Omitir") |
+| T-02 | `02-bienvenida` | 01 Splash y 02–04 Onboarding (con "Omitir"), `BotonVeredicto` y token estado/escalar |
 | T-03 | `03-acceso` | 05 Inicio de sesión y 06 Registro (validaciones, dos consentimientos separados) |
 | T-04 | `04-inicio-y-mapa` | 07/07b Inicio, 08 Mapa de sprints, 09 Intro del sprint |
 | T-05 | `05-tarjeta-swipe` | 10, 11, 11b, 11c, 13: tarjeta, arrastre en 4 direcciones, sellos, tintes, botones equivalentes |
