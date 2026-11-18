@@ -2,7 +2,7 @@
 
 Mapa navegable del proyecto: qué existe, dónde está y con qué se relaciona. **Se actualiza cada vez que se crea, mueve, renombra o elimina algo** (reglas en `ai/conocimiento/06-grafo-de-conocimiento.md`). Si algo de aquí no coincide con la realidad, el grafo está mal y hay que corregirlo.
 
-Última actualización: 2026-11-18 · por Claude Chat · tarea: documentación inicial
+Última actualización: 2026-11-18 · por Claude Code · tarea: T-00
 
 ## Cómo leerlo
 - Cada fila es un **nodo** con un ID único. La columna **Relaciones** son las **aristas**: `→` apunta a otro nodo, con un verbo corto (`usa`, `muestra`, `navega a`, `implementa`, `depende de`, `define`).
@@ -65,17 +65,49 @@ flowchart LR
 ## 4 · Código (lo mantiene Claude Code; todo `—` hasta que exista)
 | ID | Nombre | Ruta | Estado | Relaciones |
 |---|---|---|---|---|
-| APP | App y configuración | lib/app/ | — | → usa RUTAS, TEMA |
-| RUTAS | Enrutador y constantes de rutas | lib/app/rutas.dart | — | → navega a PANT-* |
-| TEMA | Tema claro/oscuro y tokens | lib/core/tema/ | — | ← define DOC-02; → lo usan todos los COMP-* y PANT-* |
-| TEXTOS | Textos centralizados | lib/core/textos/ | — | → los usan las pantallas |
-| MOD | Modelos de datos | lib/datos/modelos/ | — | → los usan REPO-* |
-| REPO-* | Interfaces de repositorio (auth, progreso, tarjetas, vidas, apelaciones, tienda) | lib/datos/repositorios/ | — | → implementan MOCK-*; en T-14 → HTTP |
-| MOCK-* | Repositorios simulados | lib/datos/mocks/ | — | → implementan REPO-* |
+| MAIN | Punto de entrada (orientación vertical, ProviderScope) | lib/main.dart | en curso | → arranca APP |
+| APP | App y configuración (MaterialApp.router, es_MX, tema claro/oscuro) | lib/app/app.dart | en curso | → usa ENRUTADOR, TEMA, MODO-TEMA, TEXTOS |
+| ENRUTADOR | GoRouter (proveedor Riverpod); en T-00 solo la ruta `/` | lib/app/enrutador.dart | en curso | → usa RUTAS; → navega a PANT-PRUEBA |
+| RUTAS | Constantes de rutas de todas las pantallas (sin implementar) | lib/app/rutas.dart | en curso | → nombra PANT-*; ← lo usa ENRUTADOR |
+| TEMA | Tema claro/oscuro y tokens | lib/core/tema/ | en curso | ← define DOC-02; → lo usan todos los COMP-* y PANT-* |
+| TEMA-TOKENS | 14 tokens de color (ThemeExtension `TokensColor.claro/oscuro`) | lib/core/tema/tokens_color.dart | en curso | ← define DOC-02; ← verifica TEST-TEMA |
+| TEMA-MARCA | Colores de marca (15) y de módulo (5), solo decorativos | lib/core/tema/colores_marca.dart | en curso | ← define DOC-02; → lo usa MOCK-PROG |
+| TEMA-TIPO | 11 estilos de texto (`TipografiaBase`, `EstilosTexto`) y resolutor de fuentes | lib/core/tema/tipografia.dart | en curso | → usa DEC-FUENTES; ← verifica TEST-TEMA |
+| TEMA-APP | Construcción del `ThemeData` a partir de los tokens | lib/core/tema/tema_app.dart | en curso | → usa TEMA-TOKENS, TEMA-TIPO; ← lo usa APP |
+| MODO-TEMA | Proveedor del modo claro/oscuro (sigue al sistema; se fuerza en T-10) | lib/core/tema/modo_tema.dart | en curso | ← lo usan APP y PANT-PRUEBA; → lo usará PANT-26 |
+| TEXTOS | Textos centralizados | lib/core/textos/textos.dart | en curso | → los usan las pantallas y MOCK-* |
+| UTIL | Extensiones de contexto (`context.tokens`, `context.estilos`) | lib/core/utilidades/extensiones_contexto.dart | en curso | → usa TEMA-TOKENS, TEMA-TIPO |
+| MOD | Modelos de datos (Usuario, Modulo, Sprint, Tarjeta, EstadoStartup, Vidas, Apelacion, ArticuloTienda) | lib/datos/modelos/ | en curso | → los usan REPO-* |
+| REPO-* | Interfaces de repositorio (auth, progreso, tarjetas, vidas, apelaciones, tienda) | lib/datos/repositorios/ | en curso | → implementan MOCK-*; en T-14 → HTTP |
+| REPO-AUTH | Autenticación (inicio de sesión, registro con dos consentimientos) | lib/datos/repositorios/repositorio_autenticacion.dart | en curso | → usa MOD; ← implementa MOCK-AUTH; → servirá a PANT-05, PANT-06 |
+| REPO-PROG | Progreso: módulos, sprints y estado de la Startup | lib/datos/repositorios/repositorio_progreso.dart | en curso | → usa MOD; ← implementa MOCK-PROG; → servirá a PANT-07..09 |
+| REPO-TARJ | Tarjetas de un sprint | lib/datos/repositorios/repositorio_tarjetas.dart | en curso | → usa MOD; ← implementa MOCK-TARJ; → servirá a PANT-10..19b |
+| REPO-VIDAS | Vidas (regeneración del servidor) | lib/datos/repositorios/repositorio_vidas.dart | en curso | → usa MOD; ← implementa MOCK-VIDAS; → servirá a PANT-20 |
+| REPO-APEL | Apelaciones pendientes | lib/datos/repositorios/repositorio_apelaciones.dart | en curso | → usa MOD; ← implementa MOCK-APEL; → servirá a PANT-21..22b |
+| REPO-TIENDA | Tienda de comodines y monedas | lib/datos/repositorios/repositorio_tienda.dart | en curso | → usa MOD; ← implementa MOCK-TIENDA; → servirá a PANT-24 |
+| PROV-REPO | Proveedores Riverpod: único lugar donde se elige mock o HTTP | lib/datos/repositorios/proveedores_repositorios.dart | en curso | → expone REPO-*; → hoy usa MOCK-*; en T-14 → HTTP |
+| MOCK-* | Repositorios simulados | lib/datos/mocks/ | en curso | → implementan REPO-* |
+| MOCK-AUTH | Autenticación simulada (rechaza registro sin ambos consentimientos) | lib/datos/mocks/mock_autenticacion.dart | en curso | → implementa REPO-AUTH; → usa TEXTOS |
+| MOCK-PROG | 5 módulos y estado de la Startup de ejemplo | lib/datos/mocks/mock_progreso.dart | en curso | → implementa REPO-PROG; → usa TEMA-MARCA |
+| MOCK-TARJ | Tarjetas de ejemplo (incluye "Librería GPL en app cerrada") | lib/datos/mocks/mock_tarjetas.dart | en curso | → implementa REPO-TARJ |
+| MOCK-VIDAS | Vidas con hora del servidor simulada | lib/datos/mocks/mock_vidas.dart | en curso | → implementa REPO-VIDAS |
+| MOCK-APEL | Dos apelaciones de ejemplo | lib/datos/mocks/mock_apelaciones.dart | en curso | → implementa REPO-APEL |
+| MOCK-TIENDA | Los tres comodines | lib/datos/mocks/mock_tienda.dart | en curso | → implementa REPO-TIENDA |
+| PANT-PRUEBA | Pantalla temporal "Tema de prueba" (se elimina en T-02) | lib/funciones/bienvenida/pantalla_prueba.dart | en curso | → usa TEMA, MODO-TEMA, TEXTOS, UTIL; ← verifica TEST-PRUEBA |
+| FUNC | Carpetas por área (bienvenida, acceso, inicio, juego, apelaciones, tienda, perfil, jefe) | lib/funciones/ | en curso | → contendrán PANT-* |
 | COMP-* | Componentes reutilizables (botones, campos, chips HUD, corazones, indicadores, navegación inferior, Sarko, paginador) | lib/componentes/ | — | → los usan PANT-*; → usan TEMA |
 | COMP-SARKO | Sarko (marcador hasta tener imágenes) | lib/componentes/ | — | ← EXT-ASSETS |
-| TEST-TEMA | Pruebas del tema | test/ | — | → verifican TEMA |
-| CI | Flujo de integración continua | .github/workflows/ci.yml | — | → ejecuta análisis y pruebas |
+| TEST-TEMA | Pruebas del tema (hex de los 14 tokens, 11 estilos) | test/core/tema/ | en curso | → verifican TEMA-TOKENS, TEMA-TIPO |
+| TEST-PRUEBA | Prueba de widget de la pantalla de prueba (claro, oscuro, sistema, texto dinámico) | test/funciones/bienvenida/pantalla_prueba_test.dart | en curso | → verifica PANT-PRUEBA, APP, MODO-TEMA |
+| TEST-DATOS | Pruebas de los mocks y de la sustitución de proveedores | test/datos/mocks_test.dart | en curso | → verifican MOCK-*, PROV-REPO |
+| CI | Flujo de integración continua (pub get, formato, analyze, test; Flutter 3.50.0) | .github/workflows/ci.yml | en curso | → ejecuta TEST-*; → usa CONF |
+| CONF | Configuración del proyecto (dependencias, reglas de análisis, formato a 100 columnas) | pubspec.yaml, analysis_options.yaml | en curso | → define DEP-*; ← lo usa CI |
+| PLAT | Proyectos nativos generados por `flutter create` (mx.abogator.abogator) | android/, ios/ | en curso | ← arranca MAIN |
+| DEP-RIVERPOD | flutter_riverpod 3.5.0 (estado e inyección de repositorios) | pubspec.yaml | en curso | ← lo usan APP, MODO-TEMA, PROV-REPO |
+| DEP-GOROUTER | go_router 18.1.4 | pubspec.yaml | en curso | ← lo usa ENRUTADOR |
+| DEP-MATERIAL-UI | material_ui 1.x (reemplaza a `package:flutter/material.dart`, obsoleto en Flutter 3.50) | pubspec.yaml | en curso | ← lo usa todo lib/; → DEC-MATERIAL-UI |
+| DEC-FUENTES | Decisión: fuentes con google_fonts 9.0.0 en desarrollo; pasar a assets/fuentes/ más adelante (reporte T-00, D1) | lib/core/tema/tipografia.dart | en curso | → usa EXT-ASSETS (fuentes pendientes) |
+| DEC-MATERIAL-UI | Decisión: importar `package:material_ui/material_ui.dart` porque `flutter/material.dart` está obsoleto (reporte T-00, D2) | — | en curso | → DEP-MATERIAL-UI |
 
 ## 5 · Pantallas (46, según Figma) y a dónde llevan
 Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
@@ -142,3 +174,4 @@ Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
 
 ## Registro de cambios del grafo
 - 2026-11-18 · Claude Chat · creación del grafo con documentos, tareas, pantallas y conceptos; código aún sin nodos reales.
+- 2026-11-18 · Claude Code · T-00: rutas reales y estado `en curso` para APP, RUTAS, TEMA, TEXTOS, MOD, REPO-*, MOCK-*, TEST-TEMA y CI. Nodos nuevos: MAIN, ENRUTADOR, TEMA-TOKENS, TEMA-MARCA, TEMA-TIPO, TEMA-APP, MODO-TEMA, UTIL, REPO-AUTH/PROG/TARJ/VIDAS/APEL/TIENDA, PROV-REPO, MOCK-AUTH/PROG/TARJ/VIDAS/APEL/TIENDA, PANT-PRUEBA, FUNC, TEST-PRUEBA, TEST-DATOS, CONF, PLAT, DEP-RIVERPOD, DEP-GOROUTER, DEP-MATERIAL-UI, DEC-FUENTES y DEC-MATERIAL-UI. COMP-* y COMP-SARKO siguen sin ruta (`lib/componentes/` solo tiene `.gitkeep` hasta T-01).
