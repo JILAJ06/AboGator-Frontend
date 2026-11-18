@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../componentes/logo_app.dart';
 import '../../core/tema/efectos.dart';
+import '../../core/tema/tokens_color.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import 'flujo_bienvenida.dart';
@@ -106,6 +107,9 @@ class _PantallaSplashState extends ConsumerState<PantallaSplash> {
 /// Marcador: todavía no existe la variante "sobre verde" (isotipo blanco,
 /// letras blanco/crema), así que se muestra el logo normal dentro de una
 /// tarjeta redondeada. Se reemplaza cuando se exporte de Figma.
+///
+/// La tarjeta usa siempre la superficie del tema claro: el logo actual es
+/// azul marino y verde, y sobre la superficie oscura casi no se ve.
 class _LogoSobreVerde extends StatelessWidget {
   const _LogoSobreVerde();
 
@@ -115,7 +119,7 @@ class _LogoSobreVerde extends StatelessWidget {
       key: const ValueKey('logo-splash-marcador'),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: context.tokens.fondoSuperficie,
+        color: TokensColor.claro.fondoSuperficie,
         borderRadius: BorderRadius.circular(24),
       ),
       child: const LogoApp(alto: 109),
