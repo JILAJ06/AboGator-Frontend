@@ -2,7 +2,7 @@
 
 Mapa navegable del proyecto: qué existe, dónde está y con qué se relaciona. **Se actualiza cada vez que se crea, mueve, renombra o elimina algo** (reglas en `ai/conocimiento/06-grafo-de-conocimiento.md`). Si algo de aquí no coincide con la realidad, el grafo está mal y hay que corregirlo.
 
-Última actualización: 2026-11-18 · por Claude Chat · tarea: cierre de T-00 y planeación de T-01
+Última actualización: 2026-11-18 · por Claude Code · tarea: T-01
 
 ## Cómo leerlo
 - Cada fila es un **nodo** con un ID único. La columna **Relaciones** son las **aristas**: `→` apunta a otro nodo, con un verbo corto (`usa`, `muestra`, `navega a`, `implementa`, `depende de`, `define`).
@@ -67,17 +67,21 @@ flowchart LR
 | ID | Nombre | Ruta | Estado | Relaciones |
 |---|---|---|---|---|
 | MAIN | Punto de entrada (orientación vertical, ProviderScope) | lib/main.dart | hecho | → arranca APP |
-| APP | App y configuración (MaterialApp.router, es_MX, tema claro/oscuro) | lib/app/app.dart | hecho | → usa ENRUTADOR, TEMA, MODO-TEMA, TEXTOS |
-| ENRUTADOR | GoRouter (proveedor Riverpod); en T-00 solo la ruta `/` | lib/app/enrutador.dart | hecho | → usa RUTAS; → navega a PANT-PRUEBA |
+| APP | App y configuración (MaterialApp.router, es_MX, tema claro/oscuro; sin resolutor de fuentes desde T-01) | lib/app/app.dart | en curso | → usa ENRUTADOR, TEMA, MODO-TEMA, TEXTOS |
+| ENRUTADOR | GoRouter (proveedor Riverpod); por ahora solo la ruta `/` con la galería | lib/app/enrutador.dart | en curso | → usa RUTAS; → navega a PANT-GALERIA |
 | RUTAS | Constantes de rutas de todas las pantallas (sin implementar) | lib/app/rutas.dart | hecho | → nombra PANT-*; ← lo usa ENRUTADOR |
-| TEMA | Tema claro/oscuro y tokens | lib/core/tema/ | hecho | ← define DOC-02; → lo usan todos los COMP-* y PANT-* |
-| TEMA-TOKENS | 14 tokens de color (ThemeExtension `TokensColor.claro/oscuro`) | lib/core/tema/tokens_color.dart | hecho | ← define DOC-02; ← verifica TEST-TEMA |
+| TEMA | Tema claro/oscuro y tokens | lib/core/tema/ | en curso | ← define DOC-02; → lo usan todos los COMP-* y PANT-* |
+| TEMA-TOKENS | 17 tokens de color (ThemeExtension `TokensColor.claro/oscuro`; T-01 agrega borde/control, estado/condicional y foco/anillo) | lib/core/tema/tokens_color.dart | en curso | ← define DOC-02, DOC-07; ← verifica TEST-TEMA |
 | TEMA-MARCA | Colores de marca (15) y de módulo (5), solo decorativos | lib/core/tema/colores_marca.dart | hecho | ← define DOC-02; → lo usa MOCK-PROG |
-| TEMA-TIPO | 11 estilos de texto (`TipografiaBase`, `EstilosTexto`) y resolutor de fuentes | lib/core/tema/tipografia.dart | hecho | → usa DEC-FUENTES; ← verifica TEST-TEMA |
-| TEMA-APP | Construcción del `ThemeData` a partir de los tokens | lib/core/tema/tema_app.dart | hecho | → usa TEMA-TOKENS, TEMA-TIPO; ← lo usa APP |
-| MODO-TEMA | Proveedor del modo claro/oscuro (sigue al sistema; se fuerza en T-10) | lib/core/tema/modo_tema.dart | hecho | ← lo usan APP y PANT-PRUEBA; → lo usará PANT-26 |
-| TEXTOS | Textos centralizados | lib/core/textos/textos.dart | hecho | → los usan las pantallas y MOCK-* |
+| TEMA-TIPO | 11 estilos de texto (`TipografiaBase`, `EstilosTexto`); tracking 0.2 en Botón, Etiqueta y Leyenda; fuentes locales | lib/core/tema/tipografia.dart | en curso | → usa ASSETS-FUENTES; → DEC-FUENTES; ← verifica TEST-TEMA |
+| TEMA-APP | Construcción del `ThemeData` a partir de los tokens | lib/core/tema/tema_app.dart | en curso | → usa TEMA-TOKENS, TEMA-TIPO; ← lo usa APP |
+| TEMA-EFECTOS | Efectos que no son tokens: sombra sólida de botón, brillo de barra, opacidad de chips, duración con "reducir animaciones" | lib/core/tema/efectos.dart | en curso | ← lo usan COMP-BOTON, COMP-PROGRESO, COMP-PAGINADOR, COMP-IMPACTO |
+| TEMA-ICONOS | Catálogo `IconosApp` (45 nombres de Figma → Lucide, más eyeOff) | lib/core/tema/iconos_app.dart | en curso | → usa DEP-LUCIDE; ← lo usan COMP-ICONO y los COMP-* |
+| MODO-TEMA | Proveedor del modo claro/oscuro (sigue al sistema; se fuerza en T-10) | lib/core/tema/modo_tema.dart | hecho | ← lo usan APP y PANT-GALERIA; → lo usará PANT-26 |
+| TEXTOS | Textos centralizados (incluye semántica de los componentes y la galería) | lib/core/textos/textos.dart | en curso | → los usan las pantallas y MOCK-* |
 | UTIL | Extensiones de contexto (`context.tokens`, `context.estilos`) | lib/core/utilidades/extensiones_contexto.dart | hecho | → usa TEMA-TOKENS, TEMA-TIPO |
+| UTIL-CONTRASTE | Cálculo de contraste WCAG 2.1 | lib/core/utilidades/contraste.dart | en curso | ← lo usa TEST-TEMA |
+| RECURSOS | Rutas de las imágenes (`ImagenesApp`) | lib/core/recursos/imagenes_app.dart | en curso | → apunta a ASSETS-IMG; ← lo usan COMP-SARKO, COMP-LOGO |
 | MOD | Modelos de datos (Usuario, Modulo, Sprint, Tarjeta, EstadoStartup, Vidas, Apelacion, ArticuloTienda) | lib/datos/modelos/ | hecho | → los usan REPO-* |
 | REPO-* | Interfaces de repositorio (auth, progreso, tarjetas, vidas, apelaciones, tienda) | lib/datos/repositorios/ | hecho | → implementan MOCK-*; en T-14 → HTTP |
 | REPO-AUTH | Autenticación (inicio de sesión, registro con dos consentimientos) | lib/datos/repositorios/repositorio_autenticacion.dart | hecho | → usa MOD; ← implementa MOCK-AUTH; → servirá a PANT-05, PANT-06 |
@@ -94,21 +98,44 @@ flowchart LR
 | MOCK-VIDAS | Vidas con hora del servidor simulada | lib/datos/mocks/mock_vidas.dart | hecho | → implementa REPO-VIDAS |
 | MOCK-APEL | Dos apelaciones de ejemplo | lib/datos/mocks/mock_apelaciones.dart | hecho | → implementa REPO-APEL |
 | MOCK-TIENDA | Los tres comodines | lib/datos/mocks/mock_tienda.dart | hecho | → implementa REPO-TIENDA |
-| PANT-PRUEBA | Pantalla temporal "Tema de prueba" (se elimina en T-02) | lib/funciones/bienvenida/pantalla_prueba.dart | hecho | → usa TEMA, MODO-TEMA, TEXTOS, UTIL; ← verifica TEST-PRUEBA |
+| PANT-PRUEBA | Pantalla temporal "Tema de prueba" (eliminada en T-01; la reemplaza PANT-GALERIA) | — | obsoleto | → reemplazada por PANT-GALERIA |
+| PANT-GALERIA | Galería temporal de componentes (todos los tipos y estados, claro/oscuro); se elimina con las pantallas reales | lib/funciones/bienvenida/galeria_componentes.dart | en curso | → usa COMP-*, MODO-TEMA, TEXTOS, TEMA-ICONOS; ← verifica TEST-GALERIA |
 | FUNC | Carpetas por área (bienvenida, acceso, inicio, juego, apelaciones, tienda, perfil, jefe) | lib/funciones/ | hecho | → contendrán PANT-* |
-| COMP-* | Componentes reutilizables (botones, campos, chips HUD, corazones, indicadores, navegación inferior, Sarko, paginador) | lib/componentes/ | — | → los usan PANT-*; → usan TEMA |
-| COMP-SARKO | Sarko (marcador hasta tener imágenes) | lib/componentes/ | — | ← EXT-ASSETS |
-| TEST-TEMA | Pruebas del tema (hex de los 14 tokens, 11 estilos) | test/core/tema/ | hecho | → verifican TEMA-TOKENS, TEMA-TIPO |
-| TEST-PRUEBA | Prueba de widget de la pantalla de prueba (claro, oscuro, sistema, texto dinámico) | test/funciones/bienvenida/pantalla_prueba_test.dart | hecho | → verifica PANT-PRUEBA, APP, MODO-TEMA |
+| COMP-* | Componentes reutilizables (un archivo por componente) | lib/componentes/ | en curso | ← define DOC-07; → los usan PANT-*; → usan TEMA, TEXTOS |
+| COMP-BOTON | `BotonApp`: primario, secundario, acento, peligro, fantasma y deshabilitado; estado presionado | lib/componentes/boton_app.dart | en curso | → usa COMP-FOCO, COMP-ICONO, TEMA-EFECTOS; → DEC-PRESIONADO |
+| COMP-CAMPO | `CampoTextoApp`: reposo, foco, error; tipos texto/nombre/correo/contraseña | lib/componentes/campo_texto_app.dart | en curso | → usa COMP-FOCO, COMP-ICONO |
+| COMP-CHIP | `ChipHud`: vidas, monedas, racha, comodines, amparo | lib/componentes/chip_hud.dart | en curso | → usa COMP-CORAZON, COMP-ICONO |
+| COMP-CORAZON | `CorazonVida` y `FilaVidas` (silueta de Lucide dibujada para poder rellenarla) | lib/componentes/corazon_vida.dart | en curso | → usa MOD (Vidas.maximo); ← lo usa COMP-CHIP |
+| COMP-INDICADORES | `IndicadoresStartup` y enum `IndicadorStartup` | lib/componentes/indicadores_startup.dart | en curso | → usa MOD (EstadoStartup), COMP-ICONO; → DEC-INDICADORES |
+| COMP-IMPACTO | `ImpactoStartup`: chips con signo y color tras un veredicto | lib/componentes/impacto_startup.dart | en curso | → usa COMP-INDICADORES, TEMA-EFECTOS |
+| COMP-NAV | `NavegacionInferiorApp`: Mapa, Buzón, Tienda, Perfil | lib/componentes/navegacion_inferior_app.dart | en curso | → usa COMP-FOCO, COMP-ICONO; → navegará a PANT-07, 21, 24, 25; → DEC-ZONA-SEGURA |
+| COMP-PROGRESO | `BarraProgreso` con brillo y animación | lib/componentes/barra_progreso.dart | en curso | → usa TEMA-EFECTOS |
+| COMP-PAGINADOR | `PaginadorPuntos` | lib/componentes/paginador_puntos.dart | en curso | → lo usará PANT-02..04 |
+| COMP-FOCO | `AnilloFoco`: anillo de 3 en foco/anillo a 2 del control | lib/componentes/anillo_foco.dart | en curso | ← lo usan COMP-BOTON, COMP-CAMPO, COMP-NAV |
+| COMP-ICONO | `IconoApp` (decorativo sin etiqueta) | lib/componentes/icono_app.dart | en curso | → usa TEMA-ICONOS |
+| COMP-SARKO | `SarkoImagen` y enum `PoseSarko` (alegre, enojado, sorprendido, triste), con texto alternativo y marcador | lib/componentes/sarko_imagen.dart | en curso | → usa RECURSOS, ASSETS-IMG; ← EXT-ASSETS |
+| COMP-LOGO | `LogoApp`: vertical, horizontal e isotipo | lib/componentes/logo_app.dart | en curso | → usa RECURSOS, ASSETS-IMG |
+| ASSETS-IMG | Logos, ícono de app y poses de Sarko (movidos desde `Imegenes/`) | assets/imagenes/ | en curso | ← EXT-ASSETS; ← lo usan COMP-SARKO, COMP-LOGO |
+| ASSETS-FUENTES | Fredoka (600, 700), Inter (400–700), JetBrains Mono (400) y licencias OFL | assets/fuentes/ | en curso | ← EXT-ASSETS; ← lo usa TEMA-TIPO |
+| TEST-TEMA | Pruebas del tema (hex de los 17 tokens, contraste de los tokens nuevos, 11 estilos y tracking) | test/core/tema/ | en curso | → verifican TEMA-TOKENS, TEMA-TIPO; → usa UTIL-CONTRASTE |
+| TEST-PRUEBA | Prueba de la pantalla de prueba (eliminada en T-01 junto con PANT-PRUEBA) | — | obsoleto | → reemplazada por TEST-GALERIA |
+| TEST-GALERIA | Galería: todos los componentes, claro/oscuro, navegación y texto al 200 % sin desbordes | test/funciones/bienvenida/galeria_componentes_test.dart | en curso | → verifica PANT-GALERIA, APP, MODO-TEMA |
+| TEST-COMP | Pruebas de cada componente: claro y oscuro, estados, semántica, foco con teclado y solo colores del tema | test/componentes/ | en curso | → verifican COMP-*; → usa TEST-AYUDA |
+| TEST-AYUDA | Ayudante de pruebas: montar en claro/oscuro y comprobar que solo se usan colores del tema | test/ayudantes/montar.dart | en curso | ← lo usa TEST-COMP |
 | TEST-DATOS | Pruebas de los mocks y de la sustitución de proveedores | test/datos/mocks_test.dart | hecho | → verifican MOCK-*, PROV-REPO |
 | CI | Flujo de integración continua (pub get, formato, analyze, test; Flutter 3.50.0) | .github/workflows/ci.yml | hecho | → ejecuta TEST-*; → usa CONF |
-| CONF | Configuración del proyecto (dependencias, reglas de análisis, formato a 100 columnas) | pubspec.yaml, analysis_options.yaml | hecho | → define DEP-*; ← lo usa CI |
+| CONF | Configuración del proyecto (dependencias, assets y fuentes, reglas de análisis, formato a 100 columnas, saltos de línea LF) | pubspec.yaml, analysis_options.yaml, .gitattributes | en curso | → define DEP-*; ← lo usa CI |
 | PLAT | Proyectos nativos generados por `flutter create` (mx.abogator.abogator) | android/, ios/ | hecho | ← arranca MAIN |
+| PLAT-WEB | Plataforma web solo para desarrollo (ver PANT-GALERIA en Chrome); fuera del alcance del producto | web/ | en curso | ← arranca MAIN |
 | DEP-RIVERPOD | flutter_riverpod 3.5.0 (estado e inyección de repositorios) | pubspec.yaml | hecho | ← lo usan APP, MODO-TEMA, PROV-REPO |
 | DEP-GOROUTER | go_router 18.1.4 | pubspec.yaml | hecho | ← lo usa ENRUTADOR |
+| DEP-LUCIDE | lucide_icons_flutter 4.0.3 (íconos estilo Lucide) | pubspec.yaml | en curso | ← lo usa TEMA-ICONOS |
 | DEP-MATERIAL-UI | material_ui 1.x (reemplaza a `package:flutter/material.dart`, obsoleto en Flutter 3.50) | pubspec.yaml | hecho | ← lo usa todo lib/; → DEC-MATERIAL-UI |
-| DEC-FUENTES | Decisión: en T-00 se usó google_fonts; **en T-01 pasa a archivos .ttf locales en assets/fuentes/** (la app debe funcionar sin conexión) | lib/core/tema/tipografia.dart | en curso | → usa EXT-ASSETS |
+| DEC-FUENTES | Decisión: en T-00 se usó google_fonts; **en T-01 se quitó y se usan .ttf locales en assets/fuentes/** (la app funciona sin conexión) | lib/core/tema/tipografia.dart, assets/fuentes/ | en curso | → usa ASSETS-FUENTES |
 | DEC-MATERIAL-UI | Decisión: importar `package:material_ui/material_ui.dart` porque `flutter/material.dart` está obsoleto (reporte T-00, D2) | — | hecho | → DEP-MATERIAL-UI |
+| DEC-PRESIONADO | Decisión: el botón presionado baja 2 dp y su sombra pasa de 4 a 2; sin transición con "reducir animaciones" (reporte T-01) | lib/componentes/boton_app.dart | en curso | ← COMP-BOTON |
+| DEC-ZONA-SEGURA | Decisión: la navegación inferior mide 58 + la zona segura del sistema (`SafeArea`), no 26 fijos (reporte T-01) | lib/componentes/navegacion_inferior_app.dart | en curso | ← COMP-NAV |
+| DEC-INDICADORES | Decisión: columnas de ancho intrínseco en un `Wrap`; con texto grande o pantallas angostas pasan a dos filas en vez de cortar palabras (reporte T-01) | lib/componentes/indicadores_startup.dart | en curso | ← COMP-INDICADORES |
 
 ## 5 · Pantallas (46, según Figma) y a dónde llevan
 Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
@@ -177,3 +204,4 @@ Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
 - 2026-11-18 · Claude Chat · creación del grafo con documentos, tareas, pantallas y conceptos; código aún sin nodos reales.
 - 2026-11-18 · Claude Code · T-00: rutas reales y estado `en curso` para APP, RUTAS, TEMA, TEXTOS, MOD, REPO-*, MOCK-*, TEST-TEMA y CI. Nodos nuevos: MAIN, ENRUTADOR, TEMA-TOKENS, TEMA-MARCA, TEMA-TIPO, TEMA-APP, MODO-TEMA, UTIL, REPO-AUTH/PROG/TARJ/VIDAS/APEL/TIENDA, PROV-REPO, MOCK-AUTH/PROG/TARJ/VIDAS/APEL/TIENDA, PANT-PRUEBA, FUNC, TEST-PRUEBA, TEST-DATOS, CONF, PLAT, DEP-RIVERPOD, DEP-GOROUTER, DEP-MATERIAL-UI, DEC-FUENTES y DEC-MATERIAL-UI. COMP-* y COMP-SARKO siguen sin ruta (`lib/componentes/` solo tiene `.gitkeep` hasta T-01).
 - 2026-11-18 · Claude Chat · cierre de T-00: tarea y nodos de código pasan a `hecho` (merge del PR #1). T-01 `en curso`. Nuevo DOC-07 (componentes). EXT-ASSETS y DEC-FUENTES actualizados; PANT-26b aclarada (es orden de foco, no pantalla).
+- 2026-11-18 · Claude Code · T-01: `en curso` para APP, ENRUTADOR, TEMA, TEMA-TOKENS (17 tokens), TEMA-TIPO, TEMA-APP, TEXTOS, TEST-TEMA, CONF y DEC-FUENTES (ya sin google_fonts). COMP-* y COMP-SARKO con ruta real. Nodos nuevos: TEMA-EFECTOS, TEMA-ICONOS, UTIL-CONTRASTE, RECURSOS, COMP-BOTON, COMP-CAMPO, COMP-CHIP, COMP-CORAZON, COMP-INDICADORES, COMP-IMPACTO, COMP-NAV, COMP-PROGRESO, COMP-PAGINADOR, COMP-FOCO, COMP-ICONO, COMP-LOGO, ASSETS-IMG, ASSETS-FUENTES, PANT-GALERIA, TEST-GALERIA, TEST-COMP, TEST-AYUDA, PLAT-WEB, DEP-LUCIDE, DEC-PRESIONADO, DEC-ZONA-SEGURA y DEC-INDICADORES. Obsoletos: PANT-PRUEBA y TEST-PRUEBA (archivos eliminados).

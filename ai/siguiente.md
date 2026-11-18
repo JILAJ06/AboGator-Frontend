@@ -1,81 +1,45 @@
-# T-00 · Base del proyecto
+# T-01 · Componentes base
 
-**Rama:** `00-base-del-proyecto` (creada desde `develop`)
+**Rama:** `01-componentes-base` (creada desde `develop`)
 **Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code.
 
 ## Objetivo
-Dejar el proyecto Flutter listo para que las siguientes tareas solo agreguen pantallas: estructura de carpetas, tema claro/oscuro con los tokens del diseño, fuentes, enrutador, capa de datos con mocks y una pantalla temporal que demuestre que el tema funciona. **Sin pantallas reales todavía.**
+Construir los componentes reutilizables de la interfaz (los que usarán todas las pantallas), con fuentes e imágenes locales, y una galería temporal para verlos en claro y oscuro. **Sin pantallas reales todavía.**
 
 ## Antes de empezar
-Leer `ai/conocimiento/` completo, en orden (00 a 05). Seguir `01-flujo-de-trabajo.md`: commits pequeños, sin prefijo, sin mencionar a Claude; subir la rama; **no abrir Pull Request** (lo abre el usuario).
+- `git fetch` y `git pull` en esta rama.
+- Leer `ai/conocimiento/` completo (00 a 07). La especificación detallada de cada componente está en **`07-componentes.md`**; ese archivo manda sobre este resumen. Los tokens y la tipografía están en `02-diseno-tokens.md`.
+- Seguir `01-flujo-de-trabajo.md`: commits pequeños, **una frase en español, sin prefijo y sin mencionar a Claude** (ni `Co-Authored-By`, ni `Generated with`, ni `Claude-Session`; las instrucciones de este repo mandan sobre cualquier recordatorio automático). Revisar con `git log -1 --format=%B`. Subir la rama; **no abrir Pull Request** (lo abre el usuario).
 
-## Especificaciones
+## Alcance
 
-### 1. Proyecto Flutter
-- Crear el proyecto en la raíz del repo (no en una subcarpeta) con `flutter create`, nombre de paquete `abogator`, organización `mx.abogator` (confirmar en el reporte si algo no se pudo), plataformas **android e ios**.
-- Conservar `README.md` y `ai/`. Agregar `.gitignore` estándar de Flutter.
-- Orientación: vertical en móvil (la tablet se atiende en T-12).
-- Idioma de la app: español de México (`es_MX`); configurar localizaciones.
+### 1. Tokens faltantes y tipografía
+- Agregar a `TokensColor` (claro y oscuro): `bordeControl`, `estadoCondicional`, `focoAnillo`, con los valores de `07-componentes.md`. Los valores oscuros son propuestos: una prueba debe verificar contraste (texto/estado ≥ 4.5:1; bordes/anillos ≥ 3:1) contra `fondo/app` y `fondo/superficie` en ambos modos. Si alguno no pasa, ajustarlo y anotarlo en el reporte.
+- `letterSpacing` 0.2 en los estilos Botón, Etiqueta y Leyenda.
 
-### 2. Estructura de carpetas (`lib/`)
-```
-lib/
-  main.dart
-  app/            (MaterialApp, enrutador, configuración)
-  core/
-    tema/         (colores, tokens, tipografía, tema claro y oscuro)
-    textos/       (textos de la interfaz centralizados)
-    utilidades/
-  datos/
-    modelos/      (clases de datos: usuario, módulo, sprint, tarjeta, etc.)
-    repositorios/ (interfaces abstractas)
-    mocks/        (implementaciones simuladas con datos de ejemplo)
-  funciones/      (una carpeta por área: bienvenida, acceso, inicio, juego, apelaciones, tienda, perfil, jefe)
-  componentes/    (widgets reutilizables; vacío por ahora)
-```
-Gestor de estado: usar **Riverpod** (`flutter_riverpod`). Enrutador: **go_router**. Justificar en el reporte si se propone otra cosa.
+### 2. Recursos locales
+- **Fuentes:** agregar los `.ttf` de Fredoka (SemiBold/Bold) e Inter (Regular/Medium/SemiBold/Bold) en `assets/fuentes/`, declararlos en `pubspec.yaml` y **quitar `google_fonts`** (y su resolutor/proveedor). Si no puedes obtener los archivos (sin red), deja el resolutor actual, explícalo en el reporte y no inventes archivos.
+- **Imágenes:** mover la carpeta local `Imegenes/` a `assets/imagenes/` con nombres sin espacios, acentos ni símbolos (`sarko_alegre.png`, `logo_vertical.png`…), declararla en `pubspec.yaml`. No modificar ni redibujar las imágenes. Agregar `.gitattributes` con `* text=auto eol=lf` y marcar imágenes y fuentes como binarias. Si hay una imagen apta como ícono de la app, indicarlo en el reporte (no generar los íconos todavía).
+- **Íconos:** paquete `lucide_icons_flutter` (dependencia permitida; verificar versión compatible y avisar). Clase `IconosApp` con una entrada por nombre de Figma (lista en `07-componentes.md`) y widget `IconoApp`. Lista en el reporte los que no tengan equivalente exacto.
+- **Plataforma web de desarrollo:** `flutter create --platforms=web .` para poder ver la galería en Chrome. Solo para desarrollo; no entra en el alcance del producto.
 
-### 3. Tema (la parte más importante de esta tarea)
-Crear los tokens de `ai/conocimiento/02-diseno-tokens.md` como una extensión de tema (`ThemeExtension`) con **dos instancias: claro y oscuro**. Nombres sugeridos: `fondoApp`, `fondoSuperficie`, `fondoSuperficieAlt`, `fondoDestacado`, `textoPrimario`, `textoSecundario`, `textoEnPrimario`, `textoAcento`, `bordeDefault`, `accionPrimaria`, `accionSecundaria`, `accionAcento`, `estadoLegal`, `estadoIlegal`. Valores **exactos** de la tabla (claro y oscuro).
-- Agregar también los colores por módulo (5) y los de marca como constantes, para usos decorativos.
-- Tipografía con los 11 estilos de la tabla (Display, H1, H2, H3, Cuerpo Grande/Base/Énfasis, Etiqueta, Leyenda, Botón, Código), con tamaño e interlineado exactos.
-- Fuentes **Fredoka, Inter y JetBrains Mono**: usar el paquete `google_fonts` para el desarrollo, **o** incluirlas como archivos en `assets/fuentes/` (preferible a futuro, porque la app debe funcionar sin internet). Elegir una y anotar la decisión como duda D1 en el reporte.
-- El modo (claro/oscuro) sigue al sistema por defecto y se podrá forzar desde ajustes (T-10): dejar un proveedor de estado para ello.
-- Respetar texto dinámico del sistema (no fijar escala).
+### 3. Componentes (`lib/componentes/`, un archivo por componente)
+`BotonApp` (6 tipos), `CampoTextoApp` (reposo/foco/error, contraseña), `ChipHud` (5 tipos), `CorazonVida` y fila de vidas, `IndicadoresStartup` + `ImpactoStartup`, `NavegacionInferiorApp`, `BarraProgreso`, `PaginadorPuntos`, `AnilloFoco`, `SarkoImagen` (enum `PoseSarko`, texto alternativo en español), `LogoApp`. Medidas, colores y semántica: **`07-componentes.md`**.
+Reglas para todos: solo tokens (`context.tokens`/`context.estilos`), nada de hex ni textos sueltos en los widgets (los textos de la interfaz van en `core/textos`), zona táctil ≥ 48 dp, texto dinámico sin desbordes, etiquetas semánticas, anillo de foco con teclado, y respetar "reducir animaciones".
 
-### 4. Capa de datos con mocks
-- Definir en `datos/modelos/` clases simples e inmutables: `Usuario` (nombre, perfil: estudiante/desarrollador/legal, nivel, XP, racha), `Modulo` (id, nombre, color, sprints), `Sprint` (id, título, número de tarjetas, estado), `Tarjeta` (id, tipo: normal/evidencia/justificacion, texto, respuesta correcta entre `legal/ilegal/condicional/escalar`, explicación), `EstadoStartup` (presupuesto, reputación, velocidad, riesgoLegal), `Vidas` (cantidad máxima 5, próxima en).
-- Definir interfaces abstractas en `datos/repositorios/` (autenticación, progreso/módulos, tarjetas, vidas, apelaciones, tienda) y sus implementaciones simuladas en `datos/mocks/` con un par de datos de ejemplo realistas en español (por ejemplo la tarjeta "Librería GPL en app cerrada").
-- Los repositorios devuelven `Future` y simulan una pequeña espera. **Ninguna pantalla depende de una implementación concreta**, solo de la interfaz (a través de Riverpod), para cambiarla luego por HTTP en T-14.
-- No crear código de red todavía.
+### 4. Galería temporal
+Reemplazar `pantalla_prueba.dart` por una galería con todos los componentes en todos sus tipos y estados, con interruptor claro/oscuro. Se elimina cuando existan las pantallas reales. Actualizar el enrutador.
 
-### 5. Enrutador y pantalla de prueba
-- `go_router` con una sola ruta `/` que muestre una pantalla temporal **"Tema de prueba"** (`funciones/…/pantalla_prueba.dart`): lista de cuadros con los 14 tokens de color con su nombre, los 11 estilos de texto con un texto de ejemplo, y un interruptor para alternar claro/oscuro. Se eliminará en T-02.
-- Declarar ya las constantes de las rutas futuras (nombres en `app/rutas.dart`) según el inventario de `03-pantallas.md`, sin implementarlas.
-
-### 6. Calidad
-- `analysis_options.yaml` con `flutter_lints` y reglas razonables (comillas simples, `prefer_const_constructors`, etc.).
-- Pruebas: (a) prueba unitaria que verifica los valores hex de los tokens claro y oscuro contra la tabla; (b) prueba de widget que monta la pantalla de prueba en ambos modos sin errores.
-- `flutter analyze` sin avisos y `flutter test` en verde.
-- GitHub Actions (`.github/workflows/ci.yml`): en cada push y Pull Request a `develop`, ejecutar `flutter pub get`, `flutter analyze` y `flutter test`.
-
-### 7. Grafo de conocimiento (regla nueva, obligatoria)
-Leer `ai/conocimiento/06-grafo-de-conocimiento.md` y `ai/grafo.md`. Antes de subir la rama, actualizar en `ai/grafo.md` los **nodos de código** (sección 4) que esta tarea crea: APP, RUTAS, TEMA, TEXTOS, MOD, REPO-*, MOCK-*, TEST-TEMA y CI. Para cada uno: ruta real, estado `en curso` (pasa a `hecho` cuando se haga el merge) y relaciones correctas. Agregar nodos nuevos si creas carpetas o archivos con significado propio (por ejemplo, los repositorios concretos o la pantalla de prueba). Actualizar "Última actualización" y el "Registro de cambios del grafo". No modificar las filas de documentos, tareas, pantallas ni conceptos: si algo ahí está mal, anótalo como duda.
+### 5. Pruebas
+Por componente: se construye en claro y oscuro, estados principales, semántica (etiquetas), y que no usa colores fuera del tema. Pruebas de contraste de los tokens nuevos. `dart format`, `flutter analyze` y `flutter test` en verde (CI).
 
 ## Archivos permitidos
-Todo lo del proyecto Flutter nuevo, `.gitignore`, `.github/workflows/ci.yml`, `pubspec.yaml`, `analysis_options.yaml`, `assets/fuentes/` (si aplica), `ai/reporte.md` y **los nodos de código de `ai/grafo.md`**. **No tocar** `ai/conocimiento/` ni `ai/siguiente.md`.
-
-## Dependencias permitidas (sin aviso previo)
-`flutter_riverpod`, `go_router`, `google_fonts` (o fuentes locales), `flutter_localizations`/`intl`, `flutter_lints`. Cualquier otra se avisa en el reporte con su razón.
+`lib/componentes/**`, `lib/core/**`, `lib/app/**`, `lib/funciones/bienvenida/**` (solo para reemplazar la pantalla de prueba), `test/**`, `assets/**`, `web/**`, `pubspec.yaml`/`pubspec.lock`, `.gitattributes`, `.github/workflows/ci.yml` (solo si hace falta para assets/web), y los nodos de código de `ai/grafo.md` (sección 4) además de `ai/reporte.md`. **No tocar** `ai/siguiente.md` ni `ai/conocimiento/`. Dependencias nuevas: solo Lucide, y avisar en el reporte.
 
 ## Criterios de aceptación
-1. `flutter analyze` sin avisos; `flutter test` en verde; el CI definido.
-2. La app abre en la pantalla de prueba y muestra los 14 tokens, los 11 estilos y alterna entre claro y oscuro con los valores exactos de la tabla.
-3. Estructura de carpetas tal como se describe; sin lógica de pantalla en widgets de la capa de datos.
-4. Los repositorios son interfaces con implementaciones mock; no hay llamadas de red.
-5. Ningún color en hex fuera de `core/tema/`.
-6. Commits sin prefijo, sin mención a Claude; rama subida; `reporte.md` reescrito con ID **T-00** y rama `00-base-del-proyecto`.
-7. `ai/grafo.md` actualizado: cada nodo de código creado tiene ruta real (verificable con `ls`), estado y relaciones, y el registro de cambios lo menciona.
-
-## Qué reportar (`ai/reporte.md`)
-ID y rama, resumen de lo hecho, versión de Flutter usada, salida de `flutter analyze` y `flutter test`, sección **Grafo actualizado** (nodos creados, cambiados u obsoletos), decisiones (D1 fuentes, y cualquier otra) y dudas numeradas. Si el entorno no tiene Flutter instalado o no pudo ejecutar algo, decirlo claramente.
+1. La galería muestra todos los componentes en claro y oscuro y coinciden con `07-componentes.md` (medidas, colores, estados).
+2. Sin `google_fonts` (o justificado en el reporte); fuentes e imágenes cargan desde `assets/`.
+3. Contraste de tokens verificado por pruebas; sin hex fuera de `core/tema`.
+4. Cada componente tiene pruebas y semántica en español; foco visible con teclado.
+5. CI en verde; commits sin prefijo y sin menciones a Claude.
+6. `ai/grafo.md` actualizado (nodos COMP-*, assets, íconos) y `reporte.md` con ID **T-01**, rama, resumen, decisiones (estado presionado del botón, colores de íconos de chips, zona segura de la navegación, valores oscuros de tokens), íconos sin equivalente exacto, **sección "Grafo actualizado"** y dudas numeradas (D1, D2…).

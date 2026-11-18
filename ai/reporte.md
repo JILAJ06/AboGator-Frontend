@@ -1,94 +1,150 @@
 # Reporte
 
-- **Tarea:** T-00 · Base del proyecto
-- **Rama:** `00-base-del-proyecto`
+- **Tarea:** T-01 · Componentes base
+- **Rama:** `01-componentes-base`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario.
 
 ## Entorno
-- Flutter 3.50.0 (stable, revisión ab2912035e) · Dart 3.14.0 · Windows 11.
-- **No hay Android toolchain** (`flutter doctor`: falta `cmdline-tools`) y en Windows no se compila para iOS. Por eso **no pude compilar el APK ni abrir la app en un emulador**. Verifiqué la pantalla con pruebas de widget (montan la app completa en claro y oscuro). Ver D4.
+- Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11.
+- Sigue sin haber herramientas de Android (falta `cmdline-tools`), así que no hay APK ni emulador. La galería sí la revisé en Chrome con la plataforma web, en 390×844, en claro y oscuro.
+- `flutter build web` falla en esta máquina porque Windows (Smart App Control) bloquea `font-subset.exe` del SDK. Compilé con `--no-tree-shake-icons`, que no usa esa herramienta. No toqué la configuración de seguridad. Ver D6.
 
 ## Qué se hizo
-1. **Proyecto Flutter** creado en la raíz con `flutter create --org mx.abogator --project-name abogator --platforms android,ios`. El paquete es `abogator` y el applicationId/bundle es `mx.abogator.abogator`. Se conservaron `README.md` y `ai/`, y se agregó el `.gitignore` estándar de Flutter. El nombre visible de la app es "AboGator" en Android e iOS. La orientación queda solo en vertical (`SystemChrome` en `main.dart`).
-2. **Localización:** la app usa siempre `es_MX` (`locale`, `supportedLocales` y los delegados de `GlobalMaterialLocalizations`).
-3. **Estructura de `lib/`** tal como pide la tarea:
-   - `app/`: `app.dart` (MaterialApp.router), `enrutador.dart` (GoRouter vía Riverpod) y `rutas.dart`.
-   - `core/tema/`: `tokens_color.dart`, `colores_marca.dart`, `tipografia.dart`, `tema_app.dart` y `modo_tema.dart`.
-   - `core/textos/textos.dart` y `core/utilidades/extensiones_contexto.dart` (`context.tokens`, `context.estilos`, `context.esModoOscuro`).
-   - `datos/modelos/`, `datos/repositorios/` y `datos/mocks/`.
-   - `funciones/` (bienvenida, acceso, inicio, juego, apelaciones, tienda, perfil y jefe) y `componentes/`. Las carpetas vacías llevan `.gitkeep`.
-4. **Tema:**
-   - `TokensColor` es una `ThemeExtension` con los 14 tokens y dos instancias, `TokensColor.claro` y `TokensColor.oscuro`, con los valores exactos de la tabla. Incluye `copyWith` y `lerp`.
-   - `ColoresMarca` tiene los 15 primitivos y `ColoresModulo` los 5 colores de módulo, más `enOrden`.
-   - `TipografiaBase` tiene los 11 estilos (familia, peso, tamaño e interlineado exactos; `height = interlineado / tamaño`). `EstilosTexto` es una `ThemeExtension` que guarda esos estilos ya con fuente y color, y también se mapean al `TextTheme` de Material.
-   - `crearTema` arma el `ColorScheme` a partir de los tokens. No fija la escala de texto, así que se respeta el texto dinámico.
-   - `modoTemaProvider` (Notifier de Riverpod) empieza en `ThemeMode.system` y queda listo para forzarse desde Ajustes en T-10.
-5. **Capa de datos:**
-   - Modelos inmutables: `Usuario` (con `PerfilUsuario`), `Modulo`, `Sprint` (con `EstadoSprint`), `Tarjeta` (con `TipoTarjeta` y `Veredicto`: legal, ilegal, condicional y escalar), `EstadoStartup` y `Vidas` (con `maximo = 5` y `proximaEn` del servidor). Además agregué `Apelacion` y `ArticuloTienda` (con `Comodin`), que necesitan los repositorios de apelaciones y tienda (ver D7).
-   - Interfaces: `RepositorioAutenticacion`, `RepositorioProgreso`, `RepositorioTarjetas`, `RepositorioVidas`, `RepositorioApelaciones` y `RepositorioTienda`.
-   - Mocks con datos en español: los 5 módulos, la tarjeta "Librería GPL en app cerrada" con su evidencia, casos ARCO, MIT, los 3 comodines y 2 apelaciones. Todos devuelven `Future` y esperan 300 ms; la espera se puede cambiar por constructor y las pruebas usan `Duration.zero`.
-   - `proveedores_repositorios.dart` es el único lugar donde se elige la implementación. Los proveedores están tipados con la interfaz, así que en T-14 solo se cambia ahí.
-   - El registro recibe `aceptaAvisoPrivacidad` y `aceptaTerminos` por separado, y el mock rechaza el registro si falta cualquiera de los dos.
-   - No hay código de red. Ningún mock guarda ni registra (log) contraseñas.
-6. **Enrutador:** tiene una sola ruta, `/`, que abre la pantalla "Tema de prueba". En `Rutas` están declaradas las constantes de todas las pantallas del inventario de `03-pantallas.md`, sin implementar.
-7. **Pantalla de prueba** (`funciones/bienvenida/pantalla_prueba.dart`): un interruptor "Modo oscuro", los 14 tokens con su muestra, nombre y valor hex, y los 11 estilos con su tamaño/interlineado y un texto de ejemplo. Se elimina en T-02.
-8. **Calidad:**
-   - `analysis_options.yaml` con `flutter_lints`, `strict-casts`, `strict-inference` y `strict-raw-types`, y reglas como comillas simples, `prefer_const_*`, `prefer_final_locals`, `directives_ordering` y `unawaited_futures`. Ancho de formato: 100 columnas.
-   - CI en `.github/workflows/ci.yml`: en push y PR a `develop` corre `flutter pub get`, revisa el formato y ejecuta `flutter analyze` y `flutter test`, con Flutter fijo en 3.50.0.
+1. **Tokens y tipografía**
+   - `TokensColor` tiene ahora 17 tokens: agregué `bordeControl`, `estadoCondicional` y `focoAnillo`, con los valores de `07-componentes.md`. También agregué `porNombre`, el mapa de nombre de Figma → color que usan la galería y las pruebas.
+   - Botón, Etiqueta y Leyenda llevan `letterSpacing` de 0.2.
+   - `crearTema` usa `borde/control` para `outline` y `foco/anillo` para `focusColor`, e Inter como fuente por defecto.
+   - Nuevo `core/utilidades/contraste.dart` con el cálculo WCAG 2.1.
+2. **Fuentes locales.** Con tu permiso descargué los `.ttf` estáticos del CDN oficial de Google Fonts (`fonts.gstatic.com`) y verifiqué que su SHA-256 y su tamaño coincidan con los que publica el paquete `google_fonts`:
+   - Fredoka 600 y 700.
+   - Inter 400, 500, 600 y 700.
+   - JetBrains Mono 400 (hace falta para el estilo Código, aunque la tarea solo menciona Fredoka e Inter).
+   - Las licencias OFL van en `assets/fuentes/OFL-*.txt`.
+   - Quité `google_fonts`, junto con su resolutor y su proveedor, y declaré las fuentes en `pubspec.yaml`.
+3. **Imágenes.** Moví `Imegenes/` a `assets/imagenes/` sin modificar los archivos:
+   - `logo_isotipo.png` (1068×973), `logo_marca_nominativa.png` (1312×266) e `icono_app.png` (180×180).
+   - `sarko_alegre.png`, `sarko_enojado.png`, `sarko_sorprendido.png` y `sarko_triste.png`.
+   - Todas tienen fondo transparente. Las rutas están en `core/recursos/imagenes_app.dart`.
+   - En la raíz quedaron las carpetas vacías de `Imegenes/`. Una regla de seguridad me impidió borrarlas; git no las ve, pero puedes borrarlas a mano.
+4. **`.gitattributes`** con `* text=auto eol=lf`, y las imágenes, fuentes y `.jar` marcados como binarios. Lo apliqué con `git add --renormalize .` y no hubo cambios en archivos existentes.
+5. **Íconos:**
+   - Agregué `lucide_icons_flutter` 4.0.3, la versión más reciente compatible. Es la única dependencia nueva.
+   - `IconosApp` (en `core/tema/iconos_app.dart`) tiene una entrada por cada nombre de Figma, más `eyeOff` para ocultar la contraseña. `porNombre` lista los 45.
+   - `IconoApp(icono, tamano, color, etiquetaSemantica)` queda decorativo, fuera de la semántica, cuando no recibe etiqueta.
+6. **Componentes**, en `lib/componentes/`, uno por archivo:
+   - `BotonApp`: tipos primario, secundario, acento, peligro y fantasma; con `alPresionar: null` se ve como Deshabilitado. Tiene sombra sólida, estado presionado y anillo de foco, y se activa con Enter o Espacio.
+   - `CampoTextoApp`: estados reposo, foco y error; tipos texto, nombre, correo y contraseña, cada uno con su teclado y autocompletado. El botón de mostrar contraseña mide 48×48.
+   - `ChipHud`: vidas, monedas, racha, comodines y amparo, cada uno con un constructor propio, por ejemplo `ChipHud.vidas(4)`.
+   - `CorazonVida` y `FilaVidas`.
+   - `IndicadoresStartup`, el enum `IndicadorStartup` e `ImpactoStartup`.
+   - `NavegacionInferiorApp`, con el enum `PestanaApp`.
+   - `BarraProgreso`, `PaginadorPuntos` y `AnilloFoco`.
+   - `SarkoImagen`, con el enum `PoseSarko` y un texto alternativo por pose.
+   - `LogoApp`: vertical, horizontal e isotipo.
+   - Todos los componentes:
+     - Toman sus colores de `context.tokens` y sus textos de `Textos`.
+     - Tienen zonas táctiles de 48 o más.
+     - Llevan semántica en español.
+     - Crecen con el texto dinámico.
+     - Respetan "reducir animaciones" con `EfectosApp.duracion`.
+   - Los colores que no son tokens (la sombra #0F294A al 18 % y el brillo blanco al 35 %) están en `core/tema/efectos.dart`.
+7. **Galería** (`funciones/bienvenida/galeria_componentes.dart`). Reemplaza a `pantalla_prueba.dart`, que eliminé junto con su prueba. Muestra todos los componentes en todos sus tipos y estados, los 45 íconos, los 17 tokens y los 11 estilos, con el interruptor claro/oscuro. La navegación inferior va como barra real abajo. Actualicé el enrutador.
+8. **Plataforma web** de desarrollo, creada con `flutter create --platforms=web .`. Le puse el nombre "AboGator" y el idioma `es-MX`. El comando también generó un `test/widget_test.dart` de ejemplo (el contador), que estaba roto, y lo borré. Para ver la galería:
+   ```bash
+   flutter run -d chrome --no-tree-shake-icons
+   ```
 
 ## Resultados
-`flutter analyze`:
-```
-Analyzing AboGator-Frontend...
-No issues found!
-```
-`flutter test` (31 pruebas):
-```
-00:06 +31: All tests passed!
-```
-- `test/core/tema/tokens_color_test.dart`: los 14 tokens, claro y oscuro, contra los hex de la tabla; también `lerp`.
-- `test/core/tema/tipografia_test.dart`: los 11 estilos (familia, peso, tamaño e interlineado).
-- `test/funciones/bienvenida/pantalla_prueba_test.dart`: monta la app y muestra los 14 tokens y los 11 estilos; el interruptor pasa a oscuro y regresa a claro; sigue al sistema en oscuro; respeta la escala de texto 2×.
-- `test/datos/mocks_test.dart`: los mocks y la sustitución de proveedores.
-
 `dart format --set-exit-if-changed lib test`: sin cambios.
 
-Ningún color en hex en `lib/` fuera de `core/tema/`. Lo comprobé con grep.
+`flutter analyze`:
+```
+No issues found!
+```
+`flutter test` (101 pruebas):
+```
+00:04 +101: All tests passed!
+```
+- `test/core/tema/`:
+  - Los hex de los 17 tokens.
+  - El contraste de los 3 tokens nuevos sobre `fondo/app` y `fondo/superficie`, en ambos modos.
+  - Los 11 estilos con su tracking.
+- `test/componentes/`: cada componente en claro y oscuro, con:
+  - Medidas y colores esperados.
+  - Estados: presionado, foco, error, contraseña y deshabilitado.
+  - Semántica.
+  - Foco con teclado: aparece el anillo y Enter activa.
+  - Texto al 200 %.
+  - Uso de colores: un ayudante (`test/ayudantes/montar.dart`) junta los colores de textos, íconos, fondos, bordes, sombras y del corazón, y comprueba que todos salgan del tema.
+- `test/funciones/bienvenida/galeria_componentes_test.dart`: aparecen todos los componentes, el interruptor cambia el modo, la navegación cambia de pestaña y no hay desbordes con texto al 200 % en claro ni en oscuro.
+- Contrastes medidos (razón contra `fondo/app` / `fondo/superficie`):
+
+  | Token | Mínimo | Claro | Oscuro |
+  |---|---|---|---|
+  | borde/control | 3 | 4.55 / 4.76 | 3.93 / 3.44 |
+  | estado/condicional | 4.5 | 6.07 / 6.35 | 7.02 / 6.13 |
+  | foco/anillo | 3 | 6.07 / 6.35 | 8.31 / 7.27 |
+
+  Todos pasan, así que **no ajusté ningún valor oscuro propuesto**.
+- No hay hex fuera de `lib/core/tema/` (lo revisé con `git grep`) ni queda ninguna referencia a `google_fonts`.
+- El CI no necesitó cambios: los assets y las fuentes se cargan en `flutter test`.
 
 ## Criterios de aceptación
-1. Analyze sin avisos, pruebas en verde y CI definido: ✅
-2. La app abre en la pantalla de prueba con los 14 tokens y los 11 estilos, y alterna claro/oscuro con los valores exactos: ✅ en pruebas de widget; ⚠️ no la abrí en un dispositivo (D4).
-3. Estructura de carpetas tal como se pide: ✅
-4. Repositorios como interfaces con mocks, sin red: ✅
-5. Sin hex fuera de `core/tema/`: ✅ (las pruebas sí tienen los hex de la tabla para verificarlos; ver D10).
-6. Commits sin prefijo y sin mención a Claude, rama subida y reporte reescrito: ✅
-7. `ai/grafo.md` actualizado, con todas las rutas comprobadas con `ls`: ✅
+1. La galería muestra todos los componentes en claro y oscuro: ✅ Lo revisé en Chrome a 390×844 y con pruebas. Las medidas siguen `07-componentes.md`, con los matices de D2 y D3.
+2. Sin `google_fonts`; fuentes e imágenes desde `assets/`: ✅
+3. Contraste verificado por pruebas y sin hex fuera de `core/tema`: ✅
+4. Cada componente tiene pruebas, semántica en español y foco visible con teclado: ✅ (el foco aplica a botón, campo y navegación, que son los componentes interactivos).
+5. CI en verde localmente, commits sin prefijo y sin menciones a Claude: ✅
+6. Grafo y reporte actualizados: ✅
+
+## Decisiones
+- **Estado presionado del botón:** baja 2 dp y la sombra pasa de (0, 4) a (0, 2), con una transición de 80 ms; con "reducir animaciones" es inmediato. Deshabilitado, fantasma y secundario no tienen sombra.
+- **Deshabilitado como estado:** `BotonApp` tiene 5 tipos en el enum. El sexto aspecto, Deshabilitado, sale de `alPresionar: null` en cualquier tipo, para que el estado no dependa de elegir un tipo.
+- **Colores de íconos de los chips** (provisionales, según la especificación):
+  - Vidas: corazón relleno en `estado/ilegal`.
+  - Monedas y Racha: `accion/acento`.
+  - Comodines: `texto/acento`.
+  - Amparo: `accion/secundaria`, con borde de 1.5.
+- **Corazón relleno:** Lucide solo tiene el corazón de contorno, así que dibujé su misma silueta (`PintorCorazon`) para poder rellenarlo. El chip de Vidas usa ese corazón relleno.
+- **Zona segura de la navegación:** el contenido mide como mínimo 58 y debajo va `SafeArea(top: false)`. El sistema pone su propio relleno inferior: unos 34 en iPhone con indicador de inicio y 0 en teléfonos sin indicador. No fijé los 26 de Figma. Una prueba verifica que con un relleno de 26 la barra mide 58 + 26 = 84.
+- **Valores oscuros de los tokens:** dejé los propuestos (#64748B, #6FA0E8 y #7CB0F0), porque pasan las pruebas de contraste.
+- **Borde del campo en primer plano:** el borde se pinta encima de la caja para que su grosor (1.5 o 2) no cambie el alto. La caja mide 52 en los tres estados, y hay una prueba que lo verifica.
+- **Indicadores de la Startup:** las columnas tienen el ancho de su contenido, dentro de un `Wrap` con espacio uniforme. Al principio usé cuatro columnas iguales, pero en Chrome "Presupuesto" se cortaba a media palabra (ver D3).
+
+## Íconos sin equivalente exacto en Lucide
+| Figma | Lucide usado |
+|---|---|
+| coin | `coins` (no existe una sola moneda) |
+| back | `arrow-left` |
+| chevron | `chevron-right` |
+| refresh | `refresh-cw` |
+| alert | `triangle-alert` |
+
+Con otro nombre pero el mismo dibujo: bulb → `lightbulb`, home → `house`, doc → `file-text`, logout → `log-out`. Gavel, highlighter y vibrate sí existen tal cual.
+
+## Ícono de la app
+`assets/imagenes/icono_app.png` sirve como ícono: fondo verde, isotipo en crema y esquinas redondeadas. Pero mide **180×180**, y las tiendas piden 1024×1024. Para generar los íconos hace falta exportarlo de Figma a 1024. No generé ninguno.
 
 ## Grafo actualizado
-La sección 7 de `siguiente.md` llegó a la rama mientras trabajaba. Hice rebase de mis commits encima y después actualicé el grafo. Solo toqué la sección 4 (Código), la línea "Última actualización" y el registro de cambios.
-- **Con ruta real y estado `en curso`:** APP (`lib/app/app.dart`), RUTAS, TEMA, TEXTOS (`lib/core/textos/textos.dart`), MOD, REPO-*, MOCK-*, TEST-TEMA (`test/core/tema/`) y CI.
-- **Nodos nuevos (`en curso`):**
-  - Arranque y navegación: MAIN y ENRUTADOR.
-  - Tema: TEMA-TOKENS, TEMA-MARCA, TEMA-TIPO, TEMA-APP, MODO-TEMA y UTIL.
-  - Datos: REPO-AUTH, REPO-PROG, REPO-TARJ, REPO-VIDAS, REPO-APEL, REPO-TIENDA, PROV-REPO, MOCK-AUTH, MOCK-PROG, MOCK-TARJ, MOCK-VIDAS, MOCK-APEL y MOCK-TIENDA.
-  - Pantallas y pruebas: PANT-PRUEBA, FUNC, TEST-PRUEBA y TEST-DATOS.
-  - Configuración: CONF y PLAT.
-  - Dependencias: DEP-RIVERPOD, DEP-GOROUTER y DEP-MATERIAL-UI.
-  - Decisiones: DEC-FUENTES y DEC-MATERIAL-UI.
-- **Sin cambios:** COMP-* y COMP-SARKO, porque `lib/componentes/` solo tiene `.gitkeep` hasta T-01.
-- **Obsoletos:** ninguno.
+Solo toqué la sección 4 (Código), la línea "Última actualización" y el registro de cambios. Comprobé con `ls` que las 62 rutas de la sección 4 existen.
+- **Cambiados (`en curso`):** APP, ENRUTADOR (ahora lleva a PANT-GALERIA), TEMA, TEMA-TOKENS (17 tokens), TEMA-TIPO, TEMA-APP, TEXTOS, TEST-TEMA, CONF (incluye `.gitattributes`) y DEC-FUENTES (ya sin google_fonts). MODO-TEMA cambió de relación: ahora lo usa PANT-GALERIA en lugar de PANT-PRUEBA.
+- **Con ruta real:** COMP-* (`lib/componentes/`) y COMP-SARKO (`lib/componentes/sarko_imagen.dart`).
+- **Nuevos:**
+  - Tema y recursos: TEMA-EFECTOS, TEMA-ICONOS, UTIL-CONTRASTE y RECURSOS.
+  - Componentes: COMP-BOTON, COMP-CAMPO, COMP-CHIP, COMP-CORAZON, COMP-INDICADORES, COMP-IMPACTO, COMP-NAV, COMP-PROGRESO, COMP-PAGINADOR, COMP-FOCO, COMP-ICONO y COMP-LOGO.
+  - Assets: ASSETS-IMG y ASSETS-FUENTES.
+  - Galería y pruebas: PANT-GALERIA, TEST-GALERIA, TEST-COMP y TEST-AYUDA.
+  - Plataforma y dependencias: PLAT-WEB y DEP-LUCIDE.
+  - Decisiones: DEC-PRESIONADO, DEC-ZONA-SEGURA y DEC-INDICADORES.
+- **Obsoletos:** PANT-PRUEBA y TEST-PRUEBA, porque se eliminaron sus archivos.
 
-## Decisiones y dudas
-- **D1 · Fuentes.** Usé `google_fonts` (9.0.0) para el desarrollo: descarga Fredoka, Inter y JetBrains Mono la primera vez y las guarda en caché. Sin internet en el primer arranque, la app usa la fuente del sistema. Todo pasa por `resolutorFuenteProvider`, y las pruebas lo cambian por `fuenteSinDescarga` para no depender de la red. Recomiendo pasar a archivos `.ttf` en `assets/fuentes/` (licencia OFL) en una tarea posterior: solo se cambia el proveedor y el `pubspec`. **¿Quién entrega los archivos y en qué tarea?**
-- **D2 · Dependencia `material_ui` (no estaba en la lista).** En Flutter 3.50, `package:flutter/material.dart` está marcado como obsoleto y `flutter create` ya agrega `material_ui: ^1.1.0`. Todo el código importa `package:material_ui/material_ui.dart`. Las demás dependencias son las permitidas: `flutter_riverpod` 3.5.0, `go_router` 18.1.4, `google_fonts` 9.0.0, `intl` 0.20.x, `flutter_localizations` y `flutter_lints` 6.0.0.
-- **D3 · Carpeta `Imegenes/` (sin rastrear).** En la raíz hay logos y poses de Sarko. **No la subí**, porque no estaba entre los archivos permitidos. Propongo moverla a `assets/imagenes/` con nombres sin espacios, acentos ni "·" (por ejemplo `sarko_alegre.png`) en T-01. También el ícono de la app.
-- **D4 · Sin Android toolchain.** Para compilar el APK o abrir la app en un emulador hace falta instalar Android Studio o los `cmdline-tools` y aceptar las licencias (`flutter doctor --android-licenses`). iOS requiere macOS.
-- **D5 · Convención de nombres.** Las clases, variables y archivos propios están en español (`TokensColor`, `RepositorioTarjetas`, `pantalla_prueba.dart`). Las APIs de Flutter quedan como son. ¿Se confirma como convención del proyecto?
-- **D6 · Rutas.** Elegí una ruta para todo el onboarding (02–04, un paginador) y una para el juego (10–18, el sprint completo), además de rutas anidadas como `/inicio/modulo/:moduloId`. Las pestañas Inicio, Buzón, Tienda y Perfil se harán con `StatefulShellRoute` en T-04. ¿Algún cambio?
-- **D7 · Modelos extra.** Agregué `Apelacion` y `ArticuloTienda`. `Modulo.color` es un `Color` (de `dart:ui`) tomado de `ColoresModulo`. Si el backend no manda el color, se puede resolver desde `Modulo.numero` con `ColoresModulo.enOrden`.
-- **D8 · Mapeo a Material.** `onPrimary`, `onSecondary`, `onError` y `onTertiary` usan `texto/en-primario`; `outline` usa `borde/default`; `surfaceContainerHighest` usa `fondo/superficie-alt`. Por ahora no hay espaciados ni radios como tokens (Figma no los define en la tabla); la pantalla de prueba usa 24/16/8.
-- **D9 · CI.** Agregué la revisión de formato (`dart format --set-exit-if-changed`). El CI solo corre en push y PR a `develop`, así que se ejecuta cuando se abra el PR de esta rama.
-- **D10 · Hex en pruebas.** `tokens_color_test.dart` repite la tabla de Figma en hex a propósito, para verificar los tokens. No está en `lib/`.
-- **D11 · Saltos de línea.** Git avisa LF→CRLF (`core.autocrlf` en Windows). No agregué `.gitattributes` porque no estaba en la lista de archivos permitidos. ¿Lo agrego en otra tarea con `* text=auto eol=lf`?
-- **D12 · Grafo, fila EXT-ASSETS.** Dice "por exportar de Figma", pero los logos y las poses de Sarko ya están en la carpeta local `Imegenes/` (D3), solo que sin subir. No modifiqué la fila porque le corresponde a Claude Chat.
-- **D13 · Grafo, nodos de dependencias y decisiones.** Los puse en la sección 4 (DEP-* y DEC-*) porque el grafo no tiene una sección propia para ellos. Si Claude Chat prefiere una sección aparte, los muevo.
+## Dudas
+- **D1 · EXT-ASSETS en el grafo.** La fila todavía dice que las imágenes están en la carpeta local "aún sin subir". Ahora están en `assets/imagenes/`. No la cambié porque le corresponde a Claude Chat.
+- **D2 · Indicadores de la Startup.** Con Inter real, las cuatro etiquetas más sus íconos miden unos 317 dp, y el espacio útil es 322 (342 menos el relleno de 10 por lado). Caben en una fila en 390 de ancho, pero muy justo, y en un teléfono de 360 pasan a dos filas. En Figma las columnas parecen de unos 80. ¿Figma usa etiquetas más cortas o un tamaño menor? Si es así, lo ajusto.
+- **D3 · Medidas que no salían exactas.** El botón y la caja del campo miden mínimo 52 y crecen con el texto dinámico; con texto normal miden exactamente 52. El panel de indicadores mide mínimo 46.
+- **D4 · Poses de Sarko.** Enojado, Sorprendido y Triste traen el nombre de la pose escrito dentro de la imagen ("ENOJADO", etc.). Además miden alrededor de 1:2, no 4:5 como Alegre, así que en la caja 4:5 se ven más pequeños. ¿Hay versiones sin texto y recortadas a 4:5?
+- **D5 · Logos y Sarko en modo oscuro.** La marca nominativa y el isotipo usan azul marino y verde bosque, y casi no se ven sobre `fondo/app` oscuro (#0B1220). Lo mismo pasa con el traje de Sarko. ¿Existe una versión del logo para modo oscuro en Figma, o ponemos el logo sobre una superficie clara?
+- **D6 · Compilar web en esta máquina.** Smart App Control de Windows bloquea `font-subset.exe` del SDK de Flutter. Con `--no-tree-shake-icons` compila bien; solo cambia que la fuente de íconos va completa. Para que funcione sin esa opción habría que agregar una excepción para la carpeta del SDK en la configuración de seguridad de Windows. Eso lo decides tú.
+- **D7 · Número de íconos.** `07-componentes.md` dice que son 47, pero la lista tiene 45 nombres. Implementé esos 45. ¿Faltan dos?
+- **D8 · Logo vertical y horizontal.** En el repo no hay archivos de logo "vertical" ni "horizontal", solo el isotipo y la marca nominativa. Armé las dos variantes combinándolos: la marca al 36 % del alto del isotipo en la vertical y al 50 % en la horizontal. Si en Figma existen como piezas propias, conviene exportarlas.
+- **D9 · Carpetas vacías de `Imegenes/`.** Quedaron en la raíz porque una regla de seguridad me impidió borrarlas. No afectan a git; puedes borrarlas a mano.
