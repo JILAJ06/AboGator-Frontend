@@ -1,10 +1,13 @@
 /// Rutas de la app según el inventario de `ai/conocimiento/03-pantallas.md`.
 ///
-/// En T-00 solo existe [raiz] (pantalla "Tema de prueba"). El resto se
-/// declaran para que cada tarea las implemente sin cambiar los nombres.
+/// Desde T-02 la app arranca en [splash]. Las demás se declaran para que
+/// cada tarea las implemente sin cambiar los nombres.
 abstract final class Rutas {
-  /// Temporal: galería de componentes (se reemplaza en T-02 por el Splash).
+  /// Raíz: redirige al Splash.
   static const String raiz = '/';
+
+  /// Galería de componentes (solo en modo debug).
+  static const String galeria = '/galeria';
 
   // Flujo 1 · Bienvenida y acceso
   /// 01 Splash

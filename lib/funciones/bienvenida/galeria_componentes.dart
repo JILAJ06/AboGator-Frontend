@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/barra_progreso.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/boton_veredicto.dart';
 import '../../componentes/campo_texto_app.dart';
 import '../../componentes/chip_hud.dart';
 import '../../componentes/corazon_vida.dart';
@@ -21,6 +22,7 @@ import '../../core/tema/tokens_color.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/modelos/estado_startup.dart';
+import '../../datos/modelos/tarjeta.dart';
 
 /// Galería temporal de componentes: todos los tipos y estados, con
 /// interruptor claro/oscuro. Se elimina cuando existan las pantallas reales.
@@ -80,6 +82,24 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 BotonApp(texto: Textos.botonPeligro, tipo: TipoBoton.peligro, alPresionar: () {}),
                 BotonApp(texto: Textos.botonFantasma, tipo: TipoBoton.fantasma, alPresionar: () {}),
                 const BotonApp(texto: Textos.botonDeshabilitado, alPresionar: null),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaVeredictos,
+              hijos: [
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 12,
+                  children: [for (final v in Veredicto.values) BotonVeredicto(veredicto: v)],
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 12,
+                  children: [
+                    for (final v in Veredicto.values)
+                      BotonVeredicto(veredicto: v, alPresionar: () {}),
+                  ],
+                ),
               ],
             ),
             const _Seccion(
