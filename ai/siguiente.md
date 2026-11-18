@@ -59,8 +59,11 @@ Crear los tokens de `ai/conocimiento/02-diseno-tokens.md` como una extensión de
 - `flutter analyze` sin avisos y `flutter test` en verde.
 - GitHub Actions (`.github/workflows/ci.yml`): en cada push y Pull Request a `develop`, ejecutar `flutter pub get`, `flutter analyze` y `flutter test`.
 
+### 7. Grafo de conocimiento (regla nueva, obligatoria)
+Leer `ai/conocimiento/06-grafo-de-conocimiento.md` y `ai/grafo.md`. Antes de subir la rama, actualizar en `ai/grafo.md` los **nodos de código** (sección 4) que esta tarea crea: APP, RUTAS, TEMA, TEXTOS, MOD, REPO-*, MOCK-*, TEST-TEMA y CI. Para cada uno: ruta real, estado `en curso` (pasa a `hecho` cuando se haga el merge) y relaciones correctas. Agregar nodos nuevos si creas carpetas o archivos con significado propio (por ejemplo, los repositorios concretos o la pantalla de prueba). Actualizar "Última actualización" y el "Registro de cambios del grafo". No modificar las filas de documentos, tareas, pantallas ni conceptos: si algo ahí está mal, anótalo como duda.
+
 ## Archivos permitidos
-Todo lo del proyecto Flutter nuevo, `.gitignore`, `.github/workflows/ci.yml`, `pubspec.yaml`, `analysis_options.yaml`, `assets/fuentes/` (si aplica) y `ai/reporte.md`. **No tocar** `ai/conocimiento/` ni `ai/siguiente.md`.
+Todo lo del proyecto Flutter nuevo, `.gitignore`, `.github/workflows/ci.yml`, `pubspec.yaml`, `analysis_options.yaml`, `assets/fuentes/` (si aplica), `ai/reporte.md` y **los nodos de código de `ai/grafo.md`**. **No tocar** `ai/conocimiento/` ni `ai/siguiente.md`.
 
 ## Dependencias permitidas (sin aviso previo)
 `flutter_riverpod`, `go_router`, `google_fonts` (o fuentes locales), `flutter_localizations`/`intl`, `flutter_lints`. Cualquier otra se avisa en el reporte con su razón.
@@ -72,6 +75,7 @@ Todo lo del proyecto Flutter nuevo, `.gitignore`, `.github/workflows/ci.yml`, `p
 4. Los repositorios son interfaces con implementaciones mock; no hay llamadas de red.
 5. Ningún color en hex fuera de `core/tema/`.
 6. Commits sin prefijo, sin mención a Claude; rama subida; `reporte.md` reescrito con ID **T-00** y rama `00-base-del-proyecto`.
+7. `ai/grafo.md` actualizado: cada nodo de código creado tiene ruta real (verificable con `ls`), estado y relaciones, y el registro de cambios lo menciona.
 
 ## Qué reportar (`ai/reporte.md`)
-ID y rama, resumen de lo hecho, versión de Flutter usada, salida de `flutter analyze` y `flutter test`, decisiones (D1 fuentes, y cualquier otra) y dudas numeradas. Si el entorno no tiene Flutter instalado o no pudo ejecutar algo, decirlo claramente.
+ID y rama, resumen de lo hecho, versión de Flutter usada, salida de `flutter analyze` y `flutter test`, sección **Grafo actualizado** (nodos creados, cambiados u obsoletos), decisiones (D1 fuentes, y cualquier otra) y dudas numeradas. Si el entorno no tiene Flutter instalado o no pudo ejecutar algo, decirlo claramente.
