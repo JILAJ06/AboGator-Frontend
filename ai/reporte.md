@@ -62,6 +62,21 @@ Ningún color en hex en `lib/` fuera de `core/tema/`. Lo comprobé con grep.
 4. Repositorios como interfaces con mocks, sin red: ✅
 5. Sin hex fuera de `core/tema/`: ✅ (las pruebas sí tienen los hex de la tabla para verificarlos; ver D10).
 6. Commits sin prefijo y sin mención a Claude, rama subida y reporte reescrito: ✅
+7. `ai/grafo.md` actualizado, con todas las rutas comprobadas con `ls`: ✅
+
+## Grafo actualizado
+La sección 7 de `siguiente.md` llegó a la rama mientras trabajaba. Hice rebase de mis commits encima y después actualicé el grafo. Solo toqué la sección 4 (Código), la línea "Última actualización" y el registro de cambios.
+- **Con ruta real y estado `en curso`:** APP (`lib/app/app.dart`), RUTAS, TEMA, TEXTOS (`lib/core/textos/textos.dart`), MOD, REPO-*, MOCK-*, TEST-TEMA (`test/core/tema/`) y CI.
+- **Nodos nuevos (`en curso`):**
+  - Arranque y navegación: MAIN y ENRUTADOR.
+  - Tema: TEMA-TOKENS, TEMA-MARCA, TEMA-TIPO, TEMA-APP, MODO-TEMA y UTIL.
+  - Datos: REPO-AUTH, REPO-PROG, REPO-TARJ, REPO-VIDAS, REPO-APEL, REPO-TIENDA, PROV-REPO, MOCK-AUTH, MOCK-PROG, MOCK-TARJ, MOCK-VIDAS, MOCK-APEL y MOCK-TIENDA.
+  - Pantallas y pruebas: PANT-PRUEBA, FUNC, TEST-PRUEBA y TEST-DATOS.
+  - Configuración: CONF y PLAT.
+  - Dependencias: DEP-RIVERPOD, DEP-GOROUTER y DEP-MATERIAL-UI.
+  - Decisiones: DEC-FUENTES y DEC-MATERIAL-UI.
+- **Sin cambios:** COMP-* y COMP-SARKO, porque `lib/componentes/` solo tiene `.gitkeep` hasta T-01.
+- **Obsoletos:** ninguno.
 
 ## Decisiones y dudas
 - **D1 · Fuentes.** Usé `google_fonts` (9.0.0) para el desarrollo: descarga Fredoka, Inter y JetBrains Mono la primera vez y las guarda en caché. Sin internet en el primer arranque, la app usa la fuente del sistema. Todo pasa por `resolutorFuenteProvider`, y las pruebas lo cambian por `fuenteSinDescarga` para no depender de la red. Recomiendo pasar a archivos `.ttf` en `assets/fuentes/` (licencia OFL) en una tarea posterior: solo se cambia el proveedor y el `pubspec`. **¿Quién entrega los archivos y en qué tarea?**
@@ -75,3 +90,5 @@ Ningún color en hex en `lib/` fuera de `core/tema/`. Lo comprobé con grep.
 - **D9 · CI.** Agregué la revisión de formato (`dart format --set-exit-if-changed`). El CI solo corre en push y PR a `develop`, así que se ejecuta cuando se abra el PR de esta rama.
 - **D10 · Hex en pruebas.** `tokens_color_test.dart` repite la tabla de Figma en hex a propósito, para verificar los tokens. No está en `lib/`.
 - **D11 · Saltos de línea.** Git avisa LF→CRLF (`core.autocrlf` en Windows). No agregué `.gitattributes` porque no estaba en la lista de archivos permitidos. ¿Lo agrego en otra tarea con `* text=auto eol=lf`?
+- **D12 · Grafo, fila EXT-ASSETS.** Dice "por exportar de Figma", pero los logos y las poses de Sarko ya están en la carpeta local `Imegenes/` (D3), solo que sin subir. No modifiqué la fila porque le corresponde a Claude Chat.
+- **D13 · Grafo, nodos de dependencias y decisiones.** Los puse en la sección 4 (DEP-* y DEC-*) porque el grafo no tiene una sección propia para ellos. Si Claude Chat prefiere una sección aparte, los muevo.
