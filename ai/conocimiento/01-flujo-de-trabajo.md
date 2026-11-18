@@ -9,6 +9,7 @@ Dos instancias de Claude trabajan con el usuario como intermediario:
 - `ai/conocimiento/`: esta base de conocimiento.
 - `ai/siguiente.md`: la tarea actual. **Solo la escribe Claude Chat.**
 - `ai/reporte.md`: estado, lo hecho y dudas numeradas (D1, D2…). **Solo lo escribe Claude Code** y lo reescribe completo en cada tarea.
+- `ai/grafo.md`: **grafo de conocimiento** del proyecto (qué existe, dónde y con qué se relaciona). Lo actualizan las dos instancias; reglas en `06-grafo-de-conocimiento.md`.
 - Cada tarea tiene ID (T-00, T-01…). El reporte repite el ID y el nombre de la rama; si no coinciden con `siguiente.md`, el reporte no corresponde.
 
 ## Ramas
@@ -19,9 +20,9 @@ Dos instancias de Claude trabajan con el usuario como intermediario:
 - Nombres en minúsculas, sin acentos, sin espacios ni dos puntos.
 
 ## Ciclo de una tarea
-1. Claude Chat crea la rama desde `develop`, escribe `ai/siguiente.md` en esa rama y la sube.
+1. Claude Chat crea la rama desde `develop`, escribe `ai/siguiente.md` en esa rama (y marca la tarea `en curso` en el grafo) y la sube.
 2. El usuario le dice a Claude Code: "sigue con siguiente.md en la rama `<rama>`".
-3. Claude Code hace checkout de la rama, trabaja con commits pequeños, reescribe `ai/reporte.md` y **sube la rama**. **El Pull Request lo abre el usuario en GitHub** (hacia `develop`); Claude Code no abre PRs.
+3. Claude Code hace checkout de la rama, trabaja con commits pequeños, **actualiza `ai/grafo.md` con lo que crea o cambia**, reescribe `ai/reporte.md` (con su sección "Grafo actualizado") y **sube la rama**. **El Pull Request lo abre el usuario en GitHub** (hacia `develop`); Claude Code no abre PRs.
 4. El usuario le dice a Claude Chat "revisa, Claude Code ya terminó". Claude Chat hace pull, lee el reporte y el PR, revisa contra el diseño, responde dudas y, si hay cambios, escribe un nuevo `siguiente.md` en la **misma rama**.
 5. Si todo está bien, el usuario hace el merge a `develop` con **merge commit** (no squash ni rebase).
 6. Errores posteriores: rama `fix/...` desde `develop` y se repite el ciclo.
@@ -39,6 +40,7 @@ Dos instancias de Claude trabajan con el usuario como intermediario:
 - Se respetan las reglas de `05-reglas-y-seguridad.md`.
 - El reporte responde a la tarea, las dudas están numeradas y el build pasó.
 - Commits sin prefijo y sin menciones a Claude.
+- **El grafo (`ai/grafo.md`) está al día**: nodos nuevos con ruta real, relaciones correctas, estados coherentes y registro de cambios. Si no, el PR no se aprueba.
 
 ## Prompt de arranque para Claude Code (primera vez en el repo)
-Hacer `git fetch`, leer `ai/conocimiento/` en orden, resumir que se entendió el flujo y **no tocar código** hasta que el usuario diga "sigue con siguiente.md en la rama `<rama>`".
+Hacer `git fetch`, leer `ai/conocimiento/` en orden y `ai/grafo.md`, resumir que se entendió el flujo (incluida la regla de actualizar el grafo) y **no tocar código** hasta que el usuario diga "sigue con siguiente.md en la rama `<rama>`".
