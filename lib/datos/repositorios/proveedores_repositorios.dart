@@ -27,8 +27,6 @@ final repositorioTarjetasProvider = Provider<RepositorioTarjetas>((ref) => MockT
 
 final repositorioVidasProvider = Provider<RepositorioVidas>((ref) => MockVidas());
 
-final repositorioApelacionesProvider = Provider<RepositorioApelaciones>(
-  (ref) => MockApelaciones(),
-);
+final repositorioApelacionesProvider = Provider<RepositorioApelaciones>((ref) => MockApelaciones());
 
 final repositorioTiendaProvider = Provider<RepositorioTienda>((ref) => MockTienda());

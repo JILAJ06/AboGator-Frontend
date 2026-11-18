@@ -137,10 +137,7 @@ class EstilosTexto extends ThemeExtension<EstilosTexto> {
     required this.codigo,
   });
 
-  factory EstilosTexto.crear({
-    required Color colorTexto,
-    required ResolutorFuente fuente,
-  }) {
+  factory EstilosTexto.crear({required Color colorTexto, required ResolutorFuente fuente}) {
     TextStyle aplicar(TextStyle base) => fuente(base.copyWith(color: colorTexto));
     return EstilosTexto(
       display: aplicar(TipografiaBase.display),
