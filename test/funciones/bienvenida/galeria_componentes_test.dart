@@ -1,6 +1,9 @@
 import 'package:abogator/app/app.dart';
+import 'package:abogator/app/enrutador.dart';
+import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/barra_progreso.dart';
 import 'package:abogator/componentes/boton_app.dart';
+import 'package:abogator/componentes/boton_veredicto.dart';
 import 'package:abogator/componentes/campo_texto_app.dart';
 import 'package:abogator/componentes/chip_hud.dart';
 import 'package:abogator/componentes/corazon_vida.dart';
@@ -19,9 +22,24 @@ import 'package:material_ui/material_ui.dart';
 
 /// Pantalla alta para que la galería entera quede construida.
 Future<void> montarGaleria(WidgetTester tester) async {
-  await tester.binding.setSurfaceSize(const Size(390, 9000));
+  await abrirGaleria(tester);
+  await agrandar(tester, const Size(390, 9000));
+}
+
+/// Agranda la superficie después de navegar (la transición de página no
+/// puede rasterizar superficies tan altas).
+Future<void> agrandar(WidgetTester tester, Size tamano) async {
+  await tester.binding.setSurfaceSize(tamano);
   addTearDown(() => tester.binding.setSurfaceSize(null));
+  await tester.pumpAndSettle();
+}
+
+/// Monta la app (que arranca en el Splash) y navega a la galería.
+Future<void> abrirGaleria(WidgetTester tester) async {
   await tester.pumpWidget(const ProviderScope(child: AppAbogator()));
+  ProviderScope.containerOf(tester.element(find.byType(AppAbogator)))
+      .read(enrutadorProvider)
+      .go(Rutas.galeria);
   await tester.pumpAndSettle();
 }
 
@@ -33,6 +51,7 @@ void main() {
     await montarGaleria(tester);
     expect(find.text(Textos.galeriaTitulo), findsOneWidget);
     expect(find.byType(BotonApp), findsNWidgets(7));
+    expect(find.byType(BotonVeredicto), findsNWidgets(8));
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
     expect(find.byType(ChipHud), findsNWidgets(5));
     expect(find.byType(FilaVidas), findsNWidgets(3));
@@ -71,10 +90,8 @@ void main() {
       tester.platformDispatcher.platformBrightnessTestValue = brillo;
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
       addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-      await tester.binding.setSurfaceSize(const Size(390, 16000));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      await tester.pumpWidget(const ProviderScope(child: AppAbogator()));
-      await tester.pumpAndSettle();
+      await abrirGaleria(tester);
+      await agrandar(tester, const Size(390, 16000));
       expect(tester.takeException(), isNull);
     });
   }
