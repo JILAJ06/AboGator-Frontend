@@ -226,15 +226,20 @@ class _BotonOmitirState extends State<_BotonOmitir> {
           child: AnilloFoco(
             visible: _foco,
             radio: _radio,
-            child: Container(
+            // Alto de 48 y ancho del texto + 12 por lado (≥ 48): no se estira.
+            child: ConstrainedBox(
               key: const ValueKey('boton-omitir'),
               constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              alignment: Alignment.center,
-              child: Text(
-                Textos.onboardingOmitir,
-                style: context.estilos.cuerpoEnfasis.copyWith(
-                  color: context.tokens.textoSecundario,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(
+                    Textos.onboardingOmitir,
+                    style: context.estilos.cuerpoEnfasis.copyWith(
+                      color: context.tokens.textoSecundario,
+                    ),
+                  ),
                 ),
               ),
             ),

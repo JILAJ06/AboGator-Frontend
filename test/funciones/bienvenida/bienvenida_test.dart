@@ -214,6 +214,9 @@ void main() {
       final omitir = tester.getSize(find.byKey(const ValueKey('boton-omitir')));
       expect(omitir.width, greaterThanOrEqualTo(48));
       expect(omitir.height, greaterThanOrEqualTo(48));
+      // Arriba a la derecha: el texto termina a 24 del borde (x = 366 en 390).
+      final texto = tester.getRect(find.text(Textos.onboardingOmitir));
+      expect(texto.right, closeTo(366, 1));
 
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
