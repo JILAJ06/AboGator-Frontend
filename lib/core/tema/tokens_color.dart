@@ -8,7 +8,7 @@ extension ColorComoHex on Color {
   }
 }
 
-/// Tokens de color del tema (valores exactos de Figma).
+/// Tokens de color del tema (valores de Figma).
 ///
 /// Se leen desde cualquier widget con `context.tokens`
 /// (ver `core/utilidades/extensiones_contexto.dart`).
@@ -24,11 +24,14 @@ class TokensColor extends ThemeExtension<TokensColor> {
     required this.textoEnPrimario,
     required this.textoAcento,
     required this.bordeDefault,
+    required this.bordeControl,
     required this.accionPrimaria,
     required this.accionSecundaria,
     required this.accionAcento,
     required this.estadoLegal,
     required this.estadoIlegal,
+    required this.estadoCondicional,
+    required this.focoAnillo,
   });
 
   /// fondo/app
@@ -58,6 +61,10 @@ class TokensColor extends ThemeExtension<TokensColor> {
   /// borde/default
   final Color bordeDefault;
 
+  /// borde/control: bordes de campos, interruptores inactivos, puntos del
+  /// paginador y corazón vacío (contraste ≥ 3:1).
+  final Color bordeControl;
+
   /// accion/primaria
   final Color accionPrimaria;
 
@@ -73,6 +80,12 @@ class TokensColor extends ThemeExtension<TokensColor> {
   /// estado/ilegal
   final Color estadoIlegal;
 
+  /// estado/condicional: "Legal con condiciones" y barra de Reputación.
+  final Color estadoCondicional;
+
+  /// foco/anillo: anillo de foco con teclado.
+  final Color focoAnillo;
+
   static const TokensColor claro = TokensColor(
     fondoApp: Color(0xFFF8FAFC),
     fondoSuperficie: Color(0xFFFFFFFF),
@@ -83,13 +96,19 @@ class TokensColor extends ThemeExtension<TokensColor> {
     textoEnPrimario: Color(0xFFFFFFFF),
     textoAcento: Color(0xFF8A4F17),
     bordeDefault: Color(0xFFE2E8F0),
+    bordeControl: Color(0xFF64748B),
     accionPrimaria: Color(0xFF1F4E35),
     accionSecundaria: Color(0xFF0F294A),
     accionAcento: Color(0xFF9A5A1C),
     estadoLegal: Color(0xFF186B40),
     estadoIlegal: Color(0xFFB52426),
+    estadoCondicional: Color(0xFF2B5FA8),
+    focoAnillo: Color(0xFF2B5FA8),
   );
 
+  /// Los valores oscuros de borde/control, estado/condicional y foco/anillo
+  /// son propuestos (en Figma solo existen los claros); su contraste se
+  /// verifica en `test/core/tema/contraste_tokens_test.dart`.
   static const TokensColor oscuro = TokensColor(
     fondoApp: Color(0xFF0B1220),
     fondoSuperficie: Color(0xFF162030),
@@ -100,12 +119,36 @@ class TokensColor extends ThemeExtension<TokensColor> {
     textoEnPrimario: Color(0xFF0B1220),
     textoAcento: Color(0xFFE0A060),
     bordeDefault: Color(0xFF2A3850),
+    bordeControl: Color(0xFF64748B),
     accionPrimaria: Color(0xFF68B678),
     accionSecundaria: Color(0xFFE2E8F0),
     accionAcento: Color(0xFFE0A060),
     estadoLegal: Color(0xFF5CC88A),
     estadoIlegal: Color(0xFFF07070),
+    estadoCondicional: Color(0xFF6FA0E8),
+    focoAnillo: Color(0xFF7CB0F0),
   );
+
+  /// Todos los tokens con su nombre de Figma (para la galería y las pruebas).
+  Map<String, Color> get porNombre => {
+    'fondo/app': fondoApp,
+    'fondo/superficie': fondoSuperficie,
+    'fondo/superficie-alt': fondoSuperficieAlt,
+    'fondo/destacado': fondoDestacado,
+    'texto/primario': textoPrimario,
+    'texto/secundario': textoSecundario,
+    'texto/en-primario': textoEnPrimario,
+    'texto/acento': textoAcento,
+    'borde/default': bordeDefault,
+    'borde/control': bordeControl,
+    'accion/primaria': accionPrimaria,
+    'accion/secundaria': accionSecundaria,
+    'accion/acento': accionAcento,
+    'estado/legal': estadoLegal,
+    'estado/ilegal': estadoIlegal,
+    'estado/condicional': estadoCondicional,
+    'foco/anillo': focoAnillo,
+  };
 
   @override
   TokensColor copyWith({
@@ -118,11 +161,14 @@ class TokensColor extends ThemeExtension<TokensColor> {
     Color? textoEnPrimario,
     Color? textoAcento,
     Color? bordeDefault,
+    Color? bordeControl,
     Color? accionPrimaria,
     Color? accionSecundaria,
     Color? accionAcento,
     Color? estadoLegal,
     Color? estadoIlegal,
+    Color? estadoCondicional,
+    Color? focoAnillo,
   }) {
     return TokensColor(
       fondoApp: fondoApp ?? this.fondoApp,
@@ -134,11 +180,14 @@ class TokensColor extends ThemeExtension<TokensColor> {
       textoEnPrimario: textoEnPrimario ?? this.textoEnPrimario,
       textoAcento: textoAcento ?? this.textoAcento,
       bordeDefault: bordeDefault ?? this.bordeDefault,
+      bordeControl: bordeControl ?? this.bordeControl,
       accionPrimaria: accionPrimaria ?? this.accionPrimaria,
       accionSecundaria: accionSecundaria ?? this.accionSecundaria,
       accionAcento: accionAcento ?? this.accionAcento,
       estadoLegal: estadoLegal ?? this.estadoLegal,
       estadoIlegal: estadoIlegal ?? this.estadoIlegal,
+      estadoCondicional: estadoCondicional ?? this.estadoCondicional,
+      focoAnillo: focoAnillo ?? this.focoAnillo,
     );
   }
 
@@ -147,21 +196,25 @@ class TokensColor extends ThemeExtension<TokensColor> {
     if (other == null) {
       return this;
     }
+    Color mezclar(Color a, Color b) => Color.lerp(a, b, t)!;
     return TokensColor(
-      fondoApp: Color.lerp(fondoApp, other.fondoApp, t)!,
-      fondoSuperficie: Color.lerp(fondoSuperficie, other.fondoSuperficie, t)!,
-      fondoSuperficieAlt: Color.lerp(fondoSuperficieAlt, other.fondoSuperficieAlt, t)!,
-      fondoDestacado: Color.lerp(fondoDestacado, other.fondoDestacado, t)!,
-      textoPrimario: Color.lerp(textoPrimario, other.textoPrimario, t)!,
-      textoSecundario: Color.lerp(textoSecundario, other.textoSecundario, t)!,
-      textoEnPrimario: Color.lerp(textoEnPrimario, other.textoEnPrimario, t)!,
-      textoAcento: Color.lerp(textoAcento, other.textoAcento, t)!,
-      bordeDefault: Color.lerp(bordeDefault, other.bordeDefault, t)!,
-      accionPrimaria: Color.lerp(accionPrimaria, other.accionPrimaria, t)!,
-      accionSecundaria: Color.lerp(accionSecundaria, other.accionSecundaria, t)!,
-      accionAcento: Color.lerp(accionAcento, other.accionAcento, t)!,
-      estadoLegal: Color.lerp(estadoLegal, other.estadoLegal, t)!,
-      estadoIlegal: Color.lerp(estadoIlegal, other.estadoIlegal, t)!,
+      fondoApp: mezclar(fondoApp, other.fondoApp),
+      fondoSuperficie: mezclar(fondoSuperficie, other.fondoSuperficie),
+      fondoSuperficieAlt: mezclar(fondoSuperficieAlt, other.fondoSuperficieAlt),
+      fondoDestacado: mezclar(fondoDestacado, other.fondoDestacado),
+      textoPrimario: mezclar(textoPrimario, other.textoPrimario),
+      textoSecundario: mezclar(textoSecundario, other.textoSecundario),
+      textoEnPrimario: mezclar(textoEnPrimario, other.textoEnPrimario),
+      textoAcento: mezclar(textoAcento, other.textoAcento),
+      bordeDefault: mezclar(bordeDefault, other.bordeDefault),
+      bordeControl: mezclar(bordeControl, other.bordeControl),
+      accionPrimaria: mezclar(accionPrimaria, other.accionPrimaria),
+      accionSecundaria: mezclar(accionSecundaria, other.accionSecundaria),
+      accionAcento: mezclar(accionAcento, other.accionAcento),
+      estadoLegal: mezclar(estadoLegal, other.estadoLegal),
+      estadoIlegal: mezclar(estadoIlegal, other.estadoIlegal),
+      estadoCondicional: mezclar(estadoCondicional, other.estadoCondicional),
+      focoAnillo: mezclar(focoAnillo, other.focoAnillo),
     );
   }
 }
