@@ -17,6 +17,11 @@ class LogoApp extends StatelessWidget {
   static const double proporcionIsotipo = 1068 / 973;
   static const double proporcionMarca = 1312 / 266;
 
+  /// Logo vertical de Figma (323.7×187.9): isotipo de 109, hueco ≈ 13 y la
+  /// marca nominativa a todo el ancho (323.7, ≈ 65.6 de alto).
+  static const double huecoVertical = 13 / 109;
+  static const double marcaVertical = (323.7 / proporcionMarca) / 109;
+
   final VarianteLogo variante;
   final double alto;
 
@@ -34,8 +39,8 @@ class LogoApp extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           isotipo,
-          SizedBox(height: alto * 0.16),
-          _marca(alto * 0.36),
+          SizedBox(height: alto * huecoVertical),
+          _marca(alto * marcaVertical),
         ],
       ),
       VarianteLogo.horizontal => Row(
