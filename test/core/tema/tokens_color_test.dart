@@ -19,11 +19,12 @@ const Map<String, (int, int)> tablaFigma = {
   'estado/legal': (0xFF186B40, 0xFF5CC88A),
   'estado/ilegal': (0xFFB52426, 0xFFF07070),
   'estado/condicional': (0xFF2B5FA8, 0xFF6FA0E8),
+  'estado/escalar': (0xFF6B4BA1, 0xFFB9A0E8),
   'foco/anillo': (0xFF2B5FA8, 0xFF7CB0F0),
 };
 
 void main() {
-  test('hay exactamente 17 tokens con los nombres de Figma', () {
+  test('hay exactamente 18 tokens con los nombres de Figma', () {
     expect(TokensColor.claro.porNombre.keys, unorderedEquals(tablaFigma.keys));
     expect(TokensColor.oscuro.porNombre.keys, unorderedEquals(tablaFigma.keys));
   });

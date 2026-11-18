@@ -13,9 +13,10 @@ void main() {
   for (final (modo, t) in [('claro', TokensColor.claro), ('oscuro', TokensColor.oscuro)]) {
     final fondos = {'fondo/app': t.fondoApp, 'fondo/superficie': t.fondoSuperficie};
 
-    // Tokens nuevos de T-01: texto/estado ≥ 4.5:1; bordes/anillos ≥ 3:1.
+    // Tokens nuevos de T-01 y T-02: texto/estado ≥ 4.5:1; bordes/anillos ≥ 3:1.
     final casos = <(String, Color, double)>[
       ('estado/condicional', t.estadoCondicional, Contraste.minimoTexto),
+      ('estado/escalar', t.estadoEscalar, Contraste.minimoTexto),
       ('borde/control', t.bordeControl, Contraste.minimoNoTexto),
       ('foco/anillo', t.focoAnillo, Contraste.minimoNoTexto),
     ];
