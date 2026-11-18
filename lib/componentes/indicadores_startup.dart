@@ -48,6 +48,7 @@ class IndicadoresStartup extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     return Container(
+      width: double.infinity,
       constraints: const BoxConstraints(minHeight: 46),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -55,13 +56,15 @@ class IndicadoresStartup extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: tokens.bordeDefault),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      // Columnas de ancho intrínseco con espacio uniforme entre ellas. Con
+      // texto grande o pantallas angostas pasan a una segunda fila en vez de
+      // cortar palabras.
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        runSpacing: 8,
         children: [
           for (final indicador in IndicadorStartup.values)
-            Expanded(
-              child: _Columna(indicador: indicador, valor: indicador.valorEn(estado)),
-            ),
+            _Columna(indicador: indicador, valor: indicador.valorEn(estado)),
         ],
       ),
     );
@@ -83,9 +86,10 @@ class _Columna extends StatelessWidget {
       excludeSemantics: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               IconoApp(indicador.icono, tamano: 14, color: indicador.color(tokens)),
               const SizedBox(width: 3),
@@ -98,32 +102,25 @@ class _Columna extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          LayoutBuilder(
-            builder: (context, restricciones) {
-              final ancho = restricciones.maxWidth < IndicadoresStartup.anchoBarra
-                  ? restricciones.maxWidth
-                  : IndicadoresStartup.anchoBarra;
-              return SizedBox(
-                width: ancho,
-                height: IndicadoresStartup.altoBarra,
-                child: DecoratedBox(
+          SizedBox(
+            width: IndicadoresStartup.anchoBarra,
+            height: IndicadoresStartup.altoBarra,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: tokens.fondoSuperficieAlt,
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: IndicadoresStartup.anchoBarra * acotado / 100,
                   decoration: BoxDecoration(
-                    color: tokens.fondoSuperficieAlt,
+                    color: indicador.color(tokens),
                     borderRadius: BorderRadius.circular(3),
                   ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: ancho * acotado / 100,
-                      decoration: BoxDecoration(
-                        color: indicador.color(tokens),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ),
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ],
       ),
