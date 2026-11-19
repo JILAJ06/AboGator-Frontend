@@ -51,6 +51,10 @@ class IndicadoresStartup extends StatelessWidget {
   const IndicadoresStartup({required this.estado, this.cambios = const {}, super.key});
 
   static const double anchoBarra = 68;
+
+  /// Con un cambio al lado, la barra se acorta para que las 4 columnas sigan
+  /// en una fila (en Figma 14 la pista es flexible).
+  static const double anchoBarraConCambio = 44;
   static const double altoBarra = 6;
 
   final EstadoStartup estado;
@@ -100,6 +104,9 @@ class _Columna extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final acotado = valor.clamp(0, 100);
+    final anchoPista = cambio == 0
+        ? IndicadoresStartup.anchoBarra
+        : IndicadoresStartup.anchoBarraConCambio;
     return Semantics(
       label: cambio == 0
           ? Textos.indicadorValor(indicador.nombre, acotado)
@@ -127,7 +134,7 @@ class _Columna extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
-                width: IndicadoresStartup.anchoBarra,
+                width: anchoPista,
                 height: IndicadoresStartup.altoBarra,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -140,7 +147,7 @@ class _Columna extends StatelessWidget {
                       key: ValueKey('relleno-${indicador.name}'),
                       duration: EfectosApp.duracion(context, milisegundos: 400),
                       curve: Curves.easeOut,
-                      width: IndicadoresStartup.anchoBarra * acotado / 100,
+                      width: anchoPista * acotado / 100,
                       decoration: BoxDecoration(
                         color: indicador.color(tokens),
                         borderRadius: BorderRadius.circular(3),

@@ -4,6 +4,8 @@ import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/boton_veredicto.dart';
 import 'package:abogator/componentes/indicadores_startup.dart';
 import 'package:abogator/componentes/panel_veredicto.dart';
+import 'package:abogator/componentes/sello_veredicto.dart';
+import 'package:abogator/componentes/tinte_veredicto.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/funciones/juego/estado_juego.dart';
@@ -226,6 +228,17 @@ void main() {
       final enFoco = FocusManager.instance.primaryFocus!.context!;
       expect(enFoco.findAncestorWidgetOfExactType<PanelVeredicto>(), isNotNull);
       semantica.dispose();
+    });
+
+    testWidgets('con el panel abierto ya no se ven el sello ni el tinte (Figma 12 y 14)', (
+      tester,
+    ) async {
+      await abrirJuego(tester, tarjetas: mazo());
+      await elegir(tester, Veredicto.legal);
+      for (final sello in tester.widgetList<SelloVeredicto>(find.byType(SelloVeredicto))) {
+        expect(sello.opacidad, 0, reason: sello.veredicto.name);
+      }
+      expect(tester.widget<TinteVeredicto>(find.byType(TinteVeredicto)).veredicto, isNull);
     });
 
     testWidgets('el velo es #0B1220 al 40 %', (tester) async {

@@ -39,11 +39,18 @@ class BloqueLectura extends StatefulWidget {
 class _BloqueLecturaState extends State<BloqueLectura> {
   bool _foco = false;
 
+  /// El foco que llega por [BloqueLectura.autofocus] no dibuja el anillo
+  /// (solo lo hace cuando se llega navegando con teclado).
+  late bool _focoInicial = widget.autofocus;
+
   @override
   Widget build(BuildContext context) {
     final contenido = FocusableActionDetector(
       autofocus: widget.autofocus,
-      onShowFocusHighlight: (valor) => setState(() => _foco = valor),
+      onShowFocusHighlight: (valor) => setState(() => _foco = valor && !_focoInicial),
+      onFocusChange: (enfocado) {
+        if (!enfocado && _focoInicial) setState(() => _focoInicial = false);
+      },
       child: AnilloFoco(visible: _foco, radio: widget.radio, child: widget.child),
     );
     if (widget.excluirHijos) {
