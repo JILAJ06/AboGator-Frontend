@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 
 import '../core/tema/efectos.dart';
@@ -32,6 +34,26 @@ class TarjetaCaso extends StatelessWidget {
   /// Alto mínimo (la zona de la tarjeta se encoge hasta aquí).
   static const double altoMinimo = 260;
 
+  /// Alto mínimo con el texto dinámico: lo que ocupan el relleno, la
+  /// etiqueta, el personaje, dos líneas del globo y la pista. Con texto
+  /// grande la zona pide más alto y la pantalla se vuelve desplazable.
+  static double altoMinimoPara(TextScaler escala) {
+    double s(double tamano) => escala.scale(tamano);
+    final contenido =
+        24 +
+        20 + // relleno
+        s(14) +
+        10 + // etiqueta
+        18 +
+        math.max(48, s(20) + 2 + s(14)) + // personaje
+        18 +
+        36 +
+        s(25) * 2 + // globo con dos líneas
+        18 +
+        math.max(s(16), s(14) * 2 + 2); // pista
+    return math.max(altoMinimo, contenido);
+  }
+
   final String etiquetaCaso;
   final Color colorModulo;
   final String iniciales;
@@ -56,67 +78,81 @@ class TarjetaCaso extends StatelessWidget {
           border: Border.all(color: tokens.bordeDefault),
           boxShadow: EfectosApp.sombraTarjetaCaso,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              key: const ValueKey('etiqueta-caso'),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: colorModulo.withValues(alpha: EfectosApp.opacidadEtiquetaCaso),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(etiquetaCaso, style: estilos.leyenda.copyWith(color: tokens.textoAcento)),
-            ),
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                AvatarApp(iniciales: iniciales, tamano: 48),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        personaje,
-                        style: estilos.cuerpoEnfasis.copyWith(color: tokens.textoPrimario),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(rol, style: estilos.leyenda.copyWith(color: tokens.textoSecundario)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            Expanded(
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: SingleChildScrollView(
-                  key: const ValueKey('globo-caso-desplazable'),
-                  child: Container(
-                    key: const ValueKey('globo-caso'),
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(18),
+        // Si todo cabe, el globo ocupa el espacio libre y la pista queda al
+        // pie; si no (texto grande o tarjeta baja), el contenido se desplaza
+        // dentro de la tarjeta.
+        child: CustomScrollView(
+          key: const ValueKey('contenido-caso'),
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    key: const ValueKey('etiqueta-caso'),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: tokens.fondoSuperficieAlt,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(6),
-                        topRight: Radius.circular(20),
-                        bottomLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(20),
-                      ),
+                      color: colorModulo.withValues(alpha: EfectosApp.opacidadEtiquetaCaso),
+                      borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      texto,
-                      style: estilos.h3.copyWith(color: tokens.textoPrimario, height: 25 / 17),
+                      etiquetaCaso,
+                      style: estilos.leyenda.copyWith(color: tokens.textoAcento),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      AvatarApp(iniciales: iniciales, tamano: 48),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              personaje,
+                              style: estilos.cuerpoEnfasis.copyWith(color: tokens.textoPrimario),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              rol,
+                              style: estilos.leyenda.copyWith(color: tokens.textoSecundario),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Container(
+                        key: const ValueKey('globo-caso'),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: tokens.fondoSuperficieAlt,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(6),
+                            topRight: Radius.circular(20),
+                            bottomLeft: Radius.circular(20),
+                            bottomRight: Radius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          texto,
+                          style: estilos.h3.copyWith(color: tokens.textoPrimario, height: 25 / 17),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const PistaGesto(),
+                ],
               ),
             ),
-            const SizedBox(height: 18),
-            const PistaGesto(),
           ],
         ),
       ),
@@ -144,21 +180,24 @@ class PistaGesto extends StatelessWidget {
               style: estilos.etiqueta.copyWith(color: tokens.estadoIlegal),
             ),
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                Textos.casoPistaCondicional,
-                textAlign: TextAlign.center,
-                style: estilos.leyenda.copyWith(color: tokens.estadoCondicional),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                Textos.casoPistaEscalar,
-                textAlign: TextAlign.center,
-                style: estilos.leyenda.copyWith(color: tokens.estadoEscalar),
-              ),
-            ],
+          Flexible(
+            flex: 2,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  Textos.casoPistaCondicional,
+                  textAlign: TextAlign.center,
+                  style: estilos.leyenda.copyWith(color: tokens.estadoCondicional),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  Textos.casoPistaEscalar,
+                  textAlign: TextAlign.center,
+                  style: estilos.leyenda.copyWith(color: tokens.estadoEscalar),
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: Text(

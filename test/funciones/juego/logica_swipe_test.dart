@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/funciones/juego/logica_swipe.dart';
 import 'package:flutter_test/flutter_test.dart';

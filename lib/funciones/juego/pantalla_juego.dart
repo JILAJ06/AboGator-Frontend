@@ -168,8 +168,10 @@ class _JuegoState extends ConsumerState<_Juego> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: TarjetaCaso.altoMinimo + MazoSwipe.altoPila,
+              constraints: BoxConstraints(
+                minHeight:
+                    TarjetaCaso.altoMinimoPara(MediaQuery.textScalerOf(context)) +
+                    MazoSwipe.altoPila,
               ),
               // Solo hijos posicionados: la zona no aporta alto intrínseco y
               // se estira o encoge con la pantalla.

@@ -4,6 +4,7 @@ import 'package:abogator/app/app.dart';
 import 'package:abogator/app/enrutador.dart';
 import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
+import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
 import 'package:abogator/datos/mocks/mock_tarjetas.dart';
 import 'package:abogator/datos/mocks/mock_tienda.dart';
@@ -62,6 +63,7 @@ Future<TarjetasFalsas> abrirJuego(
   Map<String, List<Tarjeta>>? tarjetas,
   bool esperar = true,
   bool desdeIntro = false,
+  bool conSesion = true,
   void Function(TarjetasFalsas)? antes,
 }) async {
   await tester.binding.setSurfaceSize(tamano);
@@ -77,13 +79,14 @@ Future<TarjetasFalsas> abrirJuego(
           MockVidas(espera: Duration.zero, cantidad: vidas),
         ),
         repositorioTarjetasProvider.overrideWithValue(repo),
+        repositorioApelacionesProvider.overrideWithValue(MockApelaciones(espera: Duration.zero)),
         repositorioOnboardingProvider.overrideWithValue(OnboardingEnMemoria(vistoAlInicio: true)),
       ],
       child: const AppAbogator(),
     ),
   );
   final contenedor = ProviderScope.containerOf(tester.element(find.byType(AppAbogator)));
-  contenedor.read(sesionProvider.notifier).iniciar(ana);
+  if (conSesion) contenedor.read(sesionProvider.notifier).iniciar(ana);
   final enrutador = contenedor.read(enrutadorProvider);
   if (desdeIntro) {
     enrutador.go(Rutas.introSprintDe('mod-1', sprintId));
@@ -115,3 +118,24 @@ Finder get tarjeta => find.byKey(const ValueKey('gesto-tarjeta'));
 /// Texto del caso de la tarjeta que se ve.
 String textoActual(WidgetTester tester) =>
     tester.widget<TarjetaCaso>(find.byType(TarjetaCaso)).texto;
+
+/// Botón "Salir" del diálogo de confirmación.
+Finder get salirDelDialogo =>
+    find.descendant(of: find.byType(AlertDialog), matching: find.text('Salir'));
+
+/// Si el elemento [contexto] contiene un widget de tipo [T].
+bool contiene<T extends Widget>(BuildContext? contexto) {
+  if (contexto == null) return false;
+  var encontrado = false;
+  void visitar(Element e) {
+    if (encontrado) return;
+    if (e.widget is T) {
+      encontrado = true;
+      return;
+    }
+    e.visitChildElements(visitar);
+  }
+
+  (contexto as Element).visitChildElements(visitar);
+  return encontrado;
+}
