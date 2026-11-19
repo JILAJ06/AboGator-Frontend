@@ -2,63 +2,47 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/recursos/imagenes_app.dart';
 import '../core/textos/textos.dart';
+import '../core/utilidades/extensiones_contexto.dart';
 
-/// Variantes del logotipo. Vertical y horizontal se arman con los dos
-/// archivos entregados (isotipo y marca nominativa).
-enum VarianteLogo { vertical, horizontal, isotipo }
-
-/// Logotipo de AboGator.
+/// Logotipo de AboGator con los PNG exportados de Figma.
 ///
-/// [alto] es la altura del isotipo; la marca nominativa se ajusta a él.
+/// El alto sale de [ancho] y de la proporción del archivo. Sin [tono] se elige
+/// solo: color en modo claro y negativo en modo oscuro.
 class LogoApp extends StatelessWidget {
-  const LogoApp({this.variante = VarianteLogo.vertical, this.alto = 96, super.key});
+  const LogoApp({
+    this.forma = FormaLogo.vertical,
+    this.tono,
+    this.ancho = 200,
+    this.decorativo = false,
+    super.key,
+  });
 
-  /// Relación ancho/alto de los archivos originales.
-  static const double proporcionIsotipo = 1068 / 973;
-  static const double proporcionMarca = 1312 / 266;
+  final FormaLogo forma;
 
-  /// Logo vertical de Figma (323.7×187.9): isotipo de 109, hueco ≈ 13 y la
-  /// marca nominativa a todo el ancho (323.7, ≈ 65.6 de alto).
-  static const double huecoVertical = 13 / 109;
-  static const double marcaVertical = (323.7 / proporcionMarca) / 109;
+  /// `null`: automático según el modo (color / negativo).
+  final TonoLogo? tono;
+  final double ancho;
 
-  final VarianteLogo variante;
-  final double alto;
+  /// `true` lo excluye del lector de pantalla (cuando el texto ya dice "AboGator").
+  final bool decorativo;
+
+  double get alto => ancho / forma.proporcion;
+
+  /// Tono que se usa en un contexto dado.
+  TonoLogo tonoEn(BuildContext context) =>
+      tono ?? (context.esModoOscuro ? TonoLogo.negativo : TonoLogo.color);
 
   @override
   Widget build(BuildContext context) {
-    final isotipo = Image.asset(
-      ImagenesApp.logoIsotipo,
+    final imagen = Image.asset(
+      ImagenesApp.logo(forma, tonoEn(context)),
+      width: ancho,
       height: alto,
-      width: alto * proporcionIsotipo,
       fit: BoxFit.contain,
     );
-    final contenido = switch (variante) {
-      VarianteLogo.isotipo => isotipo,
-      VarianteLogo.vertical => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          isotipo,
-          SizedBox(height: alto * huecoVertical),
-          _marca(alto * marcaVertical),
-        ],
-      ),
-      VarianteLogo.horizontal => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          isotipo,
-          SizedBox(width: alto * 0.2),
-          _marca(alto * 0.5),
-        ],
-      ),
-    };
-    return Semantics(image: true, label: Textos.logo, excludeSemantics: true, child: contenido);
+    if (decorativo) {
+      return ExcludeSemantics(child: imagen);
+    }
+    return Semantics(image: true, label: Textos.logo, excludeSemantics: true, child: imagen);
   }
-
-  Widget _marca(double altoMarca) => Image.asset(
-    ImagenesApp.logoMarcaNominativa,
-    height: altoMarca,
-    width: altoMarca * proporcionMarca,
-    fit: BoxFit.contain,
-  );
 }
