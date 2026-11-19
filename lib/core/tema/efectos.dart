@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../utilidades/contraste.dart';
+
 /// Efectos visuales del diseño que no son tokens de color de Figma.
 abstract final class EfectosApp {
   /// Color de la sombra sólida de los botones: #0F294A al 18 % (0x2E).
@@ -47,6 +49,72 @@ abstract final class EfectosApp {
 
   /// Opacidad de los puntos de carga inactivos del Splash (40 %).
   static const double opacidadPuntoInactivo = 0.4;
+
+  // ---------------------------------------------------------------------
+  // 08 Mapa de sprints y 09 Intro del sprint (Figma 13:562 y 13:776)
+  // ---------------------------------------------------------------------
+
+  /// Sombra del globo del sprint actual ("Sombra/Elevada" de Figma).
+  static const List<BoxShadow> sombraGlobo = sombraBuzon;
+
+  /// Texto e íconos sobre el encabezado del módulo: blanco fijo.
+  static const Color textoEncabezado = Color(0xFFFFFFFF);
+
+  /// Fondo del botón atrás del encabezado: blanco al 18 % (0x2E).
+  static const Color fondoAtrasEncabezado = Color(0x2EFFFFFF);
+
+  /// Pista de la barra de avance del encabezado: blanco al 25 % (0x40).
+  static const Color pistaEncabezado = Color(0x40FFFFFF);
+
+  /// Relleno de la barra de avance del encabezado (ámbar claro de Figma).
+  static const Color rellenoEncabezado = Color(0xFFE0A060);
+
+  /// La etiqueta "MÓDULO N · NOMBRE" es el color del módulo mezclado con
+  /// blanco al 85 % (en Figma, #DCE7F7 sobre el azul del módulo 1).
+  static const double mezclaEtiquetaEncabezado = 0.85;
+
+  /// Color de la etiqueta del encabezado sobre [fondo].
+  static Color etiquetaEncabezado(Color fondo) =>
+      Color.lerp(fondo, textoEncabezado, mezclaEtiquetaEncabezado)!;
+
+  /// Fondo del encabezado del módulo: el color del módulo tal cual si el texto
+  /// blanco y la etiqueta alcanzan 4.5:1; si no (módulos 2 y 5), se oscurece lo
+  /// mínimo necesario en pasos de 2 % hacia negro.
+  static Color fondoEncabezado(Color modulo) {
+    var fondo = modulo;
+    for (var paso = 1; paso <= 50; paso++) {
+      final suficiente =
+          Contraste.razon(textoEncabezado, fondo) >= Contraste.minimoTexto &&
+          Contraste.razon(etiquetaEncabezado(fondo), fondo) >= Contraste.minimoTexto;
+      if (suficiente) return fondo;
+      fondo = Color.lerp(modulo, const Color(0xFF000000), paso * 0.02)!;
+    }
+    return fondo;
+  }
+
+  /// Camino del mapa: trazo de 8 con puntas redondas; guiones de 2 y huecos de
+  /// 15 (se ven como puntos). El color es el token borde/default.
+  static const double anchoCamino = 8;
+  static const double guionCamino = 2;
+  static const double huecoCamino = 15;
+
+  /// Opacidad del aro de pulso del sprint actual (accion/acento al 40 %).
+  static const double opacidadPulso = 0.4;
+
+  /// Bases (sombra sólida inferior) de los nodos del mapa en modo claro, tal
+  /// como están en Figma, por color de cara: completado, actual, bloqueado y
+  /// Examen final.
+  static const Map<int, Color> _basesClaro = {
+    0xFF1F4E35: Color(0xFF123222),
+    0xFF9A5A1C: Color(0xFF7A4615),
+    0xFFF1F5F9: Color(0xFFCBD5E1),
+    0xFF0F294A: Color(0xFF07172B),
+  };
+
+  /// Base de un nodo del mapa bajo su [cara]. En modo oscuro (sin valores en
+  /// Figma) es la cara oscurecida un 35 %.
+  static Color baseNodo(Color cara) =>
+      _basesClaro[cara.toARGB32()] ?? Color.lerp(cara, const Color(0xFF000000), 0.35)!;
 
   /// Sombra sólida inferior, sin desenfoque.
   static List<BoxShadow> sombraSolida(double desplazamiento) => [

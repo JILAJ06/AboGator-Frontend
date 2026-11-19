@@ -23,10 +23,14 @@ import 'package:abogator/datos/repositorios/repositorio_progreso.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/inicio/pantalla_inicio.dart';
+import 'package:abogator/funciones/mapa/pantalla_intro_sprint.dart';
+import 'package:abogator/funciones/mapa/pantalla_mapa_sprints.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+
+import '../../ayudantes/datos.dart';
 
 const ana = Usuario(
   id: 'u-ana',
@@ -43,10 +47,7 @@ Modulo moduloDe(int n, List<EstadoSprint> estados) => Modulo(
   numero: n,
   nombre: 'Módulo $n',
   color: ColoresModulo.enOrden[n - 1],
-  sprints: [
-    for (final (i, e) in estados.indexed)
-      Sprint(id: 'spr-$n-${i + 1}', titulo: 'S', numeroTarjetas: 8, estado: e),
-  ],
+  sprints: [for (final (i, e) in estados.indexed) sprintDePrueba('spr-$n-${i + 1}', e)],
 );
 
 const h = EstadoSprint.completado;
@@ -159,8 +160,8 @@ void main() {
     expect(find.text('AL'), findsOneWidget);
     expect(find.text('Dev · Nivel 4'), findsOneWidget);
     expect(find.text('7'), findsOneWidget); // racha
-    expect(find.text('340'), findsOneWidget); // monedas del mock de tienda
-    expect(find.text('3'), findsOneWidget); // vidas del mock
+    expect(find.text('240'), findsOneWidget); // monedas del mock de tienda
+    expect(find.text('5'), findsOneWidget); // vidas del mock
     expect(find.text(Textos.heroeEtiqueta), findsOneWidget);
     expect(find.text('Del Garage al MVP'), findsNWidgets(2)); // héroe y tarjeta 1
     expect(find.text('Sprint 3 de 5 · Protección de datos'), findsOneWidget);
@@ -196,7 +197,7 @@ void main() {
   testWidgets('"Continuar sprint" va a la intro del sprint actual', (tester) async {
     await abrirInicio(tester);
     await tocar(tester, find.text(Textos.continuarSprint));
-    expect(find.text(Textos.pendienteIntroSprint), findsOneWidget);
+    expect(find.byType(PantallaIntroSprint), findsOneWidget);
     final ruta = ProviderScope.containerOf(tester.element(find.byType(AppAbogator)))
         .read(enrutadorProvider)
         .routerDelegate
@@ -214,7 +215,7 @@ void main() {
     expect(find.byType(PantallaInicio), findsOneWidget);
 
     await tocar(tester, find.byKey(const ValueKey('modulo-mod-2')));
-    expect(find.text(Textos.pendienteMapaSprints), findsOneWidget);
+    expect(find.byType(PantallaMapaSprints), findsOneWidget);
   });
 
   testWidgets('el Buzón está fijo, lleva al buzón y se anuncia con sus pendientes', (tester) async {

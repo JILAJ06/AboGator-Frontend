@@ -44,17 +44,26 @@ abstract final class LogicaInicio {
     return EstadoModulo.disponible;
   }
 
-  /// Solo cuenta los sprints completados (decisión de T-04).
+  /// Sprints que cuentan en el progreso: todos menos el Examen final (T-04b).
+  static List<Sprint> sprintsNormales(Modulo modulo) =>
+      modulo.sprints.where((s) => !s.esExamenFinal).toList();
+
+  /// Total de sprints del módulo sin el Examen final (5 en el diseño).
+  static int totalSprints(Modulo modulo) => sprintsNormales(modulo).length;
+
+  /// Sprints completados, sin contar el Examen final (decisiones de T-04 y T-04b).
   static int completados(Modulo modulo) =>
-      modulo.sprints.where((s) => s.estado == EstadoSprint.completado).length;
+      sprintsNormales(modulo).where((s) => s.estado == EstadoSprint.completado).length;
 
   /// Módulo y sprint actuales: el primer módulo con un sprint en curso; si no
-  /// hay, el primer sprint disponible. `null` si no hay ninguno.
+  /// hay, el primer sprint disponible. `null` si no hay ninguno. El número del
+  /// sprint cuenta solo los sprints normales (el Examen final da el total + 1).
   static ({Modulo modulo, Sprint sprint, int numeroSprint})? actual(List<Modulo> modulos) {
     for (final buscado in [EstadoSprint.enCurso, EstadoSprint.disponible]) {
       for (final modulo in modulos) {
-        final i = modulo.sprints.indexWhere((s) => s.estado == buscado);
-        if (i >= 0) return (modulo: modulo, sprint: modulo.sprints[i], numeroSprint: i + 1);
+        final normales = sprintsNormales(modulo);
+        final i = normales.indexWhere((s) => s.estado == buscado);
+        if (i >= 0) return (modulo: modulo, sprint: normales[i], numeroSprint: i + 1);
       }
     }
     return null;

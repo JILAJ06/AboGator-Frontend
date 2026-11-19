@@ -2,11 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
 import '../../componentes/avatar_app.dart';
-import '../../componentes/boton_app.dart';
-import '../../componentes/boton_buzon.dart';
 import '../../componentes/chip_hud.dart';
+import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/tarjeta_heroe_startup.dart';
 import '../../componentes/tarjeta_modulo.dart';
@@ -23,31 +23,28 @@ class PantallaInicio extends ConsumerWidget {
   const PantallaInicio({super.key});
 
   /// Espacio entre el botón Buzón y la barra inferior (Figma: 760 − 732).
-  static const double separacionBuzon = 28;
+  static const double separacionBuzon = MarcoPrincipal.separacionBuzon;
 
   /// Reserva al final de la lista para que el Buzón no tape la última tarjeta.
-  static const double reservaFinal = BotonBuzon.lado + separacionBuzon + 16;
+  static const double reservaFinal = MarcoPrincipal.reservaBuzon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usuario = ref.watch(sesionProvider);
     final datos = ref.watch(datosInicioProvider);
 
-    return Scaffold(
-      bottomNavigationBar: NavegacionInferiorApp(
-        actual: PestanaApp.mapa,
-        alSeleccionar: (pestana) => switch (pestana) {
-          PestanaApp.mapa => null,
-          PestanaApp.buzon => context.go(Rutas.buzon),
-          PestanaApp.tienda => context.go(Rutas.tienda),
-          PestanaApp.perfil => context.go(Rutas.perfil),
-        },
-      ),
-      body: usuario == null
+    return MarcoPrincipal(
+      pestana: PestanaApp.mapa,
+      apelacionesPendientes: datos.value?.apelacionesPendientes,
+      cuerpo: usuario == null
           ? const SizedBox.shrink()
           : switch (datos) {
               AsyncData(:final value) => _Contenido(usuario: usuario, datos: value),
-              AsyncError() => _ErrorCarga(alReintentar: () => ref.invalidate(datosInicioProvider)),
+              AsyncError() => MensajePantalla(
+                texto: Textos.inicioErrorCarga,
+                textoBoton: Textos.reintentar,
+                alPresionar: () => ref.invalidate(datosInicioProvider),
+              ),
               _ => const _Esqueleto(),
             },
     );
@@ -65,78 +62,65 @@ class _Contenido extends StatelessWidget {
     final tokens = context.tokens;
     final actual = LogicaInicio.actual(datos.modulos);
 
-    return Stack(
-      children: [
-        SafeArea(
-          bottom: false,
-          child: CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(24, 10, 24, PantallaInicio.reservaFinal),
-                sliver: SliverList.list(
-                  children: [
-                    _Encabezado(usuario: usuario, datos: datos),
-                    const SizedBox(height: 22),
-                    if (actual != null)
-                      TarjetaHeroeStartup(
-                        titulo: LogicaInicio.tramo(actual.modulo),
-                        subtitulo: Textos.heroeSubtitulo(
-                          actual.numeroSprint,
-                          actual.modulo.sprints.length,
-                          LogicaInicio.nombreCorto(actual.modulo),
-                        ),
-                        alContinuar: () =>
-                            context.go(Rutas.introSprintDe(actual.modulo.id, actual.sprint.id)),
-                      ),
-                    const SizedBox(height: 14),
-                    TarjetaRetoDiario(
-                      titulo: Textos.retoTitulo,
-                      subtitulo: Textos.retoSubtitulo(usuario.racha, RetoDiario.monedas),
-                      actual: RetoDiario.actual,
-                      total: RetoDiario.total,
+    return SafeArea(
+      bottom: false,
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 10, 24, PantallaInicio.reservaFinal),
+            sliver: SliverList.list(
+              children: [
+                _Encabezado(usuario: usuario, datos: datos),
+                const SizedBox(height: 22),
+                if (actual != null)
+                  TarjetaHeroeStartup(
+                    titulo: LogicaInicio.tramo(actual.modulo),
+                    subtitulo: Textos.heroeSubtitulo(
+                      actual.numeroSprint,
+                      LogicaInicio.totalSprints(actual.modulo),
+                      LogicaInicio.nombreCorto(actual.modulo),
                     ),
-                    const SizedBox(height: 18),
-                    Semantics(
-                      header: true,
-                      label: Textos.rutaStartup,
-                      excludeSemantics: true,
-                      child: Text(
-                        Textos.rutaStartup,
-                        style: context.estilos.h2.copyWith(color: tokens.textoPrimario),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    for (final (i, modulo) in datos.modulos.indexed) ...[
-                      if (i > 0) const SizedBox(height: 12),
-                      TarjetaModulo(
-                        key: ValueKey('modulo-${modulo.id}'),
-                        numero: modulo.numero,
-                        nombreCorto: LogicaInicio.nombreCorto(modulo),
-                        titulo: LogicaInicio.tramo(modulo),
-                        estado: LogicaInicio.estadoDe(modulo),
-                        completados: LogicaInicio.completados(modulo),
-                        total: modulo.sprints.length,
-                        color: modulo.color,
-                        icono: LogicaInicio.iconoDe(modulo),
-                        alPresionar: () => context.go(Rutas.mapaSprintsDe(modulo.id)),
-                      ),
-                    ],
-                  ],
+                    alContinuar: () =>
+                        context.go(Rutas.introSprintDe(actual.modulo.id, actual.sprint.id)),
+                  ),
+                const SizedBox(height: 14),
+                TarjetaRetoDiario(
+                  titulo: Textos.retoTitulo,
+                  subtitulo: Textos.retoSubtitulo(usuario.racha, RetoDiario.monedas),
+                  actual: RetoDiario.actual,
+                  total: RetoDiario.total,
                 ),
-              ),
-            ],
+                const SizedBox(height: 18),
+                Semantics(
+                  header: true,
+                  label: Textos.rutaStartup,
+                  excludeSemantics: true,
+                  child: Text(
+                    Textos.rutaStartup,
+                    style: context.estilos.h2.copyWith(color: tokens.textoPrimario),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                for (final (i, modulo) in datos.modulos.indexed) ...[
+                  if (i > 0) const SizedBox(height: 12),
+                  TarjetaModulo(
+                    key: ValueKey('modulo-${modulo.id}'),
+                    numero: modulo.numero,
+                    nombreCorto: LogicaInicio.nombreCorto(modulo),
+                    titulo: LogicaInicio.tramo(modulo),
+                    estado: LogicaInicio.estadoDe(modulo),
+                    completados: LogicaInicio.completados(modulo),
+                    total: LogicaInicio.totalSprints(modulo),
+                    color: modulo.color,
+                    icono: LogicaInicio.iconoDe(modulo),
+                    alPresionar: () => context.go(Rutas.mapaSprintsDe(modulo.id)),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-        // Fijo sobre la lista, 28 dp por encima de la barra inferior.
-        Positioned(
-          right: 24,
-          bottom: PantallaInicio.separacionBuzon,
-          child: BotonBuzon(
-            pendientes: datos.apelacionesPendientes,
-            alPresionar: () => context.go(Rutas.buzon),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -263,44 +247,6 @@ class _Esqueleto extends StatelessWidget {
                 bloque(92, radio: TarjetaModulo.radio),
                 const SizedBox(height: 12),
               ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorCarga extends StatelessWidget {
-  const _ErrorCarga({required this.alReintentar});
-
-  final VoidCallback alReintentar;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    return SafeArea(
-      child: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Semantics(
-                liveRegion: true,
-                child: Text(
-                  Textos.inicioErrorCarga,
-                  style: context.estilos.cuerpoGrande.copyWith(color: tokens.textoPrimario),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 16),
-              BotonApp(
-                texto: Textos.reintentar,
-                tipo: TipoBoton.secundario,
-                expandido: false,
-                alPresionar: alReintentar,
-              ),
             ],
           ),
         ),

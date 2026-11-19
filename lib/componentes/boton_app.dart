@@ -28,9 +28,11 @@ class BotonApp extends StatefulWidget {
     this.expandido = true,
     this.cargando = false,
     this.textoCargando,
+    this.altoMinimo = BotonApp.alto,
     super.key,
   });
 
+  /// Alto del diseño (342×52). El botón "Comenzar" del globo del mapa usa 48.
   static const double alto = 52;
   static const double radio = 16;
   static const double rellenoHorizontal = 24;
@@ -52,6 +54,9 @@ class BotonApp extends StatefulWidget {
 
   /// Lo que se anuncia mientras carga (por ejemplo "Iniciando sesión").
   final String? textoCargando;
+
+  /// Alto mínimo (crece con el texto dinámico). Nunca menos de 48.
+  final double altoMinimo;
 
   @override
   State<BotonApp> createState() => _BotonAppState();
@@ -112,7 +117,7 @@ class _BotonAppState extends State<BotonApp> {
     final caja = AnimatedContainer(
       duration: duracion,
       transform: Matrix4.translationValues(0, bajada, 0),
-      constraints: const BoxConstraints(minHeight: BotonApp.alto),
+      constraints: BoxConstraints(minHeight: widget.altoMinimo),
       padding: const EdgeInsets.symmetric(horizontal: BotonApp.rellenoHorizontal, vertical: 8),
       decoration: BoxDecoration(
         color: estilo.fondo,

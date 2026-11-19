@@ -26,11 +26,18 @@ abstract final class Rutas {
   /// 07 / 07b Inicio (mapa de módulos)
   static const String inicio = '/inicio';
 
+  /// Tramo del mapa dentro del Inicio (ruta anidada: el Inicio queda debajo
+  /// en la pila y "atrás" vuelve a él).
+  static const String segmentoMapa = 'modulo/:moduloId';
+
+  /// Tramo de la intro dentro del mapa (ruta anidada).
+  static const String segmentoIntro = 'sprint/:sprintId';
+
   /// 08 Mapa de sprints del módulo
-  static const String mapaSprints = '/inicio/modulo/:moduloId';
+  static const String mapaSprints = '$inicio/$segmentoMapa';
 
   /// 09 Intro del sprint
-  static const String introSprint = '/inicio/modulo/:moduloId/sprint/:sprintId';
+  static const String introSprint = '$mapaSprints/$segmentoIntro';
 
   /// Ruta concreta del mapa de sprints de un módulo.
   static String mapaSprintsDe(String moduloId) => '/inicio/modulo/$moduloId';
@@ -58,6 +65,9 @@ abstract final class Rutas {
   /// 10–18, 10b, 10c: tarjetas, veredictos, evidencia y comodines.
   static const String juego = '/juego/:sprintId';
 
+  /// Ruta concreta del juego de un sprint.
+  static String juegoDe(String sprintId) => '/juego/$sprintId';
+
   /// 19 Sprint completado
   static const String sprintCompletado = '/juego/:sprintId/completado';
 
@@ -74,6 +84,9 @@ abstract final class Rutas {
   // Flujo 5 · Nivel Jefe
   /// 27 Crisis: ransomware (28, 28b y 28c ocurren dentro de esta ruta)
   static const String crisisJefe = '/jefe/:moduloId';
+
+  /// Ruta concreta del Examen final (Nivel Jefe) de un módulo.
+  static String crisisJefeDe(String moduloId) => '/jefe/$moduloId';
 
   /// 29 Auditoría superada (certificado)
   static const String auditoriaSuperada = '/jefe/:moduloId/superada';

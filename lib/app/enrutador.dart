@@ -10,6 +10,8 @@ import '../funciones/bienvenida/galeria_componentes.dart';
 import '../funciones/bienvenida/pantalla_onboarding.dart';
 import '../funciones/bienvenida/pantalla_splash.dart';
 import '../funciones/inicio/pantalla_inicio.dart';
+import '../funciones/mapa/pantalla_intro_sprint.dart';
+import '../funciones/mapa/pantalla_mapa_sprints.dart';
 import 'pantalla_pendiente.dart';
 import 'rutas.dart';
 
@@ -25,18 +27,35 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Rutas.registro, builder: (context, state) => const PantallaRegistro()),
       GoRoute(
         path: Rutas.inicio,
-        // Sin sesión (no debería pasar) se vuelve al inicio de sesión.
+        // Sin sesión (no debería pasar) se vuelve al inicio de sesión. También
+        // aplica al mapa y a la intro, que cuelgan de esta ruta.
         redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
         builder: (context, state) => const PantallaInicio(),
+        routes: [
+          GoRoute(
+            path: Rutas.segmentoMapa,
+            builder: (context, state) =>
+                PantallaMapaSprints(moduloId: state.pathParameters['moduloId']!),
+            routes: [
+              GoRoute(
+                path: Rutas.segmentoIntro,
+                builder: (context, state) => PantallaIntroSprint(
+                  moduloId: state.pathParameters['moduloId']!,
+                  sprintId: state.pathParameters['sprintId']!,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
-      // Marcadores hasta T-04b, T-09 y T-10.
+      // Marcadores hasta T-05, T-09, T-10 y T-11.
       GoRoute(
-        path: Rutas.mapaSprints,
-        builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteMapaSprints),
+        path: Rutas.juego,
+        builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteJuego),
       ),
       GoRoute(
-        path: Rutas.introSprint,
-        builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteIntroSprint),
+        path: Rutas.crisisJefe,
+        builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteJefe),
       ),
       GoRoute(
         path: Rutas.buzon,
