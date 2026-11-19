@@ -2,7 +2,7 @@
 
 Mapa navegable del proyecto: qué existe, dónde está y con qué se relaciona. **Se actualiza cada vez que se crea, mueve, renombra o elimina algo** (reglas en `ai/conocimiento/06-grafo-de-conocimiento.md`). Si algo de aquí no coincide con la realidad, el grafo está mal y hay que corregirlo.
 
-Última actualización: 2026-11-18 · por Claude Code · tarea: T-02
+Última actualización: 2026-11-19 · por Claude Chat · tarea: planeación de FIX-02
 
 ## Cómo leerlo
 - Cada fila es un **nodo** con un ID único. La columna **Relaciones** son las **aristas**: `→` apunta a otro nodo, con un verbo corto (`usa`, `muestra`, `navega a`, `implementa`, `depende de`, `define`).
@@ -33,7 +33,7 @@ flowchart LR
 | DOC-06 | Reglas del grafo | ai/conocimiento/06-grafo-de-conocimiento.md | hecho | → define GRAFO |
 | DOC-07 | Especificación de componentes | ai/conocimiento/07-componentes.md | hecho | → define COMP-*; ← lo usan T-01 y las tareas de pantallas |
 | GRAFO | Este archivo | ai/grafo.md | hecho | ← lo actualizan Claude Chat y Claude Code |
-| SIG | Tarea actual | ai/siguiente.md | en curso | → apunta a la tarea T-* vigente |
+| SIG | Tarea actual (FIX-02: imágenes de logos y Sarko) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
 | REP | Reporte | ai/reporte.md | en curso | ← lo escribe Claude Code; → responde a SIG |
 
 ## 2 · Externos
@@ -42,7 +42,7 @@ flowchart LR
 | EXT-FIGMA | Diseño de Figma | fileKey SYNAyUal3xVk4k8SEBEb7f | → fuente de PANT-*, TEMA, COMP-* |
 | EXT-BACK | Backend (FastAPI) | repositorio de otros compañeros | ← lo consume REPO-* en T-14 |
 | EXT-BD | Base de datos (PostgreSQL) | repositorio de otros compañeros | ← la usa EXT-BACK |
-| EXT-ASSETS | Logos, poses de Sarko, íconos y fuentes | Imágenes: `assets/imagenes/` (desde T-01). Íconos: paquete Lucide. Fuentes: .ttf en `assets/fuentes/`. Pendiente de Figma: logo vertical sobre verde (Splash), poses de Sarko sin texto y 4:5, logo para modo oscuro | → los usan COMP-SARKO, COMP-ICONO, COMP-LOGO y TEMA-TIPO |
+| EXT-ASSETS | Logos, poses de Sarko, íconos y fuentes | Originales de Figma en la computadora del usuario (`Imegenes/Logo-Isotipo/`, fuera de git); copias renombradas en `assets/imagenes/` (FIX-02). Íconos: Lucide. Fuentes: `assets/fuentes/`. Pendiente: reexportar a 3x | → los usan COMP-SARKO, COMP-ICONO, COMP-LOGO y TEMA-TIPO |
 
 ## 3 · Tareas
 | ID | Rama | Estado | Pantallas / áreas | Depende de |
@@ -216,3 +216,4 @@ Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
 - 2026-11-18 · Claude Code · T-01: `en curso` para APP, ENRUTADOR, TEMA, TEMA-TOKENS (17 tokens), TEMA-TIPO, TEMA-APP, TEXTOS, TEST-TEMA, CONF y DEC-FUENTES (ya sin google_fonts). COMP-* y COMP-SARKO con ruta real. Nodos nuevos: TEMA-EFECTOS, TEMA-ICONOS, UTIL-CONTRASTE, RECURSOS, COMP-BOTON, COMP-CAMPO, COMP-CHIP, COMP-CORAZON, COMP-INDICADORES, COMP-IMPACTO, COMP-NAV, COMP-PROGRESO, COMP-PAGINADOR, COMP-FOCO, COMP-ICONO, COMP-LOGO, ASSETS-IMG, ASSETS-FUENTES, PANT-GALERIA, TEST-GALERIA, TEST-COMP, TEST-AYUDA, PLAT-WEB, DEP-LUCIDE, DEC-PRESIONADO, DEC-ZONA-SEGURA y DEC-INDICADORES. Obsoletos: PANT-PRUEBA y TEST-PRUEBA (archivos eliminados).
 - 2026-11-18 · Claude Chat · cierre de T-01: tarea y nodos de código pasan a `hecho` (merge del PR #2). T-02 `en curso` (nuevo COMP-VEREDICTO y token estado/escalar). EXT-ASSETS actualizado; ENRUTADOR anota el cambio de T-02.
 - 2026-11-18 · Claude Code · T-02: `en curso` para ENRUTADOR (arranca en el Splash), RUTAS, TEMA-TOKENS (18 tokens, estado/escalar), TEMA-EFECTOS, TEXTOS, PROV-REPO, PANT-GALERIA (ahora en `/galeria`, solo debug), COMP-LOGO (proporciones de Figma), TEST-TEMA, TEST-GALERIA y TEST-COMP. Nodos nuevos: COMP-VEREDICTO, PANT-PENDIENTE, REPO-ONBOARDING, MEM-ONBOARDING, FLUJO-BIENVENIDA, CODIGO-PANT-01, CODIGO-PANT-02..04, ILUS-ONBOARDING y TEST-BIENVENIDA. Ruta del código anotada en PANT-01, PANT-02, PANT-03, PANT-03b y PANT-04. APP y COMP-PAGINADOR sin cambios de código (solo relaciones).
+- 2026-11-19 · Claude Chat · cierre de T-02 (PR #3) y planeación de FIX-02: renombrado y orden de logos y poses de Sarko en `assets/imagenes/`; EXT-ASSETS actualizado.
