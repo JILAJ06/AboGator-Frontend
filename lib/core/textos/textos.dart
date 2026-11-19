@@ -370,6 +370,12 @@ abstract final class Textos {
   static const String galeriaMapa = 'Componentes del mapa y la intro del sprint';
   static const String galeriaJuego = 'Componentes del juego';
   static const String galeriaVeredicto = 'Paneles de veredicto';
+  static const String galeriaExplicacion =
+      'La licencia GPL-3.0 es copyleft: si la integras, todo el producto derivado debe '
+      'liberarse bajo la misma licencia.';
+  static const String galeriaMicroEnunciado = '¿por qué es ilegal?';
+  static const String galeriaMicroOpcion1 = 'La GPL-3.0 obliga a liberar el código derivado';
+  static const String galeriaMicroOpcion2 = 'Porque el código de GitHub siempre es privado';
   static const String galeriaChips = 'Chips HUD';
   static const String galeriaVidas = 'Vidas';
   static const String galeriaIndicadores = 'Indicadores de la Startup';

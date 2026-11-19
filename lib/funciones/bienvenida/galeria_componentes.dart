@@ -27,6 +27,7 @@ import '../../componentes/logo_app.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/nodo_sprint.dart';
 import '../../componentes/paginador_puntos.dart';
+import '../../componentes/panel_veredicto.dart';
 import '../../componentes/pila_tarjetas.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/sello_veredicto.dart';
@@ -284,6 +285,58 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 ),
                 AccionesVeredicto(alElegir: (_) {}),
                 const BarraComodines(lupa: 2, abogado: 1, amparo: 1),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaVeredicto,
+              hijos: [
+                for (final (tipo, subtitulo, cambios, explicacion) in [
+                  (
+                    TipoPanelVeredicto.correcto,
+                    Textos.correctoSubtitulo(10, 5),
+                    {IndicadorStartup.reputacion: 5, IndicadorStartup.riesgoLegal: -10},
+                    null,
+                  ),
+                  (
+                    TipoPanelVeredicto.bonus,
+                    Textos.bonusSubtitulo(15, 5),
+                    {IndicadorStartup.reputacion: 5, IndicadorStartup.riesgoLegal: -10},
+                    Textos.galeriaExplicacion,
+                  ),
+                  (
+                    TipoPanelVeredicto.parcial,
+                    Textos.parcialSubtitulo(3),
+                    {IndicadorStartup.presupuesto: -5, IndicadorStartup.velocidad: -10},
+                    Textos.galeriaExplicacion,
+                  ),
+                  (
+                    TipoPanelVeredicto.incorrecto,
+                    Textos.incorrectoSubtitulo,
+                    {IndicadorStartup.velocidad: 10, IndicadorStartup.riesgoLegal: 25},
+                    Textos.galeriaExplicacion,
+                  ),
+                  (
+                    TipoPanelVeredicto.amparo,
+                    Textos.amparoSubtitulo,
+                    {IndicadorStartup.velocidad: 10, IndicadorStartup.riesgoLegal: 20},
+                    Textos.galeriaExplicacion,
+                  ),
+                ])
+                  PanelVeredicto(
+                    tipo: tipo,
+                    subtitulo: subtitulo,
+                    cambios: cambios,
+                    explicacion: explicacion,
+                    microPregunta: explicacion == null
+                        ? const MicroPregunta(
+                            enunciado: Textos.galeriaMicroEnunciado,
+                            opciones: [Textos.galeriaMicroOpcion1, Textos.galeriaMicroOpcion2],
+                            indiceCorrecto: 0,
+                          )
+                        : null,
+                    alElegirOpcion: (_) {},
+                    alContinuar: () {},
+                  ),
               ],
             ),
             _Seccion(
