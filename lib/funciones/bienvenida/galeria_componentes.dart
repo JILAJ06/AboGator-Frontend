@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../componentes/anillo_foco.dart';
+import '../../componentes/avatar_app.dart';
 import '../../componentes/barra_progreso.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_atras.dart';
+import '../../componentes/boton_buzon.dart';
 import '../../componentes/boton_veredicto.dart';
 import '../../componentes/campo_texto_app.dart';
 import '../../componentes/casilla_app.dart';
@@ -19,7 +21,11 @@ import '../../componentes/logo_app.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/paginador_puntos.dart';
 import '../../componentes/sarko_imagen.dart';
+import '../../componentes/tarjeta_heroe_startup.dart';
+import '../../componentes/tarjeta_modulo.dart';
+import '../../componentes/tarjeta_reto_diario.dart';
 import '../../core/recursos/imagenes_app.dart';
+import '../../core/tema/colores_marca.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/tema/modo_tema.dart';
 import '../../core/tema/tipografia.dart';
@@ -133,6 +139,47 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
               ],
             ),
             const _Seccion(titulo: Textos.galeriaAcceso, hijos: [_DemoAcceso()]),
+            _Seccion(
+              titulo: Textos.galeriaInicio,
+              hijos: [
+                const AvatarApp(iniciales: 'AL'),
+                TarjetaHeroeStartup(
+                  titulo: Textos.tramosStartup[0],
+                  subtitulo: Textos.heroeSubtitulo(3, 5, Textos.modulosCortos[0]),
+                  alContinuar: () {},
+                ),
+                TarjetaRetoDiario(
+                  titulo: Textos.retoTitulo,
+                  subtitulo: Textos.retoSubtitulo(7, 15),
+                  actual: 1,
+                  total: 3,
+                ),
+                for (final (i, estado) in EstadoModulo.values.indexed)
+                  TarjetaModulo(
+                    numero: i + 1,
+                    nombreCorto: Textos.modulosCortos[i],
+                    titulo: Textos.tramosStartup[i],
+                    estado: estado,
+                    completados: switch (estado) {
+                      EstadoModulo.completado => 5,
+                      EstadoModulo.enCurso => 2,
+                      _ => 0,
+                    },
+                    total: 5,
+                    color: ColoresModulo.enOrden[i],
+                    icono: IconosApp.shield,
+                    alPresionar: () {},
+                  ),
+                Wrap(
+                  spacing: 24,
+                  runSpacing: 16,
+                  children: [
+                    BotonBuzon(pendientes: 6, alPresionar: () {}),
+                    BotonBuzon(pendientes: 0, alPresionar: () {}),
+                  ],
+                ),
+              ],
+            ),
             _Seccion(
               titulo: Textos.galeriaChips,
               hijos: [
