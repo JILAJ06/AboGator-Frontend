@@ -35,7 +35,7 @@ class TarjetaCaso extends StatelessWidget {
   static const double altoMinimo = 260;
 
   /// Alto mínimo con el texto dinámico: lo que ocupan el relleno, la
-  /// etiqueta, el personaje, dos líneas del globo y la pista. Con texto
+  /// etiqueta, el personaje, una línea del globo y la pista (≈ 260 al 100 %). Con texto
   /// grande la zona pide más alto y la pantalla se vuelve desplazable.
   static double altoMinimoPara(TextScaler escala) {
     double s(double tamano) => escala.scale(tamano);
@@ -48,7 +48,7 @@ class TarjetaCaso extends StatelessWidget {
         math.max(48, s(20) + 2 + s(14)) + // personaje
         18 +
         36 +
-        s(25) * 2 + // globo con dos líneas
+        s(25) + // globo con una línea
         18 +
         math.max(s(16), s(14) * 2 + 2); // pista
     return math.max(altoMinimo, contenido);

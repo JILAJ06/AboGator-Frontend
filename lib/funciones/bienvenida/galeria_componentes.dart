@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../componentes/acciones_veredicto.dart';
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/avatar_app.dart';
+import '../../componentes/barra_comodines.dart';
+import '../../componentes/barra_juego.dart';
 import '../../componentes/barra_progreso.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_atras.dart';
@@ -24,7 +27,10 @@ import '../../componentes/logo_app.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/nodo_sprint.dart';
 import '../../componentes/paginador_puntos.dart';
+import '../../componentes/pila_tarjetas.dart';
 import '../../componentes/sarko_imagen.dart';
+import '../../componentes/sello_veredicto.dart';
+import '../../componentes/tarjeta_caso.dart';
 import '../../componentes/tarjeta_heroe_startup.dart';
 import '../../componentes/tarjeta_modulo.dart';
 import '../../componentes/tarjeta_reto_diario.dart';
@@ -243,6 +249,41 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                     ),
                   ],
                 ),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaJuego,
+              hijos: [
+                BarraJuego(numeroSprint: 3, actual: 5, total: 10, vidas: 4, alSalir: () {}),
+                SizedBox(
+                  height: TarjetaCaso.alto + 20,
+                  child: Stack(
+                    children: [
+                      const Positioned.fill(child: PilaTarjetas(restantes: 2)),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        height: TarjetaCaso.alto,
+                        child: TarjetaCaso(
+                          etiquetaCaso: Textos.casoEtiqueta,
+                          colorModulo: ColoresModulo.enOrden[1],
+                          iniciales: Textos.casoIniciales,
+                          personaje: Textos.casoPersona,
+                          rol: Textos.casoEquipo,
+                          texto: Textos.casoPregunta,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 16,
+                  children: [for (final v in Veredicto.values) SelloVeredicto(veredicto: v)],
+                ),
+                AccionesVeredicto(alElegir: (_) {}),
+                const BarraComodines(lupa: 2, abogado: 1, amparo: 1),
               ],
             ),
             _Seccion(
