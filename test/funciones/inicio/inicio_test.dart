@@ -163,7 +163,7 @@ void main() {
     expect(find.text('3'), findsOneWidget); // vidas del mock
     expect(find.text(Textos.heroeEtiqueta), findsOneWidget);
     expect(find.text('Del Garage al MVP'), findsNWidgets(2)); // héroe y tarjeta 1
-    expect(find.text('Sprint 3 de 5 · Módulo 1'), findsOneWidget);
+    expect(find.text('Sprint 3 de 5 · Protección de datos'), findsOneWidget);
     expect(find.text(Textos.retoTitulo), findsOneWidget);
     expect(find.text('Mantén tu racha de 7 días · +15 monedas'), findsOneWidget);
     expect(find.text(Textos.rutaStartup), findsOneWidget);
@@ -312,7 +312,7 @@ void main() {
       (EstadoModulo.bloqueado, 0),
       (EstadoModulo.bloqueado, 0),
     ]);
-    expect(find.text('Sprint 3 de 5 · Protección de Datos'), findsOneWidget);
+    expect(find.text('Sprint 3 de 5 · Protección de datos'), findsOneWidget);
   });
 
   testWidgets('orden de foco: Continuar → módulos abiertos → Buzón → pestañas', (tester) async {

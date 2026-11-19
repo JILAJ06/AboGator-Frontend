@@ -83,7 +83,7 @@ class _Contenido extends StatelessWidget {
                         subtitulo: Textos.heroeSubtitulo(
                           actual.numeroSprint,
                           actual.modulo.sprints.length,
-                          actual.modulo.nombre,
+                          LogicaInicio.nombreCorto(actual.modulo),
                         ),
                         alContinuar: () =>
                             context.go(Rutas.introSprintDe(actual.modulo.id, actual.sprint.id)),
