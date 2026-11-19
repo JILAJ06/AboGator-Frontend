@@ -13,12 +13,16 @@ import '../../componentes/casilla_app.dart';
 import '../../componentes/chip_hud.dart';
 import '../../componentes/chip_seleccion.dart';
 import '../../componentes/corazon_vida.dart';
+import '../../componentes/encabezado_modulo.dart';
 import '../../componentes/enlace_texto.dart';
+import '../../componentes/fila_detalle_sprint.dart';
+import '../../componentes/globo_sprint_actual.dart';
 import '../../componentes/icono_app.dart';
 import '../../componentes/impacto_startup.dart';
 import '../../componentes/indicadores_startup.dart';
 import '../../componentes/logo_app.dart';
 import '../../componentes/navegacion_inferior_app.dart';
+import '../../componentes/nodo_sprint.dart';
 import '../../componentes/paginador_puntos.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/tarjeta_heroe_startup.dart';
@@ -176,6 +180,67 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                   children: [
                     BotonBuzon(pendientes: 6, alPresionar: () {}),
                     BotonBuzon(pendientes: 0, alPresionar: () {}),
+                  ],
+                ),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaMapa,
+              hijos: [
+                // Módulo 1 (color tal cual) y módulo 2 (fondo oscurecido por contraste).
+                for (final i in [0, 1])
+                  EncabezadoModulo(
+                    numero: i + 1,
+                    nombreCorto: Textos.modulosCortos[i],
+                    titulo: Textos.tramosStartup[i],
+                    color: ColoresModulo.enOrden[i],
+                    vidas: 4,
+                    completados: 2 - i * 2,
+                    total: 5,
+                    alAtras: () {},
+                  ),
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  crossAxisAlignment: WrapCrossAlignment.end,
+                  children: [
+                    for (final tipo in TipoNodoSprint.values)
+                      NodoSprint(
+                        tipo: tipo,
+                        estrellas: 3,
+                        etiquetaSemantica: tipo.name,
+                        alPresionar: tipo == TipoNodoSprint.bloqueado ? null : () {},
+                      ),
+                    NodoSprint(
+                      tipo: TipoNodoSprint.completado,
+                      estrellas: 1,
+                      etiquetaSemantica: Textos.estrellasSemantica(1, 3),
+                      alPresionar: () {},
+                    ),
+                  ],
+                ),
+                GloboSprintActual(
+                  titulo: Textos.globoTitulo(3, 'Aviso de privacidad'),
+                  detalle: Textos.globoDetalle(10, 4),
+                  alComenzar: () {},
+                ),
+                TarjetaDetallesSprint(
+                  filas: [
+                    FilaDetalleSprint(
+                      icono: IconosApp.doc,
+                      titulo: Textos.tarjetasCantidad(10),
+                      texto: Textos.tarjetasDesglose(6, 3, 1),
+                    ),
+                    FilaDetalleSprint(
+                      icono: IconosApp.coin,
+                      titulo: Textos.monedasHasta(60),
+                      texto: Textos.monedasDilema,
+                    ),
+                    const FilaDetalleSprint(
+                      icono: IconosApp.zap,
+                      titulo: Textos.indicadoresTitulo,
+                      texto: Textos.indicadoresLista,
+                    ),
                   ],
                 ),
               ],

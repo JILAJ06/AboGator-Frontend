@@ -7,10 +7,14 @@ import 'package:abogator/componentes/boton_veredicto.dart';
 import 'package:abogator/componentes/campo_texto_app.dart';
 import 'package:abogator/componentes/chip_hud.dart';
 import 'package:abogator/componentes/corazon_vida.dart';
+import 'package:abogator/componentes/encabezado_modulo.dart';
+import 'package:abogator/componentes/fila_detalle_sprint.dart';
+import 'package:abogator/componentes/globo_sprint_actual.dart';
 import 'package:abogator/componentes/impacto_startup.dart';
 import 'package:abogator/componentes/indicadores_startup.dart';
 import 'package:abogator/componentes/logo_app.dart';
 import 'package:abogator/componentes/navegacion_inferior_app.dart';
+import 'package:abogator/componentes/nodo_sprint.dart';
 import 'package:abogator/componentes/paginador_puntos.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
 import 'package:abogator/core/tema/tokens_color.dart';
@@ -50,10 +54,10 @@ void main() {
   testWidgets('la app abre en la galería con todos los componentes', (tester) async {
     await montarGaleria(tester);
     expect(find.text(Textos.galeriaTitulo), findsOneWidget);
-    expect(find.byType(BotonApp), findsNWidgets(8));
+    expect(find.byType(BotonApp), findsNWidgets(9)); // 8 + el del globo
     expect(find.byType(BotonVeredicto), findsNWidgets(8));
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
-    expect(find.byType(ChipHud), findsNWidgets(5));
+    expect(find.byType(ChipHud), findsNWidgets(7)); // 5 + los de 2 encabezados
     expect(find.byType(FilaVidas), findsNWidgets(3));
     expect(find.byType(IndicadoresStartup), findsOneWidget);
     expect(find.byType(ImpactoStartup), findsOneWidget);
@@ -62,6 +66,14 @@ void main() {
     expect(find.byType(SarkoImagen), findsNWidgets(5));
     expect(find.byType(LogoApp), findsNWidgets(20));
     expect(find.byType(NavegacionInferiorApp), findsOneWidget);
+    expect(find.byType(EncabezadoModulo), findsNWidgets(2));
+    expect(find.byType(NodoSprint), findsNWidgets(5));
+    expect(
+      tester.widgetList<NodoSprint>(find.byType(NodoSprint)).map((n) => n.tipo).toSet(),
+      TipoNodoSprint.values.toSet(),
+    );
+    expect(find.byType(GloboSprintActual), findsOneWidget);
+    expect(find.byType(FilaDetalleSprint), findsNWidgets(3));
     expect(tester.takeException(), isNull);
   });
 
