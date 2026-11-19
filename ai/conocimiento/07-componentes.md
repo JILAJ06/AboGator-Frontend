@@ -102,3 +102,15 @@ Tarjeta de caso, sellos, snippet de evidencia, nodos del mapa, opciones de justi
 - **Chip de perfil (`ChipSeleccion`)**: píldora (radio 999), relleno horizontal 12 y vertical 10, texto Etiqueta (Inter SemiBold 12/16, tracking 0.2). Seleccionado: fondo y borde 1.5 `accion/primaria`, texto `texto/en-primario`. No seleccionado: fondo `fondo/superficie`, borde 1.5 `borde/default`, texto `texto/primario`. Hueco entre chips 8. Zona táctil ≥ 48 (sin cambiar el aspecto). Semántica de botón de opción seleccionado ("Perfil Desarrollador, seleccionado, 2 de 3").
 - **Enlace de texto (`EnlaceTexto`)**: Cuerpo/Énfasis (Inter SemiBold 14/20) en `texto/acento`, zona táctil ≥ 48 de alto, anillo de foco, semántica de enlace/botón.
 - **Botón de regreso (`BotonAtras`)**: cuadro de 48 con radio 12, fondo `fondo/superficie`, borde 1 `borde/default`, ícono `back` de 20; etiqueta "Atrás".
+
+## Componentes del Inicio (se construyen en T-04)
+Medidas en dp sobre el marco 390×844. Colores siempre por tokens.
+- **Avatar con iniciales (`AvatarApp`)**: círculo de 44, `fondoDestacado`; iniciales en Fredoka SemiBold 17/22 `accionSecundaria`. Semántica: excluida (decorativa; el saludo ya dice el nombre).
+- **Tarjeta héroe (`TarjetaHeroeStartup`)**: 342×168, `accionPrimaria`, radio 24, sombra (0,8,24, #0F294A 14 %), recorta lo que sobresale. Elipse decorativa de 220 en (190,-30). Etiqueta "TU STARTUP ESTÁ EN" (Leyenda, `textoEnPrimario`), título Fredoka Bold 26/32 a dos líneas (ancho 200), subtítulo Leyenda, botón "Continuar sprint" 148×48 (`accionAcento`, radio 12, texto Etiqueta + chevron 16) y Sarko 120×150 en (226,22).
+- **Reto diario (`TarjetaRetoDiario`)**: 342×60, `fondoDestacado`, radio 18, relleno 14×12, separación 12; ícono flame 24, dos líneas de texto (Cuerpo/Énfasis y Leyenda secundario) y progreso "1/3" (Etiqueta, `textoAcento`).
+- **Tarjeta de módulo (`TarjetaModulo`)**: 342 de ancho, radio 22, relleno 16, separación 14, borde 1 `bordeDefault`, sombra (0,8,12, #0F294A 14 %). Insignia 56×56 radio 16 con ícono 28; etiqueta "MÓDULO N · NOMBRE" (Leyenda), título Fredoka SemiBold 17/22, fila de progreso (barra 96×8 + "n/5 sprints") y chevron 20.
+  - **En curso** (Figma): insignia del color del módulo, etiqueta en `textoAcento`.
+  - **Bloqueado** (Figma): fondo `fondoSuperficieAlt`, insignia `fondoSuperficieAlt` con ícono lock, etiqueta `textoSecundario`, texto "Completa el módulo anterior", sin chevron activo, no se puede abrir.
+  - **Disponible** y **Completado** (no están en Figma; derivados): Disponible = como En curso con 0/5; Completado = insignia del color del módulo con ícono check y texto "5/5 sprints · Completado".
+  - Semántica: un solo botón con el texto "Módulo N, nombre, estado, progreso"; bloqueado queda deshabilitado y lo dice.
+- **Botón Buzón con contador (`BotonBuzon`)**: 60×60, `accionSecundaria`, radio 20, sombra (0,16,40, #0F294A 22 %), ícono inbox 26; contador 24×22 `estadoIlegal` con borde 2 `fondoApp` y número Leyenda `textoEnPrimario`, en (46,-8) respecto al botón. Semántica: "Buzón de apelaciones, N pendientes". Si N = 0 no se dibuja el contador.

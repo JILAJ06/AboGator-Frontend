@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:abogator/app/pantalla_pendiente.dart';
 import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/campo_texto_app.dart';
 import 'package:abogator/componentes/logo_app.dart';
@@ -10,6 +9,7 @@ import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/funciones/acceso/aviso_error.dart';
 import 'package:abogator/funciones/acceso/pantalla_registro.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
+import 'package:abogator/funciones/inicio/pantalla_inicio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -96,8 +96,7 @@ void main() {
 
     repo.pendiente!.complete(usuarioPrueba);
     await tester.pumpAndSettle();
-    expect(find.byType(PantallaPendiente), findsOneWidget);
-    expect(find.text(Textos.pendienteInicio), findsOneWidget);
+    expect(find.byType(PantallaInicio), findsOneWidget);
     expect(contenedor(tester).read(sesionProvider)?.nombre, usuarioPrueba.nombre);
     semantica.dispose();
   });
@@ -132,7 +131,7 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(repo.llamadasInicio, hasLength(1));
-    expect(find.text(Textos.pendienteInicio), findsOneWidget);
+    expect(find.byType(PantallaInicio), findsOneWidget);
   });
 
   testWidgets('"Crear una cuenta" lleva al registro', (tester) async {

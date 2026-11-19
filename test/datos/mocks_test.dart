@@ -1,9 +1,11 @@
+import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_autenticacion.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
 import 'package:abogator/datos/mocks/mock_tarjetas.dart';
 import 'package:abogator/datos/mocks/mock_tienda.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
+import 'package:abogator/datos/modelos/modulo.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/datos/modelos/vidas.dart';
@@ -22,6 +24,23 @@ void main() {
       expect(await repo.usuarioActual(), isNotNull);
       await repo.cerrarSesion();
       expect(await repo.usuarioActual(), isNull);
+    });
+
+    test('rechaza la contraseña "incorrecta" y acepta otra', () async {
+      final repo = MockAutenticacion(espera: Duration.zero);
+      await expectLater(
+        repo.iniciarSesion(correo: 'ana@startup.mx', contrasena: 'incorrecta'),
+        throwsA(
+          isA<ExcepcionAutenticacion>().having(
+            (e) => e.mensaje,
+            'mensaje',
+            Textos.errorCredenciales,
+          ),
+        ),
+      );
+      expect(await repo.usuarioActual(), isNull);
+      final usuario = await repo.iniciarSesion(correo: 'ana@startup.mx', contrasena: 'correcta1');
+      expect(usuario, MockAutenticacion.usuarioDemo);
     });
 
     test('rechaza el registro si falta alguno de los dos consentimientos', () async {
@@ -59,6 +78,10 @@ void main() {
   test('MockProgreso devuelve los 5 módulos en orden', () async {
     final modulos = await MockProgreso(espera: Duration.zero).obtenerModulos();
     expect(modulos.map((m) => m.numero), [1, 2, 3, 4, 5]);
+    expect(modulos.every((m) => m.sprints.length == 5), isTrue);
+    final primero = modulos.first.sprints.map((s) => s.estado).toList();
+    expect(primero.where((e) => e == EstadoSprint.completado), hasLength(2));
+    expect(primero[2], EstadoSprint.enCurso);
   });
 
   test('MockTarjetas incluye la tarjeta "Librería GPL en app cerrada"', () async {
@@ -87,7 +110,10 @@ void main() {
   });
 
   test('MockApelaciones y MockTienda devuelven datos de ejemplo', () async {
-    expect(await MockApelaciones(espera: Duration.zero).obtenerApelacionesPendientes(), isNotEmpty);
+    expect(
+      await MockApelaciones(espera: Duration.zero).obtenerApelacionesPendientes(),
+      hasLength(6),
+    );
     expect(await MockTienda(espera: Duration.zero).obtenerArticulos(), hasLength(3));
   });
 

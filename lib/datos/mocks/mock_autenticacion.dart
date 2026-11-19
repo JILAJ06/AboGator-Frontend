@@ -10,6 +10,9 @@ class MockAutenticacion implements RepositorioAutenticacion {
   final Duration espera;
   Usuario? _actual;
 
+  /// Contraseña que el mock rechaza, para probar el error sin servidor.
+  static const String contrasenaRechazada = 'incorrecta';
+
   static const Usuario usuarioDemo = Usuario(
     id: 'usr-001',
     nombre: 'Valeria Ríos',
@@ -23,7 +26,8 @@ class MockAutenticacion implements RepositorioAutenticacion {
   @override
   Future<Usuario> iniciarSesion({required String correo, required String contrasena}) async {
     await esperar(espera);
-    if (correo.trim().isEmpty || contrasena.isEmpty) {
+    // `incorrecta` simula credenciales rechazadas por el servidor.
+    if (correo.trim().isEmpty || contrasena.isEmpty || contrasena == contrasenaRechazada) {
       throw const ExcepcionAutenticacion(Textos.errorCredenciales);
     }
     return _actual = usuarioDemo;

@@ -5,6 +5,7 @@ import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
+import 'package:abogator/funciones/inicio/pantalla_inicio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -148,7 +149,7 @@ void main() {
     expect(llamada.perfil, PerfilUsuario.legal);
     expect(llamada.aceptaAvisoPrivacidad, isTrue);
     expect(llamada.aceptaTerminos, isTrue);
-    expect(find.text(Textos.pendienteInicio), findsOneWidget);
+    expect(find.byType(PantallaInicio), findsOneWidget);
     expect(contenedor(tester).read(sesionProvider), isNotNull);
   });
 
