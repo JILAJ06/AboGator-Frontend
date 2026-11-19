@@ -8,7 +8,8 @@ Una rama por tarea, desde `develop`. El orden va de lo que todo necesita a lo qu
 | T-01 | `01-componentes-base` | Tokens faltantes, fuentes locales, íconos, imágenes de Sarko y logos, botón, campo de texto, chip HUD, corazón, indicadores de la Startup, navegación inferior, barra de progreso, paginador, anillo de foco, galería de componentes y plataforma web de desarrollo (ver `07-componentes.md`) |
 | T-02 | `02-bienvenida` | 01 Splash y 02–04 Onboarding (con "Omitir"), `BotonVeredicto` y token estado/escalar |
 | T-03 | `03-acceso` | 05 Inicio de sesión y 06 Registro (validaciones, dos consentimientos separados) |
-| T-04 | `04-inicio-y-mapa` | 07/07b Inicio, 08 Mapa de sprints, 09 Intro del sprint |
+| T-04 | `04-inicio` | 07/07b Inicio (héroe, reto diario, módulos, Buzón, navegación inferior) |
+| T-04b | `04b-mapa-e-intro` | 08 Mapa de sprints, 09 Intro del sprint |
 | T-05 | `05-tarjeta-swipe` | 10, 11, 11b, 11c, 13: tarjeta, arrastre en 4 direcciones, sellos, tintes, botones equivalentes |
 | T-06 | `06-veredictos` | 12, 12b, 12c, 14, 14b, 19, 19b: veredictos, indicadores, vidas, quiebra |
 | T-07 | `07-evidencia-y-comodines` | 15, 16, 16b, 17, 18, 10b, 10c |
