@@ -17,6 +17,7 @@ class Sprint {
     required this.estado,
     this.estrellas = 0,
     this.esExamenFinal = false,
+    this.tituloIntro,
   }) : assert(estrellas >= 0 && estrellas <= maximoEstrellas);
 
   /// Máximo de estrellas que da un sprint completado.
@@ -24,6 +25,10 @@ class Sprint {
 
   final String id;
   final String titulo;
+
+  /// Título largo de la intro (09) si difiere del corto del mapa (08); por
+  /// ejemplo "Aviso de privacidad en el MVP".
+  final String? tituloIntro;
 
   /// Objetivo del sprint (la pantalla 09 le antepone "Objetivo: ").
   final String objetivo;

@@ -104,7 +104,7 @@ void main() {
     expect((sprint.tarjetasNormales, sprint.tarjetasConEvidencia, sprint.dilemas), (6, 3, 1));
     expect(sprint.monedasMaximas, 60);
     expect(sprint.minutosEstimados, 4);
-    expect(sprint.objetivo, startsWith('El MVP sale a producción el viernes.'));
+    expect(sprint.objetivo, startsWith('el MVP sale a producción el viernes.'));
   });
 
   test('el usuario demo es Ana López, Dev, nivel 4 y racha 7', () {

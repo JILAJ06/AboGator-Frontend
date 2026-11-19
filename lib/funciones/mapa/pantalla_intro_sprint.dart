@@ -141,7 +141,7 @@ class _Intro extends StatelessWidget {
                         Semantics(
                           header: true,
                           child: Text(
-                            sprint.titulo,
+                            sprint.tituloIntro ?? sprint.titulo,
                             textAlign: TextAlign.center,
                             style: estilos.h1.copyWith(color: tokens.textoPrimario),
                           ),

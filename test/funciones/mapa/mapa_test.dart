@@ -395,12 +395,13 @@ void main() {
       final semantica = tester.ensureSemantics();
       await abrir(tester, ruta: Rutas.introSprintDe('mod-1', 'spr-1-3'));
       expect(find.text('SPRINT 3 · MÓDULO 1'), findsOneWidget);
-      expect(find.text('Aviso de privacidad'), findsOneWidget);
+      // Título largo de la intro (D1 de T-04b).
+      expect(find.text('Aviso de privacidad en el MVP'), findsOneWidget);
       expect(
-        tester.getSemantics(find.bySemanticsLabel('Aviso de privacidad')),
+        tester.getSemantics(find.bySemanticsLabel('Aviso de privacidad en el MVP')),
         isSemantics(isHeader: true),
       );
-      expect(find.textContaining('Objetivo: El MVP sale a producción el viernes.'), findsOneWidget);
+      expect(find.textContaining('Objetivo: el MVP sale a producción el viernes.'), findsOneWidget);
       expect(find.text('10 tarjetas'), findsOneWidget);
       expect(find.text('6 normales · 3 con evidencia · 1 dilema'), findsOneWidget);
       expect(find.text('Hasta 60 monedas'), findsOneWidget);
