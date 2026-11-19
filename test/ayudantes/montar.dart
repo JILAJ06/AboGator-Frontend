@@ -1,4 +1,5 @@
 import 'package:abogator/componentes/corazon_vida.dart';
+import 'package:abogator/core/tema/colores_marca.dart';
 import 'package:abogator/core/tema/efectos.dart';
 import 'package:abogator/core/tema/tema_app.dart';
 import 'package:abogator/core/tema/tokens_color.dart';
@@ -83,9 +84,11 @@ Set<int> coloresUsados(WidgetTester tester) {
   return colores;
 }
 
-/// Colores permitidos: los tokens del modo, la sombra sólida y el brillo.
+/// Colores permitidos: los tokens del modo, los colores de módulo, la sombra
+/// sólida y el brillo.
 Set<int> coloresPermitidos(Brightness brillo) => {
   for (final c in tokensDe(brillo).porNombre.values) _rgb(c),
+  for (final c in ColoresModulo.enOrden) _rgb(c),
   _rgb(EfectosApp.colorSombraSolida),
   _rgb(EfectosApp.brilloBarra),
 };
