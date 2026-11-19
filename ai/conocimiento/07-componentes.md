@@ -96,3 +96,9 @@ Sin `alPresionar` es decorativo (excluido de semántica); con él, zona táctil 
 
 ## Fuera de T-01/T-02 (se especifican en su tarea)
 Tarjeta de caso, sellos, snippet de evidencia, nodos del mapa, opciones de justificación, temporizador, panel de retroalimentación, barra de juego, tarjeta de módulo, artículo de tienda, aviso de conexión, barra de comodines, barra del Jefe, notificación y contraargumento.
+
+## Componentes de acceso (se construyen en T-03)
+- **Casilla (`CasillaApp`)**: cuadro de 22 (radio 6) y texto Leyenda (Inter Medium 11/14, `texto/primario`) a 10 de distancia; ancho del texto hasta 300. Marcada: relleno `accion/primaria` con ícono check de 14 en `texto/en-primario`. Sin marcar (no está en Figma): relleno `fondo/superficie` y borde 1.5 `borde/control`. Toda la fila es táctil (≥ 48 de alto) con anillo de foco; semántica de casilla marcada/sin marcar y mensaje de error opcional (Leyenda, `estado/ilegal`).
+- **Chip de perfil (`ChipSeleccion`)**: píldora (radio 999), relleno horizontal 12 y vertical 10, texto Etiqueta (Inter SemiBold 12/16, tracking 0.2). Seleccionado: fondo y borde 1.5 `accion/primaria`, texto `texto/en-primario`. No seleccionado: fondo `fondo/superficie`, borde 1.5 `borde/default`, texto `texto/primario`. Hueco entre chips 8. Zona táctil ≥ 48 (sin cambiar el aspecto). Semántica de botón de opción seleccionado ("Perfil Desarrollador, seleccionado, 2 de 3").
+- **Enlace de texto (`EnlaceTexto`)**: Cuerpo/Énfasis (Inter SemiBold 14/20) en `texto/acento`, zona táctil ≥ 48 de alto, anillo de foco, semántica de enlace/botón.
+- **Botón de regreso (`BotonAtras`)**: cuadro de 48 con radio 12, fondo `fondo/superficie`, borde 1 `borde/default`, ícono `back` de 20; etiqueta "Atrás".
