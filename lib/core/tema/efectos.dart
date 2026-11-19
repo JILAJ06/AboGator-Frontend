@@ -11,6 +11,22 @@ abstract final class EfectosApp {
   /// Opacidad del fondo de los chips de impacto (13 %).
   static const double opacidadChipImpacto = 0.13;
 
+  /// Sombra del botón de veredicto: (0, 8), desenfoque 24, #0F294A al 14 % (0x24).
+  static const List<BoxShadow> sombraVeredicto = [
+    BoxShadow(color: Color(0x240F294A), offset: Offset(0, 8), blurRadius: 24),
+  ];
+
+  /// Sombra de la tarjeta de caso: (0, 10), desenfoque 12, #0F294A al 22 % (0x38).
+  static const List<BoxShadow> sombraTarjeta = [
+    BoxShadow(color: Color(0x380F294A), offset: Offset(0, 10), blurRadius: 12),
+  ];
+
+  /// Opacidad de la etiqueta de la tarjeta de caso (14 %).
+  static const double opacidadEtiquetaCaso = 0.14;
+
+  /// Opacidad de los puntos de carga inactivos del Splash (40 %).
+  static const double opacidadPuntoInactivo = 0.4;
+
   /// Sombra sólida inferior, sin desenfoque.
   static List<BoxShadow> sombraSolida(double desplazamiento) => [
     BoxShadow(color: colorSombraSolida, offset: Offset(0, desplazamiento)),

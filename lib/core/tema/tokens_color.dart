@@ -31,6 +31,7 @@ class TokensColor extends ThemeExtension<TokensColor> {
     required this.estadoLegal,
     required this.estadoIlegal,
     required this.estadoCondicional,
+    required this.estadoEscalar,
     required this.focoAnillo,
   });
 
@@ -83,6 +84,9 @@ class TokensColor extends ThemeExtension<TokensColor> {
   /// estado/condicional: "Legal con condiciones" y barra de Reputación.
   final Color estadoCondicional;
 
+  /// estado/escalar: "Escalar al área jurídica".
+  final Color estadoEscalar;
+
   /// foco/anillo: anillo de foco con teclado.
   final Color focoAnillo;
 
@@ -103,10 +107,11 @@ class TokensColor extends ThemeExtension<TokensColor> {
     estadoLegal: Color(0xFF186B40),
     estadoIlegal: Color(0xFFB52426),
     estadoCondicional: Color(0xFF2B5FA8),
+    estadoEscalar: Color(0xFF6B4BA1),
     focoAnillo: Color(0xFF2B5FA8),
   );
 
-  /// Los valores oscuros de borde/control, estado/condicional y foco/anillo
+  /// Los valores oscuros de borde/control, estado/condicional, estado/escalar y foco/anillo
   /// son propuestos (en Figma solo existen los claros); su contraste se
   /// verifica en `test/core/tema/contraste_tokens_test.dart`.
   static const TokensColor oscuro = TokensColor(
@@ -126,6 +131,7 @@ class TokensColor extends ThemeExtension<TokensColor> {
     estadoLegal: Color(0xFF5CC88A),
     estadoIlegal: Color(0xFFF07070),
     estadoCondicional: Color(0xFF6FA0E8),
+    estadoEscalar: Color(0xFFB9A0E8),
     focoAnillo: Color(0xFF7CB0F0),
   );
 
@@ -147,6 +153,7 @@ class TokensColor extends ThemeExtension<TokensColor> {
     'estado/legal': estadoLegal,
     'estado/ilegal': estadoIlegal,
     'estado/condicional': estadoCondicional,
+    'estado/escalar': estadoEscalar,
     'foco/anillo': focoAnillo,
   };
 
@@ -168,6 +175,7 @@ class TokensColor extends ThemeExtension<TokensColor> {
     Color? estadoLegal,
     Color? estadoIlegal,
     Color? estadoCondicional,
+    Color? estadoEscalar,
     Color? focoAnillo,
   }) {
     return TokensColor(
@@ -187,6 +195,7 @@ class TokensColor extends ThemeExtension<TokensColor> {
       estadoLegal: estadoLegal ?? this.estadoLegal,
       estadoIlegal: estadoIlegal ?? this.estadoIlegal,
       estadoCondicional: estadoCondicional ?? this.estadoCondicional,
+      estadoEscalar: estadoEscalar ?? this.estadoEscalar,
       focoAnillo: focoAnillo ?? this.focoAnillo,
     );
   }
@@ -214,6 +223,7 @@ class TokensColor extends ThemeExtension<TokensColor> {
       estadoLegal: mezclar(estadoLegal, other.estadoLegal),
       estadoIlegal: mezclar(estadoIlegal, other.estadoIlegal),
       estadoCondicional: mezclar(estadoCondicional, other.estadoCondicional),
+      estadoEscalar: mezclar(estadoEscalar, other.estadoEscalar),
       focoAnillo: mezclar(focoAnillo, other.focoAnillo),
     );
   }
