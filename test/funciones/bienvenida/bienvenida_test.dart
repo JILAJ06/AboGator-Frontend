@@ -1,6 +1,5 @@
 import 'package:abogator/app/app.dart';
 import 'package:abogator/app/enrutador.dart';
-import 'package:abogator/app/pantalla_pendiente.dart';
 import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
@@ -9,6 +8,7 @@ import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
+import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/bienvenida/pantalla_onboarding.dart';
 import 'package:abogator/funciones/bienvenida/pantalla_splash.dart';
 import 'package:flutter/services.dart';
@@ -134,7 +134,7 @@ void main() {
       await montarApp(tester, visto: true);
       await pasarSplash(tester);
       expect(find.byType(PantallaOnboarding), findsNothing);
-      expect(find.text(Textos.pendienteInicioSesion), findsOneWidget);
+      expect(find.byType(PantallaInicioSesion), findsOneWidget);
     });
 
     testWidgets('los puntos de carga avanzan y quedan fijos con "reducir animaciones"', (
@@ -221,7 +221,7 @@ void main() {
       }
       await tester.tap(find.text(Textos.onboardingComenzar));
       await tester.pumpAndSettle();
-      expect(find.byType(PantallaPendiente), findsOneWidget);
+      expect(find.byType(PantallaInicioSesion), findsOneWidget);
       expect(await repo.fueVisto(), isTrue);
     });
 
@@ -232,7 +232,7 @@ void main() {
       await pasarSplash(tester);
       await tester.tap(find.text(Textos.onboardingOmitir));
       await tester.pumpAndSettle();
-      expect(find.text(Textos.pendienteInicioSesion), findsOneWidget);
+      expect(find.byType(PantallaInicioSesion), findsOneWidget);
       expect(await repo.fueVisto(), isTrue);
 
       irA(tester, Rutas.splash);
@@ -241,7 +241,7 @@ void main() {
       expect(find.byType(PantallaSplash), findsOneWidget);
       await pasarSplash(tester);
       expect(find.byType(PantallaOnboarding), findsNothing);
-      expect(find.text(Textos.pendienteInicioSesion), findsOneWidget);
+      expect(find.byType(PantallaInicioSesion), findsOneWidget);
     });
 
     testWidgets('Omitir tiene zona táctil ≥ 48 y el foco va Omitir → botón', (tester) async {

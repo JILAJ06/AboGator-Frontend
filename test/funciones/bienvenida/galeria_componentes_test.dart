@@ -50,7 +50,7 @@ void main() {
   testWidgets('la app abre en la galería con todos los componentes', (tester) async {
     await montarGaleria(tester);
     expect(find.text(Textos.galeriaTitulo), findsOneWidget);
-    expect(find.byType(BotonApp), findsNWidgets(7));
+    expect(find.byType(BotonApp), findsNWidgets(8));
     expect(find.byType(BotonVeredicto), findsNWidgets(8));
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
     expect(find.byType(ChipHud), findsNWidgets(5));
