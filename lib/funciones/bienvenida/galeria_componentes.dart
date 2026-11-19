@@ -15,6 +15,7 @@ import '../../componentes/logo_app.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/paginador_puntos.dart';
 import '../../componentes/sarko_imagen.dart';
+import '../../core/recursos/imagenes_app.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/tema/modo_tema.dart';
 import '../../core/tema/tipografia.dart';
@@ -218,12 +219,11 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 ),
               ],
             ),
-            const _Seccion(
+            _Seccion(
               titulo: Textos.galeriaLogos,
               hijos: [
-                LogoApp(),
-                LogoApp(variante: VarianteLogo.horizontal, alto: 56),
-                LogoApp(variante: VarianteLogo.isotipo, alto: 64),
+                for (final tono in TonoLogo.values)
+                  for (final forma in FormaLogo.values) _MuestraLogo(forma: forma, tono: tono),
               ],
             ),
             _Seccion(
@@ -371,6 +371,51 @@ class _MuestraColor extends StatelessWidget {
         Expanded(child: Text(nombre, style: estilos.cuerpoEnfasis)),
         Text(color.comoHex, style: estilos.codigo.copyWith(color: tokens.textoSecundario)),
       ],
+    );
+  }
+}
+
+/// Un logo sobre el fondo para el que está pensado su tono. Los fondos de
+/// marca (azul, verde y superficie oscura) son fijos en ambos modos.
+class _MuestraLogo extends StatelessWidget {
+  const _MuestraLogo({required this.forma, required this.tono});
+
+  final FormaLogo forma;
+  final TonoLogo tono;
+
+  static Color fondo(TonoLogo tono, TokensColor actual) => switch (tono) {
+    TonoLogo.color || TonoLogo.negro => actual.fondoApp,
+    TonoLogo.negativo => TokensColor.oscuro.fondoSuperficie,
+    TonoLogo.sobreAzul => TokensColor.claro.accionSecundaria,
+    TonoLogo.sobreVerde => TokensColor.claro.accionPrimaria,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final ancho = forma == FormaLogo.isotipo ? 96.0 : 240.0;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: fondo(tono, tokens),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: tokens.bordeDefault),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LogoApp(forma: forma, tono: tono, ancho: ancho, decorativo: true),
+          const SizedBox(height: 8),
+          Text(
+            Textos.galeriaLogo(forma.name, tono.name),
+            style: context.estilos.leyenda.copyWith(
+              color: tono == TonoLogo.color || tono == TonoLogo.negro
+                  ? tokens.textoSecundario
+                  : TokensColor.claro.textoEnPrimario,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

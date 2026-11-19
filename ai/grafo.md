@@ -2,7 +2,7 @@
 
 Mapa navegable del proyecto: qué existe, dónde está y con qué se relaciona. **Se actualiza cada vez que se crea, mueve, renombra o elimina algo** (reglas en `ai/conocimiento/06-grafo-de-conocimiento.md`). Si algo de aquí no coincide con la realidad, el grafo está mal y hay que corregirlo.
 
-Última actualización: 2026-11-18 · por Claude Code · tarea: T-02
+Última actualización: 2026-11-19 · por Claude Code · tarea: FIX-02
 
 ## Cómo leerlo
 - Cada fila es un **nodo** con un ID único. La columna **Relaciones** son las **aristas**: `→` apunta a otro nodo, con un verbo corto (`usa`, `muestra`, `navega a`, `implementa`, `depende de`, `define`).
@@ -33,7 +33,7 @@ flowchart LR
 | DOC-06 | Reglas del grafo | ai/conocimiento/06-grafo-de-conocimiento.md | hecho | → define GRAFO |
 | DOC-07 | Especificación de componentes | ai/conocimiento/07-componentes.md | hecho | → define COMP-*; ← lo usan T-01 y las tareas de pantallas |
 | GRAFO | Este archivo | ai/grafo.md | hecho | ← lo actualizan Claude Chat y Claude Code |
-| SIG | Tarea actual | ai/siguiente.md | en curso | → apunta a la tarea T-* vigente |
+| SIG | Tarea actual (FIX-02: imágenes de logos y Sarko) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
 | REP | Reporte | ai/reporte.md | en curso | ← lo escribe Claude Code; → responde a SIG |
 
 ## 2 · Externos
@@ -42,7 +42,7 @@ flowchart LR
 | EXT-FIGMA | Diseño de Figma | fileKey SYNAyUal3xVk4k8SEBEb7f | → fuente de PANT-*, TEMA, COMP-* |
 | EXT-BACK | Backend (FastAPI) | repositorio de otros compañeros | ← lo consume REPO-* en T-14 |
 | EXT-BD | Base de datos (PostgreSQL) | repositorio de otros compañeros | ← la usa EXT-BACK |
-| EXT-ASSETS | Logos, poses de Sarko, íconos y fuentes | Imágenes: `assets/imagenes/` (desde T-01). Íconos: paquete Lucide. Fuentes: .ttf en `assets/fuentes/`. Pendiente de Figma: logo vertical sobre verde (Splash), poses de Sarko sin texto y 4:5, logo para modo oscuro | → los usan COMP-SARKO, COMP-ICONO, COMP-LOGO y TEMA-TIPO |
+| EXT-ASSETS | Logos, poses de Sarko, íconos y fuentes | Originales de Figma en la computadora del usuario (`Imegenes/Logo-Isotipo/`, fuera de git); copias renombradas en `assets/imagenes/` (FIX-02). Íconos: Lucide. Fuentes: `assets/fuentes/`. Pendiente: reexportar a 3x | → los usan COMP-SARKO, COMP-ICONO, COMP-LOGO y TEMA-TIPO |
 
 ## 3 · Tareas
 | ID | Rama | Estado | Pantallas / áreas | Depende de |
@@ -82,7 +82,7 @@ flowchart LR
 | TEXTOS | Textos centralizados (componentes, galería, Splash, onboarding y marcadores) | lib/core/textos/textos.dart | en curso | → los usan las pantallas y MOCK-* |
 | UTIL | Extensiones de contexto (`context.tokens`, `context.estilos`) | lib/core/utilidades/extensiones_contexto.dart | hecho | → usa TEMA-TOKENS, TEMA-TIPO |
 | UTIL-CONTRASTE | Cálculo de contraste WCAG 2.1 | lib/core/utilidades/contraste.dart | hecho | ← lo usa TEST-TEMA |
-| RECURSOS | Rutas de las imágenes (`ImagenesApp`) | lib/core/recursos/imagenes_app.dart | hecho | → apunta a ASSETS-IMG; ← lo usan COMP-SARKO, COMP-LOGO |
+| RECURSOS | Rutas de las imágenes (`ImagenesApp`): `logo(FormaLogo, TonoLogo)`, piezas base, poses de Sarko e íconos de app; enums `FormaLogo` (con medidas en px) y `TonoLogo` | lib/core/recursos/imagenes_app.dart | en curso | → apunta a ASSETS-LOGOS, ASSETS-SARKO, ASSETS-ICONO-APP; ← lo usan COMP-SARKO, COMP-LOGO, CODIGO-PANT-01, PANT-GALERIA |
 | MOD | Modelos de datos (Usuario, Modulo, Sprint, Tarjeta, EstadoStartup, Vidas, Apelacion, ArticuloTienda) | lib/datos/modelos/ | hecho | → los usan REPO-* |
 | REPO-* | Interfaces de repositorio (auth, progreso, tarjetas, vidas, apelaciones, tienda) | lib/datos/repositorios/ | hecho | → implementan MOCK-*; en T-14 → HTTP |
 | REPO-AUTH | Autenticación (inicio de sesión, registro con dos consentimientos) | lib/datos/repositorios/repositorio_autenticacion.dart | hecho | → usa MOD; ← implementa MOCK-AUTH; → servirá a PANT-05, PANT-06 |
@@ -102,9 +102,9 @@ flowchart LR
 | MOCK-TIENDA | Los tres comodines | lib/datos/mocks/mock_tienda.dart | hecho | → implementa REPO-TIENDA |
 | MEM-ONBOARDING | Implementación en memoria del estado "onboarding visto" (dura mientras la app está abierta) | lib/datos/mocks/onboarding_en_memoria.dart | en curso | → implementa REPO-ONBOARDING |
 | PANT-PRUEBA | Pantalla temporal "Tema de prueba" (eliminada en T-01; la reemplaza PANT-GALERIA) | — | obsoleto | → reemplazada por PANT-GALERIA |
-| PANT-GALERIA | Galería temporal de componentes (todos los tipos y estados, claro/oscuro); ruta `/galeria` solo en debug; se elimina con las pantallas reales | lib/funciones/bienvenida/galeria_componentes.dart | en curso | → usa COMP-*, MODO-TEMA, TEXTOS, TEMA-ICONOS; ← verifica TEST-GALERIA |
+| PANT-GALERIA | Galería temporal de componentes (todos los tipos y estados, claro/oscuro; los 20 logos sobre su fondo y las 4 poses); ruta `/galeria` solo en debug; se elimina con las pantallas reales | lib/funciones/bienvenida/galeria_componentes.dart | en curso | → usa COMP-*, RECURSOS, MODO-TEMA, TEXTOS, TEMA-ICONOS; ← verifica TEST-GALERIA |
 | FLUJO-BIENVENIDA | Reglas del flujo Splash → Onboarding → Inicio de sesión (destino tras el Splash, terminar onboarding) | lib/funciones/bienvenida/flujo_bienvenida.dart | en curso | → usa REPO-ONBOARDING, RUTAS; ← lo usan PANT-01 y PANT-02..04 |
-| CODIGO-PANT-01 | Pantalla 01 Splash (logo marcador, lema, puntos de carga, avance a los 2 s) | lib/funciones/bienvenida/pantalla_splash.dart | en curso | → implementa PANT-01; → usa COMP-LOGO, FLUJO-BIENVENIDA, TEMA-EFECTOS |
+| CODIGO-PANT-01 | Pantalla 01 Splash (logo vertical sobre verde real a 323.7×187.9, lema, puntos de carga, avance a los 2 s; colores de marca fijos en ambos modos) | lib/funciones/bienvenida/pantalla_splash.dart | en curso | → implementa PANT-01; → usa COMP-LOGO, RECURSOS, FLUJO-BIENVENIDA, TEMA-EFECTOS; → DEC-SPLASH-MARCA |
 | CODIGO-PANT-02..04 | Pantallas 02, 03, 03b y 04 Onboarding (un `PageView`, Omitir, paginador y botón) | lib/funciones/bienvenida/pantalla_onboarding.dart | en curso | → implementa PANT-02, PANT-03, PANT-03b, PANT-04; → usa COMP-BOTON, COMP-PAGINADOR, COMP-FOCO, FLUJO-BIENVENIDA, ILUS-ONBOARDING |
 | ILUS-ONBOARDING | Ilustraciones decorativas del onboarding (lienzo 390×400, miniatura de tarjeta de caso) | lib/funciones/bienvenida/ilustraciones_onboarding.dart | en curso | → usa COMP-SARKO, COMP-VEREDICTO, COMP-INDICADORES, COMP-CORAZON, COMP-CHIP |
 | FUNC | Carpetas por área (bienvenida, acceso, inicio, juego, apelaciones, tienda, perfil, jefe) | lib/funciones/ | hecho | → contendrán PANT-* |
@@ -120,20 +120,23 @@ flowchart LR
 | COMP-PAGINADOR | `PaginadorPuntos` | lib/componentes/paginador_puntos.dart | hecho | ← lo usa CODIGO-PANT-02..04 |
 | COMP-FOCO | `AnilloFoco`: anillo de 3 en foco/anillo a 2 del control | lib/componentes/anillo_foco.dart | hecho | ← lo usan COMP-BOTON, COMP-CAMPO, COMP-NAV |
 | COMP-ICONO | `IconoApp` (decorativo sin etiqueta) | lib/componentes/icono_app.dart | hecho | → usa TEMA-ICONOS |
-| COMP-SARKO | `SarkoImagen` y enum `PoseSarko` (alegre, enojado, sorprendido, triste), con texto alternativo y marcador | lib/componentes/sarko_imagen.dart | hecho | → usa RECURSOS, ASSETS-IMG; ← EXT-ASSETS |
-| COMP-LOGO | `LogoApp`: vertical (proporciones de Figma desde T-02), horizontal e isotipo | lib/componentes/logo_app.dart | en curso | → usa RECURSOS, ASSETS-IMG; ← lo usa CODIGO-PANT-01 |
+| COMP-SARKO | `SarkoImagen` y enum `PoseSarko` (alegre, enojado, sorprendido, triste): caja 4:5, `BoxFit.contain` alineado abajo al centro (pies en la misma línea), texto alternativo y marcador | lib/componentes/sarko_imagen.dart | en curso | → usa RECURSOS, ASSETS-SARKO; ← EXT-ASSETS |
+| COMP-LOGO | `LogoApp`: PNG de Figma por `forma` (vertical, horizontal, extendido, isotipo) y `tono` (automático: color en claro, negativo en oscuro); alto según la proporción del archivo | lib/componentes/logo_app.dart | en curso | → usa RECURSOS, ASSETS-LOGOS; ← lo usan CODIGO-PANT-01 y PANT-GALERIA |
 | COMP-VEREDICTO | `BotonVeredicto`: ilegal, legal, condicional y escalar; decorativo sin `alPresionar`, con anillo de foco y nombre accesible con él | lib/componentes/boton_veredicto.dart | en curso | → usa MOD (Veredicto), COMP-FOCO, COMP-ICONO, TEMA-EFECTOS; ← lo usan ILUS-ONBOARDING y PANT-GALERIA; → lo usará PANT-10 |
-| ASSETS-IMG | Logos, ícono de app y poses de Sarko (movidos desde `Imegenes/`) | assets/imagenes/ | hecho | ← EXT-ASSETS; ← lo usan COMP-SARKO, COMP-LOGO |
+| ASSETS-IMG | Imágenes de la app en subcarpetas (cada una declarada en `pubspec.yaml`); los provisionales de T-01 se eliminaron | assets/imagenes/ | en curso | ← EXT-ASSETS; → contiene ASSETS-LOGOS, ASSETS-SARKO, ASSETS-ICONO-APP |
+| ASSETS-LOGOS | 20 logos (4 formas × 5 tonos, ≈ 1x) y 2 piezas base de alta resolución | assets/imagenes/logos/ | en curso | ← lo usa COMP-LOGO vía RECURSOS |
+| ASSETS-SARKO | 4 poses de Sarko sin texto incrustado (alegre 432×432; enojado 269×312; sorprendido 256×283; triste 216×283) | assets/imagenes/sarko/ | en curso | ← lo usa COMP-SARKO vía RECURSOS |
+| ASSETS-ICONO-APP | Ícono de la app en 180, 120, 64 y 40 px (falta 1024 para las tiendas) | assets/imagenes/icono_app/ | en curso | → servirá para generar los íconos de Android/iOS |
 | ASSETS-FUENTES | Fredoka (600, 700), Inter (400–700), JetBrains Mono (400) y licencias OFL | assets/fuentes/ | hecho | ← EXT-ASSETS; ← lo usa TEMA-TIPO |
 | TEST-TEMA | Pruebas del tema (hex de los 18 tokens, contraste de los tokens nuevos, 11 estilos y tracking) | test/core/tema/ | en curso | → verifican TEMA-TOKENS, TEMA-TIPO; → usa UTIL-CONTRASTE |
 | TEST-PRUEBA | Prueba de la pantalla de prueba (eliminada en T-01 junto con PANT-PRUEBA) | — | obsoleto | → reemplazada por TEST-GALERIA |
-| TEST-GALERIA | Galería (se abre en `/galeria`): todos los componentes, claro/oscuro, navegación y texto al 200 % sin desbordes | test/funciones/bienvenida/galeria_componentes_test.dart | en curso | → verifica PANT-GALERIA, APP, MODO-TEMA |
-| TEST-BIENVENIDA | Splash y onboarding: destino a los 2 s, onboarding visto, 4 páginas, Omitir, ¡Comenzar!, foco, semántica, texto al 200 % en 390×844 y 360×640 | test/funciones/bienvenida/bienvenida_test.dart | en curso | → verifica CODIGO-PANT-01, CODIGO-PANT-02..04, FLUJO-BIENVENIDA |
-| TEST-COMP | Pruebas de cada componente (incluye el botón de veredicto): claro y oscuro, estados, semántica, foco con teclado y solo colores del tema | test/componentes/ | en curso | → verifican COMP-*; → usa TEST-AYUDA |
+| TEST-GALERIA | Galería (se abre en `/galeria`): todos los componentes (20 logos), claro/oscuro, navegación y texto al 200 % sin desbordes | test/funciones/bienvenida/galeria_componentes_test.dart | en curso | → verifica PANT-GALERIA, APP, MODO-TEMA |
+| TEST-BIENVENIDA | Splash y onboarding: logo sobre verde real, verde de marca también en oscuro, destino a los 2 s, onboarding visto, 4 páginas, Omitir, ¡Comenzar!, foco, semántica, texto al 200 % en 390×844 y 360×640 | test/funciones/bienvenida/bienvenida_test.dart | en curso | → verifica CODIGO-PANT-01, CODIGO-PANT-02..04, FLUJO-BIENVENIDA |
+| TEST-COMP | Pruebas de cada componente: claro y oscuro, estados, semántica, foco con teclado y solo colores del tema; rutas de imágenes en disco, en `pubspec.yaml` y en el bundle, medidas de los logos, tono automático y Sarko alineado abajo | test/componentes/ | en curso | → verifican COMP-*, RECURSOS, ASSETS-IMG; → usa TEST-AYUDA |
 | TEST-AYUDA | Ayudante de pruebas: montar en claro/oscuro y comprobar que solo se usan colores del tema | test/ayudantes/montar.dart | hecho | ← lo usa TEST-COMP |
 | TEST-DATOS | Pruebas de los mocks y de la sustitución de proveedores | test/datos/mocks_test.dart | hecho | → verifican MOCK-*, PROV-REPO |
 | CI | Flujo de integración continua (pub get, formato, analyze, test; Flutter 3.50.0) | .github/workflows/ci.yml | hecho | → ejecuta TEST-*; → usa CONF |
-| CONF | Configuración del proyecto (dependencias, assets y fuentes, reglas de análisis, formato a 100 columnas, saltos de línea LF) | pubspec.yaml, analysis_options.yaml, .gitattributes | hecho | → define DEP-*; ← lo usa CI |
+| CONF | Configuración del proyecto (dependencias, assets por subcarpeta y fuentes, reglas de análisis, formato a 100 columnas, saltos de línea LF; `Imegenes/` ignorada) | pubspec.yaml, analysis_options.yaml, .gitattributes, .gitignore | en curso | → define DEP-*; ← lo usa CI |
 | PLAT | Proyectos nativos generados por `flutter create` (mx.abogator.abogator) | android/, ios/ | hecho | ← arranca MAIN |
 | PLAT-WEB | Plataforma web solo para desarrollo (ver PANT-GALERIA en Chrome); fuera del alcance del producto | web/ | hecho | ← arranca MAIN |
 | DEP-RIVERPOD | flutter_riverpod 3.5.0 (estado e inyección de repositorios) | pubspec.yaml | hecho | ← lo usan APP, MODO-TEMA, PROV-REPO |
@@ -145,6 +148,7 @@ flowchart LR
 | DEC-PRESIONADO | Decisión: el botón presionado baja 2 dp y su sombra pasa de 4 a 2; sin transición con "reducir animaciones" (reporte T-01) | lib/componentes/boton_app.dart | hecho | ← COMP-BOTON |
 | DEC-ZONA-SEGURA | Decisión: la navegación inferior mide 58 + la zona segura del sistema (`SafeArea`), no 26 fijos (reporte T-01) | lib/componentes/navegacion_inferior_app.dart | hecho | ← COMP-NAV |
 | DEC-INDICADORES | Decisión: columnas de ancho intrínseco en un `Wrap`; con texto grande o pantallas angostas pasan a dos filas en vez de cortar palabras (reporte T-01) | lib/componentes/indicadores_startup.dart | hecho | ← COMP-INDICADORES |
+| DEC-SPLASH-MARCA | Decisión (Chat, D2 de T-02): el Splash usa siempre verde bosque `TokensColor.claro.accionPrimaria`, puntos en blanco y textos en `fondo/destacado` claros, también en modo oscuro (FIX-02) | lib/funciones/bienvenida/pantalla_splash.dart | en curso | ← CODIGO-PANT-01 |
 
 ## 5 · Pantallas (46, según Figma) y a dónde llevan
 Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
@@ -216,3 +220,5 @@ Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
 - 2026-11-18 · Claude Code · T-01: `en curso` para APP, ENRUTADOR, TEMA, TEMA-TOKENS (17 tokens), TEMA-TIPO, TEMA-APP, TEXTOS, TEST-TEMA, CONF y DEC-FUENTES (ya sin google_fonts). COMP-* y COMP-SARKO con ruta real. Nodos nuevos: TEMA-EFECTOS, TEMA-ICONOS, UTIL-CONTRASTE, RECURSOS, COMP-BOTON, COMP-CAMPO, COMP-CHIP, COMP-CORAZON, COMP-INDICADORES, COMP-IMPACTO, COMP-NAV, COMP-PROGRESO, COMP-PAGINADOR, COMP-FOCO, COMP-ICONO, COMP-LOGO, ASSETS-IMG, ASSETS-FUENTES, PANT-GALERIA, TEST-GALERIA, TEST-COMP, TEST-AYUDA, PLAT-WEB, DEP-LUCIDE, DEC-PRESIONADO, DEC-ZONA-SEGURA y DEC-INDICADORES. Obsoletos: PANT-PRUEBA y TEST-PRUEBA (archivos eliminados).
 - 2026-11-18 · Claude Chat · cierre de T-01: tarea y nodos de código pasan a `hecho` (merge del PR #2). T-02 `en curso` (nuevo COMP-VEREDICTO y token estado/escalar). EXT-ASSETS actualizado; ENRUTADOR anota el cambio de T-02.
 - 2026-11-18 · Claude Code · T-02: `en curso` para ENRUTADOR (arranca en el Splash), RUTAS, TEMA-TOKENS (18 tokens, estado/escalar), TEMA-EFECTOS, TEXTOS, PROV-REPO, PANT-GALERIA (ahora en `/galeria`, solo debug), COMP-LOGO (proporciones de Figma), TEST-TEMA, TEST-GALERIA y TEST-COMP. Nodos nuevos: COMP-VEREDICTO, PANT-PENDIENTE, REPO-ONBOARDING, MEM-ONBOARDING, FLUJO-BIENVENIDA, CODIGO-PANT-01, CODIGO-PANT-02..04, ILUS-ONBOARDING y TEST-BIENVENIDA. Ruta del código anotada en PANT-01, PANT-02, PANT-03, PANT-03b y PANT-04. APP y COMP-PAGINADOR sin cambios de código (solo relaciones).
+- 2026-11-19 · Claude Chat · cierre de T-02 (PR #3) y planeación de FIX-02: renombrado y orden de logos y poses de Sarko en `assets/imagenes/`; EXT-ASSETS actualizado.
+- 2026-11-19 · Claude Code · FIX-02: `en curso` para RECURSOS (forma × tono), COMP-LOGO (PNG de Figma, tono automático), COMP-SARKO (alineado abajo), CODIGO-PANT-01 (logo sobre verde real, verde fijo), PANT-GALERIA, ASSETS-IMG, CONF (`.gitignore`), TEST-COMP, TEST-BIENVENIDA y TEST-GALERIA. Nodos nuevos: ASSETS-LOGOS, ASSETS-SARKO, ASSETS-ICONO-APP y DEC-SPLASH-MARCA. Sin obsoletos (los PNG provisionales de T-01 se eliminaron y no tenían nodo propio).

@@ -4,6 +4,7 @@ import 'package:abogator/app/pantalla_pendiente.dart';
 import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
+import 'package:abogator/core/recursos/imagenes_app.dart';
 import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
@@ -67,8 +68,43 @@ void main() {
       expect(find.text(Textos.splashPoweredBy), findsOneWidget);
       final fondo = tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor;
       expect(fondo, TokensColor.claro.accionPrimaria);
-      // Marcador del logo "sobre verde" (ver reporte).
-      expect(find.byKey(const ValueKey('logo-splash-marcador')), findsOneWidget);
+      // Logo vertical "sobre verde" real, sin tarjeta marcador, a 323.7×187.9.
+      final logo = find.byKey(const ValueKey('logo-splash'));
+      expect(logo, findsOneWidget);
+      final imagen = tester.widget<Image>(find.descendant(of: logo, matching: find.byType(Image)));
+      expect(
+        (imagen.image as AssetImage).assetName,
+        ImagenesApp.logo(FormaLogo.vertical, TonoLogo.sobreVerde),
+      );
+      expect(tester.getSize(logo).width, closeTo(323.7, 0.01));
+      expect(tester.getSize(logo).height, closeTo(187.8, 0.2));
+      expect(find.byKey(const ValueKey('logo-splash-marcador')), findsNothing);
+      await pasarSplash(tester);
+    });
+
+    testWidgets('en modo oscuro conserva el verde de marca y los colores claros', (tester) async {
+      tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+      await montarApp(tester);
+      final fondo = tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor;
+      expect(fondo, TokensColor.claro.accionPrimaria);
+      expect(
+        tester.widget<Text>(find.text(Textos.splashLema)).style!.color,
+        TokensColor.claro.fondoDestacado,
+      );
+      expect(
+        tester.widget<Text>(find.text(Textos.splashPoweredBy)).style!.color,
+        TokensColor.claro.fondoDestacado,
+      );
+      final primerPunto = tester
+          .widgetList<Container>(
+            find.descendant(
+              of: find.byKey(const ValueKey('puntos-carga')),
+              matching: find.byType(Container),
+            ),
+          )
+          .first;
+      expect((primerPunto.decoration! as BoxDecoration).color, TokensColor.claro.textoEnPrimario);
       await pasarSplash(tester);
     });
 

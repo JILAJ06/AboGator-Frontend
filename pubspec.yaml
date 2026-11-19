@@ -25,8 +25,15 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  # Flutter no entra en subcarpetas: cada carpeta de imágenes se declara aparte.
   assets:
-    - assets/imagenes/
+    - assets/imagenes/logos/base/
+    - assets/imagenes/logos/isotipo/
+    - assets/imagenes/logos/vertical/
+    - assets/imagenes/logos/horizontal/
+    - assets/imagenes/logos/extendido/
+    - assets/imagenes/sarko/
+    - assets/imagenes/icono_app/
 
   fonts:
     - family: Fredoka

@@ -136,7 +136,8 @@ abstract final class Textos {
   static const String galeriaPaginador = 'Paginador';
   static const String galeriaFoco = 'Anillo de foco';
   static const String galeriaSarko = 'Sarko';
-  static const String galeriaLogos = 'Logos';
+  static const String galeriaLogos = 'Logos (4 formas × 5 tonos)';
+  static String galeriaLogo(String forma, String tono) => '$forma · $tono';
   static const String galeriaIconos = 'Íconos';
   static const String galeriaNavegacion = 'La navegación inferior está abajo de esta pantalla.';
 

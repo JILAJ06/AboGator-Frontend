@@ -60,7 +60,7 @@ void main() {
     expect(find.byType(BarraProgreso), findsNWidgets(4));
     expect(find.byType(PaginadorPuntos), findsOneWidget);
     expect(find.byType(SarkoImagen), findsNWidgets(4));
-    expect(find.byType(LogoApp), findsNWidgets(3));
+    expect(find.byType(LogoApp), findsNWidgets(20));
     expect(find.byType(NavegacionInferiorApp), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

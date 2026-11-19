@@ -6,14 +6,19 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../componentes/logo_app.dart';
+import '../../core/recursos/imagenes_app.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/tema/tokens_color.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import 'flujo_bienvenida.dart';
 
-/// Pantalla 01 · Splash: fondo accion/primaria, logo, lema, puntos de carga
-/// y "Powered by LawSwipe". Avanza sola a los 2 s.
+/// Pantalla 01 · Splash: logo, lema, puntos de carga y "Powered by LawSwipe".
+/// Avanza sola a los 2 s.
+///
+/// Excepción al tema: el Splash es pantalla de marca y usa **siempre** los
+/// colores del modo claro (fondo verde bosque `accion/primaria`, puntos en
+/// blanco y textos en `fondo/destacado`), también en modo oscuro.
 class PantallaSplash extends ConsumerStatefulWidget {
   const PantallaSplash({super.key});
 
@@ -45,13 +50,14 @@ class _PantallaSplashState extends ConsumerState<PantallaSplash> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
+    // Colores de marca fijos (ver la nota de la clase).
+    const marca = TokensColor.claro;
     final estilos = context.estilos;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: tokens.accionPrimaria,
+        backgroundColor: marca.accionPrimaria,
         body: Semantics(
           label: Textos.splashSemantica,
           excludeSemantics: true,
@@ -69,13 +75,18 @@ class _PantallaSplashState extends ConsumerState<PantallaSplash> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const _LogoSobreVerde(),
+                            const LogoApp(
+                              key: ValueKey('logo-splash'),
+                              tono: TonoLogo.sobreVerde,
+                              ancho: 323.7,
+                              decorativo: true,
+                            ),
                             const SizedBox(height: 6),
                             SizedBox(
                               width: 300,
                               child: Text(
                                 Textos.splashLema,
-                                style: estilos.cuerpoEnfasis.copyWith(color: tokens.fondoDestacado),
+                                style: estilos.cuerpoEnfasis.copyWith(color: marca.fondoDestacado),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -89,7 +100,7 @@ class _PantallaSplashState extends ConsumerState<PantallaSplash> {
                 const SizedBox(height: 20),
                 Text(
                   Textos.splashPoweredBy,
-                  style: estilos.leyenda.copyWith(color: tokens.fondoDestacado),
+                  style: estilos.leyenda.copyWith(color: marca.fondoDestacado),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 60),
@@ -102,33 +113,8 @@ class _PantallaSplashState extends ConsumerState<PantallaSplash> {
   }
 }
 
-/// Logo vertical para fondo verde.
-///
-/// Marcador: todavía no existe la variante "sobre verde" (isotipo blanco,
-/// letras blanco/crema), así que se muestra el logo normal dentro de una
-/// tarjeta redondeada. Se reemplaza cuando se exporte de Figma.
-///
-/// La tarjeta usa siempre la superficie del tema claro: el logo actual es
-/// azul marino y verde, y sobre la superficie oscura casi no se ve.
-class _LogoSobreVerde extends StatelessWidget {
-  const _LogoSobreVerde();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      key: const ValueKey('logo-splash-marcador'),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: TokensColor.claro.fondoSuperficie,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: const LogoApp(alto: 109),
-    );
-  }
-}
-
-/// Tres puntos de 10 (hueco 8): el activo en texto/en-primario y los demás al
-/// 40 %. El activo avanza cada 400 ms; con "reducir animaciones" quedan fijos.
+/// Tres puntos de 10 (hueco 8): el activo en blanco (texto/en-primario del
+/// modo claro, fijo) y los demás al 40 %. El activo avanza cada 400 ms; con "reducir animaciones" quedan fijos.
 class _PuntosCarga extends StatefulWidget {
   const _PuntosCarga();
 
@@ -162,7 +148,7 @@ class _PuntosCargaState extends State<_PuntosCarga> {
 
   @override
   Widget build(BuildContext context) {
-    final color = context.tokens.textoEnPrimario;
+    final color = TokensColor.claro.textoEnPrimario;
     return Row(
       key: const ValueKey('puntos-carga'),
       mainAxisSize: MainAxisSize.min,
