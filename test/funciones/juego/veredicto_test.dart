@@ -259,7 +259,7 @@ void main() {
       await elegir(tester, Veredicto.legal);
       await pulsarBotonDelPanel(tester);
       expect(rutaActual(tester), Rutas.sprintCompletadoDe(sprintMock));
-      expect(find.text(Textos.pendienteSprintCompletado), findsOneWidget);
+      expect(find.text(Textos.sprintCompletadoTitulo), findsOneWidget);
     });
 
     testWidgets('vidas en 0 → Sin vidas, aunque queden tarjetas', (tester) async {
@@ -284,7 +284,7 @@ void main() {
       expect(estadoJuego(tester).estadoStartup.riesgoLegal, 100);
       await pulsarBotonDelPanel(tester);
       expect(rutaActual(tester), Rutas.startupQuiebraDe(sprintMock));
-      expect(find.text(Textos.pendienteQuiebra), findsOneWidget);
+      expect(find.text(Textos.quiebraTitulo), findsOneWidget);
     });
 
     testWidgets('Presupuesto en 0 → quiebra', (tester) async {

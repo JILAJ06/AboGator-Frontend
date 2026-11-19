@@ -1,6 +1,7 @@
 import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/camino_sprints.dart';
 import 'package:abogator/componentes/encabezado_modulo.dart';
+import 'package:abogator/componentes/estrellas_sprint.dart';
 import 'package:abogator/componentes/fila_detalle_sprint.dart';
 import 'package:abogator/componentes/globo_sprint_actual.dart';
 import 'package:abogator/componentes/nodo_sprint.dart';
@@ -192,7 +193,7 @@ void main() {
           tipo == TipoNodoSprint.actual ? findsOneWidget : findsNothing,
         );
         expect(
-          find.byType(EstrellasSprint),
+          find.byType(EstrellasNodo),
           tipo == TipoNodoSprint.completado ? findsOneWidget : findsNothing,
         );
         final icono = tester.widget<Icon>(find.byType(Icon));
@@ -221,7 +222,7 @@ void main() {
       tester,
       brillo,
     ) async {
-      await montar(tester, const EstrellasSprint(estrellas: 2), brillo: brillo);
+      await montar(tester, const EstrellasNodo(estrellas: 2), brillo: brillo);
       final t = tokensDe(brillo);
       Color colorDe(int i) =>
           (tester.widget<CustomPaint>(find.byKey(ValueKey('estrella-$i'))).painter!
@@ -231,7 +232,7 @@ void main() {
         [colorDe(0), colorDe(1), colorDe(2)],
         [t.accionAcento, t.accionAcento, t.bordeDefault],
       );
-      expect(tester.getSize(find.byType(EstrellasSprint)), const Size(52, 16));
+      expect(tester.getSize(find.byType(EstrellasNodo)), const Size(52, 16));
     });
 
     testWidgets('con acción: botón con la etiqueta, foco con teclado y Enter', (tester) async {
