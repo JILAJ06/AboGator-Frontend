@@ -21,6 +21,27 @@ abstract final class EfectosApp {
     BoxShadow(color: Color(0x380F294A), offset: Offset(0, 10), blurRadius: 12),
   ];
 
+  /// Sombra de la tarjeta héroe: (0, 8), desenfoque 24, #0F294A al 14 %.
+  static const List<BoxShadow> sombraHeroe = sombraVeredicto;
+
+  /// Sombra de la tarjeta de módulo: (0, 8), desenfoque 12, #0F294A al 14 %.
+  static const List<BoxShadow> sombraModulo = [
+    BoxShadow(color: Color(0x240F294A), offset: Offset(0, 8), blurRadius: 12),
+  ];
+
+  /// Sombra del botón Buzón: (0, 16), desenfoque 40, #0F294A al 22 % (0x38).
+  static const List<BoxShadow> sombraBuzon = [
+    BoxShadow(color: Color(0x380F294A), offset: Offset(0, 16), blurRadius: 40),
+  ];
+
+  /// Elipse decorativa de la tarjeta héroe: blanco al 8 % (más clara que el verde
+  /// en ambos modos, como en Figma 07 y 07b).
+  static const Color elipseHeroe = Color(0x14FFFFFF);
+
+  /// Ícono sobre el color de un módulo: blanco fijo (los colores de módulo son
+  /// de marca y no cambian con el modo).
+  static const Color iconoSobreModulo = Color(0xFFFFFFFF);
+
   /// Opacidad de la etiqueta de la tarjeta de caso (14 %).
   static const double opacidadEtiquetaCaso = 0.14;
 

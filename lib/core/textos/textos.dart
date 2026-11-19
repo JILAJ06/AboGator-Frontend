@@ -162,9 +162,79 @@ abstract final class Textos {
   static const String yaTienesCuenta = '¿Ya tienes cuenta? Inicia sesión';
 
   // ---------------------------------------------------------------------
+  // 07 Inicio
+  // ---------------------------------------------------------------------
+  static String saludo(String primerNombre) => 'Hola, $primerNombre';
+  static String perfilYNivel(String perfil, int nivel) => '$perfil · Nivel $nivel';
+  static const String perfilCortoEstudiante = 'Estudiante';
+  static const String perfilCortoDesarrollador = 'Dev';
+  static const String perfilCortoLegal = 'Legal';
+
+  static const String heroeEtiqueta = 'TU STARTUP ESTÁ EN';
+  static String heroeSubtitulo(int sprint, int total, String modulo) =>
+      'Sprint $sprint de $total · $modulo';
+  static const String continuarSprint = 'Continuar sprint';
+
+  static const String retoTitulo = 'Reto diario: 3 tarjetas sin fallar';
+  static String retoSubtitulo(int racha, int monedas) =>
+      'Mantén tu racha de $racha días · +$monedas monedas';
+  static String retoProgreso(int actual, int total) => '$actual/$total';
+  static String retoSemantica(int actual, int total) => 'Progreso: $actual de $total';
+
+  static const String rutaStartup = 'Ruta de tu Startup';
+
+  /// Nombre corto de cada módulo (etiqueta de la tarjeta, como en Figma).
+  static const List<String> modulosCortos = [
+    'Protección de datos',
+    'Licencias open source',
+    'Delitos informáticos',
+    'Contratos digitales',
+    'Auditoría y cumplimiento',
+  ];
+
+  /// Tramo de la Startup que representa cada módulo (título de la tarjeta).
+  static const List<String> tramosStartup = [
+    'Del Garage al MVP',
+    'Ronda Semilla',
+    'Escalando el equipo',
+    'Serie A',
+    'Salida a bolsa',
+  ];
+
+  static String moduloEtiqueta(int numero, String nombreCorto) =>
+      'MÓDULO $numero · ${nombreCorto.toUpperCase()}';
+  static String sprintsProgreso(int completados, int total) => '$completados/$total sprints';
+  static String sprintsCompletado(int total) => '$total/$total sprints · Completado';
+  static const String moduloBloqueadoAyuda = 'Completa el módulo anterior';
+  static const String estadoModuloBloqueado = 'bloqueado';
+  static const String estadoModuloDisponible = 'disponible';
+  static const String estadoModuloEnCurso = 'en curso';
+  static const String estadoModuloCompletado = 'completado';
+  static String moduloSemantica(int numero, String nombre, String titulo, String estado) =>
+      'Módulo $numero, $nombre, $titulo, $estado';
+  static String sprintsSemantica(int completados, int total) =>
+      '$completados de $total sprints completados';
+
+  static const String buzonApelaciones = 'Buzón de apelaciones';
+  static String buzonSemantica(int pendientes) => pendientes == 0
+      ? buzonApelaciones
+      : pendientes == 1
+      ? '$buzonApelaciones, 1 pendiente'
+      : '$buzonApelaciones, $pendientes pendientes';
+
+  static const String inicioErrorCarga = 'No pudimos cargar tu progreso.';
+  static const String reintentar = 'Reintentar';
+  static const String cargandoInicio = 'Cargando tu progreso';
+
+  // ---------------------------------------------------------------------
   // Pantallas pendientes (marcadores temporales)
   // ---------------------------------------------------------------------
   static const String pendienteInicio = 'Inicio · llega en T-04';
+  static const String pendienteMapaSprints = 'Mapa de sprints · llega en T-04b';
+  static const String pendienteIntroSprint = 'Intro del sprint · llega en T-04b';
+  static const String pendienteBuzon = 'Buzón · llega en T-09';
+  static const String pendienteTienda = 'Tienda · llega en T-10';
+  static const String pendientePerfil = 'Perfil · llega en T-10';
 
   // ---------------------------------------------------------------------
   // Galería de componentes (temporal, se elimina con las pantallas reales)
@@ -179,6 +249,7 @@ abstract final class Textos {
   static const String galeriaVeredictos = 'Botones de veredicto (decorativos e interactivos)';
   static const String galeriaCampos = 'Campos de texto';
   static const String galeriaAcceso = 'Componentes de acceso';
+  static const String galeriaInicio = 'Componentes del Inicio';
   static const String galeriaChips = 'Chips HUD';
   static const String galeriaVidas = 'Vidas';
   static const String galeriaIndicadores = 'Indicadores de la Startup';

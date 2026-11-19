@@ -32,6 +32,13 @@ abstract final class Rutas {
   /// 09 Intro del sprint
   static const String introSprint = '/inicio/modulo/:moduloId/sprint/:sprintId';
 
+  /// Ruta concreta del mapa de sprints de un módulo.
+  static String mapaSprintsDe(String moduloId) => '/inicio/modulo/$moduloId';
+
+  /// Ruta concreta de la intro de un sprint.
+  static String introSprintDe(String moduloId, String sprintId) =>
+      '/inicio/modulo/$moduloId/sprint/$sprintId';
+
   /// 21 Buzón de Apelaciones
   static const String buzon = '/buzon';
 
