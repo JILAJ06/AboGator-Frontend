@@ -165,7 +165,6 @@ class _PantallaRegistroState extends ConsumerState<PantallaRegistro> {
                     const SizedBox(height: 14),
                     CampoTextoApp(
                       etiqueta: Textos.campoContrasenaInicio,
-                      textoAyuda: Textos.campoContrasenaAyuda,
                       tipo: TipoCampo.contrasena,
                       iconoInicio: IconosApp.lock,
                       controlador: _contrasena,
