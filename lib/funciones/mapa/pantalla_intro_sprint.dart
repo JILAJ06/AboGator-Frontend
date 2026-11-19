@@ -3,11 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/rutas.dart';
-import '../../componentes/accion_enfocable.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/boton_cerrar.dart';
 import '../../componentes/chip_hud.dart';
 import '../../componentes/fila_detalle_sprint.dart';
-import '../../componentes/icono_app.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../core/tema/iconos_app.dart';
@@ -115,7 +114,7 @@ class _Intro extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _BotonCerrar(alPresionar: alCerrar),
+                        BotonCerrar(alPresionar: alCerrar),
                         const Spacer(),
                         Padding(
                           padding: const EdgeInsets.only(top: 10),
@@ -236,43 +235,6 @@ class _SarkoConElipse extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Botón Cerrar: 48×48, fondo/superficie, borde 1 borde/default, radio 12 e
-/// ícono x de 20. Se anuncia como "Cerrar".
-class _BotonCerrar extends StatelessWidget {
-  const _BotonCerrar({required this.alPresionar});
-
-  static const double radio = 12;
-
-  final VoidCallback alPresionar;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    return AccionEnfocable(
-      alPresionar: alPresionar,
-      radio: radio,
-      semantica: (hijo) => Semantics(
-        button: true,
-        label: Textos.cerrar,
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
-      child: Container(
-        key: const ValueKey('cerrar-intro'),
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficie,
-          borderRadius: BorderRadius.circular(radio),
-          border: Border.all(color: tokens.bordeDefault),
-        ),
-        child: Center(child: IconoApp(IconosApp.x, tamano: 20, color: tokens.textoPrimario)),
       ),
     );
   }

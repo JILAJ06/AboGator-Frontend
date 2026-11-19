@@ -276,9 +276,49 @@ abstract final class Textos {
   static const String volverAlMapa = 'Volver al mapa';
 
   // ---------------------------------------------------------------------
+  // 10 Juego: tarjeta swipe (11, 11b, 11c y 13 son estados de arrastre)
+  // ---------------------------------------------------------------------
+  static const String salir = 'Salir';
+  static String juegoPaso(int sprint, int actual, int total) =>
+      'Sprint $sprint · Tarjeta $actual de $total';
+  static String tarjetaSemantica(
+    int actual,
+    int total,
+    String personaje,
+    String rol,
+    String texto,
+  ) => 'Tarjeta $actual de $total. $personaje, $rol: $texto';
+  static String casoSemantica(String personaje, String rol, String texto) =>
+      '$personaje, $rol: $texto';
+  static const String selloLegal = 'LEGAL';
+  static const String selloIlegal = 'ILEGAL';
+  static const String selloCondicional = 'CON CONDICIONES';
+  static const String selloEscalar = 'A JURÍDICO';
+  static const String accionLegal = 'Legal';
+  static const String accionIlegal = 'Ilegal';
+  static const String accionCondicional = 'Legal con condiciones';
+  static const String accionEscalar = 'Escalar a jurídico';
+  static const String comodinLupa = 'Lupa';
+  static const String comodinAbogado = 'Abogado';
+  static const String comodinAmparo = 'Amparo';
+  static String comodinCantidad(String nombre, int cantidad) => '$nombre ×$cantidad';
+  static String comodinSemantica(String nombre, int cantidad) =>
+      cantidad == 1 ? '$nombre, 1 disponible' : '$nombre, $cantidad disponibles';
+  static const String comodinesTitulo = 'Comodines';
+  static const String indicadoresSemantica = 'Indicadores de la Startup';
+  static const String salirTitulo = '¿Salir del sprint?';
+  static const String salirTexto = 'Perderás el avance de este sprint.';
+  static const String seguirJugando = 'Seguir jugando';
+  static const String cargandoJuego = 'Cargando el sprint';
+  static const String juegoErrorCarga = 'No pudimos cargar las tarjetas del sprint.';
+  static const String sprintSinTarjetas = 'Este sprint todavía no tiene tarjetas.';
+  static const String sinVidasPendiente = 'Sin vidas · llega en T-08';
+  static String veredictoAnuncio(String accion) => 'Veredicto: $accion';
+
+  // ---------------------------------------------------------------------
   // Pantallas pendientes (marcadores temporales)
   // ---------------------------------------------------------------------
-  static const String pendienteJuego = 'Juego · llega en T-05';
+  static const String pendienteSprintCompletado = 'Sprint completado · llega en T-06';
   static const String pendienteJefe = 'Examen final · llega en T-11';
   static const String pendienteBuzon = 'Buzón · llega en T-09';
   static const String pendienteTienda = 'Tienda · llega en T-10';
@@ -299,6 +339,7 @@ abstract final class Textos {
   static const String galeriaAcceso = 'Componentes de acceso';
   static const String galeriaInicio = 'Componentes del Inicio';
   static const String galeriaMapa = 'Componentes del mapa y la intro del sprint';
+  static const String galeriaJuego = 'Componentes del juego';
   static const String galeriaChips = 'Chips HUD';
   static const String galeriaVidas = 'Vidas';
   static const String galeriaIndicadores = 'Indicadores de la Startup';
