@@ -227,11 +227,59 @@ abstract final class Textos {
   static const String cargandoInicio = 'Cargando tu progreso';
 
   // ---------------------------------------------------------------------
+  // 08 Mapa de sprints
+  // ---------------------------------------------------------------------
+  static String sprintNumero(int numero) => 'Sprint $numero';
+  static const String examenFinal = 'Examen final';
+  static String avanceModulo(int completados, int total) => '$completados/$total';
+  static String avanceModuloSemantica(int completados, int total) =>
+      'Avance del módulo: $completados de $total sprints completados';
+  static const String estadoSprintCompletado = 'completado';
+  static const String estadoSprintActual = 'en curso';
+  static const String estadoSprintDisponible = 'disponible';
+  static const String estadoSprintBloqueado = 'bloqueado';
+  static String estrellasSemantica(int estrellas, int maximo) => '$estrellas de $maximo estrellas';
+  static String nodoSemantica(String nombre, String titulo, String estado) =>
+      '$nombre, $titulo, $estado';
+  static String globoTitulo(int numero, String titulo) => 'Sprint $numero · $titulo';
+  static String globoDetalle(int tarjetas, int minutos) =>
+      '${tarjetasCantidad(tarjetas)} · ≈ $minutos min';
+  static const String comenzar = 'Comenzar';
+  static const String cargandoMapa = 'Cargando el mapa del módulo';
+  static const String mapaErrorCarga = 'No pudimos cargar el mapa del módulo.';
+  static const String moduloNoEncontrado = 'No encontramos ese módulo.';
+  static const String volverAlInicio = 'Volver al inicio';
+
+  // ---------------------------------------------------------------------
+  // 09 Intro del sprint
+  // ---------------------------------------------------------------------
+  static const String cerrar = 'Cerrar';
+  static String introEtiqueta(int sprint, int modulo) => 'SPRINT $sprint · MÓDULO $modulo';
+  static String introEtiquetaExamen(int modulo) => 'EXAMEN FINAL · MÓDULO $modulo';
+  static String introObjetivo(String objetivo) => 'Objetivo: $objetivo';
+  static String tarjetasCantidad(int n) => n == 1 ? '1 tarjeta' : '$n tarjetas';
+  static String tarjetasDesglose(int normales, int conEvidencia, int dilemas) => [
+    normales == 1 ? '1 normal' : '$normales normales',
+    '$conEvidencia con evidencia',
+    dilemas == 1 ? '1 dilema' : '$dilemas dilemas',
+  ].join(' · ');
+  static String monedasHasta(int monedas) =>
+      monedas == 1 ? 'Hasta 1 moneda' : 'Hasta $monedas monedas';
+  static const String monedasDilema = 'Dilema clave acertado = monedas ×2';
+  static const String indicadoresTitulo = '4 indicadores de tu Startup';
+  static const String indicadoresLista = 'Presupuesto, Reputación, Velocidad y Riesgo legal';
+  static const String comenzarSprint = 'Comenzar sprint';
+  static const String sprintBloqueado =
+      'Este sprint está bloqueado. Completa los sprints anteriores para desbloquearlo.';
+  static const String cargandoIntro = 'Cargando el sprint';
+  static const String introErrorCarga = 'No pudimos cargar el sprint.';
+  static const String volverAlMapa = 'Volver al mapa';
+
+  // ---------------------------------------------------------------------
   // Pantallas pendientes (marcadores temporales)
   // ---------------------------------------------------------------------
-  static const String pendienteInicio = 'Inicio · llega en T-04';
-  static const String pendienteMapaSprints = 'Mapa de sprints · llega en T-04b';
-  static const String pendienteIntroSprint = 'Intro del sprint · llega en T-04b';
+  static const String pendienteJuego = 'Juego · llega en T-05';
+  static const String pendienteJefe = 'Examen final · llega en T-11';
   static const String pendienteBuzon = 'Buzón · llega en T-09';
   static const String pendienteTienda = 'Tienda · llega en T-10';
   static const String pendientePerfil = 'Perfil · llega en T-10';
@@ -250,6 +298,7 @@ abstract final class Textos {
   static const String galeriaCampos = 'Campos de texto';
   static const String galeriaAcceso = 'Componentes de acceso';
   static const String galeriaInicio = 'Componentes del Inicio';
+  static const String galeriaMapa = 'Componentes del mapa y la intro del sprint';
   static const String galeriaChips = 'Chips HUD';
   static const String galeriaVidas = 'Vidas';
   static const String galeriaIndicadores = 'Indicadores de la Startup';
