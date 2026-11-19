@@ -28,6 +28,20 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'La LFPDPPP obliga a poner el aviso de privacidad a disposición del '
             'titular antes de recabar sus datos.',
+        impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
+        impactoFallo: ImpactoTarjeta(velocidad: 10, riesgoLegal: 20),
+        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
+        microPregunta: MicroPregunta(
+          enunciado: '¿por qué es ilegal?',
+          opciones: [
+            'La LFPDPPP exige el aviso antes de recabar los datos',
+            'Porque los formularios de registro son opcionales',
+          ],
+          indiceCorrecto: 0,
+        ),
+        explicacionFallo:
+            'Recabar datos sin poner antes el aviso de privacidad a disposición del titular '
+            'incumple la LFPDPPP, aunque el lanzamiento sea urgente.',
       ),
       Tarjeta(
         id: 'tar-aviso-02',
@@ -42,6 +56,9 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'El aviso simplificado es válido si informa lo esencial y remite al '
             'aviso integral.',
+        impactoAcierto: ImpactoTarjeta(reputacion: 5, velocidad: 5),
+        impactoFallo: ImpactoTarjeta(reputacion: -5, velocidad: -5),
+        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
       ),
       Tarjeta(
         id: 'tar-aviso-03',
@@ -57,6 +74,18 @@ class MockTarjetas implements RepositorioTarjetas {
             'Usar los datos para una finalidad que no está en el aviso incumple el '
             'principio de finalidad.',
         evidencia: 'onRegistro(u) {\n  crearCuenta(u);\n  listaPromos.agregar(u.correo);\n}',
+        impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
+        impactoFallo: ImpactoTarjeta(reputacion: -5, riesgoLegal: 20),
+        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
+        microPregunta: MicroPregunta(
+          enunciado: '¿por qué es ilegal?',
+          opciones: [
+            'Usa el correo para una finalidad que no está en el aviso',
+            'Porque las listas de correo son ilegales',
+            'Porque el código no está documentado',
+          ],
+          indiceCorrecto: 0,
+        ),
       ),
       Tarjeta(
         id: 'tar-aviso-04',
@@ -71,6 +100,9 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Las finalidades secundarias son válidas si están en el aviso y el '
             'titular puede negarse a ellas.',
+        impactoAcierto: ImpactoTarjeta(presupuesto: 5, reputacion: 5),
+        impactoFallo: ImpactoTarjeta(reputacion: -10, riesgoLegal: 15),
+        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -5),
       ),
       Tarjeta(
         id: 'tar-aviso-05',
@@ -86,6 +118,16 @@ class MockTarjetas implements RepositorioTarjetas {
             'Los datos de salud son sensibles: requieren consentimiento expreso y '
             'por escrito. Es un caso para el área jurídica.',
         evidencia: 'campos: [nombre, correo, padecimientos]',
+        impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
+        impactoFallo: ImpactoTarjeta(velocidad: 5, riesgoLegal: 25),
+        microPregunta: MicroPregunta(
+          enunciado: '¿por qué hay que escalarlo?',
+          opciones: [
+            'Los datos de salud son sensibles y piden consentimiento expreso',
+            'Porque el área jurídica revisa todos los formularios',
+          ],
+          indiceCorrecto: 0,
+        ),
       ),
       Tarjeta(
         id: 'tar-aviso-06',
@@ -100,6 +142,8 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'El tratamiento de datos de menores necesita el consentimiento de quien '
             'ejerce la patria potestad; conviene escalarlo.',
+        impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -5),
+        impactoFallo: ImpactoTarjeta(reputacion: -5, riesgoLegal: 20),
       ),
       Tarjeta(
         id: 'tar-aviso-07',
@@ -114,6 +158,9 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'La remisión a un encargado que trata los datos por cuenta del '
             'responsable no requiere consentimiento.',
+        impactoAcierto: ImpactoTarjeta(presupuesto: 5, velocidad: 5),
+        impactoFallo: ImpactoTarjeta(presupuesto: -10, velocidad: -5),
+        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
       ),
       Tarjeta(
         id: 'tar-aviso-08',
@@ -127,6 +174,9 @@ class MockTarjetas implements RepositorioTarjetas {
         respuestaCorrecta: Veredicto.condicional,
         explicacion: 'Es válido si el aviso lo informa y el usuario puede deshabilitarlo.',
         evidencia: '<script src="https://anuncios.ejemplo/pixel.js"></script>',
+        impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -5),
+        impactoFallo: ImpactoTarjeta(reputacion: -5, riesgoLegal: 15),
+        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -5),
       ),
       Tarjeta(
         id: 'tar-aviso-09',
@@ -141,6 +191,17 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Los cambios al aviso deben comunicarse a los titulares antes de '
             'aplicar la nueva finalidad.',
+        impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
+        impactoFallo: ImpactoTarjeta(reputacion: -10, riesgoLegal: 20),
+        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
+        microPregunta: MicroPregunta(
+          enunciado: '¿por qué es ilegal?',
+          opciones: [
+            'Los cambios al aviso deben comunicarse antes de aplicarse',
+            'Porque el aviso no se puede cambiar nunca',
+          ],
+          indiceCorrecto: 0,
+        ),
       ),
       Tarjeta(
         id: 'tar-aviso-10',
@@ -155,6 +216,8 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Compartir la base con un tercero es una transferencia que requiere '
             'consentimiento; el área jurídica debe revisarlo.',
+        impactoAcierto: ImpactoTarjeta(reputacion: 10, riesgoLegal: -10),
+        impactoFallo: ImpactoTarjeta(presupuesto: 5, riesgoLegal: 25),
       ),
     ],
     'spr-2-1': [
@@ -169,9 +232,29 @@ class MockTarjetas implements RepositorioTarjetas {
             'en nuestra app de código cerrado y la publicamos?',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
-            'La GPL v3 obliga a distribuir la obra derivada bajo la misma licencia '
-            'y a publicar su código fuente. Usarla en una app cerrada la incumple.',
+            'La licencia GPL-3.0 es copyleft: si la integras, todo el producto derivado '
+            'debe liberarse bajo la misma licencia. Responder bien el porqué demuestra que '
+            'no adivinaste.',
         evidencia: 'dependencies:\n  pdf_engine: ^2.1.0  # Licencia: GPL-3.0',
+        impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
+        impactoFallo: ImpactoTarjeta(velocidad: 10, riesgoLegal: 25),
+        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
+        microPregunta: MicroPregunta(
+          enunciado: '¿por qué es ilegal?',
+          opciones: [
+            'La GPL-3.0 obliga a liberar el código derivado',
+            'Porque el código de GitHub siempre es privado',
+          ],
+          indiceCorrecto: 0,
+        ),
+        explicacionFallo:
+            'Usar código GPL-3.0 dentro de software propietario sin liberar el código '
+            'fuente infringe la licencia y la Ley Federal del Derecho de Autor. Busca una '
+            'alternativa MIT o Apache 2.0.',
+        explicacionParcial:
+            'Escalar a jurídico no está mal, pero aquí no hacía falta: la GPL-3.0 es clara '
+            'y no se puede usar en código cerrado. Consultar costó tiempo y dinero al '
+            'equipo.',
       ),
       Tarjeta(
         id: 'tar-mit-02',

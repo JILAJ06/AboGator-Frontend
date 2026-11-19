@@ -77,6 +77,9 @@ abstract final class Rutas {
   /// 19b Startup en quiebra
   static const String startupQuiebra = '/juego/:sprintId/quiebra';
 
+  /// Ruta concreta de "Startup en quiebra" de un sprint.
+  static String startupQuiebraDe(String sprintId) => '/juego/$sprintId/quiebra';
+
   // Flujo 4 · Vidas y conexión
   /// 20 Sin vidas
   static const String sinVidas = '/sin-vidas';

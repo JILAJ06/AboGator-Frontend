@@ -6,6 +6,7 @@ import 'package:abogator/componentes/barra_comodines.dart';
 import 'package:abogator/componentes/barra_juego.dart';
 import 'package:abogator/componentes/boton_veredicto.dart';
 import 'package:abogator/componentes/indicadores_startup.dart';
+import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/pila_tarjetas.dart';
 import 'package:abogator/componentes/sello_veredicto.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
@@ -118,6 +119,9 @@ void main() {
       ) async {
         await abrirJuego(tester);
         await arrastrar(tester, hasta);
+        // La tarjeta avanza al cerrar el panel de veredicto.
+        expect(textoActual(tester), tarjetasMock[0].texto);
+        await cerrarPanel(tester);
         expect(estadoJuego(tester).respuestas, [
           RespuestaJuego(tarjetaId: tarjetasMock[0].id, veredicto: veredicto),
         ]);
@@ -194,6 +198,7 @@ void main() {
       for (final (i, v) in AccionesVeredicto.orden.indexed) {
         await tester.tap(find.byWidgetPredicate((w) => w is BotonVeredicto && w.veredicto == v));
         await tester.pumpAndSettle();
+        await cerrarPanel(tester);
         expect(estadoJuego(tester).respuestas[i].veredicto, v);
         expect(estadoJuego(tester).respuestas[i].tarjetaId, tarjetasMock[i].id);
       }
@@ -239,6 +244,8 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pumpAndSettle();
       expect(estadoJuego(tester).respuestas.single.veredicto, Veredicto.ilegal);
+      await cerrarPanel(tester);
+      // Al cerrar el panel, el foco vuelve al botón Ilegal.
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
       await tester.pumpAndSettle();
       expect(estadoJuego(tester).respuestas.last.veredicto, Veredicto.ilegal);
@@ -312,6 +319,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(estadoJuego(tester).respuestas.single.veredicto, Veredicto.condicional);
+      await cerrarPanel(tester);
       // La tarjeta nueva se anuncia.
       expect(
         find.bySemanticsLabel(RegExp('^Tarjeta 2 de 10. ${tarjetasMock[1].personaje}')),
@@ -329,6 +337,7 @@ void main() {
       expect(find.byKey(const ValueKey('pila-2')), findsNothing);
       await tester.tap(find.byType(BotonVeredicto).first);
       await tester.pumpAndSettle();
+      await cerrarPanel(tester);
       expect(find.byType(PilaTarjetas), findsOneWidget);
       expect(find.byKey(const ValueKey('pila-1')), findsNothing);
     });
@@ -337,8 +346,10 @@ void main() {
       await abrirJuego(tester, tarjetas: cortas);
       await tester.tap(find.byType(BotonVeredicto).last);
       await tester.pumpAndSettle();
+      await cerrarPanel(tester);
       await tester.tap(find.byType(BotonVeredicto).first);
       await tester.pumpAndSettle();
+      await cerrarPanel(tester);
       expect(find.text(Textos.pendienteSprintCompletado), findsOneWidget);
       expect(rutaActual(tester), Rutas.sprintCompletadoDe(sprintMock));
     });
@@ -353,6 +364,10 @@ void main() {
       await tester.pump();
       expect(estadoJuego(tester).respuestas, hasLength(1));
       await tester.pump();
+      // El panel aparece sin animación.
+      expect(find.byType(PanelVeredicto), findsOneWidget);
+      expect(tester.hasRunningAnimations, isFalse);
+      await cerrarPanel(tester, settle: false);
       expect(textoActual(tester), tarjetasMock[1].texto);
       expect(desplazamientoTarjeta(tester), Offset.zero);
       expect(tester.hasRunningAnimations, isFalse);

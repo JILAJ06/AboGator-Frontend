@@ -111,6 +111,10 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
 
   /// Vuelo en curso (no admite otra confirmación).
   bool _volando = false;
+
+  /// La tarjeta ya salió de la zona: sin sello ni tinte hasta la siguiente
+  /// (como en Figma 12 y 14, mientras está abierto el panel).
+  bool _fuera = false;
   Size _zona = Size.zero;
 
   Animation<Offset>? _animDesplazamiento;
@@ -162,6 +166,7 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
     _angulo = 0;
     _previa = null;
     _volando = false;
+    _fuera = false;
     // Se llama mientras se reconstruye: el tinte se avisa al terminar el cuadro.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _publicar();
@@ -254,6 +259,8 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
         : 0.0;
     void terminar() {
       if (!mounted) return;
+      setState(() => _fuera = true);
+      widget.arrastre.value = const ArrastreVisible();
       widget.alConfirmar(veredicto);
     }
 
@@ -294,7 +301,7 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
         final altoTarjeta = math.max(0.0, _zona.height - MazoSwipe.altoPila);
         final progreso = _progreso;
         final actual = _veredictoActual;
-        double opacidad(Veredicto v) => actual == v ? progreso : 0;
+        double opacidad(Veredicto v) => !_fuera && actual == v ? progreso : 0;
 
         // Entrada desde la pila: de la escala y posición de Pila 1 a la normal.
         final e = Curves.easeOut.transform(_entrada.value);

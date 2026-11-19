@@ -45,7 +45,7 @@ class _ChipImpacto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = indicador.color(context.tokens);
+    final color = indicador.colorTexto(context.tokens);
     return Semantics(
       label: Textos.impactoSemantica(indicador.nombre, cambio),
       excludeSemantics: true,

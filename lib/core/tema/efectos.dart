@@ -137,6 +137,16 @@ abstract final class EfectosApp {
   /// Espaciado de las letras de los sellos.
   static const double espaciadoSello = 3;
 
+  // ---------------------------------------------------------------------
+  // 12, 12b, 12c, 14 y 14b Panel de veredicto
+  // ---------------------------------------------------------------------
+
+  /// Velo detrás del panel: #0B1220 al 40 % (0x66), como en Figma 14.
+  static const Color colorVelo = Color(0x660B1220);
+
+  /// El panel sube en 280 ms (ease-out).
+  static const Duration duracionPanel = Duration(milliseconds: 280);
+
   /// Sombra sólida inferior, sin desenfoque.
   static List<BoxShadow> sombraSolida(double desplazamiento) => [
     BoxShadow(color: colorSombraSolida, offset: Offset(0, desplazamiento)),

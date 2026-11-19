@@ -1,60 +1,49 @@
 # Reporte
 
-- **Tarea:** T-05 · Tarjeta swipe (pantallas 10, 11, 11b, 11c y 13)
-- **Rama:** `05-tarjeta-swipe`
+- **Tarea:** T-06 · Veredictos (pantallas 12, 12b, 12c, 14 y 14b)
+- **Rama:** `06-veredictos`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11.
+- Durante la tarea, Windows Device Guard bloqueó `dart.exe` un rato. Me detuve hasta que se desbloqueó; desde entonces cada paso pasó por `dart format`, `flutter analyze` y `flutter test`.
 - **Comparé contra Figma** con el conector (solo lectura):
-  - Contexto de diseño y capturas de 10 (`37:1676`) y 11 (`37:2043`).
-  - Metadatos de 11: cajas de la tarjeta girada y de los 4 sellos.
-  - Diseño de los sellos `37:2132` (Ilegal) y `37:2134` (Legal).
-- Probé la app compilada para web en el navegador, a 390×844, en claro y oscuro:
-  - Inicio → "Continuar sprint" → intro → "Comenzar sprint" → juego.
-  - Arrastre con el ratón a la izquierda: confirma y pasa a la tarjeta 2.
-  - Flechas ↑, ← y ↓: previsualizan con su sello. Esc cancela; → y Enter confirman.
-  - Salir con el diálogo, de vuelta a la intro.
+  - Metadatos de las pantallas 12 (`37:2287`) y 14 (`37:3147`).
+  - Contexto de diseño de 14 y de los paneles `37:2427`, `37:2671`, `37:4047` y `38:5384`.
+  - Lo que confirmé:
+    - Hay un **velo `#0B1220` al 40 %** sobre toda la pantalla.
+    - La tarjeta ya salió de la pantalla y se ve la pila.
+    - Los indicadores muestran el cambio ("+10", "+25") junto a cada barra.
+    - Los paneles miden 487 (12) y 419 (14).
+- Probé la app compilada para web en el navegador, a 390×844: acierto con micro-pregunta (12), opción correcta → bonus (12b), Continuar → tarjeta 2, error (14) con la barra en 4 vidas.
 
 ## Qué se hizo
-1. **Ajustes de T-04b:**
-   - **D1:** `Sprint.tituloIntro` (opcional). El mock lleva "Aviso de privacidad en el MVP" y la intro lo usa si existe.
-   - **D2:** los objetivos del mock empiezan en minúscula ("Objetivo: el MVP sale…").
-   - **D6:** el encabezado del Inicio es un `Wrap`. El saludo ya no se recorta: si no cabe junto a los chips, los chips bajan a la segunda fila.
-2. **Datos:**
-   - `Tarjeta` tiene `etiquetaCaso`, `personaje` y `rol`.
-   - `MockTarjetas`: `spr-1-3` tiene 10 tarjetas (6 normales, 3 con evidencia con su fragmento y 1 de justificación), con casos de la LFPDPPP. Las de `spr-1-2` y `spr-2-1` ya tienen los campos nuevos.
-   - `MockProgreso.obtenerEstadoStartup` devuelve 70/60/50/25, como Figma.
-3. **Lógica pura** (`funciones/juego/logica_swipe.dart`):
-   - El eje se decide a los 12 dp.
-   - Umbral: 28 % del ancho en horizontal y 80 dp en vertical. También confirma un lanzamiento de 800 dp/s.
-   - Progreso de 0 a 1, e inclinación con tope de 12° (llega a la mitad del umbral).
-   - Dirección → veredicto, posición de la previsualización y destino del vuelo.
-4. **Estado** (`estado_juego.dart`):
-   - `datosJuegoProvider` (por sprint) pide primero las vidas; con 0 no carga el juego.
-   - Luego pide en paralelo las tarjetas, el estado de la Startup y los módulos (para el número de sprint y el color del chip). Un sprint inexistente da una lista vacía.
-   - `juegoProvider` guarda el índice y las respuestas (`RespuestaJuego`: id de tarjeta y veredicto), sin calificar.
-5. **Mazo** (`mazo_swipe.dart`):
-   - Pila, tarjeta y los 4 sellos.
-   - Arrastre solo sobre el eje bloqueado.
-   - Vuelo de 280 ms (hasta 24° en horizontal), regreso con resorte de 250 ms (`easeOutBack`) y entrada de la siguiente tarjeta desde la Pila 1 (200 ms).
-   - `previsualizar`, `cancelarPrevia` y `confirmar` sirven al teclado y a los botones.
-   - Semántica: etiqueta "Tarjeta k de n. personaje, rol: texto", región en vivo y 4 acciones personalizadas.
-   - Con "reducir animaciones" todo es inmediato.
-6. **Pantalla 10** (`pantalla_juego.dart`), en la ruta `/juego/:sprintId`, sin navegación inferior:
-   - De arriba abajo: barra de juego, indicadores, zona de la tarjeta, acciones y comodines.
-   - La zona de la tarjeta se estira o encoge. Su alto mínimo es 260 (+20 de la pila) y crece con el texto dinámico; si todo no cabe, la pantalla se desplaza.
-   - El tinte cubre la pantalla, detrás del contenido.
-   - Teclado: las flechas previsualizan, Enter confirma y Esc cancela. Sin previsualización, Enter y Esc siguen su camino (Enter activa el botón con foco).
-   - Indicadores y comodines son bloques de lectura que reciben foco: el orden queda como en 26b.
-   - Salir abre un diálogo "¿Salir del sprint?" con "Seguir jugando" y "Salir". "Salir" hace `pop` si hay pila; si no, `go` al mapa del módulo.
-   - Estados: esqueleto, error con "Reintentar", sprint sin tarjetas o inexistente (vuelve al mapa o al Inicio) y 0 vidas (marcador de T-08 en la misma pantalla).
-   - Al responder la última tarjeta va a `Rutas.sprintCompletadoDe` (marcador de T-06).
-   - Sin sesión, el enrutador redirige al inicio de sesión.
-7. **Componentes nuevos** (con pruebas y en la galería):
-   - `BarraJuego`, `TarjetaCaso` (con `PistaGesto`), `PilaTarjetas`, `SelloVeredicto`, `TinteVeredicto`, `AccionesVeredicto` y `BarraComodines`.
-   - `BotonCerrar`: extraído de la intro, porque Salir es el mismo botón.
-   - `BarraProgreso` ahora tiene el alto fijo por fuera del `LayoutBuilder`, para poder medirse dentro de un `IntrinsicHeight`.
+1. **Datos:**
+   - `ImpactoTarjeta`: presupuesto, reputación, velocidad y riesgo legal; todos 0 por defecto.
+   - `MicroPregunta`: enunciado, 2 o 3 opciones e índice correcto.
+   - `Tarjeta` tiene ahora `impactoAcierto`, `impactoFallo`, `impactoParcial`, `microPregunta`, `explicacionFallo` y `explicacionParcial`.
+   - `MockTarjetas`: las 10 tarjetas de `spr-1-3` tienen sus 3 impactos y 4 llevan micro-pregunta. La tarjeta de la GPL (`spr-2-1`) tiene los valores, la micro-pregunta y los 3 textos de Figma (bonus, parcial y fallo).
+2. **Lógica pura** (`LogicaVeredicto`):
+   - `calificar` devuelve correcto, parcial, incorrecto o Amparo, con sus XP, monedas, vida e impacto. `conBonus` suma los 5 XP de la micro-pregunta.
+   - `aplicar` deja cada indicador entre 0 y 100.
+   - `haQuebrado`: Riesgo legal en 100 o Presupuesto en 0.
+   - `destino`: quiebra → sin vidas → última tarjeta → siguiente.
+   - `explicacion` elige el texto según el resultado.
+3. **Estado del sprint** (`EstadoJuego` y `JuegoNotifier`):
+   - Guarda el estado de la Startup, vidas, XP, monedas, resultados (con bonus), falladas, el panel pendiente (con su fase: micro-pregunta, explicación o bonus) y si el Amparo está activo.
+   - `responder` califica y abre el panel. `elegirOpcion` y `saltarBonus` mueven la micro-pregunta. `cerrarPanel` decide el destino y solo avanza la tarjeta si toca la siguiente.
+   - El Amparo se gasta al absorber un error; `establecerAmparo` queda listo para T-07.
+4. **Componentes nuevos** (con pruebas y en la galería):
+   - `PanelVeredicto`: un solo componente con las 5 variantes de la tabla de `07-componentes.md`.
+   - `OpcionJustificacion`.
+   - `BloqueLectura`: lo extraje de la pantalla de juego para reusarlo en el panel.
+   - `IndicadoresStartup` ahora muestra el cambio junto a la barra (y la acorta para no pasar a dos filas) y anima el relleno.
+   - `ImpactoStartup` usa `texto/acento` para Presupuesto, como en Figma 12c.
+5. **Flujo en la pantalla:**
+   - Al confirmar (arrastre, botón, teclado o lector), la tarjeta sale volando. Al terminar el vuelo se ocultan el sello y el tinte, se califica y vibra según el tipo (en web no).
+   - Sube el panel: hoja modal sin descarte (no se cierra con Esc, atrás ni tocando fuera), con el velo de Figma, en 280 ms ease-out; con "reducir animaciones" aparece sin movimiento.
+   - Mientras está abierto, la barra de juego muestra las vidas nuevas y los indicadores, los valores nuevos con sus cambios.
+   - Al pulsar el botón se cierra y la app va a quiebra (`Rutas.startupQuiebraDe`), sin vidas (`Rutas.sinVidas`), sprint completado o la siguiente tarjeta. Las tres rutas son marcadores (`PANT-PENDIENTE`).
 
 ## Resultados
 `dart format --set-exit-if-changed lib test`: sin cambios.
@@ -63,69 +52,60 @@
 ```
 No issues found!
 ```
-`flutter test` (409 pruebas; antes 327):
+`flutter test` (474 pruebas; antes 409):
 ```
-+409: All tests passed!
++474: All tests passed!
 ```
-- `test/funciones/juego/logica_swipe_test.dart`: eje, sobre-eje, umbrales, dirección ↔ veredicto, progreso, ángulo con tope y signo, soltar (regresa, confirma, lanzamiento solo en su eje) y destino del vuelo.
-- `test/funciones/juego/juego_test.dart`:
-  - Contenido y medidas: contenido de Figma, tarjeta de 342 y sin desplazamiento en 390×844; número de sprint y color del módulo.
-  - Arrastre: las 4 direcciones confirman por encima del umbral (con la respuesta registrada) y regresan por debajo.
-  - Sello y tinte proporcionales, inclinación de −12° a la mitad del umbral y eje vertical sin inclinación.
-  - Otras formas de confirmar: lanzamiento, los 4 botones y teclado (flechas, cambio de flecha, Esc, Enter; Enter y Espacio con el foco en un botón).
-  - Accesibilidad: orden de foco 26b, y lector con anuncio, 4 acciones personalizadas ejecutables y región en vivo.
-  - Flujo: la pila se vacía, la última tarjeta lleva a sprint completado y "reducir animaciones" funciona.
-  - Salir: con y sin pila.
-  - Estados: cargando, error con reintento, sin tarjetas, inexistente, 0 vidas (sin pedir tarjetas) y sin sesión.
-  - **Sin desbordes** en 390×844, 360×640 y 320×640 al 100 % y 200 %, en claro y oscuro. En cada caso se recorre la pantalla, se desplaza desde la barra y se comprueba que un arrastre en la tarjeta confirma sin mover el desplazamiento.
-- `test/componentes/juego_componentes_test.dart`:
-  - Medidas, colores y semántica de cada componente en claro y oscuro.
-  - **Contraste ≥ 4.5:1** de `texto/acento` sobre el chip del caso con los 5 colores de módulo, y de las 4 pistas sobre `fondo/superficie`, en ambos modos.
-  - `BarraProgreso` dentro de `IntrinsicHeight`, tarjeta con texto al 200 % sin desbordes, pila de 0 a 2 capas y acciones en 280 al 200 %.
-- También:
-  - Intro con título largo y objetivo en minúscula; "Comenzar sprint" abre el juego real.
-  - Saludo del Inicio sin recortar.
-  - Mocks: 10 tarjetas 6/3/1 que coinciden con la intro, y Startup 70/60/50/25.
-  - Galería con los componentes del juego.
-- Con `git grep` comprobé que no haya `Color(0x…)` fuera de `lib/core/tema/`.
+- `test/funciones/juego/logica_veredicto_test.dart`:
+  - Calificación: correcto, bonus, parcial con Escalar (y no con Condicional ni Legal), Escalar cuando sí era Escalar, incorrecto, Amparo (+20 en lugar de +25), Amparo con aumento menor a 5 (queda en 0), y Amparo que no cambia un acierto ni un parcial.
+  - Indicadores: límites 0–100 y quiebra por Riesgo y por Presupuesto.
+  - Prioridad de destino y explicaciones por resultado.
+  - Mock: 10 tarjetas con impactos y 4 micro-preguntas.
+- `test/funciones/juego/veredicto_test.dart`:
+  - Las 5 variantes con XP, monedas, vidas, falladas e indicadores; micro-pregunta acertada, fallada y saltada.
+  - Panel modal: no se cierra con Esc, atrás ni tocando fuera; sello y tinte ocultos; velo de `#0B1220` al 40 %; título anunciado y con el foco.
+  - Destinos: última tarjeta, 0 vidas, quiebra por Riesgo con prioridad sobre 0 vidas, y quiebra por Presupuesto.
+  - Vibraciones: ligera, de selección y media.
+  - Sin desbordes con el panel abierto en 390×844 y 360×640 al 200 %, y 320×640 al 100 % y 200 %, en claro y oscuro.
+- `test/componentes/veredicto_componentes_test.dart`:
+  - Las 5 variantes en claro y oscuro: insignia, ícono, título, subtítulo, pose de Sarko, explicación y tipo de botón. Correcto con micro-pregunta y "Saltar bonus".
+  - Separación 14 (16 en Incorrecto).
+  - Accesibilidad: anuncio y foco del título, y orden de foco impacto → explicación → botón.
+  - **Contraste ≥ 4.5:1** de los 5 colores de título sobre `fondo/superficie`, del ícono sobre la insignia y de los 4 chips de impacto sobre su fondo, en ambos modos.
+  - Sin desbordes a 390/360 al 200 % y a 320.
+  - Indicadores con cambios y animación (salta con "reducir animaciones"), y `OpcionJustificacion`.
+- Ajusté las pruebas de T-05: ahora la tarjeta avanza al cerrar el panel (ayudante `cerrarPanel`). Galería con los 5 paneles.
 
 ## Decisiones
-- **Inclinación de los sellos** (DEC-SELLOS): el conector no da el ángulo. Lo calculé con las cajas giradas de Figma: alto 61, ancho 174 (Ilegal) y 163 (Legal), **14°**; Legal +14° e Ilegal −14°.
-  - Los sellos quedan fijos sobre la zona de la tarjeta, en las posiciones de Figma, y solo cambia su opacidad.
-  - Condicional y Escalar además se mueven, de su posición de reposo a la final, como pide la tarea.
-- **Gesto** (DEC-GESTO-TARJETA):
-  - La tarjeta usa un reconocedor que gana la arena al tocarla, para que la pantalla desplazable no le robe el gesto. La pantalla se desplaza desde fuera de la tarjeta.
-  - Por lo mismo, si el texto del caso no cabe, el contenido de la tarjeta se desplaza con la rueda del ratón o el lector, no arrastrándolo.
-  - La tarjeta se mueve solo sobre el eje bloqueado (en Figma 11 apenas baja unos 8 dp).
-- **Previsualización con teclado:** coloca la tarjeta justo en el umbral (sello al 100 % y tinte al 10 %). Al confirmar con un botón, la tarjeta vuela desde el umbral para que se vean el sello y el tinte.
-- **Alto mínimo de la zona:** 260 al 100 % de texto; con texto grande crece (`TarjetaCaso.altoMinimoPara`) para que el contenido básico quepa y la pantalla se vuelva desplazable.
-- **Sombra de la tarjeta:** (0, 16, 20) al 22 %, del nodo `10:5`. La de la miniatura del onboarding sigue igual.
-- **Comodines:** cantidades fijas (`ComodinesJuego`: 2, 1 y 1), porque el repositorio no las da todavía. Íconos search, briefcase y shield-check en `accion/acento`.
-- **Salir:** el diálogo usa `BotonApp` (secundario "Salir" y primario "Seguir jugando") con los colores del tema; no está en Figma.
-- **"Sin vidas":** se muestra como mensaje dentro de la pantalla de juego, con "Volver al mapa", en lugar de navegar a una ruta marcador.
+- **Panel como hoja modal** (DEC-PANEL-MODAL): `showModalBottomSheet` con `isDismissible: false`, `enableDrag: false` y `PopScope(canPop: false)`. La pantalla decide el destino al cerrarla.
+- **Sombra del panel:** (0, 16, 40) al 22 % ("Sombra/Elevada"), como dice `07-componentes.md`. El código de Figma la exporta como `drop-shadow(0 16 20)`, que es la misma sombra en CSS.
+- **Barras con cambio:** con un cambio al lado, la pista mide 44 en lugar de 68, para que las 4 columnas sigan en una fila como en Figma 14 (allí la pista es flexible).
+- **Sello y tinte tras el vuelo:** se ocultan hasta la siguiente tarjeta; en Figma 12 y 14 ya no se ven.
+- **Foco inicial:** el título del panel recibe el foco al abrirse, pero no dibuja el anillo. El anillo solo aparece al llegar navegando con teclado; antes se veía con el ratón en web.
+- **Explicación del Amparo:** usa la del fallo (`explicacionFallo`). Figma 14b tiene un texto propio que menciona el Amparo (ver D2).
+- **Íconos de la insignia:** check, star, arrow-down, x y shield-check de Lucide, que ya existían en `IconosApp`.
+
+## Límites conocidos
+- **Estado local:** vidas, XP, monedas, indicadores y falladas viven solo durante el sprint; los repositorios solo se leen al entrar. Lo guardará el servidor en T-14.
+- **Amparo sin activar:** existen el parámetro, el estado `amparoActivo` (falso por defecto) y la variante 14b, pero el comodín se activa en T-07. En las pruebas se activa a mano.
+- **Parcial solo con Escalar:** elegir Condicional cuando no era la respuesta cuenta como incorrecto (decisión de Chat).
+- **Falladas:** quedan en `EstadoJuego.falladas`; no van al Buzón hasta T-09.
 
 ## Grafo actualizado
-Toqué la sección 4 (Código), las filas PANT-10, 11, 11b, 11c, 13 y 26b (sección 5), la línea "Última actualización" y el registro de cambios. Comprobé que todas las rutas de `lib/` y `test/` del grafo existen.
+Toqué la sección 4 (Código), las filas PANT-12, 12b, 12c, 14 y 14b (sección 5), la línea "Última actualización" y el registro de cambios. Comprobé que todas las rutas de `lib/` y `test/` del grafo existen.
 - **Cambiados (`en curso`):**
   - App y rutas: ENRUTADOR, RUTAS y PANT-PENDIENTE.
   - Tema y textos: TEMA-EFECTOS y TEXTOS.
-  - Datos: MOD, MOCK-PROG y MOCK-TARJ.
-  - Pantallas: PANT-GALERIA, FUNC, CODIGO-PANT-07 y CODIGO-PANT-09.
-  - Componentes: COMP-PROGRESO.
-  - Pruebas: TEST-GALERIA, TEST-INICIO, TEST-MAPA, TEST-COMP, TEST-AYUDA y TEST-DATOS.
-- **Solo relaciones:** COMP-AVATAR, COMP-VEREDICTO y COMP-INDICADORES.
-- **Nuevos:**
-  - Lógica, estado y pantalla: LOGICA-SWIPE, EST-JUEGO, MAZO-SWIPE y CODIGO-PANT-10.
-  - Componentes: COMP-CERRAR, COMP-BARRA-JUEGO, COMP-TARJETA-CASO, COMP-PILA, COMP-SELLO, COMP-TINTE, COMP-ACCIONES y COMP-COMODINES.
-  - Pruebas: TEST-JUEGO.
-  - Decisiones: DEC-SELLOS y DEC-GESTO-TARJETA.
-- **Pantallas:** PANT-11, 11b, 11c y 13 dicen que son estados de arrastre de PANT-10 (misma ruta de código).
-- **Obsoletos:** ninguno. El texto `pendienteJuego` se reemplazó por `pendienteSprintCompletado`; no tenía nodo propio.
+  - Datos: MOD y MOCK-TARJ.
+  - Juego: EST-JUEGO, MAZO-SWIPE y CODIGO-PANT-10.
+  - Componentes: COMP-BOTON (solo relaciones), COMP-INDICADORES y COMP-IMPACTO.
+  - Galería y pruebas: PANT-GALERIA, TEST-GALERIA, TEST-JUEGO, TEST-COMP y TEST-DATOS.
+- **Nuevos:** LOGICA-VEREDICTO, COMP-BLOQUE-LECTURA, COMP-OPCION-JUSTIFICACION, COMP-PANEL-VEREDICTO, TEST-VEREDICTO y DEC-PANEL-MODAL.
+- **Obsoletos:** ninguno. La clase privada `_BloqueEnfocable` de la pantalla de juego se reemplazó por `BloqueLectura`; no tenía nodo propio.
 
 ## Dudas
-- **D1 · Saludo del Inicio en 390.** Con Inter, "Hola, Ana" y los tres chips (7, 240, 5) no caben en una fila de 342 por unos pocos dp, así que en 390 los chips pasan a la segunda fila. En Figma caben en una. ¿Se reducen las separaciones (avatar 10, chips 6) para que quepan, o se queda así?
-- **D2 · Tarjetas de los demás sprints.** Solo `spr-1-3` tiene las 10 tarjetas que anuncia su intro. `spr-1-2` y `spr-2-1` tienen 2 (sus intros dicen 8), y los demás sprints no tienen; al entrar, el juego muestra "Este sprint todavía no tiene tarjetas". ¿Se completan en otra tarea o cuando llegue el backend?
-- **D3 · Tarjeta sobre la barra y los botones.** Al arrastrar hacia arriba, la tarjeta pasa por encima de los indicadores; hacia abajo, por debajo de los botones de veredicto. Lo dejé así porque en Figma (11b y 11c) los botones van por encima de la tarjeta. ¿Es lo esperado?
-- **D4 · Tinte.** El tinte va detrás de todo el contenido (como dice la tarea), así que no tiñe la barra, los indicadores ni los botones; en Figma la capa del tinte queda por encima de la barra y los indicadores. ¿Se mantiene?
-- **D5 · Comodines y monedas.** Las cantidades de comodines son fijas en la pantalla. ¿Las dará `RepositorioTienda` (por ejemplo `obtenerComodines()`) en T-07?
-- **D6 · Tarjetas con evidencia y justificación.** Por ahora se ven como tarjeta normal (sin el fragmento de evidencia), como pide la tarea; se resuelven en T-07.
+- **D1 · Tarjeta de la GPL.** Figma muestra la GPL como la tarjeta 5 del Sprint 3 (Aviso de privacidad), pero en el mock está en `spr-2-1` (Licencias). Le puse ahí los valores y textos de Figma, y a las 10 de `spr-1-3` valores parecidos sobre privacidad. ¿Se mueve la GPL al Sprint 3, o se queda en Licencias?
+- **D2 · Texto del Amparo.** Figma 14b tiene una explicación propia ("Tu Amparo absorbió el error esta vez…"). ¿Se agrega un campo `explicacionAmparo` a la tarjeta, o un texto fijo que se añade a la explicación del fallo?
+- **D3 · Velo en modo oscuro.** El velo `#0B1220` al 40 % casi no se nota sobre el fondo oscuro. ¿Se usa otro valor en oscuro?
+- **D4 · Star de la insignia.** El ícono star de Lucide es de contorno; en el bonus de Figma también se ve de contorno, pero en la micro-pregunta parece relleno. Lo dejé de contorno en los dos. ¿Se rellena el de la micro-pregunta?
+- **D5 · XP y monedas fuera del sprint.** El XP y las monedas ganados no cambian todavía el nivel ni las monedas del Inicio (no hay guardado). ¿Se suma en T-06b o en T-14?

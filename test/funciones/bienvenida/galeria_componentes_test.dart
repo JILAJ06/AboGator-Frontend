@@ -17,7 +17,9 @@ import 'package:abogator/componentes/indicadores_startup.dart';
 import 'package:abogator/componentes/logo_app.dart';
 import 'package:abogator/componentes/navegacion_inferior_app.dart';
 import 'package:abogator/componentes/nodo_sprint.dart';
+import 'package:abogator/componentes/opcion_justificacion.dart';
 import 'package:abogator/componentes/paginador_puntos.dart';
+import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
 import 'package:abogator/componentes/sello_veredicto.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
@@ -31,7 +33,7 @@ import 'package:material_ui/material_ui.dart';
 /// Pantalla alta para que la galería entera quede construida.
 Future<void> montarGaleria(WidgetTester tester) async {
   await abrirGaleria(tester);
-  await agrandar(tester, const Size(390, 9000));
+  await agrandar(tester, const Size(390, 13000));
 }
 
 /// Agranda la superficie después de navegar (la transición de página no
@@ -58,16 +60,16 @@ void main() {
   testWidgets('la app abre en la galería con todos los componentes', (tester) async {
     await montarGaleria(tester);
     expect(find.text(Textos.galeriaTitulo), findsOneWidget);
-    expect(find.byType(BotonApp), findsNWidgets(9)); // 8 + el del globo
+    expect(find.byType(BotonApp), findsNWidgets(14)); // 8 + globo + 5 paneles
     expect(find.byType(BotonVeredicto), findsNWidgets(12)); // 8 + los de las acciones
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
     expect(find.byType(ChipHud), findsNWidgets(8)); // 5 + 2 encabezados + barra de juego
     expect(find.byType(FilaVidas), findsNWidgets(3));
     expect(find.byType(IndicadoresStartup), findsOneWidget);
-    expect(find.byType(ImpactoStartup), findsOneWidget);
+    expect(find.byType(ImpactoStartup), findsNWidgets(6)); // 1 + 5 paneles
     expect(find.byType(BarraProgreso), findsNWidgets(5)); // 4 + barra de juego
     expect(find.byType(PaginadorPuntos), findsOneWidget);
-    expect(find.byType(SarkoImagen), findsNWidgets(5));
+    expect(find.byType(SarkoImagen), findsNWidgets(10)); // 5 + 5 paneles
     expect(find.byType(LogoApp), findsNWidgets(20));
     expect(find.byType(NavegacionInferiorApp), findsOneWidget);
     expect(find.byType(EncabezadoModulo), findsNWidgets(2));
@@ -82,6 +84,11 @@ void main() {
     expect(find.byType(SelloVeredicto), findsNWidgets(4));
     expect(find.byType(AccionesVeredicto), findsOneWidget);
     expect(find.byType(BarraComodines), findsOneWidget);
+    expect(
+      tester.widgetList<PanelVeredicto>(find.byType(PanelVeredicto)).map((p) => p.tipo),
+      TipoPanelVeredicto.values,
+    );
+    expect(find.byType(OpcionJustificacion), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 
@@ -111,7 +118,7 @@ void main() {
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
       addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
       await abrirGaleria(tester);
-      await agrandar(tester, const Size(390, 16000));
+      await agrandar(tester, const Size(390, 22000));
       expect(tester.takeException(), isNull);
     });
   }
