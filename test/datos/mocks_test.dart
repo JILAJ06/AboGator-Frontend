@@ -104,7 +104,7 @@ void main() {
     expect((sprint.tarjetasNormales, sprint.tarjetasConEvidencia, sprint.dilemas), (6, 3, 1));
     expect(sprint.monedasMaximas, 60);
     expect(sprint.minutosEstimados, 4);
-    expect(sprint.objetivo, startsWith('El MVP sale a producción el viernes.'));
+    expect(sprint.objetivo, startsWith('el MVP sale a producción el viernes.'));
   });
 
   test('el usuario demo es Ana López, Dev, nivel 4 y racha 7', () {
@@ -120,6 +120,31 @@ void main() {
     expect(gpl.tipo, TipoTarjeta.evidencia);
     expect(gpl.respuestaCorrecta, Veredicto.ilegal);
     expect(gpl.evidencia, isNotNull);
+  });
+
+  test('el sprint en curso tiene 10 tarjetas: 6 normales, 3 con evidencia y 1 dilema', () async {
+    final tarjetas = await MockTarjetas(espera: Duration.zero).obtenerTarjetasDelSprint('spr-1-3');
+    expect(tarjetas, hasLength(10));
+    expect(tarjetas.where((t) => t.tipo == TipoTarjeta.normal), hasLength(6));
+    expect(tarjetas.where((t) => t.tipo == TipoTarjeta.evidencia), hasLength(3));
+    expect(tarjetas.where((t) => t.tipo == TipoTarjeta.justificacion), hasLength(1));
+    expect(
+      tarjetas.where((t) => t.tipo == TipoTarjeta.evidencia).every((t) => t.evidencia != null),
+      isTrue,
+    );
+    for (final t in MockTarjetas.tarjetasPorSprint.values.expand((l) => l)) {
+      expect(t.personaje, isNotEmpty);
+      expect(t.rol, isNotEmpty);
+      expect(t.etiquetaCaso, startsWith('CASO '));
+    }
+    // Coincide con lo que anuncia la intro del sprint.
+    final sprint = MockProgreso.modulos.first.sprints[2];
+    expect(sprint.numeroTarjetas, tarjetas.length);
+  });
+
+  test('el estado de la Startup del mock es el de Figma (70, 60, 50, 25)', () async {
+    final e = await MockProgreso(espera: Duration.zero).obtenerEstadoStartup();
+    expect((e.presupuesto, e.reputacion, e.velocidad, e.riesgoLegal), (70, 60, 50, 25));
   });
 
   test('MockTarjetas falla con un sprint inexistente', () async {

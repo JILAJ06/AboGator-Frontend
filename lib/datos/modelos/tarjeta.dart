@@ -21,6 +21,9 @@ class Tarjeta {
   const Tarjeta({
     required this.id,
     required this.tipo,
+    required this.etiquetaCaso,
+    required this.personaje,
+    required this.rol,
     required this.texto,
     required this.respuestaCorrecta,
     required this.explicacion,
@@ -29,6 +32,17 @@ class Tarjeta {
 
   final String id;
   final TipoTarjeta tipo;
+
+  /// Etiqueta del caso, por ejemplo "CASO 4 · LICENCIAS OSS".
+  final String etiquetaCaso;
+
+  /// Quien plantea el caso, por ejemplo "Dev Junior".
+  final String personaje;
+
+  /// Rol o equipo del personaje, por ejemplo "Equipo de Backend".
+  final String rol;
+
+  /// Texto del caso (va en el globo de la tarjeta).
   final String texto;
   final Veredicto respuestaCorrecta;
   final String explicacion;

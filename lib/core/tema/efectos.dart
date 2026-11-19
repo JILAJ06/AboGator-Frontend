@@ -116,6 +116,27 @@ abstract final class EfectosApp {
   static Color baseNodo(Color cara) =>
       _basesClaro[cara.toARGB32()] ?? Color.lerp(cara, const Color(0xFF000000), 0.35)!;
 
+  // ---------------------------------------------------------------------
+  // 10 Juego (Figma 37:1676)
+  // ---------------------------------------------------------------------
+
+  /// Sombra de la tarjeta de caso del juego (nodo 10:5): (0, 16), desenfoque
+  /// 20, #0F294A al 22 % (0x38).
+  static const List<BoxShadow> sombraTarjetaCaso = [
+    BoxShadow(color: Color(0x380F294A), offset: Offset(0, 16), blurRadius: 20),
+  ];
+
+  /// Opacidad de las tarjetas de la pila: Pila 1 al 80 % y Pila 2 al 50 %.
+  static const double opacidadPila1 = 0.8;
+  static const double opacidadPila2 = 0.5;
+
+  /// Inclinación de los sellos Legal (+14°) e Ilegal (−14°), calculada de
+  /// sus cajas en Figma (37:2134 y 37:2132).
+  static const double anguloSello = 14;
+
+  /// Espaciado de las letras de los sellos.
+  static const double espaciadoSello = 3;
+
   /// Sombra sólida inferior, sin desenfoque.
   static List<BoxShadow> sombraSolida(double desplazamiento) => [
     BoxShadow(color: colorSombraSolida, offset: Offset(0, desplazamiento)),

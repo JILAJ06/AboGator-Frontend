@@ -126,7 +126,8 @@ class _Contenido extends StatelessWidget {
 }
 
 /// Avatar y saludo a la izquierda; chips de racha, monedas y vidas a la derecha.
-/// Con texto grande o pantallas muy angostas, los chips bajan a otra fila.
+/// Con texto grande, pantallas muy angostas o si el saludo no cabe completo,
+/// los chips bajan a otra fila.
 class _Encabezado extends StatelessWidget {
   const _Encabezado({required this.usuario, required this.datos});
 
@@ -141,10 +142,11 @@ class _Encabezado extends StatelessWidget {
     final perfil = Textos.perfilYNivel(LogicaInicio.perfilCorto(usuario.perfil), usuario.nivel);
 
     final saludoBloque = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         AvatarApp(iniciales: LogicaInicio.iniciales(usuario.nombre)),
         const SizedBox(width: 10),
-        Expanded(
+        Flexible(
           child: Semantics(
             header: true,
             label: '$saludo. $perfil',
@@ -191,12 +193,16 @@ class _Encabezado extends StatelessWidget {
             children: [saludoBloque, const SizedBox(height: 10), chips],
           );
         }
-        return Row(
-          children: [
-            Expanded(child: saludoBloque),
-            const SizedBox(width: 6),
-            chips,
-          ],
+        // Saludo a la izquierda y chips a la derecha; si el saludo completo no
+        // cabe junto a los chips, los chips bajan a la segunda fila en lugar de
+        // recortar el nombre (D6 de T-04b).
+        return Wrap(
+          key: const ValueKey('encabezado-inicio'),
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 6,
+          runSpacing: 10,
+          children: [saludoBloque, chips],
         );
       },
     );

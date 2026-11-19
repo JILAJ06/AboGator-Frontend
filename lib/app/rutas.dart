@@ -71,6 +71,9 @@ abstract final class Rutas {
   /// 19 Sprint completado
   static const String sprintCompletado = '/juego/:sprintId/completado';
 
+  /// Ruta concreta de "Sprint completado" de un sprint.
+  static String sprintCompletadoDe(String sprintId) => '/juego/$sprintId/completado';
+
   /// 19b Startup en quiebra
   static const String startupQuiebra = '/juego/:sprintId/quiebra';
 

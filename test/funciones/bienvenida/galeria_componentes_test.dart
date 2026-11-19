@@ -1,6 +1,8 @@
 import 'package:abogator/app/app.dart';
 import 'package:abogator/app/enrutador.dart';
 import 'package:abogator/app/rutas.dart';
+import 'package:abogator/componentes/acciones_veredicto.dart';
+import 'package:abogator/componentes/barra_comodines.dart';
 import 'package:abogator/componentes/barra_progreso.dart';
 import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/boton_veredicto.dart';
@@ -17,6 +19,8 @@ import 'package:abogator/componentes/navegacion_inferior_app.dart';
 import 'package:abogator/componentes/nodo_sprint.dart';
 import 'package:abogator/componentes/paginador_puntos.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
+import 'package:abogator/componentes/sello_veredicto.dart';
+import 'package:abogator/componentes/tarjeta_caso.dart';
 import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/funciones/bienvenida/galeria_componentes.dart';
@@ -55,13 +59,13 @@ void main() {
     await montarGaleria(tester);
     expect(find.text(Textos.galeriaTitulo), findsOneWidget);
     expect(find.byType(BotonApp), findsNWidgets(9)); // 8 + el del globo
-    expect(find.byType(BotonVeredicto), findsNWidgets(8));
+    expect(find.byType(BotonVeredicto), findsNWidgets(12)); // 8 + los de las acciones
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
-    expect(find.byType(ChipHud), findsNWidgets(7)); // 5 + los de 2 encabezados
+    expect(find.byType(ChipHud), findsNWidgets(8)); // 5 + 2 encabezados + barra de juego
     expect(find.byType(FilaVidas), findsNWidgets(3));
     expect(find.byType(IndicadoresStartup), findsOneWidget);
     expect(find.byType(ImpactoStartup), findsOneWidget);
-    expect(find.byType(BarraProgreso), findsNWidgets(4));
+    expect(find.byType(BarraProgreso), findsNWidgets(5)); // 4 + barra de juego
     expect(find.byType(PaginadorPuntos), findsOneWidget);
     expect(find.byType(SarkoImagen), findsNWidgets(5));
     expect(find.byType(LogoApp), findsNWidgets(20));
@@ -74,6 +78,10 @@ void main() {
     );
     expect(find.byType(GloboSprintActual), findsOneWidget);
     expect(find.byType(FilaDetalleSprint), findsNWidgets(3));
+    expect(find.byType(TarjetaCaso), findsOneWidget);
+    expect(find.byType(SelloVeredicto), findsNWidgets(4));
+    expect(find.byType(AccionesVeredicto), findsOneWidget);
+    expect(find.byType(BarraComodines), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

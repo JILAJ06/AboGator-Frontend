@@ -27,49 +27,54 @@ class BarraProgreso extends StatelessWidget {
       label: etiquetaSemantica,
       value: '${(acotado * 100).round()} %',
       excludeSemantics: true,
-      child: LayoutBuilder(
-        builder: (context, restricciones) {
-          final total = restricciones.maxWidth;
-          final relleno = total * acotado;
-          return Container(
-            height: alto,
-            width: total,
-            decoration: BoxDecoration(
-              color: tokens.fondoSuperficieAlt,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Stack(
-              children: [
-                AnimatedContainer(
-                  key: const ValueKey('relleno-progreso'),
-                  duration: duracion,
-                  curve: Curves.easeOut,
-                  width: relleno,
-                  height: alto,
-                  decoration: BoxDecoration(
-                    color: tokens.accionPrimaria,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                if (relleno > 12)
-                  AnimatedPositioned(
+      // Alto fijo por fuera del LayoutBuilder: así la barra puede ir dentro de
+      // un IntrinsicHeight (pantalla de juego).
+      child: SizedBox(
+        height: alto,
+        child: LayoutBuilder(
+          builder: (context, restricciones) {
+            final total = restricciones.maxWidth;
+            final relleno = total * acotado;
+            return Container(
+              height: alto,
+              width: total,
+              decoration: BoxDecoration(
+                color: tokens.fondoSuperficieAlt,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Stack(
+                children: [
+                  AnimatedContainer(
+                    key: const ValueKey('relleno-progreso'),
                     duration: duracion,
                     curve: Curves.easeOut,
-                    left: 6,
-                    top: 2.5,
-                    width: relleno - 12,
-                    height: 3,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: EfectosApp.brilloBarra,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                    width: relleno,
+                    height: alto,
+                    decoration: BoxDecoration(
+                      color: tokens.accionPrimaria,
+                      borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-              ],
-            ),
-          );
-        },
+                  if (relleno > 12)
+                    AnimatedPositioned(
+                      duration: duracion,
+                      curve: Curves.easeOut,
+                      left: 6,
+                      top: 2.5,
+                      width: relleno - 12,
+                      height: 3,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: EfectosApp.brilloBarra,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

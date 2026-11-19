@@ -13,6 +13,7 @@ import 'package:abogator/componentes/navegacion_inferior_app.dart';
 import 'package:abogator/componentes/nodo_sprint.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
+import 'package:abogator/datos/mocks/mock_tarjetas.dart';
 import 'package:abogator/datos/mocks/mock_tienda.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
 import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
@@ -26,6 +27,7 @@ import 'package:abogator/datos/repositorios/repositorio_progreso.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/inicio/pantalla_inicio.dart';
+import 'package:abogator/funciones/juego/pantalla_juego.dart';
 import 'package:abogator/funciones/mapa/pantalla_intro_sprint.dart';
 import 'package:abogator/funciones/mapa/pantalla_mapa_sprints.dart';
 import 'package:flutter/services.dart';
@@ -110,6 +112,7 @@ Future<ProgresoFalso> abrir(
         repositorioProgresoProvider.overrideWithValue(progreso),
         repositorioTiendaProvider.overrideWithValue(MockTienda(espera: Duration.zero)),
         repositorioVidasProvider.overrideWithValue(MockVidas(espera: Duration.zero)),
+        repositorioTarjetasProvider.overrideWithValue(MockTarjetas(espera: Duration.zero)),
         repositorioApelacionesProvider.overrideWithValue(ApelacionesFalsas()),
         repositorioOnboardingProvider.overrideWithValue(OnboardingEnMemoria(vistoAlInicio: true)),
       ],
@@ -395,12 +398,13 @@ void main() {
       final semantica = tester.ensureSemantics();
       await abrir(tester, ruta: Rutas.introSprintDe('mod-1', 'spr-1-3'));
       expect(find.text('SPRINT 3 · MÓDULO 1'), findsOneWidget);
-      expect(find.text('Aviso de privacidad'), findsOneWidget);
+      // Título largo de la intro (D1 de T-04b).
+      expect(find.text('Aviso de privacidad en el MVP'), findsOneWidget);
       expect(
-        tester.getSemantics(find.bySemanticsLabel('Aviso de privacidad')),
+        tester.getSemantics(find.bySemanticsLabel('Aviso de privacidad en el MVP')),
         isSemantics(isHeader: true),
       );
-      expect(find.textContaining('Objetivo: El MVP sale a producción el viernes.'), findsOneWidget);
+      expect(find.textContaining('Objetivo: el MVP sale a producción el viernes.'), findsOneWidget);
       expect(find.text('10 tarjetas'), findsOneWidget);
       expect(find.text('6 normales · 3 con evidencia · 1 dilema'), findsOneWidget);
       expect(find.text('Hasta 60 monedas'), findsOneWidget);
@@ -426,7 +430,7 @@ void main() {
       expect(844 - boton.bottom, 16);
       await tester.tap(find.text(Textos.comenzarSprint));
       await tester.pumpAndSettle();
-      expect(find.text(Textos.pendienteJuego), findsOneWidget);
+      expect(find.byType(PantallaJuego), findsOneWidget);
       expect(rutaActual(tester), Rutas.juegoDe('spr-1-3'));
     });
 
@@ -441,7 +445,7 @@ void main() {
 
     testWidgets('Cerrar sin pila también va al mapa', (tester) async {
       await abrir(tester, ruta: Rutas.introSprintDe('mod-1', 'spr-1-1'));
-      await tester.tap(find.byKey(const ValueKey('cerrar-intro')));
+      await tester.tap(find.byKey(const ValueKey('caja-cerrar')));
       await tester.pumpAndSettle();
       expect(find.byType(PantallaMapaSprints), findsOneWidget);
     });
@@ -452,7 +456,7 @@ void main() {
       await abrir(tester, ruta: Rutas.inicio);
       await tocar(tester, find.text(Textos.continuarSprint));
       expect(find.byType(PantallaIntroSprint), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('cerrar-intro')));
+      await tester.tap(find.byKey(const ValueKey('caja-cerrar')));
       await tester.pumpAndSettle();
       expect(find.byType(PantallaMapaSprints), findsOneWidget);
     });
@@ -557,8 +561,8 @@ void main() {
     }
   });
 
-  testWidgets('el marcador del juego es una pantalla pendiente', (tester) async {
-    await abrir(tester, ruta: Rutas.juegoDe('spr-1-3'));
+  testWidgets('el marcador de sprint completado es una pantalla pendiente', (tester) async {
+    await abrir(tester, ruta: Rutas.sprintCompletadoDe('spr-1-3'));
     expect(find.byType(PantallaPendiente), findsOneWidget);
   });
 }

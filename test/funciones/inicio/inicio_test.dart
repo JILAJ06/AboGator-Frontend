@@ -25,6 +25,7 @@ import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/inicio/pantalla_inicio.dart';
 import 'package:abogator/funciones/mapa/pantalla_intro_sprint.dart';
 import 'package:abogator/funciones/mapa/pantalla_mapa_sprints.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -178,6 +179,16 @@ void main() {
     expect(tarjetas(tester).map((t) => t.completados), [2, 0, 5, 0, 0]);
     expect(find.text('MÓDULO 2 · LICENCIAS OPEN SOURCE'), findsOneWidget);
     expect(find.text('6'), findsOneWidget); // contador del Buzón
+  });
+
+  testWidgets('en 390 el saludo no se recorta: si no cabe, los chips bajan (D6)', (tester) async {
+    await abrirInicio(tester);
+    final saludo = tester.renderObject<RenderParagraph>(find.text('Hola, Ana'));
+    expect(saludo.didExceedMaxLines, isFalse);
+    final chips = tester.getRect(find.text('240'));
+    final texto = tester.getRect(find.text('Hola, Ana'));
+    // O caben en la misma fila (los chips a la derecha) o los chips van abajo.
+    expect(chips.left >= texto.right || chips.top >= texto.bottom, isTrue);
   });
 
   testWidgets('el título "Ruta de tu Startup" y el saludo son encabezados', (tester) async {

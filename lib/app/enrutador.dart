@@ -10,6 +10,7 @@ import '../funciones/bienvenida/galeria_componentes.dart';
 import '../funciones/bienvenida/pantalla_onboarding.dart';
 import '../funciones/bienvenida/pantalla_splash.dart';
 import '../funciones/inicio/pantalla_inicio.dart';
+import '../funciones/juego/pantalla_juego.dart';
 import '../funciones/mapa/pantalla_intro_sprint.dart';
 import '../funciones/mapa/pantalla_mapa_sprints.dart';
 import 'pantalla_pendiente.dart';
@@ -48,10 +49,16 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      // Marcadores hasta T-05, T-09, T-10 y T-11.
       GoRoute(
         path: Rutas.juego,
-        builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteJuego),
+        redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
+        builder: (context, state) => PantallaJuego(sprintId: state.pathParameters['sprintId']!),
+      ),
+      // Marcadores hasta T-06, T-09, T-10 y T-11.
+      GoRoute(
+        path: Rutas.sprintCompletado,
+        builder: (context, state) =>
+            const PantallaPendiente(texto: Textos.pendienteSprintCompletado),
       ),
       GoRoute(
         path: Rutas.crisisJefe,

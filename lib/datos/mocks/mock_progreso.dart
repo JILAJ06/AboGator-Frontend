@@ -53,7 +53,7 @@ class MockProgreso implements RepositorioProgreso {
     _final(
       prefijo,
       'Auditoría de inversores',
-      'Los inversores revisan tu Startup en una crisis de 72 horas.',
+      'los inversores revisan tu Startup en una crisis de 72 horas.',
     ),
   ];
 
@@ -67,22 +67,23 @@ class MockProgreso implements RepositorioProgreso {
         _sprint(
           'spr-1-1',
           'Datos personales',
-          'Identifica qué datos de tus usuarios son personales y cuáles son sensibles.',
+          'identifica qué datos de tus usuarios son personales y cuáles son sensibles.',
           estado: EstadoSprint.completado,
           estrellas: 3,
         ),
         _sprint(
           'spr-1-2',
           'Consentimiento',
-          'Decide cuándo necesitas el consentimiento de tus usuarios y cómo pedirlo.',
+          'decide cuándo necesitas el consentimiento de tus usuarios y cómo pedirlo.',
           estado: EstadoSprint.completado,
           estrellas: 3,
         ),
         const Sprint(
           id: 'spr-1-3',
           titulo: 'Aviso de privacidad',
+          tituloIntro: 'Aviso de privacidad en el MVP',
           objetivo:
-              'El MVP sale a producción el viernes. Revisa que el registro de usuarios '
+              'el MVP sale a producción el viernes. Revisa que el registro de usuarios '
               'cumpla con la LFPDPPP antes del lanzamiento.',
           tarjetasNormales: 6,
           tarjetasConEvidencia: 3,
@@ -94,17 +95,17 @@ class MockProgreso implements RepositorioProgreso {
         _sprint(
           'spr-1-4',
           'Derechos ARCO',
-          'Responde a tiempo las solicitudes de acceso, rectificación, cancelación y oposición.',
+          'responde a tiempo las solicitudes de acceso, rectificación, cancelación y oposición.',
         ),
         _sprint(
           'spr-1-5',
           'Brechas de seguridad',
-          'Hubo una fuga de datos: decide a quién avisar y qué hacer primero.',
+          'hubo una fuga de datos: decide a quién avisar y qué hacer primero.',
         ),
         _final(
           'spr-1',
           'Auditoría de inversores',
-          'Los inversores auditan cómo tratas los datos de tus usuarios en una crisis de 72 horas.',
+          'los inversores auditan cómo tratas los datos de tus usuarios en una crisis de 72 horas.',
         ),
       ],
     ),
@@ -114,11 +115,11 @@ class MockProgreso implements RepositorioProgreso {
       nombre: 'Licencias y Propiedad Intelectual',
       color: ColoresModulo.licenciasYPropiedadIntelectual,
       sprints: _bloqueados('spr-2', [
-        ('Software libre y copyleft', 'Usa librerías GPL sin poner en riesgo tu código cerrado.'),
-        ('Licencias permisivas', 'Cumple las condiciones de MIT, BSD y Apache 2.0.'),
-        ('Derechos de autor del código', 'Define quién es dueño del código que escribe tu equipo.'),
-        ('Marcas y patentes de software', 'Protege el nombre y las ideas de tu Startup.'),
-        ('Contenido generado con IA', 'Decide si puedes usar código e imágenes creados con IA.'),
+        ('Software libre y copyleft', 'usa librerías GPL sin poner en riesgo tu código cerrado.'),
+        ('Licencias permisivas', 'cumple las condiciones de MIT, BSD y Apache 2.0.'),
+        ('Derechos de autor del código', 'define quién es dueño del código que escribe tu equipo.'),
+        ('Marcas y patentes de software', 'protege el nombre y las ideas de tu Startup.'),
+        ('Contenido generado con IA', 'decide si puedes usar código e imágenes creados con IA.'),
       ]),
     ),
     Modulo(
@@ -127,11 +128,11 @@ class MockProgreso implements RepositorioProgreso {
       nombre: 'Delitos Informáticos',
       color: ColoresModulo.delitosInformaticos,
       sprints: _bloqueados('spr-3', [
-        ('Acceso ilícito a sistemas', 'Distingue una prueba autorizada de un acceso ilícito.'),
-        ('Fraude informático', 'Detecta operaciones que podrían ser fraude.'),
-        ('Suplantación de identidad', 'Protege a tus usuarios del robo de identidad.'),
-        ('Evidencia digital', 'Conserva la evidencia de un incidente sin alterarla.'),
-        ('Denuncia y cooperación', 'Decide cuándo denunciar y cómo cooperar con la autoridad.'),
+        ('Acceso ilícito a sistemas', 'distingue una prueba autorizada de un acceso ilícito.'),
+        ('Fraude informático', 'detecta operaciones que podrían ser fraude.'),
+        ('Suplantación de identidad', 'protege a tus usuarios del robo de identidad.'),
+        ('Evidencia digital', 'conserva la evidencia de un incidente sin alterarla.'),
+        ('Denuncia y cooperación', 'decide cuándo denunciar y cómo cooperar con la autoridad.'),
       ]),
     ),
     Modulo(
@@ -140,11 +141,11 @@ class MockProgreso implements RepositorioProgreso {
       nombre: 'Contratos Digitales',
       color: ColoresModulo.contratosDigitales,
       sprints: _bloqueados('spr-4', [
-        ('Términos y condiciones', 'Redacta términos claros y válidos para tu app.'),
-        ('Contratos de desarrollo', 'Acuerda entregables y propiedad con tus proveedores.'),
-        ('Niveles de servicio (SLA)', 'Define qué pasa si tu servicio se cae.'),
-        ('Firma electrónica', 'Usa la firma electrónica con validez legal.'),
-        ('Comercio electrónico', 'Cumple las reglas de venta en línea y devoluciones.'),
+        ('Términos y condiciones', 'redacta términos claros y válidos para tu app.'),
+        ('Contratos de desarrollo', 'acuerda entregables y propiedad con tus proveedores.'),
+        ('Niveles de servicio (SLA)', 'define qué pasa si tu servicio se cae.'),
+        ('Firma electrónica', 'usa la firma electrónica con validez legal.'),
+        ('Comercio electrónico', 'cumple las reglas de venta en línea y devoluciones.'),
       ]),
     ),
     Modulo(
@@ -153,11 +154,11 @@ class MockProgreso implements RepositorioProgreso {
       nombre: 'Auditoría y Cumplimiento',
       color: ColoresModulo.auditoriaYCumplimiento,
       sprints: _bloqueados('spr-5', [
-        ('Controles internos', 'Diseña controles que eviten errores y abusos.'),
-        ('Normas ISO 27001', 'Prepara tu Startup para una certificación de seguridad.'),
-        ('Gestión de riesgos', 'Prioriza los riesgos legales y técnicos.'),
-        ('Auditoría externa', 'Atiende a un auditor externo sin sorpresas.'),
-        ('Cumplimiento continuo', 'Mantén el cumplimiento mientras tu Startup crece.'),
+        ('Controles internos', 'diseña controles que eviten errores y abusos.'),
+        ('Normas ISO 27001', 'prepara tu Startup para una certificación de seguridad.'),
+        ('Gestión de riesgos', 'prioriza los riesgos legales y técnicos.'),
+        ('Auditoría externa', 'atiende a un auditor externo sin sorpresas.'),
+        ('Cumplimiento continuo', 'mantén el cumplimiento mientras tu Startup crece.'),
       ]),
     ),
   ];
@@ -171,6 +172,6 @@ class MockProgreso implements RepositorioProgreso {
   @override
   Future<EstadoStartup> obtenerEstadoStartup() async {
     await esperar(espera);
-    return const EstadoStartup(presupuesto: 70, reputacion: 55, velocidad: 60, riesgoLegal: 25);
+    return const EstadoStartup(presupuesto: 70, reputacion: 60, velocidad: 50, riesgoLegal: 25);
   }
 }
