@@ -15,6 +15,9 @@ enum TipoBoton { primario, secundario, acento, peligro, fantasma }
 ///
 /// Estado presionado (decisión, no está en Figma): baja 2 dp y la sombra
 /// pasa de 4 a 2. Con "reducir animaciones" el cambio es inmediato.
+///
+/// Con [cargando] el botón conserva sus colores, no responde, muestra un
+/// indicador de progreso en lugar del texto y se anuncia con [textoCargando].
 class BotonApp extends StatefulWidget {
   const BotonApp({
     required this.texto,
@@ -23,6 +26,8 @@ class BotonApp extends StatefulWidget {
     this.iconoInicio,
     this.iconoFin,
     this.expandido = true,
+    this.cargando = false,
+    this.textoCargando,
     super.key,
   });
 
@@ -42,6 +47,12 @@ class BotonApp extends StatefulWidget {
   /// `true`: ocupa el ancho del contenedor. `false`: ancho intrínseco.
   final bool expandido;
 
+  /// Envío en curso: sin respuesta al toque y con indicador de progreso.
+  final bool cargando;
+
+  /// Lo que se anuncia mientras carga (por ejemplo "Iniciando sesión").
+  final String? textoCargando;
+
   @override
   State<BotonApp> createState() => _BotonAppState();
 }
@@ -50,7 +61,10 @@ class _BotonAppState extends State<BotonApp> {
   bool _presionado = false;
   bool _foco = false;
 
-  bool get _habilitado => widget.alPresionar != null;
+  bool get _habilitado => widget.alPresionar != null && !widget.cargando;
+
+  /// Mientras carga conserva el aspecto de su tipo (no el gris de deshabilitado).
+  bool get _aspectoHabilitado => widget.alPresionar != null;
 
   void _cambiarPresionado(bool valor) {
     if (_habilitado && _presionado != valor) {
@@ -60,7 +74,7 @@ class _BotonAppState extends State<BotonApp> {
 
   @override
   Widget build(BuildContext context) {
-    final estilo = _EstiloBoton.de(widget.tipo, context.tokens, habilitado: _habilitado);
+    final estilo = _EstiloBoton.de(widget.tipo, context.tokens, habilitado: _aspectoHabilitado);
     final estiloTexto = context.estilos.boton.copyWith(color: estilo.texto);
     final bajada = _presionado ? 2.0 : 0.0;
     final sombra = estilo.conSombra ? EfectosApp.sombraSolida(_presionado ? 2 : 4) : null;
@@ -69,19 +83,30 @@ class _BotonAppState extends State<BotonApp> {
     final contenido = Row(
       mainAxisSize: widget.expandido ? MainAxisSize.max : MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (widget.iconoInicio != null) ...[
-          IconoApp(widget.iconoInicio!, tamano: BotonApp.tamanoIcono, color: estilo.texto),
-          const SizedBox(width: 8),
-        ],
-        Flexible(
-          child: Text(widget.texto, style: estiloTexto, textAlign: TextAlign.center),
-        ),
-        if (widget.iconoFin != null) ...[
-          const SizedBox(width: 8),
-          IconoApp(widget.iconoFin!, tamano: BotonApp.tamanoIcono, color: estilo.texto),
-        ],
-      ],
+      children: widget.cargando
+          ? [
+              SizedBox.square(
+                key: const ValueKey('progreso-boton'),
+                dimension: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(estilo.texto),
+                ),
+              ),
+            ]
+          : [
+              if (widget.iconoInicio != null) ...[
+                IconoApp(widget.iconoInicio!, tamano: BotonApp.tamanoIcono, color: estilo.texto),
+                const SizedBox(width: 8),
+              ],
+              Flexible(
+                child: Text(widget.texto, style: estiloTexto, textAlign: TextAlign.center),
+              ),
+              if (widget.iconoFin != null) ...[
+                const SizedBox(width: 8),
+                IconoApp(widget.iconoFin!, tamano: BotonApp.tamanoIcono, color: estilo.texto),
+              ],
+            ],
     );
 
     final caja = AnimatedContainer(
@@ -101,8 +126,9 @@ class _BotonAppState extends State<BotonApp> {
     return Semantics(
       button: true,
       enabled: _habilitado,
-      label: widget.texto,
-      onTap: widget.alPresionar,
+      liveRegion: widget.cargando,
+      label: widget.cargando ? (widget.textoCargando ?? widget.texto) : widget.texto,
+      onTap: _habilitado ? widget.alPresionar : null,
       excludeSemantics: true,
       child: FocusableActionDetector(
         enabled: _habilitado,
@@ -111,14 +137,14 @@ class _BotonAppState extends State<BotonApp> {
         actions: {
           ActivateIntent: CallbackAction<ActivateIntent>(
             onInvoke: (_) {
-              widget.alPresionar?.call();
+              if (_habilitado) widget.alPresionar?.call();
               return null;
             },
           ),
         },
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: widget.alPresionar,
+          onTap: _habilitado ? widget.alPresionar : null,
           onTapDown: (_) => _cambiarPresionado(true),
           onTapUp: (_) => _cambiarPresionado(false),
           onTapCancel: () => _cambiarPresionado(false),
