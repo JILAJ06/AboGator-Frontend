@@ -41,6 +41,6 @@ class MockTienda implements RepositorioTienda {
   @override
   Future<int> obtenerMonedas() async {
     await esperar(espera);
-    return 340;
+    return 240;
   }
 }

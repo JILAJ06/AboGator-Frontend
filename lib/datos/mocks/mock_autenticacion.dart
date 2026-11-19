@@ -15,12 +15,12 @@ class MockAutenticacion implements RepositorioAutenticacion {
 
   static const Usuario usuarioDemo = Usuario(
     id: 'usr-001',
-    nombre: 'Valeria Ríos',
-    correo: 'valeria@ejemplo.mx',
+    nombre: 'Ana López',
+    correo: 'ana@ejemplo.mx',
     perfil: PerfilUsuario.desarrollador,
-    nivel: 3,
+    nivel: 4,
     xp: 1250,
-    racha: 4,
+    racha: 7,
   );
 
   @override

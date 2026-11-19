@@ -7,15 +7,14 @@ import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/funciones/inicio/logica_inicio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../ayudantes/datos.dart';
+
 Modulo modulo(List<EstadoSprint> estados, {int numero = 1, String id = 'm'}) => Modulo(
   id: id,
   numero: numero,
   nombre: 'Módulo $numero',
   color: ColoresModulo.enOrden[numero - 1],
-  sprints: [
-    for (final (i, e) in estados.indexed)
-      Sprint(id: '$id-$i', titulo: 'S$i', numeroTarjetas: 8, estado: e),
-  ],
+  sprints: [for (final (i, e) in estados.indexed) sprintDePrueba('$id-$i', e, titulo: 'S$i')],
 );
 
 const b = EstadoSprint.bloqueado;
@@ -51,6 +50,16 @@ void main() {
     expect(LogicaInicio.completados(modulo([h, h, c, b, b])), 2);
   });
 
+  test('el Examen final no cuenta en el progreso ni en el total', () {
+    final conFinal = moduloDePrueba(1, [h, h, h, h, h], conFinal: true, estadoFinal: h);
+    expect(LogicaInicio.sprintsNormales(conFinal), hasLength(5));
+    expect(LogicaInicio.totalSprints(conFinal), 5);
+    expect(LogicaInicio.completados(conFinal), 5);
+    // Con el final disponible no hay sprint "actual" en ese módulo.
+    final soloFinal = moduloDePrueba(1, [h, h], conFinal: true, estadoFinal: d);
+    expect(LogicaInicio.actual([soloFinal]), isNull);
+  });
+
   test('módulo y sprint actuales', () {
     final primero = modulo([h, h, b], id: 'a');
     final segundo = modulo([h, c, b], numero: 2, id: 'b');
@@ -76,7 +85,9 @@ void main() {
     expect(LogicaInicio.completados(modulos.first), 2);
     final actual = LogicaInicio.actual(modulos)!;
     expect(actual.numeroSprint, 3);
-    expect(actual.modulo.sprints, hasLength(5));
+    expect(actual.sprint.titulo, 'Aviso de privacidad');
+    expect(actual.modulo.sprints, hasLength(6));
+    expect(LogicaInicio.totalSprints(actual.modulo), 5);
     for (final m in modulos.skip(1)) {
       expect(LogicaInicio.estadoDe(m), EstadoModulo.bloqueado);
     }

@@ -78,10 +78,40 @@ void main() {
   test('MockProgreso devuelve los 5 módulos en orden', () async {
     final modulos = await MockProgreso(espera: Duration.zero).obtenerModulos();
     expect(modulos.map((m) => m.numero), [1, 2, 3, 4, 5]);
-    expect(modulos.every((m) => m.sprints.length == 5), isTrue);
-    final primero = modulos.first.sprints.map((s) => s.estado).toList();
-    expect(primero.where((e) => e == EstadoSprint.completado), hasLength(2));
-    expect(primero[2], EstadoSprint.enCurso);
+    // 5 sprints más el Examen final, que va al último.
+    for (final m in modulos) {
+      expect(m.sprints, hasLength(6));
+      expect(m.sprints.last.esExamenFinal, isTrue);
+      expect(m.sprints.where((s) => s.esExamenFinal), hasLength(1));
+    }
+    final primero = modulos.first.sprints;
+    expect(primero.map((s) => s.titulo), [
+      'Datos personales',
+      'Consentimiento',
+      'Aviso de privacidad',
+      'Derechos ARCO',
+      'Brechas de seguridad',
+      'Auditoría de inversores',
+    ]);
+    expect(primero.map((s) => s.estado).where((e) => e == EstadoSprint.completado), hasLength(2));
+    expect(primero.take(2).map((s) => s.estrellas), [3, 3]);
+    expect(primero[2].estado, EstadoSprint.enCurso);
+  });
+
+  test('el sprint 3 del módulo 1 tiene los datos de Figma', () {
+    final sprint = MockProgreso.modulos.first.sprints[2];
+    expect(sprint.numeroTarjetas, 10);
+    expect((sprint.tarjetasNormales, sprint.tarjetasConEvidencia, sprint.dilemas), (6, 3, 1));
+    expect(sprint.monedasMaximas, 60);
+    expect(sprint.minutosEstimados, 4);
+    expect(sprint.objetivo, startsWith('El MVP sale a producción el viernes.'));
+  });
+
+  test('el usuario demo es Ana López, Dev, nivel 4 y racha 7', () {
+    const ana = MockAutenticacion.usuarioDemo;
+    expect(ana.nombre, 'Ana López');
+    expect(ana.perfil, PerfilUsuario.desarrollador);
+    expect((ana.nivel, ana.racha), (4, 7));
   });
 
   test('MockTarjetas incluye la tarjeta "Librería GPL en app cerrada"', () async {
@@ -99,13 +129,21 @@ void main() {
     );
   });
 
+  test('MockVidas da 5 vidas y 240 monedas en la tienda', () async {
+    final vidas = await MockVidas(espera: Duration.zero).obtenerVidas();
+    expect(vidas.cantidad, Vidas.maximo);
+    expect(vidas.proximaEn, isNull);
+    expect(await MockTienda(espera: Duration.zero).obtenerMonedas(), 240);
+  });
+
   test('MockVidas toma la hora del servidor, no del dispositivo', () async {
     final servidor = DateTime.utc(2026, 1, 1, 12);
     final vidas = await MockVidas(
       espera: Duration.zero,
+      cantidad: 3,
       ahoraServidor: () => servidor,
     ).obtenerVidas();
-    expect(vidas.cantidad, lessThanOrEqualTo(Vidas.maximo));
+    expect(vidas.cantidad, 3);
     expect(vidas.proximaEn!.isAfter(servidor), isTrue);
   });
 
