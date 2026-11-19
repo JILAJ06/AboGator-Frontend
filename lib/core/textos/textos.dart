@@ -316,9 +316,38 @@ abstract final class Textos {
   static String veredictoAnuncio(String accion) => 'Veredicto: $accion';
 
   // ---------------------------------------------------------------------
+  // 12, 12b, 12c, 14 y 14b Panel de veredicto
+  // ---------------------------------------------------------------------
+  static const String veredictoCorrectoTitulo = '¡Veredicto correcto!';
+  static const String bonusGanadoTitulo = '¡Bonus ganado!';
+  static const String respuestaParcialTitulo = 'Respuesta parcial';
+  static const String veredictoIncorrectoTitulo = 'Veredicto incorrecto';
+  static const String amparoTitulo = '¡El Amparo te protegió!';
+  static String correctoSubtitulo(int xp, int monedas) =>
+      '+$xp XP  ·  ${monedas == 1 ? '+1 moneda' : '+$monedas monedas'}';
+  static String bonusSubtitulo(int xp, int monedas) =>
+      '+$xp XP en total  ·  ${monedas == 1 ? '+1 moneda' : '+$monedas monedas'}';
+  static String parcialSubtitulo(int xp) => '+$xp XP  ·  no pierdes vida';
+  static const String incorrectoSubtitulo = '−1 vida  ·  Se guarda en tu Buzón de Apelaciones';
+  static const String amparoSubtitulo = 'Veredicto incorrecto · conservas tu vida';
+  static const String porQue = '¿Por qué?';
+  static String bonusPregunta(int xp, String enunciado) => 'Bonus +$xp XP: $enunciado';
+  static const String saltarBonus = 'Saltar bonus';
+  static const String continuar = 'Continuar';
+  static const String entendido = 'Entendido';
+  static const String sinCambios = 'sin cambios';
+  static String impactoAnuncio(List<String> cambios) =>
+      'Impacto: ${cambios.isEmpty ? sinCambios : cambios.join(', ')}';
+  static String panelAnuncio(String titulo, String subtitulo, String impacto) =>
+      '$titulo. ${subtitulo.replaceAll('  ', ' ')}. $impacto';
+  static String opcionSemantica(String opcion, int posicion, int total) =>
+      'Opción $posicion de $total: $opcion';
+
+  // ---------------------------------------------------------------------
   // Pantallas pendientes (marcadores temporales)
   // ---------------------------------------------------------------------
-  static const String pendienteSprintCompletado = 'Sprint completado · llega en T-06';
+  static const String pendienteSprintCompletado = 'Sprint completado · llega en T-06b';
+  static const String pendienteQuiebra = 'Startup en quiebra · llega en T-06b';
   static const String pendienteJefe = 'Examen final · llega en T-11';
   static const String pendienteBuzon = 'Buzón · llega en T-09';
   static const String pendienteTienda = 'Tienda · llega en T-10';
@@ -340,6 +369,7 @@ abstract final class Textos {
   static const String galeriaInicio = 'Componentes del Inicio';
   static const String galeriaMapa = 'Componentes del mapa y la intro del sprint';
   static const String galeriaJuego = 'Componentes del juego';
+  static const String galeriaVeredicto = 'Paneles de veredicto';
   static const String galeriaChips = 'Chips HUD';
   static const String galeriaVidas = 'Vidas';
   static const String galeriaIndicadores = 'Indicadores de la Startup';

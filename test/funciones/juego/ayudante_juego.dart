@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:abogator/app/app.dart';
 import 'package:abogator/app/enrutador.dart';
 import 'package:abogator/app/rutas.dart';
+import 'package:abogator/componentes/boton_app.dart';
+import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
 import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
@@ -138,4 +140,21 @@ bool contiene<T extends Widget>(BuildContext? contexto) {
 
   (contexto as Element).visitChildElements(visitar);
   return encontrado;
+}
+
+/// Cierra el panel de veredicto abierto: si hay micro-pregunta, primero
+/// "Saltar bonus"; luego el botón del panel ("Continuar" o "Entendido").
+Future<void> cerrarPanel(WidgetTester tester, {bool settle = true}) async {
+  for (var i = 0; i < 3; i++) {
+    final boton = find.descendant(of: find.byType(PanelVeredicto), matching: find.byType(BotonApp));
+    if (boton.evaluate().isEmpty) return;
+    await tester.ensureVisible(boton);
+    await tester.tap(boton);
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+      await tester.pump();
+    }
+  }
 }

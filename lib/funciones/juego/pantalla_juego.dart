@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,20 +6,23 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/rutas.dart';
 import '../../componentes/acciones_veredicto.dart';
-import '../../componentes/anillo_foco.dart';
 import '../../componentes/barra_comodines.dart';
 import '../../componentes/barra_juego.dart';
+import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/indicadores_startup.dart';
 import '../../componentes/mensaje_pantalla.dart';
+import '../../componentes/panel_veredicto.dart';
 import '../../componentes/tarjeta_caso.dart';
 import '../../componentes/tinte_veredicto.dart';
+import '../../core/tema/efectos.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/modelos/tarjeta.dart';
 import '../inicio/logica_inicio.dart';
 import 'estado_juego.dart';
 import 'logica_swipe.dart';
+import 'logica_veredicto.dart';
 import 'mazo_swipe.dart';
 
 /// Pantalla 10 · Juego: tarjeta de caso que se arrastra en 4 direcciones.
@@ -87,10 +91,62 @@ class _JuegoState extends ConsumerState<_Juego> {
     super.dispose();
   }
 
-  void _alConfirmar(Tarjeta tarjeta, Veredicto veredicto) {
-    ref.read(juegoProvider(widget.sprintId).notifier).responder(tarjeta, veredicto);
-    if (ref.read(juegoProvider(widget.sprintId)).indice >= widget.datos.tarjetas.length) {
-      context.go(Rutas.sprintCompletadoDe(widget.sprintId));
+  JuegoNotifier get _juego => ref.read(juegoProvider(widget.sprintId).notifier);
+
+  /// Tras el vuelo de la tarjeta: califica, abre el panel (modal sin
+  /// descarte) y, al cerrarlo, resuelve qué sigue.
+  Future<void> _alConfirmar(Tarjeta tarjeta, Veredicto veredicto) async {
+    final resultado = _juego.responder(tarjeta, veredicto);
+    _vibrar(resultado.tipo);
+    final sinAnimaciones = MediaQuery.disableAnimationsOf(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      backgroundColor: const Color(0x00000000),
+      elevation: 0,
+      barrierColor: EfectosApp.colorVelo,
+      sheetAnimationStyle: sinAnimaciones
+          ? AnimationStyle.noAnimation
+          : const AnimationStyle(
+              duration: EfectosApp.duracionPanel,
+              reverseDuration: EfectosApp.duracionPanel,
+              curve: Curves.easeOut,
+            ),
+      builder: (contexto) => PopScope(
+        canPop: false,
+        child: _PanelDelJuego(
+          sprintId: widget.sprintId,
+          alCerrar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    final destino = _juego.cerrarPanel(totalTarjetas: widget.datos.tarjetas.length);
+    switch (destino) {
+      case DestinoVeredicto.quiebra:
+        context.go(Rutas.startupQuiebraDe(widget.sprintId));
+      case DestinoVeredicto.sinVidas:
+        context.go(Rutas.sinVidas);
+      case DestinoVeredicto.sprintCompletado:
+        context.go(Rutas.sprintCompletadoDe(widget.sprintId));
+      case DestinoVeredicto.siguiente:
+        break;
+    }
+  }
+
+  /// Vibración según el resultado (no hay en web): correcto ligera, parcial
+  /// de selección, error y Amparo media.
+  static void _vibrar(TipoVeredicto tipo) {
+    if (kIsWeb) return;
+    switch (tipo) {
+      case TipoVeredicto.correcto:
+        HapticFeedback.lightImpact();
+      case TipoVeredicto.parcial:
+        HapticFeedback.selectionClick();
+      case TipoVeredicto.incorrecto || TipoVeredicto.amparo:
+        HapticFeedback.mediumImpact();
     }
   }
 
@@ -152,15 +208,20 @@ class _JuegoState extends ConsumerState<_Juego> {
           numeroSprint: datos.numeroSprint,
           actual: indice + 1,
           total: total,
-          vidas: datos.vidas.cantidad,
+          vidas: progreso.vidas,
           alSalir: _salir,
         ),
         const SizedBox(height: 2),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: _BloqueEnfocable(
+          child: BloqueLectura(
             etiqueta: Textos.indicadoresSemantica,
-            child: IndicadoresStartup(estado: datos.estadoStartup!),
+            child: IndicadoresStartup(
+              estado: progreso.estadoStartup,
+              cambios: progreso.panel == null
+                  ? const {}
+                  : cambiosDe(progreso.panel!.resultado.impacto),
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -214,7 +275,7 @@ class _JuegoState extends ConsumerState<_Juego> {
         const SizedBox(height: 22),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
-          child: _BloqueEnfocable(
+          child: BloqueLectura(
             etiqueta: Textos.comodinesTitulo,
             child: BarraComodines(
               lupa: ComodinesJuego.lupa,
@@ -260,32 +321,53 @@ class _JuegoState extends ConsumerState<_Juego> {
   }
 }
 
-/// Bloque que se lee completo y recibe foco con teclado (indicadores y
-/// comodines, como en el orden de foco de Figma 26b). No hace nada al
-/// activarlo.
-class _BloqueEnfocable extends StatefulWidget {
-  const _BloqueEnfocable({required this.etiqueta, required this.child});
+/// Cambios de un impacto por indicador (para el panel y las barras).
+Map<IndicadorStartup, int> cambiosDe(ImpactoTarjeta i) => {
+  IndicadorStartup.presupuesto: i.presupuesto,
+  IndicadorStartup.reputacion: i.reputacion,
+  IndicadorStartup.velocidad: i.velocidad,
+  IndicadorStartup.riesgoLegal: i.riesgoLegal,
+};
 
-  final String etiqueta;
-  final Widget child;
+/// Panel del veredicto en curso: sigue al estado del juego (micro-pregunta,
+/// bonus o explicación).
+class _PanelDelJuego extends ConsumerWidget {
+  const _PanelDelJuego({required this.sprintId, required this.alCerrar});
+
+  final String sprintId;
+  final VoidCallback alCerrar;
 
   @override
-  State<_BloqueEnfocable> createState() => _BloqueEnfocableState();
-}
-
-class _BloqueEnfocableState extends State<_BloqueEnfocable> {
-  bool _foco = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      container: true,
-      label: widget.etiqueta,
-      child: MergeSemantics(
-        child: FocusableActionDetector(
-          onShowFocusHighlight: (valor) => setState(() => _foco = valor),
-          child: AnilloFoco(visible: _foco, radio: 16, child: widget.child),
-        ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final panel = ref.watch(juegoProvider(sprintId).select((e) => e.panel));
+    if (panel == null) return const SizedBox.shrink();
+    final juego = ref.read(juegoProvider(sprintId).notifier);
+    final r = panel.resultado;
+    final (tipo, subtitulo) = switch (r.tipo) {
+      TipoVeredicto.correcto when panel.fase == FasePanel.bonus => (
+        TipoPanelVeredicto.bonus,
+        Textos.bonusSubtitulo(r.xp, r.monedas),
+      ),
+      TipoVeredicto.correcto => (
+        TipoPanelVeredicto.correcto,
+        Textos.correctoSubtitulo(r.xp, r.monedas),
+      ),
+      TipoVeredicto.parcial => (TipoPanelVeredicto.parcial, Textos.parcialSubtitulo(r.xp)),
+      TipoVeredicto.incorrecto => (TipoPanelVeredicto.incorrecto, Textos.incorrectoSubtitulo),
+      TipoVeredicto.amparo => (TipoPanelVeredicto.amparo, Textos.amparoSubtitulo),
+    };
+    final conPregunta = panel.fase == FasePanel.microPregunta;
+    final alto = MediaQuery.sizeOf(context).height;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: alto * 0.92),
+      child: PanelVeredicto(
+        tipo: tipo,
+        subtitulo: subtitulo,
+        cambios: cambiosDe(r.impacto),
+        explicacion: LogicaVeredicto.explicacion(panel.tarjeta, r.tipo),
+        microPregunta: conPregunta ? panel.tarjeta.microPregunta : null,
+        alElegirOpcion: juego.elegirOpcion,
+        alContinuar: conPregunta ? juego.saltarBonus : alCerrar,
       ),
     );
   }

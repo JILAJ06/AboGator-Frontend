@@ -54,7 +54,15 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
         builder: (context, state) => PantallaJuego(sprintId: state.pathParameters['sprintId']!),
       ),
-      // Marcadores hasta T-06, T-09, T-10 y T-11.
+      // Marcadores hasta T-06b, T-08, T-09, T-10 y T-11.
+      GoRoute(
+        path: Rutas.startupQuiebra,
+        builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteQuiebra),
+      ),
+      GoRoute(
+        path: Rutas.sinVidas,
+        builder: (context, state) => const PantallaPendiente(texto: Textos.sinVidasPendiente),
+      ),
       GoRoute(
         path: Rutas.sprintCompletado,
         builder: (context, state) =>
