@@ -1,60 +1,55 @@
 # Reporte
 
-- **Tarea:** T-03 · Acceso: Inicio de sesión y Registro
-- **Rama:** `03-acceso`
+- **Tarea:** T-04 · Inicio (pantallas 07 y 07b)
+- **Rama:** `04-inicio`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11.
-- Revisé en Chrome (web en modo debug):
-  - Inicio de sesión: en claro a 390×844, vacío y con errores; en oscuro a 360×640.
-  - Registro: en claro a 390×844, vacío y con todos los errores; en oscuro a 360×640.
+- **Comparé contra Figma** con el conector de Figma (solo lectura): capturas y metadatos de los nodos 07 (`13:356`) y 07b (`14:1132`).
+- En Chrome (web en modo debug) revisé:
+  - El inicio de sesión con `incorrecta`, que muestra el error.
+  - El Inicio en claro y oscuro a 390×844, desplazado hasta el final.
+  - El Inicio a 320×640.
+- Aviso: en GitHub existe la rama `revert-5-03-acceso`, creada por el botón "Revert" del PR #5. No está mergeada en `develop` y no la toqué.
 
 ## Qué se hizo
 1. **Componentes nuevos** en `lib/componentes/`, con pruebas y en la galería:
-   - `AccionEnfocable`: base común de los controles propios. Se activa con toque, Enter o Espacio, muestra el anillo de foco solo con teclado y deja la semántica a cargo de quien lo usa.
-   - `CasillaApp`: cuadro de 22 con radio 6 y texto Leyenda a 10.
-     - Marcada: `accion/primaria` con un check de 14.
-     - Sin marcar: `fondo/superficie` con borde 1.5 `borde/control`.
-     - Toda la fila es táctil (≥ 48). Se anuncia como casilla marcada o sin marcar, y su error se anuncia.
-   - `ChipSeleccion`: píldora con relleno 12×10 y texto Etiqueta, con los colores de seleccionado y no seleccionado de la especificación.
-     - Su zona táctil mide ≥ 48 sin cambiar el aspecto.
-     - Se anuncia como opción seleccionada de un grupo exclusivo, por ejemplo "Perfil Desarrollador, 2 de 3", **sin emoji**.
-   - `EnlaceTexto`: Cuerpo/Énfasis en `texto/acento`, zona ≥ 48, semántica de enlace.
-   - `BotonAtras`: cuadro de 48 con radio 12, `fondo/superficie`, borde 1 e ícono back de 20, etiqueta "Atrás".
-2. **Componentes ajustados:**
-   - `BotonApp` ganó `cargando` y `textoCargando`. Mientras carga no responde y muestra un indicador de progreso en lugar del texto. Su semántica pasa a deshabilitada, en región viva, con el texto de carga ("Iniciando sesión" / "Creando tu cuenta").
-   - `CampoTextoApp` ganó `alEnviar` (Enter o "Listo" en el teclado) y `pistasAutocompletado`. Por defecto, el correo ahora usa las pistas email y username.
-3. **Validadores** (`lib/funciones/acceso/validadores.dart`): una clase pura con los mensajes exactos de la tarea.
-   - Nombre: 2 a 60 caracteres tras recortar espacios.
-   - Correo: formato `algo@dominio.tld` sin espacios, máximo 254.
-   - Contraseña: en el inicio de sesión solo se exige que no esté vacía; en el registro, al menos 8 caracteres con un número.
-   - Perfil y las dos casillas son obligatorios.
-   - Ningún mensaje incluye la contraseña.
-4. **Estado (Riverpod):**
-   - `inicioSesionProvider` y `registroProvider` se liberan al salir de la pantalla (`autoDispose`).
-   - Guardan errores, el estado de envío y, en el registro, el perfil y las casillas. **Nunca guardan la contraseña**: la pantalla la pasa solo al enviar.
-   - Devuelven el primer campo con error para mover el foco.
-   - `sesionProvider` (`Usuario?`) queda listo para T-04.
-   - Las pantallas usan `repositorioAutenticacionProvider`; nunca llaman al mock directamente.
-   - Se envía el correo (y el nombre) recortado. Los consentimientos viajan como dos booleanos distintos.
-5. **Pantalla 05 · Inicio de sesión:**
-   - Logo horizontal a color de 306.9×74.4 (en oscuro cambia solo a la versión negativa).
-   - Título en dos líneas y subtítulo fijo, con Sarko de 96×120 decorativo a la derecha.
-   - Campos de correo y contraseña (oculta, con botón para mostrarla). Enter en la contraseña envía el formulario.
-   - "¿Olvidaste tu contraseña?" muestra un aviso breve no bloqueante (ver Pendientes).
-   - Botón "Iniciar sesión" con estado de carga, separador "o", "Crear una cuenta" (va al registro) y la nota de seguridad.
-   - Errores por campo al enviar, que se limpian al editar. El error del repositorio aparece arriba del botón, con ícono en `estado/ilegal`, y se anuncia.
-   - Al iniciar sesión va a `Rutas.inicio`, que es un marcador ("Inicio · llega en T-04").
-6. **Pantalla 06 · Registro:**
-   - Botón atrás que regresa al inicio de sesión, título y subtítulo.
-   - Tres chips de perfil **sin selección inicial**.
-   - Campos de nombre, correo y contraseña, que empiezan **vacíos**.
-   - **Dos casillas independientes y sin marcar.**
-   - "Crear cuenta" está siempre habilitado salvo durante el envío; la validación ocurre al enviar.
-   - Debajo, el enlace "¿Ya tienes cuenta? Inicia sesión".
-   - Al enviar con errores se muestran todos y el **foco va al primero en orden visual** (perfil, nombre, correo, contraseña, Aviso, Términos). Los errores se anuncian como región viva.
-7. **Rutas:** `inicioSesion` y `registro` ya son pantallas reales. Solo `inicio` queda como marcador. El flujo completo es Splash → Onboarding → Inicio de sesión ⇄ Registro → marcador del Inicio.
+   - `AvatarApp`: círculo de 44 en `fondo/destacado` con iniciales en H3 y color `accion/secundaria`. Es decorativo.
+   - `TarjetaHeroeStartup`:
+     - Medidas: 342×168 (crece con el texto), `accion/primaria`, radio 24, sombra (0, 8, 24) y recorte.
+     - Contenido: elipse de 220 en (190, −30), etiqueta, título de ancho 200, subtítulo, botón "Continuar sprint" y Sarko de 120×150 en (226, 22).
+     - El botón mide 148×48 (`accion/acento`, radio 12, Etiqueta + chevron 16), tiene anillo de foco y se anuncia.
+   - `TarjetaRetoDiario`: 342×60 en `fondo/destacado`, radio 18, relleno 14×12, flame de 24, dos líneas y "1/3" en `texto/acento`. Se lee como un solo bloque.
+   - `TarjetaModulo` y el enum `EstadoModulo`, con 4 estados:
+     - En curso y disponible: insignia del color del módulo y etiqueta en `texto/acento`.
+     - Completado: check y "5/5 sprints · Completado".
+     - Bloqueado: `fondo/superficie-alt`, candado y "Completa el módulo anterior". Sin acción, y se anuncia como deshabilitado.
+     - Todas tienen barra de 96×8 y semántica "Módulo N, nombre, tramo, estado, progreso".
+   - `BotonBuzon`: 60×60 en `accion/secundaria`, radio 20, sombra (0, 16, 40) y contador de 24×22 en (46, −8). Se anuncia como "Buzón de apelaciones, N pendientes". Sin pendientes no dibuja el contador.
+2. **Lógica del Inicio** (`funciones/inicio/logica_inicio.dart`, pura y probada):
+   - Iniciales (primera letra del nombre y del apellido) y perfil corto (Estudiante / Dev / Legal).
+   - Estado del módulo con la regla de la tarea; un módulo sin sprints cuenta como bloqueado.
+   - Progreso = solo los sprints **completados**.
+   - Módulo y sprint actuales: el primero en curso o, si no hay, el primero disponible.
+   - Nombre corto, tramo e ícono por número de módulo (shield, code, gavel, doc, shieldCheck; ya existían en `IconosApp`).
+   - El reto diario es una constante (`RetoDiario`: 1/3, +15 monedas).
+3. **Datos** (`estado_inicio.dart`): `datosInicioProvider` pide en paralelo los módulos, las monedas (`RepositorioTienda`), las vidas y las apelaciones pendientes. "Reintentar" hace `invalidate`. El nombre, nivel, perfil y racha salen de `sesionProvider`.
+4. **Pantalla 07 / 07b** (`pantalla_inicio.dart`):
+   - Un `CustomScrollView` con el encabezado (avatar, saludo y chips de racha, monedas y vidas), el héroe, el reto, "Ruta de tu Startup" (marcado como encabezado) y los 5 módulos.
+   - El Buzón queda **fijo** a 28 dp sobre la barra inferior, y la lista reserva espacio al final para que no tape la última tarjeta.
+   - Navegación inferior con "Mapa" activo. Buzón, Tienda y Perfil usan `context.go` hacia sus marcadores; tocar Mapa no hace nada.
+   - "Continuar sprint" va a `introSprintDe(módulo, sprint)` y las tarjetas abiertas a `mapaSprintsDe(módulo)`, los dos todavía marcadores (T-04b).
+   - Estados de la pantalla:
+     - Cargando: esqueleto con las mismas medidas.
+     - Error de carga: mensaje y "Reintentar".
+     - Sin sesión: el enrutador redirige al inicio de sesión.
+   - El modo oscuro (07b) sale solo de los tokens, sin código especial.
+5. **Rutas:** ayudantes `Rutas.mapaSprintsDe` e `introSprintDe`. Marcadores para mapa e intro (T-04b), Buzón (T-09), Tienda y Perfil (T-10).
+6. **Mocks:**
+   - `MockAutenticacion` rechaza la contraseña exacta `incorrecta` con `Textos.errorCredenciales`. Lo comprobé en Chrome.
+   - `MockApelaciones` devuelve **6** pendientes, como el contador de Figma.
+   - `MockProgreso` tiene 5 sprints por módulo, el último es el Examen final. El módulo 1 lleva 2 completados, el 3.º en curso y 2 bloqueados; los módulos 2 a 5 están bloqueados. Lo cambié porque antes los módulos 3 a 5 no tenían sprints y el héroe no podía decir "Sprint 3 de 5".
 
 ## Resultados
 `dart format --set-exit-if-changed lib test`: sin cambios.
@@ -63,60 +58,59 @@
 ```
 No issues found!
 ```
-`flutter test` (186 pruebas):
+`flutter test` (235 pruebas):
 ```
-+186: All tests passed!
++235: All tests passed!
 ```
-- `test/funciones/acceso/validadores_test.dart`: casos válidos e inválidos y los límites (2 y 60 caracteres de nombre, 254 de correo, 8 de contraseña con número).
-- `test/componentes/acceso_componentes_test.dart`: los 4 componentes en claro y oscuro, solo colores del tema, semántica (casilla, opción seleccionada, enlace, "Atrás"), zonas ≥ 48, anillo de foco con Tab y activación con Enter o Espacio. También el botón en carga.
-- `test/funciones/acceso/inicio_sesion_test.dart`:
-  - Medidas del logo y tipos de teclado y autocompletado.
-  - Errores al enviar vacío, con foco en el correo; error de correo inválido que se limpia al editar.
-  - Durante la carga: progreso, anuncio "Iniciando sesión" y un segundo toque que no reenvía. Al terminar, éxito con sesión iniciada.
-  - Error del repositorio anunciado y ubicado arriba del botón.
-  - Enter envía, "Crear una cuenta" lleva al registro y el enlace muestra el aviso.
-  - Orden de foco correcto y contraseña fuera de la semántica.
-  - Texto al 200 % sin desbordes en 390×844 y 360×640, en claro y oscuro.
-- `test/funciones/acceso/registro_test.dart`:
-  - Al abrir no hay perfil elegido, las casillas están sin marcar y los campos vacíos.
-  - Los perfiles se anuncian sin emoji y la selección es única.
-  - Con todo vacío aparecen los 6 errores y el foco va al perfil.
-  - **Las casillas son independientes:** con una marcada, el error y el foco van a la otra, en los dos sentidos.
-  - La contraseña sin número muestra el mensaje exacto.
-  - En el éxito se envían los datos recortados y los dos booleanos por separado.
-  - El botón atrás y el enlace regresan al inicio de sesión.
-  - La contraseña no aparece en la semántica, y no hay desbordes con texto al 200 % en los dos tamaños y modos.
-- Revisé con `git grep` que no haya hex fuera de `lib/core/tema/` ni `print` o `debugPrint` en `lib/`.
-
-## Pendientes
-- **Recuperación de contraseña:** no existe la pantalla. "¿Olvidaste tu contraseña?" muestra un aviso breve: "La recuperación de contraseña estará disponible pronto".
-- **Pantallas del Aviso de Privacidad y los Términos de uso:** no existen. Los textos de las casillas no son enlaces.
-- **Inicio (07):** sigue siendo un marcador hasta T-04.
+- `test/funciones/inicio/logica_inicio_test.dart`: iniciales, perfil corto, estados (incluido el módulo sin sprints), conteo de completados, módulo y sprint actuales, nombres, tramos e íconos, y el mock real (2/5, sprint 3 de 5, resto bloqueado).
+- `test/componentes/inicio_componentes_test.dart`:
+  - Cada componente en claro y oscuro, con solo colores del tema (más los colores de módulo).
+  - Medidas, semántica, foco con teclado y Enter, y el módulo bloqueado sin acción.
+  - El Buzón con y sin contador.
+  - **Contraste** de `texto/en-primario` sobre `accion/primaria` y sobre `accion/acento` ≥ 4.5:1 en ambos modos (claro 9.55 y 5.45; oscuro 7.62 y 8.35).
+- `test/funciones/inicio/inicio_test.dart`:
+  - Saludo, iniciales y "Dev · Nivel 4" desde la sesión; chips con los datos de los repositorios.
+  - Héroe con "Sprint 3 de 5 · Protección de datos", reto y título como encabezado.
+  - Estados y progreso de los 5 módulos (en curso, disponible, completado, bloqueado y bloqueado), y contador "6".
+  - "Continuar sprint" va a la ruta exacta. Las tarjetas abiertas navegan y la bloqueada no.
+  - El Buzón queda fijo al desplazar, no tapa la última tarjeta y navega.
+  - Las 3 pestañas llevan a sus marcadores y Mapa no hace nada.
+  - Esqueleto mientras carga, error y reintento, y redirección sin sesión.
+  - Orden de foco: Continuar → módulos 1, 2 y 3 → Buzón → pestañas; los bloqueados no reciben foco.
+  - **Sin desbordes** en 390×844 y 360×640 con texto al 200 %, y en 320×640 al 100 % y 200 %, en claro y oscuro, recorriendo toda la lista.
+- `test/datos/mocks_test.dart`: `incorrecta` falla y otra contraseña entra; 5×5 sprints y 6 apelaciones.
+- Revisé con `git grep` que no haya hex fuera de `lib/core/tema/`.
 
 ## Decisiones
-- **Botón en carga:** conserva los colores de su tipo en lugar del gris de deshabilitado, para que no parezca un error. Aun así no responde y se anuncia como deshabilitado.
-- **`AccionEnfocable`:** los 4 componentes nuevos comparten la misma lógica de foco, teclado y toque. No migré los componentes de T-01 y T-02 para no salirme del alcance.
-- **Autocompletado:** el correo usa email y username en el inicio de sesión, y solo email en el registro. La contraseña usa `password` en el inicio de sesión y `newPassword` en el registro, para que el gestor de contraseñas proponga una nueva.
-- **Posiciones del inicio de sesión:** el enlace de contraseña ocupa una zona de 48, así que el hueco antes del botón es de 8 (no 20) para mantener el botón cerca de y=560. En el navegador todo queda 48 dp más arriba, porque no hay barra de estado; en un teléfono `SafeArea` lo baja a y≈96.
-- **Posiciones del registro:**
-  - El botón atrás se corre 4 dp a la izquierda para quedar en x=20, con el resto del contenido en x=24.
-  - El error "Elige tu perfil" va debajo de los chips.
-  - Cada casilla ocupa 48 de alto, porque la fila entera es táctil, así que quedan a 48 entre sí en lugar de los 36 de Figma (ver D1).
-- **Texto de ayuda de la contraseña en el registro:** no lleva, porque el diseño no lo pide. El correo y el nombre usan los textos de ayuda que ya existían ("tu@correo.com" y "¿Cómo te llamas?").
-- **El mock no cambió:** inicia sesión con cualquier correo y contraseña no vacíos. El error del repositorio se prueba con un repositorio falso en las pruebas.
+- **Nombres cortos y tramos** (DEC-INICIO-NOMBRES): están en `Textos`, ordenados por número de módulo. No agregué un campo al modelo.
+  - Etiqueta: "MÓDULO N · NOMBRE" con los nombres cortos de Figma, y "AUDITORÍA Y CUMPLIMIENTO" para el módulo 5.
+  - Títulos: Del Garage al MVP, Ronda Semilla, Escalando el equipo, Serie A y Salida a bolsa.
+  - El subtítulo del héroe también usa el nombre corto ("Protección de datos", como en Figma).
+- **Progreso:** cuenta solo los completados. **El mock muestra 2/5** en el módulo 1; Figma 07 dice 3/5.
+- **Encabezado** (DEC-INICIO-ENCABEZADO):
+  - Normalmente va en una fila: el nombre se recorta con puntos suspensivos y los chips se mantienen.
+  - Con texto ≥ 130 % o menos de 300 dp útiles (320 de ancho), los chips bajan a una segunda fila, para evitar desbordes.
+- **Buzón a 28 dp** de la barra, como en Figma (760 − 732). La tarea decía 24.
+- **Colores fuera de los tokens, en `EfectosApp`:**
+  - Ícono blanco fijo sobre el color del módulo (de marca), con contraste de 4.07 a 9.55.
+  - Elipse del héroe en blanco al 8 %: se ve más clara que el verde en 07 y en 07b. El valor lo estimé de la captura (ver D3).
+  - Sombras de Figma: héroe y módulo al 14 %, Buzón al 22 %.
+- **Módulo bloqueado:** "Completa el módulo anterior" va debajo del título, donde estaría la barra. En Figma aparece en una columna a la derecha. El chevron se ve en `borde/control` y no es tocable.
+- **El usuario del mock no cambió** (Valeria Ríos, Dev, nivel 3, racha 4; 340 monedas y 3 vidas). La tarea solo pedía ajustar las apelaciones, así que el Inicio no muestra los mismos números que Figma ("Hola, Ana", 7, 240 y 5).
 
 ## Grafo actualizado
-Toqué la sección 4 (Código), las filas PANT-05 y PANT-06 (sección 5) para anotar la ruta del código, la línea "Última actualización" y el registro de cambios. Comprobé con `ls` que todas las rutas de la sección 4 existen.
-- **Cambiados (`en curso`):** ENRUTADOR, RUTAS, PANT-PENDIENTE (ahora solo el Inicio), TEXTOS, COMP-BOTON (carga), COMP-CAMPO (Enter y autocompletado), PANT-GALERIA, FUNC, TEST-COMP, TEST-GALERIA y TEST-BIENVENIDA.
+Toqué la sección 4 (Código), las filas PANT-07 y PANT-07b (sección 5) con la ruta del código, la línea "Última actualización" y el registro de cambios. Comprobé con `ls` que todas las rutas de la sección 4 existen.
+- **Cambiados (`en curso`):** ENRUTADOR, RUTAS, PANT-PENDIENTE, TEXTOS, TEMA-EFECTOS, MOCK-AUTH, MOCK-PROG, MOCK-APEL, PANT-GALERIA, SESION, TEST-GALERIA, TEST-COMP y TEST-DATOS.
 - **Nuevos:**
-  - Componentes: COMP-ACCION, COMP-CASILLA, COMP-CHIP-SEL, COMP-ENLACE y COMP-ATRAS.
-  - Lógica de acceso: VALIDADORES, SESION, EST-INICIO-SESION, EST-REGISTRO y AVISO-ERROR.
-  - Pantallas y pruebas: CODIGO-PANT-05, CODIGO-PANT-06 y TEST-ACCESO.
-  - Decisión: DEC-CARGA.
+  - Lógica y pantalla: LOGICA-INICIO, EST-INICIO y CODIGO-PANT-07.
+  - Componentes: COMP-AVATAR, COMP-HEROE, COMP-RETO, COMP-MODULO y COMP-BUZON.
+  - Pruebas: TEST-INICIO.
+  - Decisiones: DEC-INICIO-NOMBRES y DEC-INICIO-ENCABEZADO.
 - **Obsoletos:** ninguno.
 
 ## Dudas
-- **D1 · Separación de las casillas.** En Figma están a 36 de distancia (y=548 y y=584), pero cada fila táctil debe medir ≥ 48. Las dejé a 48, unos 12 dp más que en el diseño. ¿Se acepta, o se reduce la zona táctil solapándolas?
-- **D2 · Chips de perfil en 360 de ancho.** En 360×640, "⚖️ Legal" baja a una segunda fila. En 390 caben los tres en una. ¿Se acepta el salto, o se reduce el relleno en pantallas angostas?
-- **D3 · Mock de autenticación.** ¿Conviene que el mock rechace alguna credencial concreta (por ejemplo, una contraseña "incorrecta") para poder demostrar el error del repositorio en la app, y no solo en las pruebas?
-- **D4 · "Bienvenido de vuelta".** Es el texto del diseño, pero está en masculino. ¿Se prefiere una forma neutra como "Te damos la bienvenida de vuelta"? No lo cambié.
+- **D1 · Datos del usuario del mock.** ¿Cambio `usuarioDemo` a "Ana López", Dev, nivel 4, racha 7, y las monedas y vidas a 240 y 5, para que el Inicio se vea idéntico a Figma? Ahora el saludo se recorta a "Hola, V…" en 390 porque "Valeria" es más largo.
+- **D2 · Corte del título del héroe.** Con Fredoka en Flutter, "Del Garage al" cabe en 200 dp y el título queda "Del Garage al / MVP". En Figma es "Del Garage / al MVP". ¿Se fuerza el salto después de "Garage"?
+- **D3 · Elipse del héroe.** No tengo el color exacto (lo estimé de la captura en blanco al 8 %). Si Figma usa otro valor u opacidad, lo cambio.
+- **D4 · Sarko en 320 dp.** El héroe mide 272 de ancho y Sarko (en x=226) queda casi fuera de la tarjeta. ¿Se oculta o se reduce en pantallas angostas?
+- **D5 · Ícono de monedas.** Figma usa una moneda rellena; el chip usa `coins` de Lucide, una decisión de T-01. ¿Se mantiene?
