@@ -13,7 +13,8 @@ import 'sarko_imagen.dart';
 /// título de dos líneas (ancho 200), subtítulo, botón "Continuar sprint"
 /// (148×48, accion/acento, radio 12) y Sarko de 120×150 en (226, 22).
 ///
-/// Crece en alto con el texto dinámico.
+/// Crece en alto con el texto dinámico. Con menos de [anchoMinimoSarko] de
+/// ancho, Sarko se oculta para no quedar cortado (D4 de T-04).
 class TarjetaHeroeStartup extends StatelessWidget {
   const TarjetaHeroeStartup({
     required this.titulo,
@@ -26,12 +27,22 @@ class TarjetaHeroeStartup extends StatelessWidget {
   static const double radio = 24;
   static const double anchoTexto = 200;
 
+  /// Ancho mínimo de la tarjeta para mostrar a Sarko.
+  static const double anchoMinimoSarko = 320;
+
   final String titulo;
   final String subtitulo;
   final VoidCallback? alContinuar;
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, restricciones) =>
+          _construir(context, conSarko: restricciones.maxWidth >= anchoMinimoSarko),
+    );
+  }
+
+  Widget _construir(BuildContext context, {required bool conSarko}) {
     final tokens = context.tokens;
     final estilos = context.estilos;
     final colorTexto = tokens.textoEnPrimario;
@@ -59,11 +70,12 @@ class TarjetaHeroeStartup extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned(
-            left: 226,
-            top: 22,
-            child: SarkoImagen(pose: PoseSarko.alegre, ancho: 120, decorativa: true),
-          ),
+          if (conSarko)
+            const Positioned(
+              left: 226,
+              top: 22,
+              child: SarkoImagen(pose: PoseSarko.alegre, ancho: 120, decorativa: true),
+            ),
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 20),
             child: Column(
