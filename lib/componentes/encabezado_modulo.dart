@@ -65,7 +65,7 @@ class EncabezadoModulo extends StatelessWidget {
       key: const ValueKey('encabezado-modulo'),
       color: fondo,
       constraints: BoxConstraints(minHeight: arriba + altoContenido),
-      padding: EdgeInsets.only(top: arriba, bottom: 24),
+      padding: EdgeInsets.only(top: arriba, bottom: 21),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -105,7 +105,8 @@ class EncabezadoModulo extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
+          // En Figma "n/5" (16 de alto) queda centrado en la barra de 8.
+          const SizedBox(height: 13),
           Semantics(
             label: Textos.avanceModuloSemantica(completados, total),
             value: '${(avance * 100).round()} %',

@@ -1,5 +1,6 @@
 import 'package:abogator/componentes/avatar_app.dart';
 import 'package:abogator/componentes/boton_buzon.dart';
+import 'package:abogator/componentes/sarko_imagen.dart';
 import 'package:abogator/componentes/tarjeta_heroe_startup.dart';
 import 'package:abogator/componentes/tarjeta_modulo.dart';
 import 'package:abogator/componentes/tarjeta_reto_diario.dart';
@@ -84,6 +85,31 @@ void main() {
       expect(toques, 1);
       esperarSoloColoresDelTema(tester, brillo);
     });
+
+    for (final (ancho, conSarko) in [
+      (342.0, true),
+      (320.0, true),
+      (319.0, false),
+      (272.0, false),
+    ]) {
+      testWidgets('a $ancho de ancho ${conSarko ? 'muestra' : 'oculta'} a Sarko (D4)', (
+        tester,
+      ) async {
+        await montar(
+          tester,
+          SizedBox(
+            width: ancho,
+            child: TarjetaHeroeStartup(
+              titulo: 'Del Garage al MVP',
+              subtitulo: 'S',
+              alContinuar: () {},
+            ),
+          ),
+        );
+        expect(find.byType(SarkoImagen), conSarko ? findsOneWidget : findsNothing);
+        expect(tester.takeException(), isNull);
+      });
+    }
 
     test('contraste del texto sobre el héroe y el botón ≥ 4.5:1 en ambos modos', () {
       for (final t in [TokensColor.claro, TokensColor.oscuro]) {

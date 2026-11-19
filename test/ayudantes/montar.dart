@@ -85,13 +85,18 @@ Set<int> coloresUsados(WidgetTester tester) {
 }
 
 /// Colores permitidos: los tokens del modo, los colores de módulo, la sombra
-/// sólida y el brillo.
-Set<int> coloresPermitidos(Brightness brillo) => {
-  for (final c in tokensDe(brillo).porNombre.values) _rgb(c),
-  for (final c in ColoresModulo.enOrden) _rgb(c),
-  _rgb(EfectosApp.colorSombraSolida),
-  _rgb(EfectosApp.brilloBarra),
-};
+/// sólida, el brillo y las bases de los nodos del mapa (derivadas de las caras).
+Set<int> coloresPermitidos(Brightness brillo) {
+  final t = tokensDe(brillo);
+  return {
+    for (final c in t.porNombre.values) _rgb(c),
+    for (final c in ColoresModulo.enOrden) _rgb(c),
+    _rgb(EfectosApp.colorSombraSolida),
+    _rgb(EfectosApp.brilloBarra),
+    for (final cara in [t.accionPrimaria, t.accionAcento, t.fondoSuperficieAlt, t.accionSecundaria])
+      _rgb(EfectosApp.baseNodo(cara)),
+  };
+}
 
 /// Verifica que el componente montado solo use colores del tema.
 void esperarSoloColoresDelTema(WidgetTester tester, Brightness brillo) {
