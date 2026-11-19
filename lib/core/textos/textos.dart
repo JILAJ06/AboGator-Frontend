@@ -53,6 +53,9 @@ abstract final class Textos {
   // Logo
   static const String logo = 'AboGator';
 
+  // Botón de regreso
+  static const String atras = 'Atrás';
+
   // Botón de veredicto
   static const String veredictoLegal = 'LEGAL';
   static const String veredictoIlegal = 'ILEGAL';
@@ -113,9 +116,55 @@ abstract final class Textos {
   static const String casoPistaEscalar = '↓ ESCALAR';
 
   // ---------------------------------------------------------------------
+  // Validaciones de acceso (mensajes exactos del diseño)
+  // ---------------------------------------------------------------------
+  static const String errorNombre = 'Ingresa tu nombre';
+  static const String errorCorreo = 'Ingresa un correo válido';
+  static const String errorContrasenaVacia = 'Ingresa tu contraseña';
+  static const String errorContrasenaRegistro = 'Mínimo 8 caracteres, incluye un número';
+  static const String errorPerfil = 'Elige tu perfil';
+  static const String errorAvisoPrivacidad = 'Debes aceptar el Aviso de Privacidad para continuar';
+  static const String errorTerminos = 'Debes aceptar los Términos de uso para continuar';
+
+  // ---------------------------------------------------------------------
+  // 05 Inicio de sesión
+  // ---------------------------------------------------------------------
+  static const String inicioSesionTitulo = 'Bienvenido\nde vuelta';
+  static const String inicioSesionSubtitulo = 'Continúa tu racha de 7 días';
+  static const String campoCorreoInicio = 'Correo electrónico';
+  static const String campoContrasenaInicio = 'Contraseña';
+  static const String olvidasteContrasena = '¿Olvidaste tu contraseña?';
+  static const String recuperacionPronto = 'La recuperación de contraseña estará disponible pronto';
+  static const String botonIniciarSesion = 'Iniciar sesión';
+  static const String iniciandoSesion = 'Iniciando sesión';
+  static const String separadorO = 'o';
+  static const String botonCrearUnaCuenta = 'Crear una cuenta';
+  static const String notaSeguridad = 'Conexión cifrada (TLS 1.2+) · Autenticación JWT';
+
+  // ---------------------------------------------------------------------
+  // 06 Registro
+  // ---------------------------------------------------------------------
+  static const String registroTitulo = 'Crea tu cuenta';
+  static const String registroSubtitulo = 'Elige tu perfil para ajustar el ritmo de los sprints.';
+  static const String perfilEstudiante = 'Estudiante';
+  static const String perfilDesarrollador = 'Desarrollador';
+  static const String perfilLegal = 'Legal';
+  static const String perfilEstudianteVisible = '🎓 Estudiante';
+  static const String perfilDesarrolladorVisible = '💻 Desarrollador';
+  static const String perfilLegalVisible = '⚖️ Legal';
+  static String perfilSemantica(String perfil, int posicion, int total) =>
+      'Perfil $perfil, $posicion de $total';
+  static const String campoNombreRegistro = 'Nombre';
+  static const String aceptoAvisoPrivacidad = 'He leído y acepto el Aviso de Privacidad.';
+  static const String aceptoTerminos = 'He leído y acepto los Términos de uso.';
+  static const String botonCrearCuenta = 'Crear cuenta';
+  static const String creandoCuenta = 'Creando tu cuenta';
+  static const String yaTienesCuenta = '¿Ya tienes cuenta? Inicia sesión';
+
+  // ---------------------------------------------------------------------
   // Pantallas pendientes (marcadores temporales)
   // ---------------------------------------------------------------------
-  static const String pendienteInicioSesion = 'Inicio de sesión · llega en T-03';
+  static const String pendienteInicio = 'Inicio · llega en T-04';
 
   // ---------------------------------------------------------------------
   // Galería de componentes (temporal, se elimina con las pantallas reales)
@@ -129,6 +178,7 @@ abstract final class Textos {
   static const String galeriaBotones = 'Botones';
   static const String galeriaVeredictos = 'Botones de veredicto (decorativos e interactivos)';
   static const String galeriaCampos = 'Campos de texto';
+  static const String galeriaAcceso = 'Componentes de acceso';
   static const String galeriaChips = 'Chips HUD';
   static const String galeriaVidas = 'Vidas';
   static const String galeriaIndicadores = 'Indicadores de la Startup';

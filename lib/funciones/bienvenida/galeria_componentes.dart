@@ -4,10 +4,14 @@ import 'package:material_ui/material_ui.dart';
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/barra_progreso.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/boton_atras.dart';
 import '../../componentes/boton_veredicto.dart';
 import '../../componentes/campo_texto_app.dart';
+import '../../componentes/casilla_app.dart';
 import '../../componentes/chip_hud.dart';
+import '../../componentes/chip_seleccion.dart';
 import '../../componentes/corazon_vida.dart';
+import '../../componentes/enlace_texto.dart';
 import '../../componentes/icono_app.dart';
 import '../../componentes/impacto_startup.dart';
 import '../../componentes/indicadores_startup.dart';
@@ -128,6 +132,7 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 _CampoConValor(),
               ],
             ),
+            const _Seccion(titulo: Textos.galeriaAcceso, hijos: [_DemoAcceso()]),
             _Seccion(
               titulo: Textos.galeriaChips,
               hijos: [
@@ -416,6 +421,81 @@ class _MuestraLogo extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Casillas, chips de perfil, enlace y botón de regreso, con estado local.
+class _DemoAcceso extends StatefulWidget {
+  const _DemoAcceso();
+
+  @override
+  State<_DemoAcceso> createState() => _DemoAccesoState();
+}
+
+class _DemoAccesoState extends State<_DemoAcceso> {
+  bool _aviso = false;
+  bool _terminos = true;
+  int? _perfil = 1;
+  bool _cargando = false;
+
+  static const _perfiles = [
+    (Textos.perfilEstudianteVisible, Textos.perfilEstudiante),
+    (Textos.perfilDesarrolladorVisible, Textos.perfilDesarrollador),
+    (Textos.perfilLegalVisible, Textos.perfilLegal),
+  ];
+
+  Future<void> _simularCarga() async {
+    setState(() => _cargando = true);
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (mounted) setState(() => _cargando = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final (i, (visible, nombre)) in _perfiles.indexed)
+              ChipSeleccion(
+                texto: visible,
+                etiquetaSemantica: Textos.perfilSemantica(nombre, i + 1, _perfiles.length),
+                seleccionado: _perfil == i,
+                alPresionar: () => setState(() => _perfil = i),
+              ),
+          ],
+        ),
+        CasillaApp(
+          texto: Textos.aceptoAvisoPrivacidad,
+          marcada: _aviso,
+          error: _aviso ? null : Textos.errorAvisoPrivacidad,
+          alCambiar: (v) => setState(() => _aviso = v),
+        ),
+        CasillaApp(
+          texto: Textos.aceptoTerminos,
+          marcada: _terminos,
+          alCambiar: (v) => setState(() => _terminos = v),
+        ),
+        Row(
+          children: [
+            BotonAtras(alPresionar: () {}),
+            const SizedBox(width: 16),
+            Flexible(
+              child: EnlaceTexto(texto: Textos.olvidasteContrasena, alPresionar: () {}),
+            ),
+          ],
+        ),
+        // Tócalo para ver el estado de carga durante 2 s.
+        BotonApp(
+          texto: Textos.botonIniciarSesion,
+          alPresionar: _simularCarga,
+          cargando: _cargando,
+          textoCargando: Textos.iniciandoSesion,
+        ),
+      ],
     );
   }
 }

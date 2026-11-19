@@ -22,6 +22,8 @@ class CampoTextoApp extends StatefulWidget {
     this.alCambiar,
     this.nodoFoco,
     this.accionTeclado,
+    this.alEnviar,
+    this.pistasAutocompletado,
     super.key,
   });
 
@@ -40,6 +42,12 @@ class CampoTextoApp extends StatefulWidget {
   final ValueChanged<String>? alCambiar;
   final FocusNode? nodoFoco;
   final TextInputAction? accionTeclado;
+
+  /// Enter / "Listo" en el teclado (por ejemplo, enviar el formulario).
+  final ValueChanged<String>? alEnviar;
+
+  /// Pistas de autocompletado; si es `null` se eligen según [tipo].
+  final List<String>? pistasAutocompletado;
 
   @override
   State<CampoTextoApp> createState() => _CampoTextoAppState();
@@ -110,12 +118,15 @@ class _CampoTextoAppState extends State<CampoTextoApp> {
       textCapitalization: widget.tipo == TipoCampo.nombre
           ? TextCapitalization.words
           : TextCapitalization.none,
-      autofillHints: switch (widget.tipo) {
-        TipoCampo.correo => const [AutofillHints.email],
-        TipoCampo.contrasena => const [AutofillHints.password],
-        TipoCampo.nombre => const [AutofillHints.name],
-        TipoCampo.texto => null,
-      },
+      onSubmitted: widget.alEnviar,
+      autofillHints:
+          widget.pistasAutocompletado ??
+          switch (widget.tipo) {
+            TipoCampo.correo => const [AutofillHints.email, AutofillHints.username],
+            TipoCampo.contrasena => const [AutofillHints.password],
+            TipoCampo.nombre => const [AutofillHints.name],
+            TipoCampo.texto => null,
+          },
       textInputAction: widget.accionTeclado,
       style: estilos.cuerpoGrande.copyWith(color: tokens.textoPrimario),
       cursorColor: tokens.accionPrimaria,

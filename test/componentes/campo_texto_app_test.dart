@@ -89,7 +89,7 @@ void main() {
     await montar(tester, const CampoTextoApp(etiqueta: 'Correo', tipo: TipoCampo.correo));
     final campo = tester.widget<TextField>(find.byType(TextField));
     expect(campo.keyboardType, TextInputType.emailAddress);
-    expect(campo.autofillHints, [AutofillHints.email]);
+    expect(campo.autofillHints, [AutofillHints.email, AutofillHints.username]);
   });
 
   testWidgets('semántica: la etiqueta se asocia al campo y el error se anuncia', (tester) async {
