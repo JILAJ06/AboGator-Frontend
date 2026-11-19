@@ -1,69 +1,64 @@
-# T-03 · Acceso: Inicio de sesión y Registro
+# T-04 · Inicio (pantallas 07 y 07b)
 
-**Rama:** `03-acceso` (creada desde `develop`)
+**Rama:** `04-inicio` (creada desde `develop`)
 **Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code.
 
 ## Objetivo
-Implementar las pantallas **05 Inicio de sesión** y **06 Registro** con validaciones, estados de error y carga, y **dos consentimientos separados** (Aviso de Privacidad y Términos de uso), usando el repositorio de autenticación que ya existe (mock). Incluye 4 componentes nuevos de acceso.
+Implementar la pantalla **07 Inicio** (y su versión oscura **07b**, que sale del tema, no es otra pantalla) con datos del usuario y del progreso que ya existen (sesión y repositorios con mocks), 5 componentes nuevos y la navegación inferior funcionando. El **Mapa de sprints (08) y la Intro del sprint (09) NO van aquí**: son la tarea T-04b. Aquí, tocar un módulo o "Continuar sprint" navega a su ruta, que sigue siendo un marcador pendiente.
 
 ## Antes de empezar
-- `git fetch`, `git checkout 03-acceso`, `git pull`. Leer `ai/conocimiento/` (00 a 07): `03-pantallas.md` (flujo 1), `05-reglas-y-seguridad.md` (¡importante para contraseñas y consentimientos!) y `07-componentes.md` (sección "Componentes de acceso").
-- Commits pequeños, **una frase en español, sin prefijo y sin mencionar a Claude** (ni `Co-Authored-By`, ni `Generated with`, ni `Claude-Session`). Revisar con `git log -1 --format=%B`. Subir la rama; **no abrir Pull Request**.
-- Medidas en dp del marco de Figma de 390×844. Solo tokens/estilos del tema, textos en `core/textos`, y reutiliza `BotonApp`, `CampoTextoApp`, `LogoApp`, `SarkoImagen`, `AnilloFoco`, `IconoApp`. Sin dependencias nuevas.
+- `git fetch`, `git checkout 04-inicio`, `git pull`. Leer `ai/conocimiento/` (00 a 07): `03-pantallas.md` (flujo 2), `05-reglas-y-seguridad.md` y `07-componentes.md` (sección "Componentes del Inicio").
+- Comparar en Chrome contra Figma (archivo `SYNAyUal3xVk4k8SEBEb7f`, página "Vistas", nodos 07 = `13:356`, 07b = `14:1132`). Las medidas de abajo salen de ese diseño.
+
+## Estructura de la pantalla (marco 390×844, fondo `fondoApp`)
+Contenido con desplazamiento vertical (`CustomScrollView` o `ListView`); encabezado, héroe, reto y módulos se mueven con el scroll; **la navegación inferior y el botón Buzón quedan fijos**. Márgenes laterales 24. Respetar la zona segura superior (el 58 de Figma es la barra de estado + relleno).
+
+1. **Encabezado** (alto 44, y=58): `AvatarApp` (44) con iniciales; a su derecha, a 10 dp, "Hola, {primer nombre}" (Fredoka SemiBold 17/22, `textoPrimario`) y debajo "{Perfil} · Nivel {n}" (Leyenda, `textoSecundario`). A la derecha, los `ChipHud` ya existentes, separados 6: racha, monedas y vidas. En 360 dp de ancho el encabezado no puede desbordar: el nombre se recorta con puntos suspensivos y los chips se mantienen.
+   - Nombre e iniciales: de `sesionProvider` (primera letra del nombre y del apellido; si hay una sola palabra, una letra). Perfil legible en español: Estudiante / Dev / Legal (Figma muestra "Dev").
+   - Racha: `Usuario.racha`. Monedas: `RepositorioTienda.obtenerMonedas()`. Vidas: `RepositorioVidas`.
+2. **Tarjeta héroe** (`TarjetaHeroeStartup`, y=124, margen 24, 342×168): ver sección de componentes. Textos: "TU STARTUP ESTÁ EN" / nombre del módulo actual ("Del Garage al MVP") / "Sprint {n} de {total} · {nombre del módulo}" / botón "Continuar sprint". El módulo y el sprint actual salen de `obtenerModulos()` (primer módulo con algún sprint `enCurso`; si no hay, el primero `disponible`). El botón navega a la ruta de intro del sprint (marcador pendiente hasta T-04b).
+3. **Reto diario** (`TarjetaRetoDiario`, 16 dp debajo del héroe): "Reto diario: 3 tarjetas sin fallar" / "Mantén tu racha de {racha} días · +15 monedas" / "1/3". Por ahora es solo presentación (datos fijos en una constante o en el mock); no se puede tocar.
+4. **Título** "Ruta de tu Startup" (Fredoka SemiBold 20/26), 18 dp debajo del reto.
+5. **Lista de módulos** (16 dp debajo del título, separación 12): una `TarjetaModulo` por módulo de `obtenerModulos()`, en orden. Cada módulo tiene su color (`ColoresModulo.enOrden`) y su ícono: 1 `shield`, 2 `code`, 3 `gavel`, 4 `doc`, 5 `shieldCheck` (todos existen ya en `IconosApp`; si falta uno, agregarlo y decirlo en el reporte). Etiqueta: `MÓDULO {n} · {NOMBRE EN MAYÚSCULAS}` (en Figma: "PROTECCIÓN DE DATOS", "LICENCIAS OPEN SOURCE", "DELITOS INFORMÁTICOS", "CONTRATOS DIGITALES"; para el 5 usar "AUDITORÍA Y CUMPLIMIENTO"). **Nota:** los nombres del mock son más largos ("Licencias y Propiedad Intelectual"); la etiqueta de Figma usa nombres cortos. Agregar al modelo/mocks un `nombreCorto` solo si hace falta, o mapearlo en una constante de textos; decidirlo y reportarlo.
+   - Estado de cada módulo: bloqueado si todos sus sprints están `bloqueado`; completado si todos están `completado`; en curso si alguno está `enCurso` o hay algunos completados; si no, disponible. El título de la tarjeta es el nombre del tramo de la Startup ("Del Garage al MVP", "Ronda Semilla", "Escalando el equipo", "Serie A"; el módulo 5 como "Salida a bolsa"). Ponerlos en `Textos`.
+   - Progreso: `sprints completados / total`. **Diferencia en Figma:** la tarjeta del 07 dice "3/5 sprints" y el mapa 08 dice 2/5. Decisión de esta tarea: contar solo los **completados** (2/5 si el mock tiene dos completados y uno en curso). Anotar en el reporte lo que muestra el mock.
+   - Tocar una tarjeta no bloqueada navega a `Rutas.mapaSprints` con su `moduloId` (marcador pendiente). La bloqueada no responde y lo anuncia el lector de pantalla.
+6. **Botón Buzón** (`BotonBuzon`): flotante a la derecha, 24 dp sobre la barra inferior (en Figma, (306,672)); contador con el número de apelaciones pendientes de `RepositorioApelaciones` (Figma muestra 6; si el mock no devuelve 6 pendientes, ajustarlo para que coincida). Navega a `Rutas.buzon` (marcador pendiente). Reservar espacio al final de la lista para que el botón no tape la última tarjeta.
+7. **Navegación inferior**: `NavegacionInferiorApp` con `actual: PestanaApp.mapa`. Al tocar Buzón, Tienda o Perfil se navega a `Rutas.buzon`, `Rutas.tienda`, `Rutas.perfil` (marcadores pendientes con el nombre de la tarea que los implementa: Buzón T-09, Tienda y Perfil T-10); tocar Mapa estando en Inicio no hace nada. Usar `context.go` para que cada pestaña sea una raíz sin pila acumulada.
+
+## Estados de la pantalla
+- **Cargando**: mientras llegan los datos, mostrar el esqueleto simple (bloques `fondoSuperficieAlt` con las mismas medidas) sin saltos de diseño.
+- **Error de carga**: mensaje breve con botón "Reintentar" (`BotonApp` secundario). Texto en `Textos`.
+- **Sin sesión** (no debería ocurrir): redirigir a `Rutas.inicioSesion`.
+
+## Arreglo pendiente del mock (viene de T-03, duda D3)
+`MockAutenticacion.iniciarSesion` debe rechazar la contraseña exacta `incorrecta` lanzando `ExcepcionAutenticacion(Textos.errorCredenciales)` (acepta cualquier otra no vacía). Agregar la prueba. Sirve para probar el error de inicio de sesión sin servidor.
 
 ## Componentes nuevos (`lib/componentes/`, con pruebas y en la galería)
-Especificación completa en `07-componentes.md` → "Componentes de acceso":
-`CasillaApp` (casilla con texto y error), `ChipSeleccion` (chip de perfil), `EnlaceTexto` y `BotonAtras`.
+`AvatarApp`, `TarjetaHeroeStartup`, `TarjetaRetoDiario`, `TarjetaModulo` (4 estados) y `BotonBuzon`. Especificaciones en `ai/conocimiento/07-componentes.md` ("Componentes del Inicio"). Reglas: solo tokens y estilos del tema (nada de colores sueltos salvo el color del módulo y la sombra de Figma ya usada en otras tarjetas), zonas táctiles ≥ 48, anillo de foco visible con teclado (reusar `AccionEnfocable`/`AnilloFoco`), semántica completa, texto al 200 % sin desbordes. Agregar a la galería los 4 estados de `TarjetaModulo` y el botón Buzón con y sin contador.
 
-## Pantalla 05 · Inicio de sesión (`lib/funciones/acceso/`)
-Fondo `fondo/app`, contenido en una columna desplazable (el teclado no debe tapar el campo enfocado ni producir desbordes; con texto al 200 % todo sigue alcanzable).
-- **Logo horizontal** a color (`LogoApp` horizontal, tono por defecto) de ≈ 306.9×74.4, centrado, con su parte superior en y=96.
-- **Sarko alegre** decorativo de 96 de ancho (caja 96×120) en (270,190), a la derecha del título.
-- **Título** "Bienvenido de vuelta" en dos líneas (Fredoka Bold 26/32, `texto/primario`), x=24, y=210, ancho 220. **Subtítulo** "Continúa tu racha de 7 días" (Cuerpo/Base, Inter 14/20, `texto/secundario`), x=24, y=280, ancho 220 (texto fijo del diseño; no lo conectes a datos).
-- **Formulario** en x=24, y=340, ancho 342, hueco 16:
-  - `CampoTextoApp` "Correo electrónico" (ícono mail, teclado de correo, autocompletado de usuario/correo, sin autocorrección).
-  - `CampoTextoApp` "Contraseña" (ícono lock, contraseña oculta con botón de mostrar/ocultar, autocompletado de contraseña).
-  - `EnlaceTexto` "¿Olvidaste tu contraseña?" (zona 48 de alto, alineado a la izquierda). La pantalla de recuperación no existe: al tocarlo muestra un aviso breve no bloqueante ("La recuperación de contraseña estará disponible pronto") y anótalo como pendiente en el reporte.
-- **Botón primario** "Iniciar sesión" (342×52) en y=560. Mientras se envía: queda deshabilitado, muestra un indicador de progreso accesible y se anuncia "Iniciando sesión".
-- **Separador** en y=632: línea de 1 `borde/default` de 140 – "o" (Cuerpo/Base, `texto/secundario`) – línea de 140, hueco 12.
-- **Botón secundario** "Crear una cuenta" (342×52) en y=668 → va a `Rutas.registro`.
-- **Nota** centrada en y=750, Leyenda (`texto/secundario`): "Conexión cifrada (TLS 1.2+) · Autenticación JWT".
-- Estados: error de campo (correo vacío o con formato inválido: "Ingresa un correo válido"; contraseña vacía: "Ingresa tu contraseña") y error general del repositorio (`ExcepcionAutenticacion.mensaje`, mostrado arriba del botón con ícono y color `estado/ilegal`, anunciado por el lector). Los errores se muestran al enviar y se limpian al editar el campo.
-- Al iniciar sesión con éxito → `Rutas.inicio` (aún no existe: usa `PantallaPendiente` con "Inicio · llega en T-04").
+## Orden de foco y semántica
+Orden: avatar/saludo (un solo encabezado de lectura) → chips (racha, monedas, vidas, con sus etiquetas) → "Continuar sprint" → reto diario → módulos en orden → botón Buzón → pestañas. Los títulos ("Ruta de tu Startup") se marcan como encabezado. Sarko es decorativo (sin etiqueta).
 
-## Pantalla 06 · Registro
-- **Botón atrás** (`BotonAtras`) en (20,54) → regresa al inicio de sesión (`context.go` a `Rutas.inicioSesion`, porque el onboarding ya se vio).
-- **Título** "Crea tu cuenta" (Fredoka Bold 26/32) en x=24, y=116, ancho 342. **Subtítulo** "Elige tu perfil para ajustar el ritmo de los sprints." (Cuerpo/Base, `texto/secundario`) en y=154.
-- **Perfil** en y=196: tres `ChipSeleccion` ("🎓 Estudiante", "💻 Desarrollador", "⚖️ Legal"), hueco 8. Es un grupo de selección única. En el diseño aparece "Desarrollador" seleccionado solo como ejemplo: **al abrir la pantalla no hay ninguno seleccionado**, y si el usuario no elige se muestra el error "Elige tu perfil". La etiqueta semántica **no** incluye el emoji ("Estudiante", "Desarrollador", "Legal"); el emoji es solo visual.
-- **Formulario** en y=256, ancho 342, hueco 14: `CampoTextoApp` "Nombre" (ícono user, capitalización de nombres, autocompletado de nombre), "Correo electrónico" (ícono mail) y "Contraseña" (ícono lock, ocultable). En el diseño el campo de contraseña aparece con error "Mínimo 8 caracteres, incluye un número" (Leyenda, `estado/ilegal`, borde de 2): ese es el estado de error cuando la contraseña no cumple. Los valores de ejemplo del diseño (Ana López, ana.dev@startup.mx) **no** son valores por defecto: los campos inician vacíos.
-- **Consentimientos** (dos `CasillaApp` **independientes y sin marcar por defecto**): en y=548 "He leído y acepto el Aviso de Privacidad." y en y=584 "He leído y acepto los Términos de uso." No hay pantallas de esos documentos todavía: el texto es solo texto; anótalo como pendiente. Si se intenta crear la cuenta sin marcar alguna, esa casilla muestra su error ("Debes aceptar el Aviso de Privacidad para continuar" / "Debes aceptar los Términos de uso para continuar") y el foco/lector se mueven al primer error.
-- **Botón primario** "Crear cuenta" en y=620, con el mismo estado de carga ("Creando tu cuenta"). Va **siempre habilitado** salvo durante el envío: la validación ocurre al enviar.
-- **Enlace** "¿Ya tienes cuenta? Inicia sesión" (`EnlaceTexto`, centrado) en y≈700 → inicio de sesión.
-- Éxito → `Rutas.inicio` (marcador de T-04).
-
-## Validaciones (en una clase pura y probada, `lib/funciones/acceso/validadores.dart`)
-- **Nombre:** no vacío tras recortar espacios, 2 a 60 caracteres. Mensaje: "Ingresa tu nombre".
-- **Correo:** formato razonable (`algo@dominio.tld`, sin espacios), máx. 254. Mensaje: "Ingresa un correo válido".
-- **Contraseña (registro):** mínimo 8 caracteres y al menos un número. Mensaje exacto: "Mínimo 8 caracteres, incluye un número". En el inicio de sesión solo se exige que no esté vacía.
-- **Perfil** obligatorio; **ambas casillas** obligatorias.
-- Se envía al repositorio el correo recortado; la contraseña **nunca** se imprime, registra ni guarda (ni en logs, ni en estado persistente, ni en mensajes de error). Los dos consentimientos viajan como dos booleanos distintos (`aceptaAvisoPrivacidad`, `aceptaTerminos`).
-
-## Estado y navegación
-- Proveedores de Riverpod por pantalla (estado del formulario y envío) que usan `repositorioAutenticacionProvider`; las pantallas no llaman al mock directamente. Un proveedor de sesión con el usuario actual (`Usuario?`) disponible para T-04.
-- Rutas: reutiliza `Rutas.inicioSesion` y `Rutas.registro` (reemplaza el marcador de inicio de sesión; deja marcador solo para `Rutas.inicio`).
-- Con "reducir animaciones", sin transiciones decorativas. Orden de foco por teclado en el orden visual de cada pantalla; Enter en el último campo envía el formulario.
+## Modo oscuro (07b)
+Sin código especial: todo por tokens. Verificar que el héroe siga en verde de marca (`accionPrimaria` del tema oscuro) y que el contraste del texto sobre él cumpla 4.5:1 en ambos modos (usar `UTIL-CONTRASTE` en las pruebas).
 
 ## Pruebas
-Validadores (casos válidos e inválidos, límites); `CasillaApp`, `ChipSeleccion`, `EnlaceTexto`, `BotonAtras` (claro/oscuro, semántica, foco, zona táctil ≥ 48); pantalla 05 (errores, carga, éxito y error del repositorio, navegación a registro, el enlace de contraseña); pantalla 06 (grupo de perfil sin selección inicial, errores por campo, **las dos casillas independientes y sin marcar**, éxito, regreso); que la contraseña no aparece en ningún texto semántico; texto al 200 % sin desbordes en 390×844 y 360×640, claro y oscuro. Agrega los componentes nuevos a la galería. `dart format`, `flutter analyze` y `flutter test` en verde.
+- Pantalla: se ve el saludo con el nombre de la sesión, las 4 secciones, las 5 tarjetas de módulo con estados correctos (usando un repositorio de prueba), contador del Buzón, navegación de cada pestaña y de cada tarjeta, bloqueado no navega, estados cargando y error con reintento.
+- Componentes: claro y oscuro, estados, semántica, foco con teclado, solo colores del tema.
+- Texto al 200 % sin desbordes en 390×844 y 360×640; sin desbordes tampoco en 320 de ancho.
+- Mock de autenticación: contraseña `incorrecta` falla, otra acierta.
+- Actualizar `TEST-GALERIA` y la galería.
 
 ## Archivos permitidos
-`lib/funciones/acceso/**`, `lib/componentes/**`, `lib/core/**`, `lib/app/**`, `lib/datos/**` (solo si hace falta ajustar el mock o el proveedor de sesión), `lib/funciones/bienvenida/galeria_componentes.dart`, `test/**`, los nodos de código de `ai/grafo.md` y `ai/reporte.md`. **No tocar** `ai/siguiente.md` ni `ai/conocimiento/`. Sin dependencias nuevas.
+`lib/funciones/inicio/**`, `lib/componentes/**`, `lib/core/**`, `lib/app/**`, `lib/datos/**` (modelo/mocks solo para lo indicado), `lib/funciones/bienvenida/galeria_componentes.dart`, `test/**`, los nodos de código de `ai/grafo.md` y `ai/reporte.md`. **No tocar** `ai/siguiente.md` ni `ai/conocimiento/`. Sin dependencias nuevas.
 
 ## Criterios de aceptación
-1. Pantallas 05 y 06 coinciden con las medidas, textos y colores de arriba, en claro y oscuro (verifica en Chrome a 390×844 y 360×640).
-2. Validaciones y mensajes exactos; errores accesibles (anunciados, con foco al primer error).
-3. Dos consentimientos separados, sin marcar y obligatorios; perfil obligatorio y sin selección inicial.
-4. Contraseña tratada como dato sensible (oculta, sin registros). Sin hex fuera de `core/tema` ni textos sueltos.
-5. Navegación: Splash → Onboarding → Inicio de sesión ⇄ Registro → marcador de Inicio.
-6. CI en verde; commits sin prefijo y sin menciones a Claude.
-7. `ai/grafo.md` actualizado (PANT-05, PANT-06, componentes, validadores, proveedores, pruebas, rutas) y `reporte.md` con ID **T-03**, rama, resumen, decisiones, pendientes (recuperación de contraseña, pantallas de Aviso y Términos), sección **"Grafo actualizado"** y dudas numeradas.
+- [ ] El Inicio coincide con Figma 07 y 07b (medidas, colores por tokens, tipografías, Sarko 120×150 en la tarjeta).
+- [ ] Datos reales desde sesión y repositorios (nada fijo salvo el reto diario).
+- [ ] Navegación: tarjetas, "Continuar sprint", Buzón y pestañas llegan a sus rutas; bloqueado no responde.
+- [ ] Cargando, error con reintento y sin desbordes a 200 % de texto y 320 dp de ancho.
+- [ ] Mock de autenticación rechaza `incorrecta`.
+- [ ] `dart format`, `flutter analyze` y `flutter test` limpios; CI en verde.
+- [ ] Grafo actualizado (nodos de código: PANT-07 con su ruta, CODIGO-PANT-07, EST-INICIO, COMP-AVATAR, COMP-HEROE, COMP-RETO, COMP-MODULO, COMP-BUZON, TEST-INICIO; cambios en ENRUTADOR, RUTAS, PANT-PENDIENTE, TEXTOS, MOCK-AUTH, PANT-GALERIA y SESION) y `reporte.md` con ID **T-04**, rama `04-inicio`, dudas numeradas (D1, D2…).
+- [ ] Commits: una frase en español, sin prefijo y **sin mencionar a Claude** (revisar con `git log -1 --format=%B`). Pull Request hacia `develop`, sin menciones a Claude. No hacer merge.
