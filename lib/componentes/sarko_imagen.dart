@@ -21,6 +21,10 @@ enum PoseSarko {
 
 /// Imagen de Sarko en una caja de relación 4:5 (ancho:alto).
 ///
+/// Las poses no son 4:5 (alegre es 1:1; las demás ≈ 0.76–0.86), así que se
+/// ajustan con `BoxFit.contain` **abajo al centro**: los pies quedan sobre la
+/// misma línea en todas las poses.
+///
 /// Tamaños del diseño: 264, 208, 184, 176, 160, 120, 104, 96 y 88 de ancho.
 /// Si la imagen no carga se muestra un marcador. Con [decorativa] se excluye
 /// del lector de pantalla.
@@ -41,6 +45,7 @@ class SarkoImagen extends StatelessWidget {
       child: Image.asset(
         pose.ruta,
         fit: BoxFit.contain,
+        alignment: Alignment.bottomCenter,
         errorBuilder: (context, error, pila) => _Marcador(ancho: ancho),
       ),
     );
