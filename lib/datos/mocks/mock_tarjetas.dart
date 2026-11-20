@@ -29,6 +29,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Guardamos el nombre y el correo de cada usuario. Como no son secretos, '
             '¿podemos usarlos como queramos sin seguir la ley de datos?',
+        palabrasTrampa: ['no son secretos', 'como queramos', 'sin seguir la ley de datos'],
+        traduccionLegal: '¿El nombre y el correo de una persona son datos personales cuyo uso está sujeto a la ley de protección de datos?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: definición de dato personal',
+          'Ley de datos personales en posesión de particulares: principios de licitud y finalidad',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El nombre y el correo identifican a una persona: son datos personales y '
@@ -54,6 +60,11 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Queremos publicar en el blog cuántos usuarios tenemos por estado, solo '
             'con totales y sin ningún nombre. ¿Podemos?',
+        palabrasTrampa: ['solo con totales', 'sin ningún nombre'],
+        traduccionLegal: '¿Las cifras agregadas que no permiten identificar a nadie siguen siendo datos personales?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: datos disociados o anonimizados',
+        ],
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Las cifras totales no permiten identificar a nadie, así que ya no son '
@@ -71,6 +82,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Marketing pidió guardar la religión de cada usuario para recomendarle '
             'contenido. ¿Lo agregamos al perfil con el aviso normal?',
+        palabrasTrampa: ['religión', 'con el aviso normal'],
+        traduccionLegal: '¿Se pueden tratar las creencias religiosas, que son datos sensibles, solo con el aviso de privacidad general?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: datos personales sensibles',
+          'Ley de datos personales en posesión de particulares: consentimiento expreso y por escrito para datos sensibles',
+        ],
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'Las creencias religiosas son datos sensibles: piden consentimiento expreso '
@@ -98,6 +115,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Pedimos la dirección del cliente solo para enviarle su compra, y el aviso '
             'de privacidad lo dice. ¿Está bien?',
+        palabrasTrampa: ['solo para enviarle su compra', 'el aviso de privacidad lo dice'],
+        traduccionLegal: '¿Es válido recabar la dirección cuando es necesaria para la finalidad informada en el aviso de privacidad?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: principios de finalidad y proporcionalidad',
+          'Ley de datos personales en posesión de particulares: aviso de privacidad',
+        ],
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Es un dato personal necesario para una finalidad informada en el aviso: '
@@ -115,6 +138,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Los registros de error guardan el nombre y el correo de quien falla al '
             'entrar, y el panel de registros es público. ¿Lo dejamos así?',
+        palabrasTrampa: ['nombre y el correo', 'es público'],
+        traduccionLegal: '¿Se cumplen los deberes de seguridad y confidencialidad si los datos personales quedan expuestos en un panel público?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: deber de seguridad',
+          'Ley de datos personales en posesión de particulares: deber de confidencialidad',
+        ],
+        iniciales: 'QA',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Exponer datos personales en un panel público incumple el deber de '
@@ -143,6 +173,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'En nuestra app de recetas queremos pedir la CURP y el estado civil "por '
             'si algún día sirven". ¿Los agregamos al registro?',
+        palabrasTrampa: ['la CURP', 'por si algún día sirven'],
+        traduccionLegal:
+            '¿Se pueden pedir datos que no son necesarios para la finalidad del servicio?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: principio de proporcionalidad (minimización de datos)',
+          'Ley de datos personales en posesión de particulares: principio de finalidad',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Solo se deben pedir los datos necesarios para la finalidad. La CURP y el '
@@ -169,6 +206,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Queremos usar las fotos de perfil de los usuarios en los anuncios de la '
             'app. ¿Podemos?',
+        palabrasTrampa: ['fotos de perfil', 'anuncios'],
+        traduccionLegal: '¿Se puede usar la imagen de una persona para una finalidad distinta sin su consentimiento?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: principio de finalidad y consentimiento para finalidades nuevas',
+          'Derecho a la propia imagen',
+        ],
+        iniciales: 'MK',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'La foto identifica a la persona. Usarla en anuncios es otra finalidad: '
@@ -186,6 +230,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Un hospital aliado nos ofrece los expedientes de sus pacientes para '
             'entrenar nuestro modelo de IA. ¿Los aceptamos?',
+        palabrasTrampa: ['expedientes de sus pacientes', 'entrenar nuestro modelo de IA'],
+        traduccionLegal: '¿Se pueden recibir datos de salud de otra empresa para una finalidad nueva sin revisar el consentimiento y el contrato de transferencia?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: datos personales sensibles (salud)',
+          'Ley de datos personales en posesión de particulares: transferencias y consentimiento del titular',
+        ],
+        iniciales: 'CT',
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'Los datos de salud son sensibles y recibirlos de otra empresa es una '
@@ -214,6 +265,11 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Usamos la dirección del cliente para entregarle el pedido que compró. '
             '¿Necesitamos pedirle un consentimiento aparte?',
+        palabrasTrampa: ['entregarle el pedido', 'consentimiento aparte'],
+        traduccionLegal: '¿Hace falta consentimiento cuando los datos son necesarios para cumplir la relación con el cliente?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: excepciones al consentimiento por una relación jurídica con el titular',
+        ],
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'No hace falta: los datos necesarios para cumplir la relación con el '
@@ -239,6 +295,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'El usuario no autorizó usar sus datos de salud, pero el código los usa '
             'igual para recomendar rutinas. ¿Lo publicamos así?',
+        palabrasTrampa: ['no autorizó', 'datos de salud', 'los usa igual'],
+        traduccionLegal:
+            '¿Se pueden tratar datos de salud sin el consentimiento expreso del titular?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: consentimiento expreso y por escrito para datos sensibles',
+          'Ley de datos personales en posesión de particulares: principio de licitud',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Los datos de salud son sensibles: sin consentimiento expreso no se pueden '
@@ -272,6 +335,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'La nueva función guarda cómo se siente el usuario cada día. ¿Basta con '
             'el aviso y que no se queje (consentimiento tácito)?',
+        palabrasTrampa: ['cómo se siente', 'consentimiento tácito'],
+        traduccionLegal: '¿Basta el consentimiento tácito para tratar datos sobre la salud emocional del usuario?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: consentimiento expreso y por escrito para datos sensibles',
+          'Ley de datos personales en posesión de particulares: consentimiento tácito y expreso',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El estado de ánimo es un dato de salud, y los datos sensibles piden '
@@ -297,6 +366,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Marketing quiere vender la base de correos de los clientes a una '
             'empresa aliada sin avisarles. ¿Es legal?',
+        palabrasTrampa: ['vender la base de correos', 'sin avisarles'],
+        traduccionLegal: '¿Se pueden transferir datos personales a un tercero sin informarlo en el aviso ni obtener el consentimiento del titular?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: transferencias y consentimiento del titular',
+          'Ley de datos personales en posesión de particulares: aviso de privacidad',
+        ],
+        iniciales: 'MK',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Transferir datos personales a terceros requiere informarlo en el '
@@ -314,6 +390,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Queremos usar los correos para encuestas de satisfacción, algo que el '
             'aviso no menciona. ¿Podemos empezar ya?',
+        palabrasTrampa: ['encuestas de satisfacción', 'el aviso no menciona'],
+        traduccionLegal: '¿Se pueden usar los datos para una finalidad que no está en el aviso de privacidad sin pedir consentimiento?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: principio de finalidad',
+          'Ley de datos personales en posesión de particulares: cambios al aviso de privacidad',
+        ],
+        iniciales: 'SP',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Una finalidad nueva vale si se informa en el aviso y se obtiene el '
@@ -331,6 +414,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Este usuario revocó su consentimiento para promociones, pero sigue en la '
             'lista del boletín. ¿Le seguimos enviando porque ya había aceptado?',
+        palabrasTrampa: ['revocó su consentimiento', 'ya había aceptado'],
+        traduccionLegal: '¿Se pueden seguir usando los datos para una finalidad después de que el titular revocó su consentimiento?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: revocación del consentimiento',
+          'Ley de datos personales en posesión de particulares: principio de finalidad',
+        ],
+        iniciales: 'MK',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El titular puede revocar su consentimiento en cualquier momento; desde '
@@ -363,6 +453,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Antes de guardar datos de salud mostramos el aviso y el usuario confirma '
             'un "Sí, autorizo" con su contraseña. ¿Cumple?',
+        palabrasTrampa: ['Sí, autorizo', 'con su contraseña'],
+        traduccionLegal: '¿Una autorización expresa, confirmada con un medio de autenticación, cumple como consentimiento para datos sensibles?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: consentimiento expreso y por escrito para datos sensibles',
+          'Ley de datos personales en posesión de particulares: firma electrónica o medio de autenticación',
+        ],
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Es un consentimiento expreso y firmado con un medio de autenticación, '
@@ -380,6 +476,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Un usuario pide que borren sus datos personales, pero tienen facturas '
             'fiscales recientes a su nombre. ¿Qué haces?',
+        palabrasTrampa: ['borren sus datos', 'facturas fiscales recientes'],
+        traduccionLegal: '¿Cómo se atiende una cancelación cuando otra ley obliga a conservar parte de los datos?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: derecho de cancelación: bloqueo y supresión',
+          'Obligaciones fiscales de conservación de comprobantes',
+        ],
+        iniciales: 'SP',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Se atiende la cancelación, pero se conservan bloqueados los datos que '
@@ -407,6 +510,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Una usuaria pide saber qué datos suyos tenemos. ¿Le pedimos que acredite '
             'su identidad antes de entregárselos?',
+        palabrasTrampa: ['qué datos suyos tenemos', 'acredite su identidad'],
+        traduccionLegal: '¿Se puede pedir al titular que acredite su identidad para ejercer su derecho de acceso?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: derecho de acceso',
+          'Ley de datos personales en posesión de particulares: acreditación de la identidad del titular',
+        ],
+        iniciales: 'SP',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Sí: para ejercer los derechos ARCO el titular debe acreditar su identidad, '
@@ -432,6 +542,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Atender solicitudes de acceso nos quita tiempo. ¿Cobramos una cuota por '
             'cada una?',
+        palabrasTrampa: ['nos quita tiempo', 'Cobramos una cuota'],
+        traduccionLegal: '¿Se puede cobrar por atender el ejercicio de los derechos de acceso, rectificación, cancelación y oposición?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: gratuidad de los derechos ARCO',
+          'Ley de datos personales en posesión de particulares: costos de envío o de reproducción',
+        ],
+        iniciales: 'CE',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Ejercer los derechos ARCO es gratuito; solo se pueden cobrar los gastos de '
@@ -454,6 +571,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Esta solicitud de acceso lleva semanas sin respuesta y ya venció el plazo '
             'legal. ¿La dejamos para después del lanzamiento?',
+        palabrasTrampa: ['semanas sin respuesta', 'después del lanzamiento'],
+        traduccionLegal: '¿Se puede dejar sin respuesta una solicitud de acceso cuando ya venció el plazo legal?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: plazos de respuesta a los derechos ARCO',
+          'Ley de datos personales en posesión de particulares: derecho de acceso',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Las solicitudes ARCO deben responderse dentro del plazo que marca la '
@@ -487,6 +610,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Una usuaria pide corregir su apellido, que está mal escrito. ¿Lo '
             'corregimos y le confirmamos el cambio?',
+        palabrasTrampa: ['mal escrito', 'le confirmamos el cambio'],
+        traduccionLegal: '¿El titular puede pedir que se corrijan sus datos cuando son inexactos?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: derecho de rectificación',
+          'Ley de datos personales en posesión de particulares: principio de calidad de los datos',
+        ],
+        iniciales: 'SP',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Es el derecho de rectificación: el titular puede pedir que se corrijan '
@@ -504,6 +634,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Un usuario pide cancelar su cuenta, pero tiene un reembolso en trámite. '
             '¿Atendemos la cancelación?',
+        palabrasTrampa: ['cancelar su cuenta', 'reembolso en trámite'],
+        traduccionLegal: '¿Cómo se atiende una cancelación cuando hay una obligación pendiente que todavía necesita los datos?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: derecho de cancelación: periodo de bloqueo',
+          'Ley de datos personales en posesión de particulares: excepciones a la cancelación',
+        ],
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Se atiende, pero los datos necesarios para terminar el reembolso se '
@@ -521,6 +657,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Para "cancelar" una cuenta solo ocultamos el perfil; los datos siguen '
             'guardados para siempre. ¿Con eso cumplimos?',
+        palabrasTrampa: ['solo ocultamos el perfil', 'para siempre'],
+        traduccionLegal: '¿Ocultar un perfil sin bloquear ni suprimir los datos cumple con el derecho de cancelación?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: derecho de cancelación: bloqueo y supresión',
+          'Ley de datos personales en posesión de particulares: principio de calidad: conservación limitada',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Cancelar implica bloquear los datos y después suprimirlos. Ocultarlos y '
@@ -554,6 +696,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Un usuario se opone a que usemos sus datos para publicidad. ¿Dejamos de '
             'enviarle anuncios y mantenemos su cuenta?',
+        palabrasTrampa: ['se opone', 'publicidad'],
+        traduccionLegal: '¿El titular puede oponerse a que sus datos se usen para una finalidad concreta sin perder el servicio?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: derecho de oposición',
+          'Ley de datos personales en posesión de particulares: finalidades secundarias',
+        ],
+        iniciales: 'MK',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Es el derecho de oposición: se deja de usar sus datos para esa finalidad '
@@ -571,6 +720,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Una persona dice ser la abogada de un usuario y trae una carta simple '
             'para pedir todos sus datos. ¿Qué hacemos?',
+        palabrasTrampa: ['dice ser la abogada', 'carta simple'],
+        traduccionLegal: '¿Qué debe acreditar un representante para ejercer los derechos de otra persona sobre sus datos?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: ejercicio de los derechos ARCO por representante',
+          'Ley de datos personales en posesión de particulares: acreditación de la identidad y la representación',
+        ],
+        iniciales: 'SP',
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'Un representante debe acreditar su representación. Revisar si el '
@@ -598,6 +754,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Alguien entró sin permiso a la base de usuarios y se llevó correos y '
             'teléfonos. ¿Lo mantenemos en secreto para no asustar a nadie?',
+        palabrasTrampa: ['sin permiso', 'en secreto'],
+        traduccionLegal: '¿Hay que informar a los titulares una vulneración de seguridad que los afecta de forma significativa?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: vulneraciones de seguridad: aviso a los titulares',
+          'Ley de datos personales en posesión de particulares: deber de seguridad',
+        ],
+        iniciales: 'CE',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Las vulneraciones que afectan de forma significativa a los titulares '
@@ -623,6 +786,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Lo primero que proponemos es cerrar el acceso y cambiar todas las '
             'credenciales comprometidas. ¿Empezamos por ahí?',
+        palabrasTrampa: ['cerrar el acceso', 'credenciales comprometidas'],
+        traduccionLegal:
+            '¿Contener una vulneración forma parte del deber de seguridad del responsable?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: deber de seguridad',
+          'Ley de datos personales en posesión de particulares: vulneraciones de seguridad: acciones correctivas',
+        ],
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Contener la vulneración es parte del deber de seguridad: primero se '
@@ -638,6 +808,13 @@ class MockTarjetas implements RepositorioTarjetas {
         personaje: 'Soporte',
         rol: 'Atención a clientes',
         texto: 'Este es el correo que preparamos para los afectados. ¿Lo enviamos así?',
+        palabrasTrampa: ['correo que preparamos', 'Lo enviamos así'],
+        traduccionLegal:
+            '¿Qué información debe contener el aviso de una vulneración a los titulares afectados?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: vulneraciones de seguridad: contenido del aviso a los titulares',
+        ],
+        iniciales: 'SP',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Se puede enviar si agrega qué pasó, qué datos se afectaron, qué puede '
@@ -666,6 +843,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Descubrimos que las contraseñas se guardan en texto plano. Cambiarlo '
             'retrasa el lanzamiento. ¿Seguimos así por ahora?',
+        palabrasTrampa: ['texto plano', 'retrasa el lanzamiento'],
+        traduccionLegal: '¿Guardar contraseñas sin cifrar cumple con las medidas de seguridad técnicas que exige la ley?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: deber de seguridad: medidas técnicas',
+          'Ley de datos personales en posesión de particulares: vulneraciones de seguridad',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El responsable debe aplicar medidas de seguridad técnicas adecuadas. '
@@ -699,6 +882,14 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Proponemos registrar el incidente: cuándo pasó, qué datos se afectaron, '
             'la causa y lo que hicimos. ¿Lo documentamos?',
+        palabrasTrampa: ['registrar el incidente', 'lo que hicimos'],
+        traduccionLegal:
+            '¿Conviene documentar las vulneraciones y las medidas que se tomaron para atenderlas?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: vulneraciones de seguridad: registro de incidentes',
+          'Ley de datos personales en posesión de particulares: principio de responsabilidad',
+        ],
+        iniciales: 'QA',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Documentar las vulneraciones y las medidas tomadas ayuda a demostrar el '
@@ -716,6 +907,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Un periodista pregunta por la fuga y el equipo quiere culpar al proveedor '
             'sin tener pruebas. ¿Qué hacemos con la respuesta?',
+        palabrasTrampa: ['culpar al proveedor', 'sin tener pruebas'],
+        traduccionLegal: '¿Una declaración pública que culpa a un tercero de una fuga sin pruebas tiene riesgos legales que debe revisar jurídico?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: vulneraciones de seguridad: comunicación a los titulares',
+          'Código Civil Federal: responsabilidad por daño moral',
+        ],
+        iniciales: 'MK',
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'Una declaración pública sobre una fuga y sobre un tercero tiene riesgos '
@@ -732,6 +930,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'La fuga ocurrió en nuestro proveedor de nube, que guarda los datos por '
             'encargo nuestro. ¿El problema es solo suyo?',
+        palabrasTrampa: ['por encargo nuestro', 'solo suyo'],
+        traduccionLegal: '¿El responsable sigue respondiendo por los datos cuando la vulneración ocurre en su encargado?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: responsable y encargado del tratamiento',
+          'Ley de datos personales en posesión de particulares: vulneraciones de seguridad: aviso a los titulares',
+        ],
+        iniciales: 'CT',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El responsable sigue respondiendo por los datos aunque los trate un '
@@ -757,6 +962,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'El atacante pide un rescate para no publicar los datos robados. ¿Pagamos '
             'y lo dejamos así?',
+        palabrasTrampa: ['pide un rescate', 'lo dejamos así'],
+        traduccionLegal: '¿Pagar un rescate por datos robados es una decisión que el equipo puede tomar sin jurídico ni las autoridades?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: vulneraciones de seguridad: aviso y acciones correctivas',
+          'Denuncia ante las autoridades competentes',
+        ],
+        iniciales: 'CE',
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'Un rescate es una decisión con riesgos legales y de seguridad; debe '
@@ -784,6 +996,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'El formulario de registro pide nombre, correo y fecha de nacimiento. '
             '¿Podemos lanzarlo el viernes sin mostrar ningún aviso de privacidad?',
+        palabrasTrampa: ['lanzarlo el viernes', 'sin mostrar ningún aviso'],
+        traduccionLegal: '¿Se pueden recabar datos personales sin poner antes el aviso de privacidad a disposición del titular?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: aviso de privacidad',
+          'Ley de datos personales en posesión de particulares: principio de información',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'La LFPDPPP obliga a poner el aviso de privacidad a disposición del '
@@ -812,6 +1030,11 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Pusimos un aviso simplificado en el registro con un enlace al aviso '
             'integral. ¿Cumple?',
+        palabrasTrampa: ['aviso simplificado', 'aviso integral'],
+        traduccionLegal: '¿Un aviso simplificado con enlace al aviso integral cumple con el deber de informar al titular?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: modalidades del aviso de privacidad: integral, simplificado y corto',
+        ],
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'El aviso simplificado es válido si informa lo esencial y remite al '
@@ -829,6 +1052,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'El aviso dice que usamos el correo solo para la cuenta, pero el código '
             'lo manda también a la lista de promociones. ¿Lo dejamos así?',
+        palabrasTrampa: ['solo para la cuenta', 'lista de promociones'],
+        traduccionLegal: '¿Se pueden usar los datos para una finalidad que no aparece en el aviso de privacidad?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: principio de finalidad',
+          'Ley de datos personales en posesión de particulares: aviso de privacidad',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Usar los datos para una finalidad que no está en el aviso incumple el '
@@ -857,6 +1086,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Queremos enviar promociones. ¿Basta con agregarlo al aviso y dar una '
             'casilla para que el usuario se niegue?',
+        palabrasTrampa: ['enviar promociones', 'se niegue'],
+        traduccionLegal: '¿Son válidas las finalidades secundarias si se informan en el aviso y el titular puede negarse a ellas?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: finalidades secundarias y mecanismo para negarse',
+          'Ley de datos personales en posesión de particulares: aviso de privacidad',
+        ],
+        iniciales: 'MK',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Las finalidades secundarias son válidas si están en el aviso y el '
@@ -874,6 +1110,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Encontré una librería GPL-3.0 que resuelve el login. ¿La copio tal cual '
             'en nuestra app de código cerrado y la publicamos?',
+        palabrasTrampa: ['GPL-3.0', 'tal cual', 'código cerrado'],
+        traduccionLegal: '¿Se puede incluir código bajo GPL-3.0 dentro de un software propietario que se distribuye sin publicar su código fuente?',
+        normas: [
+          'Licencia GPL-3.0, sección 5: obras derivadas',
+          'Ley Federal del Derecho de Autor, art. 102 (programas de cómputo)',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'La licencia GPL-3.0 es copyleft: si la integras, todo el producto derivado '
@@ -911,6 +1153,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Revisé el formulario de registro antes del lanzamiento. Ya cumple con el aviso '
             'de privacidad, ¿lo publicamos así?',
+        palabrasTrampa: ['Ya cumple', 'lo publicamos así'],
+        traduccionLegal: '¿Una casilla de consentimiento pre-marcada y un formulario sin aviso de privacidad cumplen con la ley de datos?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: consentimiento libre, específico e informado',
+          'Ley de datos personales en posesión de particulares: aviso de privacidad',
+        ],
+        iniciales: 'QA',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El consentimiento debe ser libre e informado: una casilla pre-marcada no lo es, y '
@@ -947,6 +1196,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Guardamos los datos en un proveedor de nube que solo los procesa por '
             'nuestro encargo. ¿Hay que pedir consentimiento para eso?',
+        palabrasTrampa: ['solo los procesa', 'por nuestro encargo'],
+        traduccionLegal: '¿Enviar datos a un encargado que los trata por cuenta del responsable requiere el consentimiento del titular?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: remisiones al encargado',
+          'Ley de datos personales en posesión de particulares: responsable y encargado del tratamiento',
+        ],
+        iniciales: 'CT',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'La remisión a un encargado que trata los datos por cuenta del '
@@ -964,6 +1220,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Detectamos que algunos usuarios tienen 15 años. ¿Seguimos registrándolos '
             'igual que a los adultos?',
+        palabrasTrampa: ['15 años', 'igual que a los adultos'],
+        traduccionLegal: '¿Qué se necesita para tratar los datos personales de menores de edad?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: datos de menores: consentimiento de quien ejerce la patria potestad',
+          'Interés superior de la niñez',
+        ],
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'El tratamiento de datos de menores necesita el consentimiento de quien '
@@ -980,6 +1242,12 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Cambiamos el aviso para agregar una finalidad nueva. ¿Lo publicamos '
             'sin avisar a los usuarios que ya están registrados?',
+        palabrasTrampa: ['finalidad nueva', 'sin avisar'],
+        traduccionLegal: '¿Se puede aplicar una finalidad nueva sin comunicar antes los cambios del aviso a los titulares?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: cambios al aviso de privacidad',
+          'Ley de datos personales en posesión de particulares: principio de finalidad',
+        ],
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Los cambios al aviso deben comunicarse a los titulares antes de '
@@ -1005,6 +1273,13 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'El cliente nos pide guardar las contraseñas de los usuarios en texto plano "para '
             'soporte". ¿Aceptamos?',
+        palabrasTrampa: ['texto plano', 'para soporte'],
+        traduccionLegal: '¿Se pueden guardar las contraseñas de los usuarios sin cifrar aunque lo pida el cliente?',
+        normas: [
+          'Ley de datos personales en posesión de particulares: deber de seguridad: medidas técnicas',
+          'Ley de datos personales en posesión de particulares: responsable y encargado del tratamiento',
+        ],
+        iniciales: 'CL',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Las contraseñas son datos personales y el responsable debe protegerlas con medidas '

@@ -309,6 +309,25 @@ abstract final class Textos {
   static String comodinSemantica(String nombre, int cantidad) =>
       cantidad == 1 ? '$nombre, 1 disponible' : '$nombre, $cantidad disponibles';
   static const String comodinesTitulo = 'Comodines';
+
+  // ---------------------------------------------------------------------
+  // T-07b Comodines: barra, 10b Lupa de Auditor y 10c Abogado Senior
+  // ---------------------------------------------------------------------
+  static const String comodinActivo = 'activa';
+  static const String comodinNoDisponible = 'no disponible';
+  static const String amparoArmado = 'Amparo armado: tu próximo error no te quita vida';
+  static const String amparoDesarmado = 'Amparo desarmado';
+  static String comodinEstadoSemantica(String base, String? estado) =>
+      estado == null ? base : '$base; $estado';
+  static String comodinQuedan(String nombre, int cantidad) => '$nombre, quedan $cantidad';
+  static const String lupaActiva = 'Lupa de Auditor: palabras trampa resaltadas';
+  static String palabrasTrampaSemantica(List<String> palabras) =>
+      palabras.map((p) => 'palabra trampa: $p').join('; ');
+  static const String abogadoTitulo = 'Consulta al Abogado Senior';
+  static const String abogadoSubtitulo = 'El caso, sin ruido y en términos legales';
+  static const String abogadoPregunta = 'Lo que realmente se pregunta';
+  static const String normaAplicable = 'NORMA APLICABLE';
+  static const String volverALaTarjeta = 'Volver a la tarjeta';
   static const String indicadoresSemantica = 'Indicadores de la Startup';
   static const String salirTitulo = '¿Salir del sprint?';
   static const String salirTexto = 'Perderás el avance de este sprint.';

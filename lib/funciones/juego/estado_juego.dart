@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../datos/modelos/articulo_tienda.dart';
 import '../../datos/modelos/estado_startup.dart';
 import '../../datos/modelos/modulo.dart';
 import '../../datos/modelos/tarjeta.dart';
 import '../../datos/modelos/vidas.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
 import '../mapa/logica_mapa.dart';
+import 'logica_comodines.dart';
 import 'logica_fin_sprint.dart';
 import 'logica_veredicto.dart';
 
@@ -18,6 +22,7 @@ class DatosJuego {
     this.modulo,
     this.sprint,
     this.numeroSprint = 1,
+    this.comodines = const {},
   });
 
   final Vidas vidas;
@@ -36,21 +41,16 @@ class DatosJuego {
   /// Número del sprint dentro de su módulo (sin contar el Examen final).
   final int numeroSprint;
 
+  /// Comodines que tiene el usuario al empezar (de la tienda).
+  final Map<Comodin, int> comodines;
+
   /// Con 0 vidas no se carga el juego (marcador de "Sin vidas", T-08).
   bool get sinVidas => vidas.cantidad <= 0;
 }
 
-/// Comodines que se muestran en la barra mientras el repositorio no da las
-/// cantidades (se activan en T-07).
-abstract final class ComodinesJuego {
-  static const int lupa = 2;
-  static const int abogado = 1;
-  static const int amparo = 1;
-}
-
 /// Carga primero las vidas: con 0 no carga el juego. Si hay vidas, pide en
-/// paralelo las tarjetas, el estado de la Startup y los módulos (para el
-/// número del sprint y el color del módulo). Un sprint inexistente da una
+/// paralelo las tarjetas, el estado de la Startup, los módulos (para el
+/// número del sprint y el color del módulo) y los comodines de la tienda. Un sprint inexistente da una
 /// lista de tarjetas vacía.
 final datosJuegoProvider = FutureProvider.autoDispose.family<DatosJuego, String>((
   ref,
@@ -59,6 +59,7 @@ final datosJuegoProvider = FutureProvider.autoDispose.family<DatosJuego, String>
   final repoVidas = ref.watch(repositorioVidasProvider);
   final repoTarjetas = ref.watch(repositorioTarjetasProvider);
   final repoProgreso = ref.watch(repositorioProgresoProvider);
+  final repoTienda = ref.watch(repositorioTiendaProvider);
 
   final vidas = await repoVidas.obtenerVidas();
   if (vidas.cantidad <= 0) return DatosJuego(vidas: vidas);
@@ -71,10 +72,11 @@ final datosJuegoProvider = FutureProvider.autoDispose.family<DatosJuego, String>
     }
   }
 
-  final (lista, estado, modulos) = await (
+  final (lista, estado, modulos, comodines) = await (
     tarjetas(),
     repoProgreso.obtenerEstadoStartup(),
     repoProgreso.obtenerModulos(),
+    repoTienda.obtenerComodines(),
   ).wait;
 
   Modulo? modulo;
@@ -95,6 +97,7 @@ final datosJuegoProvider = FutureProvider.autoDispose.family<DatosJuego, String>
     modulo: modulo,
     sprint: sprint,
     numeroSprint: modulo == null || sprint == null ? 1 : LogicaMapa.numeroDe(modulo, sprint) ?? 1,
+    comodines: comodines,
   );
 });
 
@@ -196,6 +199,9 @@ class EstadoJuego {
     this.guardado = false,
     this.evidenciaMarcada = const {},
     this.lineasMarcadas = const {},
+    this.comodines = const {},
+    this.lupaUsada = const {},
+    this.abogadoUsado = const {},
   });
 
   /// Tarjeta actual. Avanza al **cerrar** el panel, no al lanzar la tarjeta.
@@ -217,7 +223,7 @@ class EstadoJuego {
   /// Panel de veredicto abierto; `null` si no hay.
   final PanelPendiente? panel;
 
-  /// Amparo activo para el siguiente error (se activa en T-07).
+  /// Amparo armado: absorbe el siguiente error (T-07b).
   final bool amparoActivo;
 
   /// Cómo terminó el sprint; `null` mientras se juega.
@@ -232,6 +238,16 @@ class EstadoJuego {
 
   /// Líneas que marcó el jugador en cada evidencia (para volver a mostrarlas).
   final Map<String, List<int>> lineasMarcadas;
+
+  /// Comodines que quedan (se descuentan al usarlos).
+  final Map<Comodin, int> comodines;
+
+  /// Tarjetas en las que ya se usó la Lupa o se consultó al Abogado.
+  final Set<String> lupaUsada;
+  final Set<String> abogadoUsado;
+
+  /// Cuántos quedan de [comodin].
+  int cantidad(Comodin comodin) => comodines[comodin] ?? 0;
 
   /// Tarjetas correctas (con o sin bonus).
   int get aciertos => LogicaFinSprint.aciertos(resultados);
@@ -254,6 +270,9 @@ class EstadoJuego {
     bool? guardado,
     Map<String, bool>? evidenciaMarcada,
     Map<String, List<int>>? lineasMarcadas,
+    Map<Comodin, int>? comodines,
+    Set<String>? lupaUsada,
+    Set<String>? abogadoUsado,
   }) => EstadoJuego(
     indice: indice ?? this.indice,
     totalTarjetas: totalTarjetas,
@@ -271,6 +290,9 @@ class EstadoJuego {
     guardado: guardado ?? this.guardado,
     evidenciaMarcada: evidenciaMarcada ?? this.evidenciaMarcada,
     lineasMarcadas: lineasMarcadas ?? this.lineasMarcadas,
+    comodines: comodines ?? this.comodines,
+    lupaUsada: lupaUsada ?? this.lupaUsada,
+    abogadoUsado: abogadoUsado ?? this.abogadoUsado,
   );
 }
 
@@ -295,11 +317,49 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
       estadoInicial: inicial,
       estadoStartup: inicial,
       vidas: datos?.vidas.cantidad ?? 0,
+      comodines: datos?.comodines ?? const {},
     );
   }
 
-  /// Activa o desactiva el Amparo para el siguiente error (T-07 lo usará).
-  void establecerAmparo({required bool activo}) => state = state.copiar(amparoActivo: activo);
+  /// Arma o desarma el Amparo. Armarlo no gasta (se gasta al absorber un
+  /// error) y no se puede armar sin Amparos.
+  void establecerAmparo({required bool activo}) {
+    if (activo && state.cantidad(Comodin.amparo) <= 0) return;
+    state = state.copiar(amparoActivo: activo);
+  }
+
+  /// Tocar el Amparo: lo arma o lo desarma. Devuelve si quedó armado.
+  bool alternarAmparo() {
+    establecerAmparo(activo: !state.amparoActivo);
+    return state.amparoActivo;
+  }
+
+  /// Resta 1 a [comodin] en la sesión y lo guarda en la tienda en el momento.
+  void _gastar(Comodin comodin) {
+    state = state.copiar(
+      comodines: {...state.comodines, comodin: LogicaComodines.restar(state.cantidad(comodin))},
+    );
+    unawaited(ref.read(repositorioTiendaProvider).consumirComodin(comodin));
+  }
+
+  /// Usa la Lupa en [tarjeta]: gasta 1 y marca la tarjeta. No hace nada (y
+  /// devuelve `false`) si no se puede usar; ver [LogicaComodines.puedeUsarLupa].
+  bool usarLupa(Tarjeta tarjeta) {
+    if (!LogicaComodines.puedeUsarLupa(state, tarjeta)) return false;
+    _gastar(Comodin.lupaAuditor);
+    state = state.copiar(lupaUsada: {...state.lupaUsada, tarjeta.id});
+    return true;
+  }
+
+  /// Consulta al Abogado en [tarjeta]: la primera vez gasta 1; reabrirlo en la
+  /// misma tarjeta es gratis. Devuelve si se puede abrir el panel.
+  bool consultarAbogado(Tarjeta tarjeta) {
+    if (state.abogadoUsado.contains(tarjeta.id)) return state.panel == null;
+    if (!LogicaComodines.puedeUsarAbogado(state, tarjeta)) return false;
+    _gastar(Comodin.abogadoSenior);
+    state = state.copiar(abogadoUsado: {...state.abogadoUsado, tarjeta.id});
+    return true;
+  }
 
   /// Marca las [lineas] de la evidencia de [tarjeta] y dice si incluyen una
   /// línea clave. Solo se marca una vez: si ya estaba marcada, devuelve el
@@ -357,7 +417,7 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
         ResultadoTarjeta(tarjetaId: tarjeta.id, tipo: resultado.tipo, bonus: bonus),
       ],
       falladas: resultado.esFallo ? [...state.falladas, tarjeta.id] : state.falladas,
-      // El Amparo se gasta al absorber un error.
+      // El Amparo se desarma al absorber un error (el gasto va abajo).
       amparoActivo: resultado.tipo == TipoVeredicto.amparo ? false : state.amparoActivo,
       panel: () => PanelPendiente(
         tarjeta: tarjeta,
@@ -369,6 +429,8 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
             : FasePanel.explicacion,
       ),
     );
+    // El Amparo se gasta cuando absorbe el error, no al armarlo.
+    if (resultado.tipo == TipoVeredicto.amparo) _gastar(Comodin.amparo);
     return resultado;
   }
 

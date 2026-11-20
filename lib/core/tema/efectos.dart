@@ -183,6 +183,21 @@ abstract final class EfectosApp {
   static const Duration duracionResaltado = Duration(milliseconds: 150);
 
   // ---------------------------------------------------------------------
+  // 10b Lupa de Auditor (Figma 38:4914)
+  // ---------------------------------------------------------------------
+
+  /// Subrayado grueso de las palabras trampa: #FFD84D al 65 % (como en
+  /// Figma). En oscuro baja al 35 % para que el texto claro siga en AA.
+  static const Color trampaClaro = Color(0xA6FFD84D);
+  static const Color trampaOscuro = Color(0x59FFD84D);
+
+  /// Grosor del subrayado (11 en Figma, con el texto de 17).
+  static const double grosorTrampa = 11;
+
+  /// Color del subrayado de las trampas según el modo.
+  static Color trampa(Brightness brillo) => brillo == Brightness.dark ? trampaOscuro : trampaClaro;
+
+  // ---------------------------------------------------------------------
   // 19 Sprint completado (Figma 38:5557)
   // ---------------------------------------------------------------------
 

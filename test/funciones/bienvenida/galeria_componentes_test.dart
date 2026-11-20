@@ -42,7 +42,7 @@ import 'package:material_ui/material_ui.dart';
 /// Pantalla alta para que la galería entera quede construida.
 Future<void> montarGaleria(WidgetTester tester) async {
   await abrirGaleria(tester);
-  await agrandar(tester, const Size(390, 17000));
+  await agrandar(tester, const Size(390, 19000));
 }
 
 /// Agranda la superficie después de navegar (la transición de página no
@@ -71,8 +71,8 @@ void main() {
     expect(find.text(Textos.galeriaTitulo), findsOneWidget);
     expect(
       find.byType(BotonApp),
-      findsNWidgets(18),
-    ); // 8 + globo + 5 paneles + 3 visores + panel 18
+      findsNWidgets(19),
+    ); // 8 + globo + 5 paneles + 3 visores + panel 18 + Abogado
     expect(find.byType(BotonVeredicto), findsNWidgets(12)); // 8 + los de las acciones
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
     expect(find.byType(ChipHud), findsNWidgets(8)); // 5 + 2 encabezados + barra de juego
@@ -98,17 +98,17 @@ void main() {
     );
     expect(find.byType(GloboSprintActual), findsOneWidget);
     expect(find.byType(FilaDetalleSprint), findsNWidgets(3));
-    expect(find.byType(TarjetaCaso), findsNWidgets(3));
+    expect(find.byType(TarjetaCaso), findsNWidgets(4));
     expect(
-      tester.widgetList<TarjetaCaso>(find.byType(TarjetaCaso)).map((t) => t.tipo),
-      TipoTarjeta.values,
+      tester.widgetList<TarjetaCaso>(find.byType(TarjetaCaso)).map((t) => t.tipo).toSet(),
+      TipoTarjeta.values.toSet(),
     );
     expect(find.byType(SnippetCodigo), findsNWidgets(5)); // 2 sueltos + 3 visores
     expect(find.byType(PanelEvidencia), findsNWidgets(3));
     expect(find.byType(PanelJustificacion), findsOneWidget);
     expect(find.byType(SelloVeredicto), findsNWidgets(4));
     expect(find.byType(AccionesVeredicto), findsOneWidget);
-    expect(find.byType(BarraComodines), findsOneWidget);
+    expect(find.byType(BarraComodines), findsNWidgets(3));
     expect(
       tester.widgetList<PanelVeredicto>(find.byType(PanelVeredicto)).map((p) => p.tipo),
       TipoPanelVeredicto.values,

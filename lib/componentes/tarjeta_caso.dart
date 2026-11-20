@@ -36,6 +36,7 @@ class TarjetaCaso extends StatelessWidget {
     this.tipo = TipoTarjeta.normal,
     this.alInspeccionar,
     this.nodoFocoEvidencia,
+    this.palabrasTrampa = const [],
     super.key,
   });
 
@@ -85,13 +86,19 @@ class TarjetaCaso extends StatelessWidget {
   /// Foco del botón de evidencia (vuelve aquí al cerrar el visor).
   final FocusNode? nodoFocoEvidencia;
 
+  /// Palabras trampa resaltadas por la Lupa (10b); vacía si no se usó.
+  final List<String> palabrasTrampa;
+
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
 
     return Semantics(
-      label: Textos.casoSemantica(personaje, rol, texto),
+      label: palabrasTrampa.isEmpty
+          ? Textos.casoSemantica(personaje, rol, texto)
+          : '${Textos.casoSemantica(personaje, rol, texto)} '
+                '(${Textos.palabrasTrampaSemantica(palabrasTrampa)})',
       excludeSemantics: true,
       child: Container(
         key: const ValueKey('tarjeta-caso'),
@@ -176,9 +183,10 @@ class TarjetaCaso extends StatelessWidget {
                         bottomRight: Radius.circular(20),
                       ),
                     ),
-                    child: Text(
-                      texto,
-                      style: estilos.h3.copyWith(color: tokens.textoPrimario, height: 25 / 17),
+                    child: TextoConTrampas(
+                      texto: texto,
+                      trampas: palabrasTrampa,
+                      estilo: estilos.h3.copyWith(color: tokens.textoPrimario, height: 25 / 17),
                     ),
                   ),
                   if (tipo == TipoTarjeta.evidencia) ...[
@@ -200,6 +208,110 @@ class TarjetaCaso extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Texto del globo con las palabras trampa marcadas (Figma 38:4914): un
+/// subrayado grueso (11 a tamaño normal) de #FFD84D al 65 % detrás de cada
+/// trampa, como un marcador; en oscuro al 35 % para que el texto siga en AA.
+/// Sin [trampas] es un texto normal. El subrayado se calcula con las cajas
+/// del texto, así que sigue a las trampas aunque cambien de línea.
+class TextoConTrampas extends StatelessWidget {
+  const TextoConTrampas({
+    required this.texto,
+    required this.estilo,
+    this.trampas = const [],
+    super.key,
+  });
+
+  final String texto;
+  final TextStyle estilo;
+  final List<String> trampas;
+
+  /// Rangos (inicio, fin) de cada aparición de las [trampas] en [texto].
+  static List<(int, int)> rangos(String texto, List<String> trampas) {
+    final rangos = <(int, int)>[];
+    for (final t in trampas) {
+      if (t.isEmpty) continue;
+      var desde = 0;
+      while (true) {
+        final i = texto.indexOf(t, desde);
+        if (i < 0) break;
+        rangos.add((i, i + t.length));
+        desde = i + t.length;
+      }
+    }
+    return rangos;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final texto = Text(this.texto, style: estilo);
+    if (trampas.isEmpty) return texto;
+    return CustomPaint(
+      key: const ValueKey('trampas-globo'),
+      painter: PintorTrampas(
+        texto: this.texto,
+        estilo: estilo,
+        escala: MediaQuery.textScalerOf(context),
+        rangos: rangos(this.texto, trampas),
+        color: EfectosApp.trampa(Theme.of(context).brightness),
+      ),
+      child: texto,
+    );
+  }
+}
+
+/// Pinta el subrayado de las trampas detrás del texto, centrado en la línea
+/// base (de 6 por encima a 5 por debajo, escalado con el texto).
+class PintorTrampas extends CustomPainter {
+  const PintorTrampas({
+    required this.texto,
+    required this.estilo,
+    required this.escala,
+    required this.rangos,
+    required this.color,
+  });
+
+  final String texto;
+  final TextStyle estilo;
+  final TextScaler escala;
+  final List<(int, int)> rangos;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final pintor = TextPainter(
+      text: TextSpan(text: texto, style: estilo),
+      textDirection: TextDirection.ltr,
+      textScaler: escala,
+    )..layout(maxWidth: size.width);
+    final lineas = pintor.computeLineMetrics();
+    final grosor = escala.scale(EfectosApp.grosorTrampa);
+    final pincel = Paint()..color = color;
+    for (final (inicio, fin) in rangos) {
+      final cajas = pintor.getBoxesForSelection(
+        TextSelection(baseOffset: inicio, extentOffset: fin),
+      );
+      for (final caja in cajas) {
+        final centro = (caja.top + caja.bottom) / 2;
+        final linea = lineas.firstWhere(
+          (l) => centro >= l.baseline - l.ascent && centro <= l.baseline + l.descent,
+          orElse: () => lineas.last,
+        );
+        final arriba = linea.baseline - grosor * 6 / 11;
+        canvas.drawRect(Rect.fromLTRB(caja.left, arriba, caja.right, arriba + grosor), pincel);
+      }
+    }
+    pintor.dispose();
+  }
+
+  @override
+  bool shouldRepaint(PintorTrampas oldDelegate) =>
+      oldDelegate.texto != texto ||
+      oldDelegate.estilo != estilo ||
+      oldDelegate.escala != escala ||
+      oldDelegate.color != color ||
+      oldDelegate.rangos.length != rangos.length;
 }
 
 /// Chip del tipo de tarjeta, a la derecha del encabezado: píldora con
