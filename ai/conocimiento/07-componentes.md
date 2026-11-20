@@ -194,6 +194,6 @@ Figma: 21 = `41:5631`, 21b = `41:5499`, 22 = `41:5785`, 22b = `41:5862`. Medidas
 - **Recompensa:** `fondoDestacado`, radio 18, cuadrado 40 `estadoIlegal` con `heart`; "N juicios de apelación hoy" y "Gana cada apelación y recupera 1 vida".
 - **Fila de apelación:** franja 6×40 con el color del módulo, título, tema y píldora de plazo (de hoy: `estadoIlegal` con `gavel` y "Día N · hoy · +1 vida"; futura: `fondoSuperficieAlt` con `clock` y "Día N · mañana / en N días"), `chevron` 18. Plazos con la fecha del servidor.
 - **Notificación (21b):** `NotificacionApelacion`, 358 de ancho, ícono de app 38 y texto "⚖️ Tienes un juicio de apelación pendiente"; solo maqueta y enlace profundo.
-- **Juicio (22), previsto para T-09b:** barra "Apelación k de n" con chip "+1 vida", tarjeta "APELACIÓN · TEMA", aviso "La fallaste hace N días" y las 4 acciones, sin indicadores ni comodines.
-- **Apelación ganada (22b), previsto para T-09b:** Sarko, 5 corazones, "+1 vida recuperada", título, explicación y fila "Día 3 · Día 7 · Día 14" (hecho = `estadoLegal` con `check`).
+- **Juicio (22), T-09b:** barra "Apelación k de n" con chip "+1 vida", tarjeta "APELACIÓN · TEMA", aviso "La fallaste hace N días" y las 4 acciones, sin indicadores ni comodines.
+- **Apelación ganada (22b), T-09b** (y la perdida, sin Figma: Sarko triste, "No pierdes vidas", "Apelación perdida"): Sarko, 5 corazones, "+1 vida recuperada", título, explicación y fila "Día 3 · Día 7 · Día 14" (hecho = `estadoLegal` con `check`).
 
