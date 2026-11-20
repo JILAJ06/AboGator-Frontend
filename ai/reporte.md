@@ -1,13 +1,34 @@
 # Reporte
 - **Tarea:** T-06b · Fin de sprint (pantallas 19 y 19b)
 - **Rama:** `06b-fin-de-sprint`
-- **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario.
+- **Estado:** terminada y subida, con los ajustes de la revisión. El Pull Request #10 ya existe; no hice merge.
+
+## Ajustes de la revisión
+1. **Regla de estrellas (D1):** ahora **≥ 90 % = 3**, ≥ 60 % = 2 y menos = 1 (`LogicaFinSprint.porcentajeTresEstrellas = 90`). Como en Figma 19, 8 de 10 aciertos dan 2 estrellas.
+   - Pruebas de lógica: límites 89/90 % y 59/60 %, el caso 8/10 = 2, y en sprints de 8 tarjetas solo 8/8 da 3.
+   - Pruebas de pantalla: el sprint de prueba con 4 de 5 aciertos (80 %) ahora muestra y guarda 2 estrellas, y se lee "2 de 3 estrellas".
+   - Los sprints 1 y 2 del mock siguen completados con 3 estrellas.
+2. **Cifras legales (D5):** quité los plazos y montos con cifra de las tarjetas. En las tres conservé la respuesta correcta y la explicación:
+   - `tar-derechos-03` (`spr-1-4`, tarjeta 3): "lleva más de dos meses sin respuesta" ahora dice "lleva semanas sin respuesta y ya venció el plazo legal". La evidencia ya no trae fechas: "Recibida: hace semanas · Plazo legal: vencido".
+   - `tar-derechos-02` (`spr-1-4`, tarjeta 2): "¿Cobramos 500 pesos…?" ahora es "¿Cobramos una cuota…?" y la opción incorrecta "Porque 500 pesos es muy poco" ahora es "Porque la cuota es muy baja".
+   - `tar-arco-01` (`spr-1-2`, tarjeta 8): "facturas fiscales … de hace dos años" ahora son "facturas fiscales recientes". La cifra dependía del plazo fiscal de conservación.
+   - **Revisé las demás cifras de `MockTarjetas` y las dejé:** no son plazos ni montos legales.
+     - "15 años" en `tar-aviso-06` es la edad de un menor.
+     - "revocado (2 de marzo)" en `tar-consen-05` es la fecha del hecho.
+     - "algún día" y "cada día" son expresiones.
+     - Las versiones de licencia (GPL-3.0, Apache 2.0) son nombres, no cifras legales.
+   - **Prueba nueva:** "ninguna tarjeta menciona plazos ni montos legales con cifra". Revisa texto, explicaciones, evidencia y micro-preguntas. Comprobé que falla con las tarjetas anteriores y que no confunde una edad con un plazo.
+3. **Respuestas de Chat sin cambios de código:**
+   - D2: la estrella no ganada se queda en contorno.
+   - D3: los íconos de las estadísticas se quedan de contorno.
+   - D4: el confeti queda como está.
+   - D6: "CASO 5" para la GPL está bien.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11.
 - **Comparé contra Figma** con el conector (solo lectura): contexto de diseño de 19 (`38:5557`) y 19b (`37:4136`), los SVG del círculo, las estrellas y los íconos, y el contexto de movimiento de 19.
 - **Lo que verifiqué en Figma:**
-  - **Estrellas:** Figma pinta **2 llenas** (`accion/acento`) y la tercera **rellena en `#E2E8F0`** (`borde/default`), no en contorno (ver D1 y D2).
+  - **Estrellas:** Figma pinta **2 llenas** (`accion/acento`) y la tercera **rellena en `#E2E8F0`** (`borde/default`), no en contorno. Por la revisión, la regla pasó a 90/60 (8/10 = 2 estrellas, como en Figma) y la estrella no ganada se queda en contorno.
   - **Círculo detrás de Sarko:** sin transparencia. En 19 es `#E8D8A8` (`fondo/destacado`) y en 19b `#F1F5F9` (`fondo/superficie-alt`).
   - **Confeti:** Figma no tiene animación (contexto de movimiento vacío), así que la caída la diseñé yo: 1.2 s, cada pieza un poco después de la anterior, media vuelta y aparición gradual.
   - **Íconos de color:**
@@ -34,7 +55,7 @@
    - **GPL:** pasó a ser la tarjeta 5 de `spr-1-3` ("CASO 5 · LICENCIAS OSS") en lugar de la de datos de salud, que también era de evidencia. `spr-2-1` queda solo con la tarjeta MIT.
 2. **Lógica pura** (`LogicaFinSprint`):
    - Aciertos y falladas (el parcial no cuenta en ninguno).
-   - Estrellas: ≥ 80 % da 3, ≥ 60 % da 2 y si no 1; calculado con enteros, sin decimales.
+   - Estrellas: ≥ 90 % da 3, ≥ 60 % da 2 y si no 1; calculado con enteros, sin decimales.
    - Cambios respecto al inicio del sprint.
    - Aviso del buzón: para 1, 2, y 3 o más falladas.
    - Causa de la quiebra: si se dan las dos, manda el Riesgo legal.
@@ -57,7 +78,7 @@
    - "Repasar mis fallos" e "Ir al Buzón de Apelaciones" van a `Rutas.buzon` (marcador hasta T-09).
 
 ## Tarjetas nuevas y su base legal
-Todas se basan en la LFPDPPP. Cito principios y deberes, no números de artículo, porque la ley se reemplazó en 2025 (ver D5).
+Todas se basan en la LFPDPPP. Cito principios y deberes, no números de artículo, porque la ley se reemplazó en 2025. Tras la revisión, ninguna tarjeta menciona plazos ni montos con cifra.
 
 **`spr-1-1` · Datos personales** (5 normales, 2 con evidencia y 1 dilema):
 
@@ -90,8 +111,8 @@ Todas se basan en la LFPDPPP. Cito principios y deberes, no números de artícul
 | Tarjeta | Respuesta | Base |
 |---|---|---|
 | 1 Pedir acreditar la identidad | Legal | Para ejercer los derechos ARCO el titular acredita su identidad. |
-| 2 Cobrar 500 pesos | Ilegal | El ejercicio es gratuito; solo se cobran envío o reproducción. |
-| 3 Solicitud sin respuesta por más de dos meses (evidencia) | Ilegal | Hay un plazo legal de respuesta (ver D5). |
+| 2 Cobrar una cuota | Ilegal | El ejercicio es gratuito; solo se cobran envío o reproducción. |
+| 3 Solicitud sin respuesta con el plazo vencido (evidencia) | Ilegal | Hay un plazo legal de respuesta. |
 | 4 Corregir un apellido | Legal | Derecho de rectificación. |
 | 5 Cancelar con un reembolso en trámite | Condicional | Bloqueo hasta concluir la obligación; después, supresión. |
 | 6 "Cancelar" solo ocultando el perfil (evidencia) | Ilegal | Cancelar es bloquear y suprimir. |
@@ -120,14 +141,14 @@ Cada sprint tiene 3 o 4 micro-preguntas. `spr-1-3` conserva sus 4: la de la GPL 
 ```
 No issues found!
 ```
-`flutter test` (555 pruebas; antes 474):
+`flutter test` (556 pruebas; antes de T-06b, 474):
 ```
-+555: All tests passed!
++556: All tests passed!
 ```
 - **`test/funciones/juego/logica_fin_sprint_test.dart`:**
-  - Estrellas (límites 59/60 y 79/80 %, con 8 y 10 tarjetas, total 0), aciertos y falladas, cambios, aviso del buzón y causa y descripción de quiebra.
+  - Estrellas (límites 59/60 y 89/90 %, 8/10 = 2, con 8 y 10 tarjetas, total 0), aciertos y falladas, cambios, aviso del buzón y causa y descripción de quiebra.
   - Guardado en los mocks: progreso, máximo de estrellas, Examen final sin cambio, reinicio por instancia, vidas y monedas.
-  - Datos: los 5 sprints con su número de tarjetas y su composición, ids únicos, "CASO n" en orden, impactos, evidencia, micro-preguntas, mensajes y la GPL en `spr-1-3`.
+  - Datos: los 5 sprints con su número de tarjetas y su composición, ids únicos, "CASO n" en orden, impactos, evidencia, micro-preguntas, mensajes, la GPL en `spr-1-3` y ninguna tarjeta con plazos o montos legales con cifra.
 - **`test/componentes/fin_sprint_componentes_test.dart`** (en claro y oscuro):
   - Medidas y colores de los 5 componentes; estrellas llenas y en contorno; semántica de estrellas, estadísticas, aviso y etiqueta.
   - **Contraste:** etiqueta y textos ≥ 4.5:1; íconos y estrellas ≥ 3:1.
@@ -178,11 +199,7 @@ No issues found!
   - Componentes: COMP-CONFETI, COMP-ESTRELLAS-SPRINT, COMP-ESTADISTICAS, COMP-AVISO y COMP-ETIQUETA-QUIEBRA.
   - Pruebas y decisiones: TEST-FIN-SPRINT y DEC-JUEGO-VIVO.
 - **Obsoletos:** ninguno. El `PintorEstrella` de `nodo_sprint.dart` se unió al de COMP-ESTRELLAS-SPRINT.
+- **Ajustes de la revisión:** LOGICA-FIN-SPRINT (regla 90/60), MOCK-TARJ (sin cifras legales) y TEST-FIN-SPRINT, más una línea en el registro de cambios.
 
 ## Dudas
-- **D1 · Estrellas de Figma 19.** Figma muestra 8/10 aciertos (80 %) con 2 estrellas, pero la regla de Chat da 3 con ≥ 80 %. ¿Se ajusta la regla (por ejemplo, > 80 % o ≥ 90 % para 3) o se corrige Figma?
-- **D2 · Estrella no ganada.** En Figma es rellena en `borde/default` (#E2E8F0); la tarea pide contorno en `borde/control`, que es lo que hice. `borde/default` sobre `fondo/app` no llega a 3:1, y `borde/control` sí. ¿Se queda el contorno?
-- **D3 · Íconos de las estadísticas.** En Figma la estrella de XP y la moneda van rellenas; aquí uso los íconos de Lucide de la app (de contorno), igual que en los indicadores. ¿Se rellenan, por ejemplo con `PintorEstrella` para la de XP?
-- **D4 · Animación del confeti.** Figma no tiene movimiento; la caída (1.2 s, escalonada, media vuelta) es mía. ¿Está bien, o se prefiere otra?
-- **D5 · Ley vigente.** La LFPDPPP de 2010 se reemplazó por una nueva ley en 2025 (y el INAI desapareció). Las tarjetas citan principios y deberes sin números de artículo ni días exactos. ¿Conviene que el usuario confirme los plazos ARCO (respuesta y efectividad) y el deber de avisar de las vulneraciones con la ley nueva antes de mencionarlos en las explicaciones?
-- **D6 · Etiqueta "CASO 5" de la GPL.** La renombré de "CASO 4" a "CASO 5" porque ahora es la tarjeta 5 de `spr-1-3`. ¿Está bien, aunque Figma 10 diga "CASO 4"?
+Ninguna nueva. Las dudas D1 a D6 quedaron resueltas en la revisión (ver "Ajustes de la revisión").
