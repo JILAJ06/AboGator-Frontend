@@ -166,3 +166,11 @@ Medidas en dp sobre el marco 390×844 (posiciones absolutas de Figma; en código
 - **Etiqueta de quiebra (`EtiquetaQuiebra`, solo 19b)**: píldora `estadoIlegal` (relleno 12×6, separación 6) con ícono trending-down 16 y "RIESGO LEGAL 100%" (Etiqueta, `textoEnPrimario`), centrada en y=364. Si la causa es el Presupuesto: "PRESUPUESTO 0%".
 - **Botones**: primario 342×52 y fantasma 342×48 debajo (separación 8). 19: "Continuar al mapa" y "Repasar mis fallos". 19b: "Reiniciar sprint" y "Ir al Buzón de Apelaciones".
 - **Indicadores en 19b** (24,64): los valores del momento de la quiebra con su cambio (Presupuesto −60, Riesgo legal +40 en Figma).
+
+## Componentes de evidencia y justificación (se construyen en T-07)
+Figma: 15 = `38:3956`, 16 = `38:4155`, 16b = `38:4355`, 17 = `38:4556`, 18 = `38:4737`. Medidas, textos y reglas completos en `ai/siguiente.md` de la T-07.
+- **Tarjeta con evidencia:** chip "Evidencia" (`accionSecundaria`, ícono eye) y botón discontinuo "Toca la tarjeta para inspeccionar" (48, borde 2 `accionSecundaria`, radio 14, ícono code 20).
+- **Visor (panel modal):** sin marcar (16): ícono highlighter, instrucción, snippet y botón deshabilitado "Marca una línea para continuar"; marcado (16b): "Línea marcada", snippet con líneas clave reveladas, chip `fondoDestacado` "Evidencia correcta: +5 XP al acertar el veredicto" y "Volver y decidir".
+- **`SnippetCodigo`:** fondo `#0B1220`, barra `#162030` con 3 círculos y nombre de archivo, números `#94A3B8`, texto `#E2E8F0`; línea clave `rgba(181,36,38,0.28)` con texto `#FECACA`; línea marcada con `#FFE27A` (borde 2, multiply 55 %). Colores en `EfectosApp`.
+- **Tarjeta de justificación:** chip "Dilema ×2" (`accionAcento`, ícono star) y aviso `fondoDestacado` "Después de deslizar tendrás que justificar tu veredicto. Acertar ambas partes = monedas dobles."
+- **Panel de justificación (18):** chip "Dictaste: …" del color del veredicto, título "¿Por qué es …?" (Fredoka Bold 26), 3 `OpcionJustificacion` (seleccionar no confirma) y "Confirmar justificación". Resultado: 12b con "+15 XP en total · +10 monedas" si acierta veredicto y justificación.

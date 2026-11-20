@@ -13,7 +13,8 @@ Una rama por tarea, desde `develop`. El orden va de lo que todo necesita a lo qu
 | T-05 | `05-tarjeta-swipe` | 10, 11, 11b, 11c, 13: tarjeta, arrastre en 4 direcciones, sellos, tintes, botones equivalentes |
 | T-06 | `06-veredictos` | 12, 12b, 12c, 14, 14b: panel de veredicto, calificación, indicadores, vidas, XP y monedas |
 | T-06b | `06b-fin-de-sprint` | 19, 19b: sprint completado y Startup en quiebra, tarjetas de los demás sprints |
-| T-07 | `07-evidencia-y-comodines` | 15, 16, 16b, 17, 18, 10b, 10c |
+| T-07 | `07-evidencia-y-comodines` | 15, 16, 16b, 17, 18: tarjetas con evidencia y de justificación (el nombre de la rama se conserva) |
+| T-07b | `07b-comodines` | 10b, 10c y el Amparo (14b activable); cantidades desde la tienda; deshabilitados en el examen |
 | T-08 | `08-vidas-y-offline` | 20 Sin vidas, 23 Sin conexión, cola local en SQLite |
 | T-09 | `09-apelaciones` | 21b, 21, 22, 22b |
 | T-10 | `10-tienda-perfil-ajustes` | 24, 25, 26 y modo oscuro desde ajustes (26b es el orden de foco del juego: se hace en T-05 y se verifica en T-13) |
