@@ -344,10 +344,49 @@ abstract final class Textos {
       'Opción $posicion de $total: $opcion';
 
   // ---------------------------------------------------------------------
+  // 19 Sprint completado y 19b Startup en quiebra
+  // ---------------------------------------------------------------------
+  static const String sprintCompletadoTitulo = '¡Sprint completado!';
+  static const String sprintCompletadoGenerico = 'Terminaste todas las tarjetas del sprint.';
+  static const String estadisticaAciertos = 'Aciertos';
+  static const String estadisticaXp = 'XP (con bonus)';
+  static const String estadisticaMonedas = 'Monedas';
+  static String valorAciertos(int aciertos, int total) => '$aciertos/$total';
+  static String valorGanado(int cantidad) => '+$cantidad';
+  static String estadisticasSemantica(int aciertos, int total, int xp, int monedas) =>
+      '$aciertos de $total aciertos, $xp XP con bonus, '
+      '${monedas == 1 ? '1 moneda' : '$monedas monedas'}';
+  static const String estadoFinalStartup = 'Estado final de tu Startup';
+
+  /// Aviso del buzón: 1 fallada → 3 días; 2 → 3 y 7 días; 3 o más → 3, 7 y 14.
+  static String avisoBuzon(int falladas) => switch (falladas) {
+    1 => '1 tarjeta fallada irá a apelación en 3 días. Resuélvela para recuperar una vida.',
+    2 => '2 tarjetas falladas irán a apelación en 3 y 7 días. Resuélvelas para recuperar vidas.',
+    _ =>
+      '$falladas tarjetas falladas irán a apelación en 3, 7 y 14 días. Resuélvelas para '
+          'recuperar vidas.',
+  };
+  static const String continuarAlMapa = 'Continuar al mapa';
+  static const String repasarFallos = 'Repasar mis fallos';
+  static const String quiebraTitulo = '¡Tu Startup quebró!';
+  static const String etiquetaQuiebraRiesgo = 'RIESGO LEGAL 100%';
+  static const String etiquetaQuiebraPresupuesto = 'PRESUPUESTO 0%';
+  static const String etiquetaQuiebraRiesgoSemantica = 'Riesgo legal al 100 %';
+  static const String etiquetaQuiebraPresupuestoSemantica = 'Presupuesto al 0 %';
+  static const String quiebraGenericaRiesgo =
+      'El Riesgo legal llegó al 100 %. Las demandas y las multas cerraron la Startup.';
+  static const String quiebraGenericaPresupuesto =
+      'El presupuesto se acabó y la Startup ya no pudo pagarle a su equipo.';
+  static const String avisoReinicio =
+      'El sprint se reinicia con los indicadores al inicio. Las tarjetas falladas ya están '
+      'en tu Buzón de Apelaciones.';
+  static const String reiniciarSprint = 'Reiniciar sprint';
+  static const String irAlBuzon = 'Ir al Buzón de Apelaciones';
+  static const String sinResultado = 'No hay un resultado que mostrar.';
+
+  // ---------------------------------------------------------------------
   // Pantallas pendientes (marcadores temporales)
   // ---------------------------------------------------------------------
-  static const String pendienteSprintCompletado = 'Sprint completado · llega en T-06b';
-  static const String pendienteQuiebra = 'Startup en quiebra · llega en T-06b';
   static const String pendienteJefe = 'Examen final · llega en T-11';
   static const String pendienteBuzon = 'Buzón · llega en T-09';
   static const String pendienteTienda = 'Tienda · llega en T-10';
@@ -370,6 +409,7 @@ abstract final class Textos {
   static const String galeriaMapa = 'Componentes del mapa y la intro del sprint';
   static const String galeriaJuego = 'Componentes del juego';
   static const String galeriaVeredicto = 'Paneles de veredicto';
+  static const String galeriaFinSprint = 'Componentes del fin de sprint';
   static const String galeriaExplicacion =
       'La licencia GPL-3.0 es copyleft: si la integras, todo el producto derivado debe '
       'liberarse bajo la misma licencia.';

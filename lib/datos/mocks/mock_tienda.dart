@@ -2,11 +2,16 @@ import '../modelos/articulo_tienda.dart';
 import '../repositorios/repositorio_tienda.dart';
 import 'espera_simulada.dart';
 
-/// Tienda simulada con los tres comodines.
+/// Tienda simulada con los tres comodines. Las monedas se guardan en memoria;
+/// cada instancia empieza con [monedasIniciales].
 class MockTienda implements RepositorioTienda {
-  MockTienda({this.espera = esperaSimuladaPorDefecto});
+  MockTienda({this.espera = esperaSimuladaPorDefecto, this._monedas = monedasIniciales});
+
+  /// Monedas con las que empieza el mock (240, como en Figma 07).
+  static const int monedasIniciales = 240;
 
   final Duration espera;
+  int _monedas;
 
   static const List<ArticuloTienda> articulos = [
     ArticuloTienda(
@@ -41,6 +46,13 @@ class MockTienda implements RepositorioTienda {
   @override
   Future<int> obtenerMonedas() async {
     await esperar(espera);
-    return 240;
+    return _monedas;
+  }
+
+  @override
+  Future<int> sumarMonedas(int cantidad) async {
+    await esperar(espera);
+    _monedas += cantidad;
+    return _monedas;
   }
 }

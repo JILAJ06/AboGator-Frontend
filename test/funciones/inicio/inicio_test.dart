@@ -84,6 +84,13 @@ class ProgresoFalso implements RepositorioProgreso {
   @override
   Future<EstadoStartup> obtenerEstadoStartup() async =>
       const EstadoStartup(presupuesto: 0, reputacion: 0, velocidad: 0, riesgoLegal: 0);
+
+  @override
+  Future<void> registrarSprintCompletado({
+    required String sprintId,
+    required int estrellas,
+    required EstadoStartup estadoFinal,
+  }) async {}
 }
 
 class ApelacionesFalsas implements RepositorioApelaciones {

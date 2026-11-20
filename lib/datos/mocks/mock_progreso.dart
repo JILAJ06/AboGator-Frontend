@@ -8,10 +8,25 @@ import 'espera_simulada.dart';
 /// más el Examen final (6 nodos en el mapa). Como en Figma: el módulo 1 lleva
 /// 2 sprints completados (3 estrellas) y el 3.º en curso; los demás módulos
 /// están bloqueados.
+///
+/// Los sprints completados y el estado de la Startup se guardan en memoria;
+/// cada instancia empieza con [modulos] y [estadoInicial] (las pruebas crean
+/// una nueva para reiniciar).
 class MockProgreso implements RepositorioProgreso {
-  MockProgreso({this.espera = esperaSimuladaPorDefecto});
+  MockProgreso({this.espera = esperaSimuladaPorDefecto, List<Modulo>? modulos})
+    : _modulos = modulos ?? MockProgreso.modulos;
 
   final Duration espera;
+  List<Modulo> _modulos;
+  EstadoStartup _estado = estadoInicial;
+
+  /// Estado de la Startup al empezar (como en Figma 09 y 10).
+  static const EstadoStartup estadoInicial = EstadoStartup(
+    presupuesto: 70,
+    reputacion: 60,
+    velocidad: 50,
+    riesgoLegal: 25,
+  );
 
   /// Sprint de 8 tarjetas (5 normales, 2 con evidencia y 1 dilema).
   static Sprint _sprint(
@@ -20,6 +35,8 @@ class MockProgreso implements RepositorioProgreso {
     String objetivo, {
     EstadoSprint estado = EstadoSprint.bloqueado,
     int estrellas = 0,
+    String? mensajeCompletado,
+    String? mensajeQuiebra,
   }) => Sprint(
     id: id,
     titulo: titulo,
@@ -31,6 +48,8 @@ class MockProgreso implements RepositorioProgreso {
     minutosEstimados: 3,
     estado: estado,
     estrellas: estrellas,
+    mensajeCompletado: mensajeCompletado,
+    mensajeQuiebra: mensajeQuiebra,
   );
 
   static Sprint _final(String prefijo, String titulo, String objetivo) => Sprint(
@@ -70,6 +89,10 @@ class MockProgreso implements RepositorioProgreso {
           'identifica qué datos de tus usuarios son personales y cuáles son sensibles.',
           estado: EstadoSprint.completado,
           estrellas: 3,
+          mensajeCompletado: 'Ya distingues los datos personales de los sensibles en tu app.',
+          mensajeQuiebra:
+              'Guardaste datos de salud sin protegerlos como datos sensibles. Una queja de '
+              'tus usuarios terminó en multa y la Startup no la pudo pagar.',
         ),
         _sprint(
           'spr-1-2',
@@ -77,6 +100,10 @@ class MockProgreso implements RepositorioProgreso {
           'decide cuándo necesitas el consentimiento de tus usuarios y cómo pedirlo.',
           estado: EstadoSprint.completado,
           estrellas: 3,
+          mensajeCompletado: 'Tu registro pide el consentimiento correcto en cada caso.',
+          mensajeQuiebra:
+              'Usaste los datos de tus usuarios sin su consentimiento. Las quejas y la '
+              'multa dejaron a la Startup sin presupuesto.',
         ),
         const Sprint(
           id: 'spr-1-3',
@@ -91,16 +118,29 @@ class MockProgreso implements RepositorioProgreso {
           monedasMaximas: 60,
           minutosEstimados: 4,
           estado: EstadoSprint.enCurso,
+          mensajeCompletado:
+              'Tu MVP ya cumple con el aviso de privacidad y la Startup sigue en pie.',
+          mensajeQuiebra:
+              'Una auditoría encontró la librería GPL-3.0 en tu código cerrado. La demanda '
+              'se llevó el presupuesto y los inversionistas se fueron.',
         ),
         _sprint(
           'spr-1-4',
           'Derechos ARCO',
           'responde a tiempo las solicitudes de acceso, rectificación, cancelación y oposición.',
+          mensajeCompletado: 'Tus usuarios ya pueden ejercer sus derechos ARCO sin trabas.',
+          mensajeQuiebra:
+              'Ignoraste las solicitudes ARCO de tus usuarios. La autoridad abrió un '
+              'procedimiento y la multa hundió a la Startup.',
         ),
         _sprint(
           'spr-1-5',
           'Brechas de seguridad',
           'hubo una fuga de datos: decide a quién avisar y qué hacer primero.',
+          mensajeCompletado: 'Contuviste la fuga y avisaste a tiempo a los afectados.',
+          mensajeQuiebra:
+              'Ocultaste la fuga de datos. Cuando salió a la luz, los usuarios se fueron '
+              'y los inversionistas también.',
         ),
         _final(
           'spr-1',
@@ -166,12 +206,47 @@ class MockProgreso implements RepositorioProgreso {
   @override
   Future<List<Modulo>> obtenerModulos() async {
     await esperar(espera);
-    return modulos;
+    return _modulos;
   }
 
   @override
   Future<EstadoStartup> obtenerEstadoStartup() async {
     await esperar(espera);
-    return const EstadoStartup(presupuesto: 70, reputacion: 60, velocidad: 50, riesgoLegal: 25);
+    return _estado;
+  }
+
+  @override
+  Future<void> registrarSprintCompletado({
+    required String sprintId,
+    required int estrellas,
+    required EstadoStartup estadoFinal,
+  }) async {
+    await esperar(espera);
+    _modulos = [
+      for (final modulo in _modulos)
+        modulo.sprints.any((s) => s.id == sprintId)
+            ? modulo.copiar(sprints: _completar(modulo.sprints, sprintId, estrellas))
+            : modulo,
+    ];
+    _estado = estadoFinal;
+  }
+
+  /// Marca [sprintId] completado (con el máximo de estrellas) y pone en curso
+  /// el siguiente sprint si estaba bloqueado. El Examen final no cambia: se
+  /// habilita solo cuando todos los sprints están completados.
+  static List<Sprint> _completar(List<Sprint> sprints, String sprintId, int estrellas) {
+    final indice = sprints.indexWhere((s) => s.id == sprintId);
+    return [
+      for (final (i, s) in sprints.indexed)
+        if (i == indice)
+          s.copiar(
+            estado: EstadoSprint.completado,
+            estrellas: estrellas.clamp(s.estrellas, Sprint.maximoEstrellas),
+          )
+        else if (i == indice + 1 && !s.esExamenFinal && s.estado == EstadoSprint.bloqueado)
+          s.copiar(estado: EstadoSprint.enCurso)
+        else
+          s,
+    ];
   }
 }
