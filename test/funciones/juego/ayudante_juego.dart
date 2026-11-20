@@ -67,6 +67,7 @@ Future<TarjetasFalsas> abrirJuego(
   bool desdeIntro = false,
   bool conSesion = true,
   void Function(TarjetasFalsas)? antes,
+  MockTienda? tienda,
 }) async {
   await tester.binding.setSurfaceSize(tamano);
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -76,7 +77,7 @@ Future<TarjetasFalsas> abrirJuego(
     ProviderScope(
       overrides: [
         repositorioProgresoProvider.overrideWithValue(MockProgreso(espera: Duration.zero)),
-        repositorioTiendaProvider.overrideWithValue(MockTienda(espera: Duration.zero)),
+        repositorioTiendaProvider.overrideWithValue(tienda ?? MockTienda(espera: Duration.zero)),
         repositorioVidasProvider.overrideWithValue(
           MockVidas(espera: Duration.zero, cantidad: vidas),
         ),

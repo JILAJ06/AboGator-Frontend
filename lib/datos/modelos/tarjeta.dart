@@ -123,6 +123,10 @@ class Tarjeta {
     this.impactoParcial = const ImpactoTarjeta(),
     this.microPregunta,
     this.justificacion,
+    this.palabrasTrampa = const [],
+    this.traduccionLegal,
+    this.normas = const [],
+    this.iniciales,
     this.explicacionFallo,
     this.explicacionParcial,
   });
@@ -165,4 +169,22 @@ class Tarjeta {
 
   /// Justificación del veredicto (solo en tarjetas de dilema).
   final Justificacion? justificacion;
+
+  /// Fragmentos exactos de [texto] que resalta la Lupa de Auditor (10b).
+  final List<String> palabrasTrampa;
+
+  /// La pregunta real en términos legales (Abogado Senior, 10c).
+  final String? traduccionLegal;
+
+  /// Normas aplicables, por nombre (Abogado Senior, 10c).
+  final List<String> normas;
+
+  /// Iniciales del avatar; si faltan, se calculan del [personaje].
+  final String? iniciales;
+
+  /// La Lupa solo sirve si hay palabras trampa.
+  bool get aplicaLupa => palabrasTrampa.isNotEmpty;
+
+  /// El Abogado solo sirve con traducción y al menos una norma.
+  bool get aplicaAbogado => (traduccionLegal?.isNotEmpty ?? false) && normas.isNotEmpty;
 }

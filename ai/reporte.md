@@ -1,117 +1,131 @@
 # Reporte
-- **Tarea:** T-07 · Evidencia y justificación (pantallas 15, 16, 16b, 17 y 18)
-- **Rama:** `07-evidencia-y-comodines`
-- **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge. Los comodines y el Amparo quedan para T-07b.
+- **Tarea:** T-07b · Comodines (pantallas 10b y 10c, y el Amparo)
+- **Rama:** `07b-comodines`
+- **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11.
-- **Comparé contra Figma** con el conector (solo lectura): contexto de diseño de 15 (`38:3956`), 16b (`38:4355`) y 18 (`38:4737`). De ahí salen los textos, las medidas, el snippet `registro_form.dart`, la tarjeta de contraseñas y las opciones de 18.
-- **Prueba en el navegador:** compilé la app para web y jugué `spr-1-3` a 390×844, en claro y en oscuro.
-  - **15:** tarjeta 6 con el chip "Evidencia" a la derecha y el botón discontinuo bajo el globo.
-  - **16 y 16b:** el visor se abre con el botón y tocando la tarjeta; marqué las líneas 4 a 6 arrastrando y apareció 16b con el chip de bonus. Al acertar Ilegal salió 12b "+15 XP en total · +5 monedas".
-  - **Línea equivocada:** se ve con su título y su texto, sin chip.
-  - **17 y 18:** tarjeta 10 con "Dilema ×2" y el aviso; al dictar Ilegal se abrió 18. Elegir la primera opción solo la seleccionó y "Confirmar justificación" llevó a 12b "+15 XP en total · +10 monedas".
+- **Comparé contra Figma** con el conector (solo lectura): contexto de diseño de 10b (`38:4914`) y 10c (`38:5065`). De ahí salen el subrayado (`#FFD84D` al 65 %, 11 de grosor), la etiqueta de la Lupa en (41, 150), el panel del Abogado y el contenido de la GPL (trampas, traducción y las dos normas).
+- **Prueba en el navegador:** compilé la app para web y jugué `spr-1-3` a 390×844.
+  - **Lupa:** en la tarjeta 1 y en la GPL marca las trampas, aparece la etiqueta y la píldora pasa a "Lupa ×1" activa. En oscuro el resaltado se lee bien.
+  - **Abogado:** el panel empieza a la misma altura que en Figma (419); al cerrarlo, el foco vuelve a la píldora, que queda activa con "Abogado ×0".
+  - **Amparo:** lo armé y fallé: sale 14b "¡El Amparo te protegió!", las vidas siguen en 5 y la cantidad baja a 0.
+  - En la primera prueba el subrayado salía desplazado: el pintor acomodaba el texto con otro ancho y otro estilo. Lo corregí (mismo ancho del globo y mismo estilo efectivo) y lo volví a comprobar.
 
 ## Qué se hizo
-1. **Modelo** (`tarjeta.dart`):
-   - `EvidenciaTarjeta{archivo, lineas, lineasClave (desde 1), mensajeAcierto, mensajeFallo}` reemplaza al `String? evidencia`.
-   - `Justificacion{opciones (3), indiceCorrecto}` va en `Tarjeta.justificacion`.
-2. **Mocks** (`mock_tarjetas.dart`):
-   - Las 10 evidencias pasaron a `EvidenciaTarjeta`, una línea por renglón, con sus líneas clave y sus dos mensajes.
-   - Los 5 dilemas tienen justificación. La correcta va segunda en `spr-1-1`, tercera en `spr-1-4` y primera en los demás; la de Figma va primera, como en el diseño.
-   - **Tarjeta 6 de `spr-1-3` (Figma 15 y 16b):** `registro_form.dart` de 7 líneas, con las líneas clave 4, 5 y 6 y el mensaje de Figma. Es "CASO 6 · PROTECCIÓN DE DATOS", de QA Tester, y la correcta es Ilegal.
-   - **Tarjeta 10 de `spr-1-3` (Figma 17 y 18):** el dilema de contraseñas en texto plano de "Cliente · Inversionista ángel", con las opciones tal cual en Figma. Sustituye al dilema del inversionista que pedía la base de usuarios.
-   - **Para conservar la composición de `spr-1-3`** (6 normales, 3 con evidencia y 1 dilema):
-     - la tarjeta de menores de edad (normal) pasó a la 8, como "CASO 8 · MENORES DE EDAD";
-     - salió la de cookies, que era de evidencia.
-   - **En `spr-1-5`:** la bitácora tenía evidencia pero su respuesta es Legal, así que no hay línea que viole la ley. Pasó a normal, y las contraseñas en texto plano (Ilegal) pasaron a tener evidencia (`usuarios.dart`, línea clave 3).
-   - Sin plazos, montos ni cifras legales nuevas; la prueba de cifras ahora revisa también las líneas, los mensajes y las justificaciones.
-3. **Micro-preguntas retiradas** (tarjetas de evidencia y de dilema; su bonus es otro):
-   - `tar-datos-03` (spr-1-1, religión);
-   - `tar-consen-05` (spr-1-2, revocación);
-   - `tar-derechos-06` (spr-1-4, borrado real);
-   - `tar-brecha-03` (spr-1-5, el aviso);
-   - `tar-aviso-03` (spr-1-3, finalidades);
-   - `tar-gpl-01` (spr-1-3, GPL).
+1. **Datos:**
+   - `RepositorioTienda.obtenerComodines()` y `consumirComodin(c)` (resta 1, nunca baja de 0). `MockTienda` los guarda en memoria por instancia y empieza con lupa 2, abogado 1 y amparo 1. No implementé la compra (T-10).
+   - Descripciones de `MockTienda.articulos`: Lupa "Resalta las palabras trampa del caso.", Abogado "Traduce el caso a términos legales y cita la norma.", Amparo igual.
+   - `Tarjeta` con `palabrasTrampa`, `traduccionLegal`, `normas` e `iniciales` (opcionales). La Lupa solo aplica con trampas y el Abogado con traducción y al menos una norma.
+   - **Contenido:** las 42 tarjetas del módulo 1 tienen 2 a 4 trampas copiadas tal cual del texto, una traducción de una frase y 1 o 2 normas por nombre. Solo las dos normas de Figma (GPL) llevan número de sección o de artículo. Sin plazos, montos ni cifras legales.
+   - **Iniciales:** "QA" (QA y QA Tester) y "CL" (Cliente), como en Figma; y para que ninguna quede de una letra, "MK" (Marketing), "CT" (CTO), "CE" (CEO) y "SP" (Soporte).
+2. **Estado y lógica:**
+   - Se quitó `ComodinesJuego`; `datosJuegoProvider` carga las cantidades de la tienda.
+   - `EstadoJuego` lleva `comodines`, `lupaUsada` y `abogadoUsado` (por tarjeta).
+   - `usarLupa` (una vez por tarjeta), `consultarAbogado` (gasta la primera vez; reabrir es gratis) y `alternarAmparo` (armar y desarmar es gratis; no se arma con 0).
+   - El gasto se guarda con `consumirComodin` **al usarlo**; el del Amparo, cuando absorbe el error (resultado `amparo`). Si se acierta, el Amparo sigue armado.
+   - Lógica pura en `LogicaComodines`: estado de cada píldora y si es tocable. Nada se puede tocar con un panel abierto (veredicto, justificación, evidencia o Abogado) ni con `habilitados: false`.
+   - Al salir y volver a entrar, lo gastado sigue gastado (se recarga de la tienda).
+3. **Barra de comodines:** cada píldora es un botón (≥ 48, foco, Enter y Espacio). Estados (los dos últimos no están en Figma):
+   - **Disponible:** como en Figma.
+   - **Activa:** Lupa usada en la tarjeta, Abogado consultado o Amparo armado. Fondo `accion/acento` con texto e ícono `texto/en-primario`; se lee "activa" (el Amparo, "Amparo armado: tu próximo error no te quita vida"). La Lupa activa no responde al toque; el Abogado activo se reabre gratis y el Amparo activo se desarma.
+   - **Deshabilitada:** sin cantidad, sin trampas o traducción en la tarjeta, con un panel abierto o en el Examen. Fondo `fondo/superficie-alt`, borde `borde/default` y `texto/secundario`; se lee "no disponible" y sigue mostrando la cantidad ("Abogado ×0").
+   - Al usar uno se anuncia cuántos quedan ("Lupa, quedan 1").
+4. **10b · Lupa:**
+   - `TextoConTrampas` pinta detrás del texto un subrayado de 11 (escalado con el texto) centrado en la línea base. Lo calcula con las cajas del texto, así que sigue a las trampas aunque cambien de línea.
+   - En claro es `#FFD84D` al 65 %. En oscuro baja al 35 %, porque al 65 % el texto claro no llegaba a AA (al 35 % da 5.5:1). No tiene animación.
+   - La etiqueta `EtiquetaLupa` flota sobre la tarjeta, se anuncia y no recibe foco; desaparece al pasar de tarjeta.
+   - El lector lee "palabra trampa: …" en el texto de la tarjeta.
+5. **10c · Abogado:** `PanelAbogado` usa el `ContenedorPanelModal` de la T-07 y se cierra con el botón, atrás o Esc. El foco va al título al abrir y vuelve a la píldora al cerrar.
+6. **Galería:** barra en sus estados y apagada, etiqueta de la Lupa, tarjeta de la GPL con trampas y panel del Abogado.
 
-   Los dilemas no tenían. Cada sprint se queda con 2 micro-preguntas, todas en tarjetas normales.
-4. **Lógica** (`LogicaVeredicto`):
-   - `aciertaEvidencia(evidencia, lineas)`: acierta si las líneas incluyen alguna clave.
-   - `bonusEvidencia`: tarjeta de evidencia, marcó bien y el veredicto es correcto.
-   - `bonusJustificacion`: tarjeta de dilema, veredicto correcto y opción correcta. Con el veredicto equivocado la justificación no cuenta.
-   - `conBonus(monedasDobles:)`: suma +5 XP y, en los dilemas, duplica las monedas (`monedasCorrecto × 2`).
-   - El bonus no toca vidas, indicadores ni estrellas: `ResultadoTarjeta.bonus` ya contaba como acierto.
-5. **Estado** (`EstadoJuego`, `JuegoNotifier`):
-   - `evidenciaMarcada` (id → acertó) y `lineasMarcadas`, para volver a mostrar el resultado.
-   - `marcarEvidencia` marca **una sola vez**; si ya estaba marcada, devuelve lo anterior.
-   - `responder(tarjeta, veredicto, justificacion:)`: con bonus, el panel abre directo en Bonus (12b) y `ResultadoTarjeta.bonus = true`. La micro-pregunta solo aparece si no hubo bonus.
-6. **Pantalla 10:**
-   - **Visor de evidencia:** `showModalBottomSheet` con `isDismissible: true` y sin arrastre. Se cierra con "Volver y decidir", atrás, Esc o tocando fuera. Al cerrar, el foco vuelve al botón de evidencia.
-   - **Abrirlo:** tocar la tarjeta sin moverla (≤ 8 dp) o el botón. El reconocedor de arrastre de la T-05 gana la arena al tocar, así que el "toque" se detecta al soltar en `MazoSwipe.alInspeccionar`; el arrastre sigue igual.
-   - **Dilemas:** al deslizar o pulsar un veredicto se abre primero el panel de justificación, sin descarte, y luego el de veredicto.
-   - **Lector:** la tarjeta agrega su tipo ("con evidencia por inspeccionar", "evidencia ya inspeccionada" o "dilema: …") y la acción "Inspeccionar evidencia".
-7. **Componentes:**
-   - **`SnippetCodigo` (nuevo):**
-     - barra con los 3 botones de ventana y el archivo, y líneas de 24 numeradas con ancho fijo;
-     - JetBrains Mono 12/18 sin saltos: el bloque se desplaza en horizontal;
-     - línea clave revelada en `rgba(181,36,38,0.28)` con texto `#FECACA`;
-     - resaltado del jugador como **un rectángulo por tramo** de líneas seguidas, a 12 de los lados, con borde 2 y radio 6 (como `38:4552-4553`);
-     - cada línea es un botón: se marca tocando o arrastrando en vertical (cuenta la línea donde empieza el dedo); con teclado, flechas y Enter o Espacio.
-   - **`PanelEvidencia` (nuevo):** 16, 16b y línea equivocada, más `ContenedorPanelModal`, el contenedor compartido con 18, y `ChipBonusEvidencia`.
-   - **`PanelJustificacion` (nuevo):** chip "Dictaste: …" del color del veredicto, título H1 centrado, subtítulo, 3 opciones y el botón deshabilitado hasta elegir.
-   - **`TarjetaCaso`:** recibe `tipo` y muestra `ChipTipoTarjeta`, `BotonEvidencia` (borde discontinuo pintado, 48, foco, Enter y Espacio) y `AvisoDilema`. `altoMinimoPara` cuenta el botón o el aviso.
-   - **`OpcionJustificacion`:** modo selección con `seleccionada` (borde 2.5 `accion/secundaria`, círculo relleno, se lee "seleccionada"). Sin `seleccionada` sigue confirmando al elegir, como en la micro-pregunta de la T-06.
-8. **`EfectosApp`:** colores del snippet y del resaltado, y duración del resaltado (150 ms; cero con "reducir animaciones").
-9. **Galería:** sección "Evidencia y dilema" con las tarjetas por tipo, dos snippets, los 3 visores, opciones en modo selección y el panel 18.
+## Bases legales por tarjeta (para verificar)
+"LDP" es la ley de datos personales en posesión de particulares vigente; en la app aparece como "Ley de datos personales en posesión de particulares: …". Las únicas normas con número son las dos de Figma.
 
-### Copy de la variante "línea equivocada" (no está en Figma)
-- Título: **"Esa no es la línea clave"**, con ícono `x` en `estado/ilegal`. En 16b el `check` va en `estado/legal`, como en Figma.
-- Texto (`mensajeFallo`, igual en todas las tarjetas): **"Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta tu veredicto."**
-- Sin chip de bonus y con el mismo botón "Volver y decidir".
-
-### Decisión: la justificación es un panel previo, no una fase de `FasePanel`
-La califico **después** de confirmar, con `responder(…, justificacion:)`. Así la calificación sigue siendo un solo paso y el panel de veredicto no sabe nada de la justificación: abre en Bonus o en Correcto según el resultado. Con una fase nueva habría que calificar antes, guardar un resultado provisional y cambiarlo al confirmar; además los indicadores mostrarían el cambio mientras se elige.
+| Tarjeta | Correcta | Normas |
+|---|---|---|
+| `tar-datos-01` (spr-1-1, 1) | ilegal | LDP: definición de dato personal; LDP: principios de licitud y finalidad |
+| `tar-datos-02` (spr-1-1, 2) | legal | LDP: datos disociados o anonimizados |
+| `tar-datos-03` (spr-1-1, 3) | escalar | LDP: datos personales sensibles; LDP: consentimiento expreso y por escrito para datos sensibles |
+| `tar-datos-04` (spr-1-1, 4) | legal | LDP: principios de finalidad y proporcionalidad; LDP: aviso de privacidad |
+| `tar-datos-05` (spr-1-1, 5) | ilegal | LDP: deber de seguridad; LDP: deber de confidencialidad |
+| `tar-datos-06` (spr-1-1, 6) | ilegal | LDP: principio de proporcionalidad (minimización de datos); LDP: principio de finalidad |
+| `tar-datos-07` (spr-1-1, 7) | condicional | LDP: principio de finalidad y consentimiento para finalidades nuevas; Derecho a la propia imagen |
+| `tar-datos-08` (spr-1-1, 8) | escalar | LDP: datos personales sensibles (salud); LDP: transferencias y consentimiento del titular |
+| `tar-consen-01` (spr-1-2, 1) | legal | LDP: excepciones al consentimiento por una relación jurídica con el titular |
+| `tar-consen-02` (spr-1-2, 2) | ilegal | LDP: consentimiento expreso y por escrito para datos sensibles; LDP: principio de licitud |
+| `tar-consen-03` (spr-1-2, 3) | ilegal | LDP: consentimiento expreso y por escrito para datos sensibles; LDP: consentimiento tácito y expreso |
+| `tar-arco-02` (spr-1-2, 4) | ilegal | LDP: transferencias y consentimiento del titular; LDP: aviso de privacidad |
+| `tar-consen-04` (spr-1-2, 5) | condicional | LDP: principio de finalidad; LDP: cambios al aviso de privacidad |
+| `tar-consen-05` (spr-1-2, 6) | ilegal | LDP: revocación del consentimiento; LDP: principio de finalidad |
+| `tar-consen-06` (spr-1-2, 7) | legal | LDP: consentimiento expreso y por escrito para datos sensibles; LDP: firma electrónica o medio de autenticación |
+| `tar-arco-01` (spr-1-2, 8) | condicional | LDP: derecho de cancelación: bloqueo y supresión; Obligaciones fiscales de conservación de comprobantes |
+| `tar-aviso-01` (spr-1-3, 1) | ilegal | LDP: aviso de privacidad; LDP: principio de información |
+| `tar-aviso-02` (spr-1-3, 2) | legal | LDP: modalidades del aviso de privacidad: integral, simplificado y corto |
+| `tar-aviso-03` (spr-1-3, 3) | ilegal | LDP: principio de finalidad; LDP: aviso de privacidad |
+| `tar-aviso-04` (spr-1-3, 4) | condicional | LDP: finalidades secundarias y mecanismo para negarse; LDP: aviso de privacidad |
+| `tar-gpl-01` (spr-1-3, 5) | ilegal | Licencia GPL-3.0, sección 5: obras derivadas; Ley Federal del Derecho de Autor, art. 102 (programas de cómputo) |
+| `tar-registro-01` (spr-1-3, 6) | ilegal | LDP: consentimiento libre, específico e informado; LDP: aviso de privacidad |
+| `tar-aviso-07` (spr-1-3, 7) | legal | LDP: remisiones al encargado; LDP: responsable y encargado del tratamiento |
+| `tar-aviso-06` (spr-1-3, 8) | escalar | LDP: datos de menores: consentimiento de quien ejerce la patria potestad; Interés superior de la niñez |
+| `tar-aviso-09` (spr-1-3, 9) | ilegal | LDP: cambios al aviso de privacidad; LDP: principio de finalidad |
+| `tar-contrasenas-01` (spr-1-3, 10) | ilegal | LDP: deber de seguridad: medidas técnicas; LDP: responsable y encargado del tratamiento |
+| `tar-derechos-01` (spr-1-4, 1) | legal | LDP: derecho de acceso; LDP: acreditación de la identidad del titular |
+| `tar-derechos-02` (spr-1-4, 2) | ilegal | LDP: gratuidad de los derechos ARCO; LDP: costos de envío o de reproducción |
+| `tar-derechos-03` (spr-1-4, 3) | ilegal | LDP: plazos de respuesta a los derechos ARCO; LDP: derecho de acceso |
+| `tar-derechos-04` (spr-1-4, 4) | legal | LDP: derecho de rectificación; LDP: principio de calidad de los datos |
+| `tar-derechos-05` (spr-1-4, 5) | condicional | LDP: derecho de cancelación: periodo de bloqueo; LDP: excepciones a la cancelación |
+| `tar-derechos-06` (spr-1-4, 6) | ilegal | LDP: derecho de cancelación: bloqueo y supresión; LDP: principio de calidad: conservación limitada |
+| `tar-derechos-07` (spr-1-4, 7) | legal | LDP: derecho de oposición; LDP: finalidades secundarias |
+| `tar-derechos-08` (spr-1-4, 8) | escalar | LDP: ejercicio de los derechos ARCO por representante; LDP: acreditación de la identidad y la representación |
+| `tar-brecha-01` (spr-1-5, 1) | ilegal | LDP: vulneraciones de seguridad: aviso a los titulares; LDP: deber de seguridad |
+| `tar-brecha-02` (spr-1-5, 2) | legal | LDP: deber de seguridad; LDP: vulneraciones de seguridad: acciones correctivas |
+| `tar-brecha-03` (spr-1-5, 3) | condicional | LDP: vulneraciones de seguridad: contenido del aviso a los titulares |
+| `tar-brecha-04` (spr-1-5, 4) | ilegal | LDP: deber de seguridad: medidas técnicas; LDP: vulneraciones de seguridad |
+| `tar-brecha-05` (spr-1-5, 5) | legal | LDP: vulneraciones de seguridad: registro de incidentes; LDP: principio de responsabilidad |
+| `tar-brecha-06` (spr-1-5, 6) | escalar | LDP: vulneraciones de seguridad: comunicación a los titulares; Código Civil Federal: responsabilidad por daño moral |
+| `tar-brecha-07` (spr-1-5, 7) | ilegal | LDP: responsable y encargado del tratamiento; LDP: vulneraciones de seguridad: aviso a los titulares |
+| `tar-brecha-08` (spr-1-5, 8) | escalar | LDP: vulneraciones de seguridad: aviso y acciones correctivas; Denuncia ante las autoridades competentes |
 
 ## Accesibilidad
-- **Foco:** al abrir, va al título del visor ("Inspecciona la evidencia") y al de 18 ("Dictaste ILEGAL. ¿Por qué es ilegal?"). Ambos se anuncian y, cuando cambian (al marcar), se vuelven a anunciar.
-- **Nada depende solo del color:**
-  - cada línea se lee "Línea 4: …; marcada; línea clave", y la marcada lleva borde;
-  - la opción elegida lleva el círculo relleno y se lee "seleccionada".
-- **Contraste AA** sobre el fondo oscuro, verificado en pruebas: texto, números, nombre de archivo, línea clave, y texto marcado sobre el resaltado.
-- **Objetivos táctiles:** el botón de evidencia mide ≥ 48. Las líneas se quedan en 24: no amplié su área a 44 porque se solaparían con las vecinas; con teclado no hay problema.
-- **Sin animaciones** en el resaltado con "reducir animaciones".
-- **Al 200 %:** el snippet se desplaza en horizontal y los paneles en vertical. Si no cabe en una línea, el chip de tipo baja debajo de la etiqueta.
+- Orden de foco de 26b: acciones y luego Lupa, Abogado y Amparo (probado con Tab).
+- Las píldoras muestran el anillo de foco. El estado no depende solo del color: se lee "activa" o "no disponible" y la cantidad siempre se ve.
+- Contraste AA verificado en pruebas: el texto en cada estado de la barra (claro y oscuro) y el texto sobre el subrayado de las trampas.
+- Al 200 % la barra baja de línea y el panel del Abogado se desplaza, sin desbordes.
 
 ## Verificación
 - `dart format`: sin cambios pendientes.
 - `flutter analyze`: `No issues found!`
-- `flutter test` (647 pruebas; antes de T-07, 556):
+- `flutter test` (691 pruebas; antes de T-07b, 647):
 ```
-+647: All tests passed!
++691: All tests passed!
 ```
 - **Pruebas nuevas o cambiadas:**
-  - **Lógica:** acierto de evidencia con una o varias líneas; bonus de evidencia (marcó bien o mal, no marcó, acierta o falla); monedas dobles; la justificación no cuenta con el veredicto equivocado; tarjetas normales sin bonus.
-  - **Mocks:** evidencia y justificación solo donde el tipo lo pide; líneas clave en rango y sin `\n`; 3 opciones; tarjetas 6 y 10 de Figma; 2 micro-preguntas por sprint, solo en normales.
-  - **Componentes:**
-    - `SnippetCodigo`: líneas, revelada, tramos, teclado, semántica, desplazamiento y contraste;
-    - tarjeta por tipo, en claro y oscuro;
-    - opción en modo selección;
-    - visores y panel 18, en claro y oscuro, al 100 % y al 200 %.
-  - **Pantalla 10 (`evidencia_justificacion_test.dart`):**
-    - visor: abrirlo con el botón, con un toque y con la acción del lector; marcar bien, mal, varias líneas y con teclado; marcar una sola vez; cerrar sin marcar con Esc, atrás o fuera, y reabrir; 12b con +15 XP;
-    - justificación: abrirla tras los 4 botones y los 4 swipes; elegir no confirma; los tres resultados más el parcial; sin descarte; foco y anuncio;
-    - sin desbordes en 390×844, 360×640 y 320×640, al 100 % y al 200 %, en claro y en oscuro.
+  - **`comodines_test.dart`:**
+    - tienda: cantidades, consumo sin bajar de 0 y descripciones;
+    - contenido de las 42 tarjetas, normas sin artículos fuera de Figma e iniciales de dos letras;
+    - lógica: Lupa, Abogado, Amparo, cantidad 0, panel abierto y `habilitados: false`;
+    - pantalla 10, Lupa: resalta, gasta, solo una vez y desaparece al cambiar de tarjeta;
+    - pantalla 10, Abogado: abre, gasta una vez, se reabre gratis, se cierra con Esc y atrás, y devuelve el foco;
+    - pantalla 10, Amparo: armar y desarmar es gratis, 14b sin perder vida y sigue armado al acertar;
+    - la barra con un panel abierto, el gasto que se conserva al volver a entrar y sin desbordes en 390×844, 360×640 y 320×640 al 100 % y 200 %.
+  - **`comodines_componentes_test.dart`:** barra en claro y oscuro, semántica, teclado, `habilitados: false` y 200 %; subrayado de las trampas y su contraste; etiqueta de la Lupa; panel del Abogado con normas largas al 200 %.
+  - La prueba de cifras legales revisa también trampas, traducciones y normas; la de orden de foco recorre las tres píldoras.
 
 ## Grafo
-- **Actualizados (`en curso`):** MOD, MOCK-TARJ, TEMA-EFECTOS, TEXTOS, PANT-GALERIA, EST-JUEGO, MAZO-SWIPE, CODIGO-PANT-10, LOGICA-VEREDICTO, COMP-TARJETA-CASO, COMP-OPCION-JUSTIFICACION, TEST-JUEGO, TEST-VEREDICTO, TEST-FIN-SPRINT, TEST-COMP, TEST-AYUDA y TEST-GALERIA.
-- **Nuevos:** COMP-SNIPPET, COMP-PANEL-EVIDENCIA, COMP-PANEL-JUSTIFICACION y TEST-EVIDENCIA.
-- **Obsoletos:** ninguno. Agregué una línea en el registro de cambios.
+- **Actualizados (`en curso`):** MOD, REPO-TIENDA, MOCK-TIENDA, MOCK-TARJ, TEMA-EFECTOS, TEXTOS, PANT-GALERIA, EST-JUEGO, CODIGO-PANT-10, COMP-TARJETA-CASO, COMP-COMODINES, TEST-JUEGO, TEST-FIN-SPRINT, TEST-COMP, TEST-AYUDA y TEST-GALERIA.
+- **Nuevos:** LOGICA-COMODINES, COMP-ETIQUETA-LUPA, COMP-PANEL-ABOGADO y TEST-COMODINES.
+- **Obsoletos:** ninguno (`ComodinesJuego` se eliminó del código). Agregué una línea en el registro de cambios.
 
 ## Dudas
-1. **Ícono de dedo (`38:4554`):** no hay SVG local, así que lo omití, como pide la tarea.
-2. **Resaltado:** Figma usa `#FFE27A` con mezcla multiply al 55 %. Sobre `#0B1220`, multiply casi no tiñe, así que usé un relleno al 12 % más el borde de 2, que es lo que se ve en Figma. ¿Está bien?
-3. **Modo oscuro:** la barra del snippet (`#162030`) casi coincide con `fondo/superficie` del panel en oscuro, así que la barra se pierde. Dejé los valores fijos de la tarea. ¿Hace falta una variante oscura?
-4. **Iniciales del avatar:** Figma muestra "QA" para "QA Tester" y "CL" para "Cliente"; la regla de `LogicaInicio.iniciales` da "QT" y "C". ¿Cambiamos la regla o los nombres?
-5. **Cambios de contenido en los mocks:** salieron la tarjeta de cookies y el dilema del inversionista de `spr-1-3`, y la evidencia de `spr-1-5` pasó de la bitácora a las contraseñas. ¿Está bien?
-6. **`mensajeFallo`:** es el mismo texto genérico en todas las tarjetas. ¿Quieres uno propio por tarjeta?
-7. **Fondo de 18:** en Figma la tarjeta lanzada se ve inclinada con el sello detrás del panel. Aquí, como en 12 y 14 desde la T-06, la tarjeta ya salió y no se ve.
+1. **Nombre de la ley:** usé "Ley de datos personales en posesión de particulares", sin nombre oficial ni número, porque la LFPDPPP se reemplazó en 2025. ¿Quieres el nombre oficial de la ley vigente?
+2. **Normas fuera de la ley de datos:** conviene confirmarlas con el usuario:
+   - "Derecho a la propia imagen" (`tar-datos-07`);
+   - "Obligaciones fiscales de conservación de comprobantes" (`tar-arco-01`);
+   - "Interés superior de la niñez" (`tar-aviso-06`);
+   - "Código Civil Federal: responsabilidad por daño moral" (`tar-brecha-06`);
+   - "Denuncia ante las autoridades competentes" (`tar-brecha-08`).
+3. **Estado activo:** en Figma 10b la píldora de la Lupa sigue como Disponible ("Lupa ×1") aunque la Lupa ya se usó; seguí la tarea y la marqué como activa. ¿Está bien?
+4. **Iniciales nuevas:** "MK", "CT", "CE" y "SP" no están en Figma; las elegí para que ninguna quede de una letra.
+5. **Resaltado en oscuro:** baja al 35 % para que el texto siga en AA. ¿Está bien o prefieres otro color en oscuro?
+6. **Etiqueta de la Lupa:** se queda fija mientras la tarjeta se arrastra (no se mueve con ella).

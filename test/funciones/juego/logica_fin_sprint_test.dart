@@ -286,6 +286,9 @@ void main() {
           ?t.evidencia?.mensajeAcierto,
           ?t.evidencia?.mensajeFallo,
           ...?t.justificacion?.opciones,
+          ...t.palabrasTrampa,
+          ?t.traduccionLegal,
+          ...t.normas,
           ?t.microPregunta?.enunciado,
           ...?t.microPregunta?.opciones,
         ];

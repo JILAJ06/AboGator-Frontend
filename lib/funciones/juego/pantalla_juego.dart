@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,8 +13,10 @@ import '../../componentes/barra_comodines.dart';
 import '../../componentes/barra_juego.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/etiqueta_lupa.dart';
 import '../../componentes/indicadores_startup.dart';
 import '../../componentes/mensaje_pantalla.dart';
+import '../../componentes/panel_abogado.dart';
 import '../../componentes/panel_evidencia.dart';
 import '../../componentes/panel_justificacion.dart';
 import '../../componentes/panel_veredicto.dart';
@@ -20,9 +25,11 @@ import '../../componentes/tinte_veredicto.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
+import '../../datos/modelos/articulo_tienda.dart';
 import '../../datos/modelos/tarjeta.dart';
 import '../inicio/logica_inicio.dart';
 import 'estado_juego.dart';
+import 'logica_comodines.dart';
 import 'logica_swipe.dart';
 import 'logica_veredicto.dart';
 import 'mazo_swipe.dart';
@@ -88,14 +95,64 @@ class _JuegoState extends ConsumerState<_Juego> {
   final _arrastre = ValueNotifier(const ArrastreVisible());
   final _focoEvidencia = FocusNode(debugLabel: 'botón de evidencia');
 
-  /// Hay un panel abierto (visor, justificación o veredicto).
-  bool _panelAbierto = false;
+  final _focoAbogado = FocusNode(debugLabel: 'comodín Abogado');
+
+  /// Hay un panel abierto (visor, justificación, Abogado o veredicto): la
+  /// barra de comodines se deshabilita.
+  final _panelAbierto = ValueNotifier(false);
 
   @override
   void dispose() {
     _arrastre.dispose();
     _focoEvidencia.dispose();
+    _focoAbogado.dispose();
+    _panelAbierto.dispose();
     super.dispose();
+  }
+
+  /// Anuncia [mensaje] al lector de pantalla.
+  void _anunciar(String mensaje) {
+    unawaited(SemanticsService.sendAnnouncement(View.of(context), mensaje, TextDirection.ltr));
+  }
+
+  /// 10b · Lupa: gasta 1 y resalta las palabras trampa de [tarjeta].
+  void _usarLupa(Tarjeta tarjeta) {
+    if (_panelAbierto.value || !_juego.usarLupa(tarjeta)) return;
+    final quedan = ref.read(juegoProvider(widget.sprintId)).cantidad(Comodin.lupaAuditor);
+    _anunciar('${Textos.lupaActiva}. ${Textos.comodinQuedan(Textos.comodinLupa, quedan)}');
+  }
+
+  /// 10c · Abogado: la primera vez en la tarjeta gasta 1; reabrirlo es gratis.
+  /// Se cierra con "Volver a la tarjeta", atrás o Esc, y el foco vuelve a la
+  /// píldora.
+  Future<void> _usarAbogado(Tarjeta tarjeta) async {
+    if (_panelAbierto.value) return;
+    final antes = ref.read(juegoProvider(widget.sprintId)).cantidad(Comodin.abogadoSenior);
+    if (!_juego.consultarAbogado(tarjeta)) return;
+    final quedan = ref.read(juegoProvider(widget.sprintId)).cantidad(Comodin.abogadoSenior);
+    if (quedan < antes) _anunciar(Textos.comodinQuedan(Textos.comodinAbogado, quedan));
+    final alto = MediaQuery.sizeOf(context).height;
+    await _mostrarPanel<void>(
+      descartable: true,
+      constructor: (contexto) => ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: alto * 0.92),
+        child: PanelAbogado(
+          traduccion: tarjeta.traduccionLegal ?? '',
+          normas: tarjeta.normas,
+          alVolver: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+    // La píldora se vuelve a habilitar al reconstruirse la barra: el foco se
+    // pide después de ese cuadro.
+    await WidgetsBinding.instance.endOfFrame;
+    if (mounted && _focoAbogado.context != null) _focoAbogado.requestFocus();
+  }
+
+  /// Amparo: arma o desarma (gratis); se gasta al absorber un error.
+  void _usarAmparo() {
+    if (_panelAbierto.value) return;
+    _anunciar(_juego.alternarAmparo() ? Textos.amparoArmado : Textos.amparoDesarmado);
   }
 
   JuegoNotifier get _juego => ref.read(juegoProvider(widget.sprintId).notifier);
@@ -108,7 +165,7 @@ class _JuegoState extends ConsumerState<_Juego> {
     required Widget Function(BuildContext contexto) constructor,
   }) async {
     final sinAnimaciones = MediaQuery.disableAnimationsOf(context);
-    _panelAbierto = true;
+    _panelAbierto.value = true;
     try {
       return await showModalBottomSheet<T>(
         context: context,
@@ -130,7 +187,7 @@ class _JuegoState extends ConsumerState<_Juego> {
             : PopScope(canPop: false, child: constructor(contexto)),
       );
     } finally {
-      _panelAbierto = false;
+      _panelAbierto.value = false;
     }
   }
 
@@ -139,7 +196,7 @@ class _JuegoState extends ConsumerState<_Juego> {
   /// cerrarse, el foco vuelve al botón de evidencia.
   Future<void> _abrirEvidencia(Tarjeta tarjeta) async {
     final evidencia = tarjeta.evidencia;
-    if (evidencia == null || _panelAbierto) return;
+    if (evidencia == null || _panelAbierto.value) return;
     final alto = MediaQuery.sizeOf(context).height;
     await _mostrarPanel<void>(
       descartable: true,
@@ -278,6 +335,7 @@ class _JuegoState extends ConsumerState<_Juego> {
     final indice = progreso.indice.clamp(0, total - 1);
     final tarjeta = datos.tarjetas[indice];
     final colorModulo = datos.modulo?.color ?? context.tokens.textoAcento;
+    final lupaUsada = progreso.lupaUsada.contains(tarjeta.id);
     final inspeccionar = tarjeta.tipo == TipoTarjeta.evidencia && tarjeta.evidencia != null
         ? () => _abrirEvidencia(tarjeta)
         : null;
@@ -335,7 +393,10 @@ class _JuegoState extends ConsumerState<_Juego> {
                           total,
                           tarjeta.personaje,
                           tarjeta.rol,
-                          tarjeta.texto,
+                          lupaUsada
+                              ? '${tarjeta.texto} '
+                                    '(${Textos.palabrasTrampaSemantica(tarjeta.palabrasTrampa)})'
+                              : tarjeta.texto,
                         ),
                         switch (tarjeta.tipo) {
                           TipoTarjeta.normal => null,
@@ -351,16 +412,26 @@ class _JuegoState extends ConsumerState<_Juego> {
                       tarjeta: TarjetaCaso(
                         etiquetaCaso: tarjeta.etiquetaCaso,
                         colorModulo: colorModulo,
-                        iniciales: LogicaInicio.iniciales(tarjeta.personaje),
+                        iniciales: tarjeta.iniciales ?? LogicaInicio.iniciales(tarjeta.personaje),
                         personaje: tarjeta.personaje,
                         rol: tarjeta.rol,
                         texto: tarjeta.texto,
                         tipo: tarjeta.tipo,
                         alInspeccionar: inspeccionar,
                         nodoFocoEvidencia: _focoEvidencia,
+                        palabrasTrampa: lupaUsada ? tarjeta.palabrasTrampa : const [],
                       ),
                     ),
                   ),
+                  // Etiqueta de la Lupa (10b): sobre el borde de la tarjeta,
+                  // solo mientras dura la tarjeta en la que se usó.
+                  if (lupaUsada)
+                    Positioned(
+                      left: EtiquetaLupa.posicion.dx,
+                      top: EtiquetaLupa.posicion.dy,
+                      right: 0,
+                      child: const Align(alignment: Alignment.topLeft, child: EtiquetaLupa()),
+                    ),
                 ],
               ),
             ),
@@ -371,14 +442,39 @@ class _JuegoState extends ConsumerState<_Juego> {
           child: AccionesVeredicto(alElegir: (v) => _mazo.currentState?.confirmar(v)),
         ),
         const SizedBox(height: 22),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: BloqueLectura(
-            etiqueta: Textos.comodinesTitulo,
-            child: BarraComodines(
-              lupa: ComodinesJuego.lupa,
-              abogado: ComodinesJuego.abogado,
-              amparo: ComodinesJuego.amparo,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Semantics(
+            container: true,
+            label: Textos.comodinesTitulo,
+            child: ValueListenableBuilder<bool>(
+              valueListenable: _panelAbierto,
+              builder: (context, panelAbierto, _) {
+                final abierto = panelAbierto || progreso.panel != null;
+                final lupa = LogicaComodines.estadoLupa(progreso, tarjeta, panelAbierto: abierto);
+                final abogado = LogicaComodines.estadoAbogado(
+                  progreso,
+                  tarjeta,
+                  panelAbierto: abierto,
+                );
+                final amparo = LogicaComodines.estadoAmparo(progreso, panelAbierto: abierto);
+                bool tocable(Comodin c, EstadoComodin e) =>
+                    LogicaComodines.tocable(c, e, panelAbierto: abierto);
+                return BarraComodines(
+                  lupa: progreso.cantidad(Comodin.lupaAuditor),
+                  abogado: progreso.cantidad(Comodin.abogadoSenior),
+                  amparo: progreso.cantidad(Comodin.amparo),
+                  estadoLupa: lupa,
+                  estadoAbogado: abogado,
+                  estadoAmparo: amparo,
+                  alUsarLupa: tocable(Comodin.lupaAuditor, lupa) ? () => _usarLupa(tarjeta) : null,
+                  alUsarAbogado: tocable(Comodin.abogadoSenior, abogado)
+                      ? () => _usarAbogado(tarjeta)
+                      : null,
+                  alUsarAmparo: tocable(Comodin.amparo, amparo) ? _usarAmparo : null,
+                  nodoFocoAbogado: _focoAbogado,
+                );
+              },
             ),
           ),
         ),

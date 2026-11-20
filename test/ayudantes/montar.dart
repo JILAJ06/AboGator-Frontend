@@ -1,5 +1,6 @@
 import 'package:abogator/componentes/corazon_vida.dart';
 import 'package:abogator/componentes/estrellas_sprint.dart';
+import 'package:abogator/componentes/tarjeta_caso.dart';
 import 'package:abogator/core/tema/colores_marca.dart';
 import 'package:abogator/core/tema/efectos.dart';
 import 'package:abogator/core/tema/tema_app.dart';
@@ -82,6 +83,7 @@ Set<int> coloresUsados(WidgetTester tester) {
     final pintor = pintura.painter;
     if (pintor is PintorCorazon) colores.add(_rgb(pintor.color));
     if (pintor is PintorEstrella) colores.add(_rgb(pintor.color));
+    if (pintor is PintorTrampas) colores.add(_rgb(pintor.color));
   }
   return colores;
 }
@@ -116,6 +118,8 @@ Set<int> coloresPermitidos(Brightness brillo) {
       EfectosApp.fondoLineaClave,
       EfectosApp.textoLineaClave,
       EfectosApp.resaltado,
+      // Subrayado de las palabras trampa (10b).
+      EfectosApp.trampaClaro,
     ])
       _rgb(c),
     for (final cara in [t.accionPrimaria, t.accionAcento, t.fondoSuperficieAlt, t.accionSecundaria])

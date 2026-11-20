@@ -255,15 +255,17 @@ void main() {
     testWidgets('orden de foco de Figma 26b', (tester) async {
       await abrirJuego(tester);
       final orden = <String>[];
-      for (var i = 0; i < 7; i++) {
+      for (var i = 0; i < 9; i++) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pump();
         final contexto = FocusManager.instance.primaryFocus?.context;
         final boton = contexto?.findAncestorWidgetOfExactType<BotonVeredicto>();
         String? dentro<T extends Widget>(String nombre) =>
             contexto?.findAncestorWidgetOfExactType<T>() != null ? nombre : null;
+        final pildora = contexto?.findAncestorWidgetOfExactType<PildoraComodin>();
         orden.add(
           boton?.veredicto.name ??
+              pildora?.nombre ??
               dentro<BarraJuego>('salir') ??
               (contiene<IndicadoresStartup>(contexto) ? 'indicadores' : null) ??
               (contiene<BarraComodines>(contexto) ? 'comodines' : null) ??
@@ -277,7 +279,9 @@ void main() {
         'escalar',
         'condicional',
         'legal',
-        'comodines',
+        Textos.comodinLupa,
+        Textos.comodinAbogado,
+        Textos.comodinAmparo,
       ]);
     });
 

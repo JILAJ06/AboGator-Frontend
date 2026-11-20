@@ -22,6 +22,7 @@ import '../../componentes/encabezado_modulo.dart';
 import '../../componentes/enlace_texto.dart';
 import '../../componentes/estadisticas_sprint.dart';
 import '../../componentes/estrellas_sprint.dart';
+import '../../componentes/etiqueta_lupa.dart';
 import '../../componentes/etiqueta_quiebra.dart';
 import '../../componentes/fila_detalle_sprint.dart';
 import '../../componentes/globo_sprint_actual.dart';
@@ -33,6 +34,7 @@ import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/nodo_sprint.dart';
 import '../../componentes/opcion_justificacion.dart';
 import '../../componentes/paginador_puntos.dart';
+import '../../componentes/panel_abogado.dart';
 import '../../componentes/panel_evidencia.dart';
 import '../../componentes/panel_justificacion.dart';
 import '../../componentes/panel_veredicto.dart';
@@ -60,6 +62,9 @@ import '../inicio/logica_inicio.dart';
 /// Tarjeta 6 (evidencia, Figma 15) y 10 (dilema, Figma 17) del sprint 3.
 final _ejemploEvidencia = MockTarjetas.tarjetasPorSprint['spr-1-3']![5];
 final _ejemploDilema = MockTarjetas.tarjetasPorSprint['spr-1-3']![9];
+
+/// Tarjeta de la GPL (Figma 10b y 10c), con trampas, traducción y normas.
+final _ejemploGpl = MockTarjetas.tarjetasPorSprint['spr-1-3']![4];
 
 /// Galería temporal de componentes: todos los tipos y estados, con
 /// interruptor claro/oscuro. Se elimina cuando existan las pantallas reales.
@@ -300,6 +305,36 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 ),
                 AccionesVeredicto(alElegir: (_) {}),
                 const BarraComodines(lupa: 2, abogado: 1, amparo: 1),
+                // Estados de T-07b: Lupa activa, Abogado sin cantidad y Amparo
+                // armado; y toda la barra apagada (Examen final).
+                BarraComodines(
+                  lupa: 1,
+                  abogado: 0,
+                  amparo: 1,
+                  estadoLupa: EstadoComodin.activo,
+                  estadoAbogado: EstadoComodin.deshabilitado,
+                  estadoAmparo: EstadoComodin.activo,
+                  alUsarAmparo: () {},
+                ),
+                const BarraComodines(lupa: 2, abogado: 1, amparo: 1, habilitados: false),
+                const Align(alignment: Alignment.centerLeft, child: EtiquetaLupa()),
+                SizedBox(
+                  height: TarjetaCaso.alto,
+                  child: TarjetaCaso(
+                    etiquetaCaso: _ejemploGpl.etiquetaCaso,
+                    colorModulo: ColoresModulo.enOrden[0],
+                    iniciales: LogicaInicio.iniciales(_ejemploGpl.personaje),
+                    personaje: _ejemploGpl.personaje,
+                    rol: _ejemploGpl.rol,
+                    texto: _ejemploGpl.texto,
+                    palabrasTrampa: _ejemploGpl.palabrasTrampa,
+                  ),
+                ),
+                PanelAbogado(
+                  traduccion: _ejemploGpl.traduccionLegal!,
+                  normas: _ejemploGpl.normas,
+                  alVolver: () {},
+                ),
               ],
             ),
             _Seccion(
