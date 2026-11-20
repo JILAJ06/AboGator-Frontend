@@ -3,9 +3,11 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../local/ajustes_sqlite.dart';
 import '../local/base_local.dart';
 import '../local/cola_respuestas_sqlite.dart';
 import '../local/onboarding_sqlite.dart';
+import '../mocks/ajustes_en_memoria.dart';
 import '../mocks/cola_respuestas_en_memoria.dart';
 import '../mocks/mock_apelaciones.dart';
 import '../mocks/mock_autenticacion.dart';
@@ -18,6 +20,7 @@ import '../mocks/mock_vidas.dart';
 import '../mocks/onboarding_en_memoria.dart';
 import '../sincronizacion/servicio_conexion.dart';
 import 'cola_respuestas.dart';
+import 'repositorio_ajustes.dart';
 import 'repositorio_apelaciones.dart';
 import 'repositorio_autenticacion.dart';
 import 'repositorio_onboarding.dart';
@@ -68,6 +71,12 @@ final baseLocalProvider = Provider<BaseLocal>((ref) {
 /// en pruebas.
 final repositorioOnboardingProvider = Provider<RepositorioOnboarding>(
   (ref) => usarBaseLocal ? OnboardingSqlite(ref.watch(baseLocalProvider)) : OnboardingEnMemoria(),
+);
+
+/// Ajustes de accesibilidad del dispositivo: SQLite en el dispositivo,
+/// memoria en web y en pruebas.
+final repositorioAjustesProvider = Provider<RepositorioAjustes>(
+  (ref) => usarBaseLocal ? AjustesSqlite(ref.watch(baseLocalProvider)) : AjustesEnMemoria(),
 );
 
 /// Cola local de respuestas: SQLite en el dispositivo, memoria en web y en

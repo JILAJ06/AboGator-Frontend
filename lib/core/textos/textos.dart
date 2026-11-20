@@ -112,6 +112,7 @@ abstract final class Textos {
       'de código cerrado y la publicamos?';
   static const String casoPistaIlegal = '←  ILEGAL';
   static const String casoPistaLegal = 'LEGAL  →';
+  static const String casoPistaBotones = 'Elige con los botones';
   static const String casoPistaCondicional = '↑ CONDICIONAL';
   static const String casoPistaEscalar = '↓ ESCALAR';
 
@@ -598,7 +599,41 @@ abstract final class Textos {
   static String notificacionApelacionCuerpo(String titulo, int dias) =>
       'Hace $dias días fallaste “$titulo”. Gánala y recupera 1 vida.';
   static const String notificacionApelacionPie = 'Toca para abrir el juicio de apelación';
-  static const String pendienteAjustes = 'Ajustes de accesibilidad · llega en T-10b';
+
+  // ---------------------------------------------------------------------
+  // 26 Ajustes de accesibilidad
+  // ---------------------------------------------------------------------
+  static const String ajustesTitulo = 'Accesibilidad';
+  static const String ajustesSubtitulo = 'WCAG 2.1 AA · Ajusta la app a tu forma de aprender.';
+  static const String seccionVisual = 'VISUAL';
+  static const String seccionMotora = 'MOTOR Y AUDITIVA';
+  static const String seccionCognitiva = 'COGNITIVA (WCAG 2.2.1)';
+  static const String modoOscuro = 'Modo oscuro';
+  static const String modoOscuroDetalle = 'Contraste alto en fondos oscuros';
+  static const String usarModoSistema = 'Usar el modo del sistema';
+  static const String tamanoTexto = 'Tamaño de texto';
+  static const String tamanoTextoDetalle = 'Texto dinámico sin deformar';
+  static String tamanoValor(int porcentaje) => 'Aa $porcentaje %';
+  static String porcentaje(int porcentaje) => '$porcentaje %';
+  static String porcentajeSemantica(int porcentaje) => '$porcentaje por ciento';
+  static const String muestraTamano = 'Aa';
+  static const String etiquetasLector = 'Etiquetas para lector';
+  static const String etiquetasLectorDetalle = 'TalkBack / VoiceOver';
+  static const String lectorActivo = 'Activo';
+  static const String lectorDisponible = 'Disponible';
+  static String lectorSemantica(bool activo) =>
+      'Etiquetas para lector: ${activo ? 'activo' : 'disponible'}';
+  static const String soloBotones = 'Botones en lugar de deslizar';
+  static const String soloBotonesDetalle = 'Toca uno de los 4 veredictos (48 dp)';
+  static const String vibracion = 'Vibración háptica';
+  static const String vibracionDetalle = 'Corta = acierto · doble = error';
+  static const String tiempoExtendido = 'Tiempo extendido en exámenes';
+  static const String tiempoExtendidoDetalle = '+50% por tarjeta y opción de pausa';
+  static const String reducirAnimaciones = 'Reducir animaciones';
+  static const String reducirAnimacionesDetalle = 'Menos movimiento en tarjetas';
+  static String filaAjusteSemantica(String titulo, String detalle) =>
+      '$titulo, ${detalle[0].toLowerCase()}${detalle.substring(1)}';
+  static const String errorGuardarAjuste = 'No se pudo guardar el ajuste. Inténtalo de nuevo.';
   static const String pendienteNotificacionesRacha =
       'Notificaciones de racha · pantalla pendiente de diseño';
   static const String pendienteAvisoPrivacidad =
@@ -715,6 +750,7 @@ abstract final class Textos {
   static const String galeriaSarko = 'Sarko';
   static const String galeriaTienda = 'Piezas de la Tienda';
   static const String galeriaPerfil = 'Piezas del Perfil';
+  static const String galeriaAjustes = 'Piezas de los Ajustes';
   static const String galeriaLogos = 'Logos (4 formas × 5 tonos)';
   static String galeriaLogo(String forma, String tono) => '$forma · $tono';
   static const String galeriaIconos = 'Íconos';

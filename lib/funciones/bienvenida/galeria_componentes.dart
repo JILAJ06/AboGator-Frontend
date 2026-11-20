@@ -44,6 +44,7 @@ import '../../componentes/panel_abogado.dart';
 import '../../componentes/panel_evidencia.dart';
 import '../../componentes/panel_justificacion.dart';
 import '../../componentes/panel_veredicto.dart';
+import '../../componentes/piezas_ajustes.dart';
 import '../../componentes/piezas_apelacion.dart';
 import '../../componentes/piezas_perfil.dart';
 import '../../componentes/piezas_tienda.dart';
@@ -588,6 +589,34 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                     ),
                   ],
                 ),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaAjustes,
+              hijos: [
+                const InterruptorApp(valor: true),
+                const InterruptorApp(valor: false),
+                const ChipValor(texto: 'Aa 120 %'),
+                const EncabezadoSeccionAjustes(Textos.seccionVisual),
+                MenuAgrupado(
+                  filas: [
+                    FilaAjuste(
+                      icono: IconosApp.moon,
+                      titulo: Textos.modoOscuro,
+                      detalle: Textos.modoOscuroDetalle,
+                      interruptor: true,
+                      control: const InterruptorApp(valor: true),
+                      alPresionar: () {},
+                    ),
+                    const FilaAjuste(
+                      icono: IconosApp.eye,
+                      titulo: Textos.etiquetasLector,
+                      detalle: Textos.etiquetasLectorDetalle,
+                      control: ChipValor(texto: Textos.lectorDisponible),
+                    ),
+                  ],
+                ),
+                OpcionTamano(porcentaje: 120, elegida: true, alElegir: () {}),
               ],
             ),
             _Seccion(

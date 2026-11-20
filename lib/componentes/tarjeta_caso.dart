@@ -38,6 +38,7 @@ class TarjetaCaso extends StatelessWidget {
     this.nodoFocoEvidencia,
     this.palabrasTrampa = const [],
     this.aviso,
+    this.soloBotones = false,
     super.key,
   });
 
@@ -98,6 +99,10 @@ class TarjetaCaso extends StatelessWidget {
   /// Aviso entre el globo y la pista de gesto (en la apelación, 22: "La
   /// fallaste hace N días"). Lo lee el lector junto con la tarjeta.
   final Widget? aviso;
+
+  /// Ajuste "Botones en lugar de deslizar": la pista dice "Elige con los
+  /// botones" en lugar de las direcciones.
+  final bool soloBotones;
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +215,7 @@ class TarjetaCaso extends StatelessWidget {
                   if (aviso case final aviso?) ...[const SizedBox(height: 18), aviso],
                   const Spacer(),
                   const SizedBox(height: 18),
-                  const PistaGesto(),
+                  PistaGesto(soloBotones: soloBotones),
                 ],
               ),
             ),
@@ -495,12 +500,28 @@ class AvisoDilema extends StatelessWidget {
 /// CONDICIONAL" sobre "↓ ESCALAR" (estado/condicional y estado/escalar) y
 /// "LEGAL →" (estado/legal). Decorativa: los botones dicen lo mismo.
 class PistaGesto extends StatelessWidget {
-  const PistaGesto({super.key});
+  const PistaGesto({this.soloBotones = false, super.key});
+
+  /// Sin arrastre: "Elige con los botones" (Etiqueta texto/secundario).
+  final bool soloBotones;
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
+    if (soloBotones) {
+      return ExcludeSemantics(
+        child: SizedBox(
+          key: const ValueKey('pista-botones'),
+          width: double.infinity,
+          child: Text(
+            Textos.casoPistaBotones,
+            textAlign: TextAlign.center,
+            style: estilos.etiqueta.copyWith(color: tokens.textoSecundario),
+          ),
+        ),
+      );
+    }
     return ExcludeSemantics(
       child: Row(
         key: const ValueKey('pista-gesto'),

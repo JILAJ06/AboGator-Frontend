@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import '../core/tema/modo_tema.dart';
 import '../core/tema/tema_app.dart';
 import '../core/textos/textos.dart';
+import '../funciones/ajustes/estado_ajustes.dart';
+import '../funciones/ajustes/logica_ajustes.dart';
 import 'enrutador.dart';
 
 /// Idioma único de la app: español de México.
@@ -15,6 +17,7 @@ class AppAbogator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final modo = ref.watch(modoTemaProvider);
+    final ajustes = ref.watch(ajustesProvider);
     final enrutador = ref.watch(enrutadorProvider);
 
     return MaterialApp.router(
@@ -27,6 +30,12 @@ class AppAbogator extends ConsumerWidget {
       supportedLocales: const [localeApp],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       routerConfig: enrutador,
+      // Tamaño de texto y "reducir animaciones" de los ajustes (pantalla 26):
+      // aquí llegan también a diálogos y paneles.
+      builder: (context, hijo) => MediaQuery(
+        data: LogicaAjustes.aplicar(MediaQuery.of(context), ajustes),
+        child: hijo ?? const SizedBox.shrink(),
+      ),
     );
   }
 }

@@ -251,10 +251,8 @@ void main() {
     });
 
     for (final (clave, ruta, texto) in [
-      ('menu-accesibilidad', Rutas.ajustes, Textos.pendienteAjustes),
       ('menu-notificaciones', Rutas.notificacionesRacha, Textos.pendienteNotificacionesRacha),
       ('menu-aviso', Rutas.avisoPrivacidad, Textos.pendienteAvisoPrivacidad),
-      ('boton-ajustes', Rutas.ajustes, Textos.pendienteAjustes),
     ]) {
       testWidgets('$clave va a $ruta sin barra inferior y atrás vuelve', (tester) async {
         await abrirPerfil(tester);

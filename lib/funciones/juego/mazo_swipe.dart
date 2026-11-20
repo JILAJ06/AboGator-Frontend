@@ -61,6 +61,7 @@ class MazoSwipe extends StatefulWidget {
     required this.alConfirmar,
     required this.arrastre,
     this.alInspeccionar,
+    this.arrastreActivo = true,
     super.key,
   });
 
@@ -86,6 +87,11 @@ class MazoSwipe extends StatefulWidget {
   /// haberla movido) abre el visor, y el lector tiene la acción "Inspeccionar
   /// evidencia".
   final VoidCallback? alInspeccionar;
+
+  /// Con `false` (ajuste "Botones en lugar de deslizar") la tarjeta no se
+  /// arrastra: no hay reconocedor de arrastre. Los botones, el teclado y las
+  /// acciones del lector siguen calificando, y un toque abre el visor.
+  final bool arrastreActivo;
 
   /// Movimiento máximo para que soltar cuente como toque.
   static const double toleranciaToque = 8;
@@ -339,14 +345,22 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
             key: const ValueKey('gesto-tarjeta'),
             behavior: HitTestBehavior.opaque,
             gestures: {
-              _ArrastreInmediato: GestureRecognizerFactoryWithHandlers<_ArrastreInmediato>(
-                _ArrastreInmediato.new,
-                (r) => r
-                  ..dragStartBehavior = DragStartBehavior.down
-                  ..onStart = _alEmpezar
-                  ..onUpdate = _alMover
-                  ..onEnd = _alSoltar,
-              ),
+              if (widget.arrastreActivo)
+                _ArrastreInmediato: GestureRecognizerFactoryWithHandlers<_ArrastreInmediato>(
+                  _ArrastreInmediato.new,
+                  (r) => r
+                    ..dragStartBehavior = DragStartBehavior.down
+                    ..onStart = _alEmpezar
+                    ..onUpdate = _alMover
+                    ..onEnd = _alSoltar,
+                )
+              else if (widget.alInspeccionar != null)
+                TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                  TapGestureRecognizer.new,
+                  (r) => r.onTap = () {
+                    if (!_volando) widget.alInspeccionar?.call();
+                  },
+                ),
             },
             child: widget.tarjeta,
           ),
