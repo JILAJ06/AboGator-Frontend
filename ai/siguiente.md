@@ -1,86 +1,100 @@
-# T-07b · Comodines (Lupa de Auditor, Abogado Senior y Amparo)
+# T-08 · Sin vidas, sin conexión y cola local (SQLite)
 
-**Rama:** `07b-comodines` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-07b**).
-**Pantallas:** 10b (Lupa de Auditor) y 10c (Abogado Senior); además activa el Amparo (la 14b ya existe desde la T-06). Figma (archivo `SYNAyUal3xVk4k8SEBEb7f`): 10b = `38:4914`, 10c = `38:5065`. Compara en Chrome con el conector.
+**Rama:** `08-vidas-y-offline` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-08**).
+**Pantallas:** 20 Sin vidas y 23 Sin conexión (offline-first). Figma (archivo `SYNAyUal3xVk4k8SEBEb7f`): 20 = `17:2072`, 23 = `41:5976`. Compara en Chrome con el conector.
 
 ## Objetivo
-La barra de comodines es hoy solo decoración con cantidades fijas (2/1/1). Hacerla real:
-- cantidades que vienen del repositorio de la tienda y se **gastan**;
-- **Lupa** (10b): resalta las palabras trampa del texto de la tarjeta;
-- **Abogado** (10c): abre un panel con la traducción legal y la norma aplicable;
-- **Amparo**: se activa y absorbe el siguiente error (la lógica ya existe: `amparoActivo`, panel 14b).
-Más: `iniciales` de la tarjeta (duda D4 de la T-07).
+1. **Sin vidas (20):** pantalla real con cuenta regresiva a la próxima vida, **calculada a partir de lo que manda el servidor** (no del reloj del dispositivo), sugerencia hacia el Buzón y regreso al mapa. Sustituye los marcadores `sinVidasPendiente`.
+2. **Sin conexión (23):** no es una pantalla aparte, es un **estado de la pantalla de juego**: aviso de conexión inestable y contador de respuestas guardadas en el dispositivo.
+3. **Cola local con SQLite (offline-first):** cada respuesta se guarda primero en el dispositivo con un UUID de cliente y se sincroniza después; el servidor la recibe una sola vez (idempotencia). Como aún no hay backend, el "servidor" es un mock.
+4. El estado "onboarding visto" pasa a guardarse en SQLite **sin cambiar su interfaz** (`RepositorioOnboarding`).
 
-## Datos
-### Repositorio y modelo
-- `RepositorioTienda`: añadir `Future<Map<Comodin,int>> obtenerComodines()` (cantidades poseídas) y `Future<void> consumirComodin(Comodin c)` (resta 1, nunca baja de 0). `MockTienda`: en memoria, empieza con lupa 2, abogado 1, amparo 1 (como Figma) y por instancia. **No** implementar la compra (T-10).
-- Quitar `ComodinesJuego` (cantidades fijas) y que `datosJuegoProvider` cargue las cantidades; `EstadoJuego` lleva `comodines` (cantidades vigentes en la sesión del sprint) y se descuentan al usarlos y se guardan con `consumirComodin` **al momento de usarlos** (no al terminar el sprint).
-- Actualizar las descripciones de `MockTienda.articulos` a lo que hacen de verdad: Lupa "Resalta las palabras trampa del caso.", Abogado "Traduce el caso a términos legales y cita la norma.", Amparo igual. (La pantalla Tienda 24 se revisa en la T-10.)
-### Tarjeta (`tarjeta.dart`)
-Campos nuevos, **todos opcionales**:
-- `palabrasTrampa: List<String>` (fragmentos exactos del `texto` que se resaltan con la Lupa);
-- `traduccionLegal: String?` y `normas: List<String>` (para el Abogado);
-- `iniciales: String?` (si falta, se calcula como hoy con `LogicaInicio.iniciales`). Poner `iniciales` explícitas donde Figma las muestra distintas: "QA" para "QA Tester" y "CL" para "Cliente"; revisar que ninguna otra tarjeta quede con iniciales feas ("C", etc.).
-- Lupa disponible solo si `palabrasTrampa` no está vacío; Abogado solo si hay `traduccionLegal` y al menos una norma.
-### Contenido (`MockTarjetas`)
-Dar `palabrasTrampa`, `traduccionLegal` y `normas` a **todas** las tarjetas de los 5 sprints del módulo 1. Reglas de contenido:
-- Palabras trampa: 2 a 4 por tarjeta, copiadas **tal cual** del `texto` (prueba: cada una está contenida en el texto). Ej. Figma 10b: "GPL-3.0", "tal cual", "código cerrado" en la GPL.
-- Traducción: la pregunta real en términos legales, 1 o 2 frases. Ej. Figma 10c: "¿Se puede incluir código bajo GPL-3.0 dentro de un software propietario que se distribuye sin publicar su código fuente?".
-- Normas: 1 a 3 referencias por nombre ("Licencia GPL-3.0, sección 5: obras derivadas"; "Ley Federal del Derecho de Autor, art. 102 (programas de cómputo)" son las de Figma). **Fuera de esas dos, no pongas números de artículo ni de sección** (no hay forma de verificarlos aquí): cita la ley o el principio por nombre ("principio de finalidad de la ley de datos personales vigente", "avisos de privacidad"). Mantén la regla: sin plazos, montos ni cifras legales. La prueba de cifras debe revisar también estos textos.
-- Lista en el reporte, por tarjeta, la base legal que usaste para que yo la verifique con el usuario.
+## Dependencias (autorizadas solo estas)
+- `sqflite` (SQLite en Android/iOS) y `path` si lo necesita para la ruta de la base.
+- `dev_dependencies`: `sqflite_common_ffi` (para probar el SQL en `flutter test`).
+- **UUID sin paquete:** escribe `generarUuidV4()` en `lib/core/utilidades/` con `Random.secure()` (formato 8-4-4-4-12, versión 4 y variante correcta) y pruébalo (formato, unicidad en 1000 llamadas).
+- Instálalas con `flutter pub add` (elige las versiones compatibles con Flutter 3.50 / Dart 3.14). **Cualquier otra dependencia: no la agregues, pregúntalo en una duda del reporte.**
+- **Web (Chrome):** sqflite no corre en web. En web (`kIsWeb`) usa implementaciones **en memoria** de la cola y del onboarding (se pierden al recargar; es solo para probar). Documenta esa limitación en el reporte. La app real es móvil y tableta.
 
-## Barra de comodines (`BarraComodines`) — de decorativa a interactiva
-Figma `33:393`: tres píldoras (alto 48, borde 1.5 `accionAcento`, fondo `fondoSuperficie`, ícono 18, Etiqueta "Lupa ×N"). Ahora son **botones** (alto ≥ 48, foco, Enter/Espacio, semántica "Lupa, 2 disponibles, botón"). Estados (los que no están en Figma, usa estos):
-- **Disponible:** como Figma.
-- **Activa** (Lupa en la tarjeta actual, o Amparo armado): fondo `accionAcento`, texto e ícono `textoEnPrimario`; el lector dice "activa".
-- **Deshabilitada** (cantidad 0, comodín que no aplica a la tarjeta, modo examen o panel abierto): fondo `fondoSuperficieAlt`, borde `bordeDefault`, ícono y texto `textoSecundario`; el lector dice "no disponible". La cantidad se sigue mostrando ("Lupa ×0").
-- Parámetro `habilitados: bool` (por defecto true) para que el Examen final (T-11) los apague entero (RN03). Aquí solo debe estar implementado y probado; el Examen aún no existe.
-Cambios de cantidad: las cifras se actualizan al instante y se anuncian ("Lupa, quedan 1").
+## Datos y repositorios
+### Vidas (`Vidas`, `RepositorioVidas`, `MockVidas`)
+- Reemplaza `Vidas.proximaEn` (DateTime) por `Duration? faltaParaProxima`: lo que **falta** según el servidor en el momento de la respuesta (`null` con vidas completas). Actualiza usos y pruebas (`mocks_test.dart`, `logica_fin_sprint_test.dart`).
+- `MockVidas` simula el servidor con reloj inyectable (`ahoraServidor`, ya existe): guarda internamente el momento de la próxima regeneración. Reglas: al bajar de 5 vidas sin regeneración programada, la programa a `ahora + 2 h`; `obtenerVidas()` aplica las regeneraciones vencidas (+1 vida por cada 2 h cumplidas, sin pasar de 5; si aún faltan, programa la siguiente 2 h después de la anterior); con 5 vidas no hay regeneración. `faltaParaProxima = proxima − ahora`.
+- **Cuenta regresiva en la UI (`CuentaRegresivaVida`):** al recibir `faltaParaProxima` se guarda un `Stopwatch` (tiempo monótono) y cada segundo se muestra `faltaParaProxima − stopwatch.elapsed`. **Nunca** `DateTime.now()`. Al llegar a 0 vuelve a pedir `obtenerVidas()` al repositorio.
 
-## 10b · Lupa de Auditor
-- Al tocarla (con cantidad > 0, tarjeta con trampas y Lupa aún no usada **en esta tarjeta**): resta 1, la píldora queda activa y el texto del globo marca cada palabra trampa: subrayado grueso del color `#FFD84D` al 65 % (Figma: `decoration` 11 px `rgba(255,216,77,0.65)`; en Flutter, un `TextSpan` con fondo o un `WidgetSpan`/`decoration` que se vea igual; el color va en `EfectosApp`) y el texto sigue legible (contraste AA, comprobarlo en claro y oscuro).
-- Una **etiqueta** flotante sobre la tarjeta (Figma `38:5058`, en (41,150) del marco): píldora `accionAcento`, relleno 10/12/6/6, separación 6, ícono `search` 14 y "Lupa de Auditor: palabras trampa resaltadas" (Etiqueta, `textoEnPrimario`). Es un anuncio (`liveRegion`) y no recibe foco. Desaparece al pasar a la siguiente tarjeta junto con el resaltado.
-- Idempotente: volver a tocarla en la misma tarjeta no gasta otra (queda deshabilitada).
-- El resaltado no depende solo del color: el lector lee las palabras trampa ("palabra trampa: …") en el texto de la tarjeta.
+### Respuestas pendientes (cola local)
+Modelo `RespuestaPendiente`: `id` (UUID v4 del cliente), `sprintId`, `tarjetaId`, `veredicto`, `justificacion` (int?, opción elegida), `evidenciaCorrecta` (bool?), `respondidaEn` (UTC; solo informativa, el servidor no se fía de ella), `intentos`.
+- Interfaz `ColaRespuestas` (en `lib/datos/repositorios/`): `agregar(RespuestaPendiente)`, `pendientes()`, `cantidadPendientes()`, `marcarEnviadas(List<String> ids)` (las borra), `registrarIntentoFallido(List<String> ids)`. Implementaciones: `ColaRespuestasSqlite` y `ColaRespuestasEnMemoria`.
+- Tabla `respuestas_pendientes(id TEXT PRIMARY KEY, sprint_id, tarjeta_id, veredicto, justificacion INTEGER NULL, evidencia_correcta INTEGER NULL, respondida_en TEXT, intentos INTEGER NOT NULL DEFAULT 0)`. Base `abogator.db`, versión 1, `onCreate`. Apertura perezosa (la base se abre en la primera operación, no al arrancar la app). El insert debe ser idempotente por `id` (`ConflictAlgorithm.ignore`).
+- Interfaz `RepositorioRespuestas` (lado servidor): `Future<List<String>> enviarRespuestas(List<RespuestaPendiente>)` devuelve los ids aceptados. `MockRespuestas`: guarda lo recibido **sin duplicar por id** (enviar dos veces el mismo UUID cuenta una vez) y expone `recibidas` para las pruebas. Puede lanzar error (parámetro para las pruebas) y entonces nada se acepta.
+- `SincronizadorRespuestas` (servicio, `lib/datos/` o `lib/funciones/juego/`): `sincronizar()` toma los pendientes, los envía y borra de la cola solo los ids aceptados; si falla, `registrarIntentoFallido` y no pierde nada. No se ejecuta dos veces a la vez (si ya está corriendo, ignora la llamada). Se dispara: al guardar una respuesta estando en línea, al volver la conexión y al abrir la app.
 
-## 10c · Abogado Senior (panel modal)
-Mismo contenedor modal que el visor de evidencia de la T-07 (`ContenedorPanelModal`: velo `#0B1220` al 40 %, esquinas 28, sombra elevada, relleno 12/24/34, asa 40×5). Cierra con "Volver a la tarjeta", atrás o Esc (aquí sí se puede cerrar; no hay penalización).
-- **Título** (fila, separación 10): cuadrado 40 `accionSecundaria` radio 12 con ícono `briefcase` 22 blanco; a su lado una columna (separación 2): "Consulta al Abogado Senior" (Título/H2) y "El caso, sin ruido y en términos legales" (Leyenda `textoSecundario`).
-- **Traducción**: caja `fondoSuperficieAlt`, radio 16, relleno 16/14, separación 8, ancho completo: "Lo que realmente se pregunta" (Cuerpo/Énfasis `textoPrimario`) y la `traduccionLegal` (Cuerpo/Base).
-- **Norma aplicable** (separación 6): "NORMA APLICABLE" (Etiqueta `textoAcento`) y una fila por norma con ícono `doc` 18 (usa el ícono de documento de la familia Lucide; añade a `IconosApp` si falta) y texto Cuerpo/Base `textoPrimario` que puede ocupar varias líneas.
-- Botón primario "Volver a la tarjeta" (52, ancho completo).
-- Gasta 1 la **primera** vez que se abre en una tarjeta; reabrirlo en la misma tarjeta es gratis y no resta. La píldora queda marcada como "usada" (activa) en esa tarjeta.
-- Foco al título al abrir y retorno del foco a la píldora al cerrar; anuncio "Consulta al Abogado Senior".
+### Conexión
+- Interfaz `ServicioConexion` con `EstadoConexion { enLinea, sinConexion }` y un `Stream`. Implementación actual `ConexionSimulada` (arranca en línea, método `establecer`). En T-14 se cambiará por detección real.
+- `conexionProvider` (Riverpod) y `respuestasPendientesProvider` (cantidad en cola, se refresca al agregar, enviar o volver la conexión).
+- **Interruptor de depuración** (`InterruptorConexionDebug`): solo con `kDebugMode`, una píldora pequeña "Simular sin conexión" con un `Switch`, abajo en la pantalla de juego (alto táctil ≥ 48, sin tapar nada del diseño). En release no existe. Es la única forma de ver el estado 23 sin backend.
 
-## Amparo
-- Tocar el Amparo con cantidad > 0 y sin armar: **no resta todavía**; arma el Amparo (`establecerAmparo(activo: true)`, píldora activa). Tocarlo otra vez lo desarma (gratis).
-- Se **gasta** (resta 1 y se guarda con `consumirComodin`) cuando absorbe un error: el resultado es `TipoVeredicto.amparo` (ya existe: sin vida perdida y Riesgo legal −5), y entonces `amparoActivo` vuelve a false. Si el jugador acierta, el Amparo sigue armado para la siguiente tarjeta.
-- Con cantidad 0 no se puede armar. Si está armado y se llega a quiebra o sin vidas, no cambia nada más.
-- El panel 14b ya existe: comprueba que se muestre al fallar con el Amparo armado y que las vidas no bajen.
-- Lector: "Amparo armado: tu próximo error no te quita vida".
+### Guardado de respuestas en el juego
+`JuegoNotifier.responder(...)` sigue calificando en local como hoy. Además, **cada respuesta** (en línea o no) se agrega primero a la cola con un UUID nuevo y luego, si hay conexión, se intenta sincronizar sin bloquear la UI ni el panel de veredicto. La calificación y el avance de tarjetas no dependen de la red. Los comodines se gastan como hoy (en memoria / tienda mock); su sincronización llega en T-14.
+- **Fuera de alcance:** el resultado del sprint (estrellas, vidas, monedas) sigue guardándose con los repositorios mock como hoy; cómo se sincroniza con el servidor se define en T-14. Anótalo en el reporte.
 
-## Reglas que cuidar
-- Los comodines se pueden usar mientras haya una tarjeta visible y **no** haya un panel abierto (veredicto, justificación o evidencia); durante esos paneles la barra está deshabilitada.
-- Usarlos no cambia las estrellas ni el estado de la Startup.
-- Si se sale del sprint a la mitad, lo ya gastado se queda gastado (se guardó al usarlo); el avance del sprint sigue como en T-06b.
+### Onboarding en SQLite
+- Tabla `ajustes(clave TEXT PRIMARY KEY, valor TEXT NOT NULL)`; `OnboardingSqlite implements RepositorioOnboarding` guarda `onboarding_visto = 1`. Mismo archivo de base que la cola (una sola clase `BaseLocal` que abre y expone la base). En web y en pruebas, `OnboardingEnMemoria`.
+- Actualiza `repositorioOnboardingProvider` y `repositorioColaRespuestasProvider` en `proveedores_repositorios.dart`: `kIsWeb` → memoria; si no, SQLite. Quita el comentario "en T-08 se guardará en SQLite".
 
-## Accesibilidad y teclado
-Orden de foco de la 26b se mantiene (acciones → comodines); las píldoras con foco visible `focoAnillo`; texto al 200 % sin desbordes (la barra baja de línea con `Wrap` como hoy); `disableAnimations` sin animar el resaltado.
+## 20 · Sin vidas — medidas (marco 390×844; en código usa una columna desplazable con estas separaciones)
+Fondo `fondoApp`. Sin navegación inferior.
+- **Cerrar** (20,54): cuadrado 48, `fondoSuperficie`, borde 1 `bordeDefault`, radio 12, ícono `x` de 20. Reusa `BotonCerrar`. Vuelve al mapa (igual que "Volver al mapa").
+- **Vidas** (y=70): 5 corazones **vacíos** (`CorazonVida` contorno `bordeControl`) de 31.2 con hueco 10.4, centrados. Si al refrescar hay vidas, se llenan en orden.
+- **Ilustración** (y=120): círculo de fondo de 220 en (85,120) (reusa el círculo de la intro del sprint / 19b; si es privado, extráelo a un componente compartido y dilo en el reporte) y `SarkoImagen` **triste** de 176×220 en (107,124).
+- **Título** (y=360): "Te quedaste sin vidas", Fredoka Bold 26/32 `textoPrimario`, centrado, ancho 342.
+- **"Próxima vida en"** (y=400): Cuerpo/Base `textoSecundario`, centrado.
+- **Tiempo** (y=422): `HH:MM:SS` (con ceros, p. ej. `01:47:32`), Fredoka Bold 52 `estadoIlegal`, centrado, alto 64. Con texto muy grande o 200 % debe encoger (`FittedBox.scaleDown`), nunca desbordar.
+- **Nota del servidor** (y=494): fila centrada, ícono `clock` 16 `textoSecundario`, hueco 6 y "1 vida cada 2 horas · tiempo controlado por el servidor" (Leyenda `textoSecundario`).
+- **Sugerencia del Buzón** (24,540; ancho 342): `fondoDestacado`, radio 22, relleno 18, separación 12.
+  - Fila (separación 12): cuadrado 44 `accionSecundaria` radio 14 con ícono `inbox` 22 blanco; columna (separación 2): "Mientras tanto, repasa" (Cuerpo/Énfasis `textoPrimario`) y "N apelaciones pendientes: cada una que ganes te devuelve 1 vida." (Leyenda `textoSecundario`).
+  - Botón primario "Ir al Buzón de Apelaciones" (52, ancho completo).
+  - **N sale del mock de apelaciones** (`obtenerApelacionesPendientes().length`; el mock tiene 6, Figma muestra 2: usa el dato real y anótalo en el reporte). Singular: "1 apelación pendiente: si la ganas te devuelve 1 vida." Con 0 pendientes la tarjeta completa no se muestra.
+  - El botón navega a `Rutas.buzon` (hoy `PantallaPendiente`; la pantalla real llega en T-09).
+- **Volver al mapa** (24,738): botón fantasma 342×48.
+- **Cuando la cuenta llega a 0 y el servidor devuelve ≥ 1 vida:** los corazones se llenan, "Próxima vida en" pasa a "¡Recuperaste una vida!" (el tiempo se oculta, o muestra la siguiente si faltan más) y se anuncia al lector. No está en Figma: decisión tuya, descríbela en el reporte.
+- **Accesibilidad:** el tiempo visible va excluido del lector; en su lugar un `Semantics` "Próxima vida en 1 hora y 47 minutos" que se actualiza cada minuto **sin** `liveRegion` (no se anuncia cada segundo). Al llegar a 0 sí se anuncia. El foco inicial va al título. Contraste de `estadoIlegal` sobre `fondoApp` ≥ 3:1 (texto grande) en claro y oscuro: pruébalo.
+
+### Cómo se llega a la 20
+- Ruta `Rutas.sinVidas` con parámetro de consulta opcional `modulo` (`Rutas.sinVidasDe(moduloId)`); "Volver al mapa" y Cerrar van a `Rutas.mapaSprintsDe(modulo)` o a Inicio si no se conoce.
+- Al quedarse sin vidas en el juego: `context.go(Rutas.sinVidasDe(modulo))` (hoy `Rutas.sinVidas`). Comprueba que `guardarResultado()` ya guardó las 0 vidas antes de salir.
+- Al abrir un sprint con 0 vidas (`DatosJuego.sinVidas`): en vez de `MensajePantalla(sinVidasPendiente)` muestra directamente `PantallaSinVidas`. Con 0 vidas `datosJuegoProvider` sigue sin cargar tarjetas pero **sí resuelve `modulo` y `sprint`** (para saber a dónde volver).
+- Borra `Textos.sinVidasPendiente`, el `PantallaPendiente` de la ruta y la constante `Rutas.sinConexion` (no se usa: PANT-23 es un estado del juego).
+
+## 23 · Sin conexión — medidas (sobre la pantalla de juego 10)
+Figma muestra la tarjeta 7 de 10 con la barra y los indicadores como siempre, más dos elementos nuevos y **sin la barra de comodines**:
+- **Aviso de conexión** (24,158; ancho 342) `AvisoConexion`: superpuesto sobre el borde superior de la tarjeta (no la empuja), `fondoSuperficie`, borde 1.5 `accionAcento` con **5 de grosor a la izquierda**, radio 14, relleno 14×12, separación 10, sombra elevada (la de los paneles), ícono `info` 20 y texto "Conexión inestable. Se guardará tu progreso localmente." (Cuerpo/Base `textoPrimario`, varias líneas permitidas). No recibe toques (`IgnorePointer`: el arrastre de la tarjeta pasa). Es un anuncio (`liveRegion`) y no recibe foco.
+  - Se muestra mientras `conexionProvider` sea `sinConexion`. Al volver la conexión cambia ~3 s a "Conexión restablecida. Se está sincronizando tu progreso." (mismo estilo) y luego desaparece; con "reducir animaciones", sin transición. Ese segundo texto no está en Figma: decisión tuya, anótala.
+- **Pendientes** (`IndicadorPendientes`, centrado en y≈744, ocupa el lugar de la barra de comodines): ícono `refresh` 14 + "N respuestas guardadas en el dispositivo (SQLite)" (Leyenda `textoAcento`, hueco 6). Singular: "1 respuesta guardada en el dispositivo (SQLite)". Semántica: "N respuestas guardadas en el dispositivo, pendientes de sincronizar". Se muestra cuando `sinConexion` **o** hay pendientes en cola (mientras se sincroniza); si no, vuelve la barra de comodines.
+  - Sin conexión los comodines no están disponibles (su gasto lo controla el servidor): la barra se reemplaza por este indicador, como en Figma.
+- El juego sigue funcionando completo sin conexión (deslizar, paneles, evidencia, justificación); solo cambian el aviso y el contador.
 
 ## Archivos permitidos
-`lib/datos/modelos/` (`tarjeta.dart`, `articulo_tienda.dart` si hace falta), `lib/datos/repositorios/repositorio_tienda.dart`, `lib/datos/mocks/mock_tienda.dart` y `mock_tarjetas.dart`, `lib/funciones/juego/`, `lib/componentes/` (`barra_comodines.dart`, `tarjeta_caso.dart`, nuevos `panel_abogado.dart` y etiqueta de Lupa), `lib/core/textos/textos.dart`, `lib/core/tema/efectos.dart` e `iconos_app.dart`, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). **No** implementar la compra ni la pantalla Tienda; sin dependencias nuevas.
+`pubspec.yaml` / `pubspec.lock` (solo las dependencias de arriba), `lib/datos/` (modelos `vidas.dart` y nuevo `respuesta_pendiente.dart`; repositorios y mocks de vidas, respuestas, cola, onboarding; `proveedores_repositorios.dart`; nueva base local), `lib/app/rutas.dart` y `enrutador.dart`, `lib/funciones/juego/` y nueva carpeta `lib/funciones/vidas/` (pantalla 20), `lib/funciones/mapa/` solo si hace falta para vidas, `lib/componentes/` (nuevos: `cuenta_regresiva_vida`, `aviso_conexion`, `indicador_pendientes`, interruptor de depuración; ajustes a `corazon_vida` y al círculo de ilustración compartido), `lib/core/utilidades/` (UUID), `lib/core/textos/textos.dart`, `lib/core/tema/iconos_app.dart` si falta algún ícono, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). **No** implementar el Buzón (T-09), la tienda (T-10) ni detección real de red (T-14).
 
 ## Pruebas
-- Mocks/tienda: cantidades iniciales, `consumirComodin` (no baja de 0), descripciones; todas las tarjetas del módulo 1 con trampas contenidas en su texto, traducción y ≥ 1 norma; `iniciales` correctas; prueba de cifras ampliada; sin números de artículo fuera de las 2 normas de Figma.
-- Lógica: gasto de Lupa y Abogado (una vez por tarjeta), Amparo armar/desarmar sin gasto, gasto al absorber el error, persistencia del Amparo al acertar, cantidad 0, deshabilitado con panel abierto y con `habilitados: false`.
-- Componentes: la barra en sus 3 estados, claro/oscuro, semántica, teclado, 200 %; globo con trampas (contraste); etiqueta de la Lupa; panel del Abogado (varias normas largas, 200 %).
-- Pantalla 10: usar Lupa (se ven las trampas y se resta), cambiar de tarjeta (desaparecen), Abogado (abre, gasta una vez, reabrir gratis), Amparo + error → 14b sin perder vida y con cantidad restada; los comodines no se pueden tocar con un panel abierto; sin desbordes en 390×844, 360×640 y 320×640 al 100 % y 200 %.
+- **UUID:** formato v4, unicidad.
+- **MockVidas:** programa la regeneración al bajar de 5, aplica 0/1/2 regeneraciones vencidas con reloj inyectado, nunca pasa de 5, `faltaParaProxima` correcto, `null` con 5.
+- **Cola:** (con `sqflite_common_ffi` en memoria) agregar, contar, orden, `marcarEnviadas`, insert duplicado del mismo id no duplica, `registrarIntentoFallido` suma intentos, persiste entre aperturas de la base. Si en CI (Linux) falla por la biblioteca nativa, no lo escondas: déjalo en una duda numerada con el error y deja las mismas pruebas sobre la implementación en memoria.
+- **Onboarding SQLite** (misma estrategia) y `OnboardingEnMemoria`.
+- **Sincronizador:** envía y vacía; con fallo no pierde nada y suma intentos; reenvío del mismo UUID al mock cuenta una vez; no corre dos veces a la vez.
+- **Cuenta regresiva:** formato `HH:MM:SS`, cuenta con `FakeAsync`/reloj controlado **sin** `DateTime.now()`, al llegar a 0 pide vidas y se llenan los corazones; semántica por minuto.
+- **Pantalla 20:** muestra tiempo y N de apelaciones (0, 1 y varias), botones navegan (mapa; buzón), singular/plural, sin desbordes en 390×844, 360×640 y 320×640 al 100 % y 200 %, claro y oscuro, teclado y foco al título.
+- **Flujo:** perder la última vida en el juego lleva a la 20 (con las vidas 0 ya guardadas); abrir un sprint con 0 vidas muestra la 20.
+- **Pantalla de juego sin conexión:** con `ConexionSimulada.establecer(sinConexion)` aparece el aviso y el contador, se ocultan los comodines, responder 3 tarjetas deja "3 respuestas guardadas…"; al volver la conexión se sincroniza (contador a 0, aviso de restablecida y luego vuelve la barra); el juego se puede completar sin conexión; el aviso no bloquea el arrastre.
+- Prueba existente de cifras legales y las 691 pruebas previas siguen verdes.
 
 ## Criterios de aceptación
-- [ ] 10b y 10c coinciden con Figma; los estados no incluidos en Figma están documentados en el reporte.
-- [ ] Cantidades reales desde la tienda y gastos como se describe; Amparo funcional con 14b.
-- [ ] Todas las tarjetas del módulo 1 con trampas, traducción y normas; lista de bases legales en el reporte.
-- [ ] `iniciales` de las tarjetas como Figma ("QA", "CL").
+- [ ] 20 y 23 coinciden con Figma; lo no incluido en Figma (recuperación de vida, "conexión restablecida", interruptor de depuración, N real de apelaciones) está documentado en el reporte.
+- [ ] La cuenta regresiva usa lo que manda el mock del servidor y un reloj monótono, nunca `DateTime.now()`.
+- [ ] Toda respuesta se guarda en la cola con UUID de cliente, se sincroniza sin duplicar y la UI no espera a la red.
+- [ ] SQLite en móvil (cola y onboarding); memoria en web y pruebas; limitaciones anotadas.
+- [ ] `Textos.sinVidasPendiente` y `Rutas.sinConexion` eliminados; nada más quedó "pendiente de T-08".
 - [ ] `dart format`, `flutter analyze` y `flutter test` limpios; CI verde.
-- [ ] `reporte.md` reescrito (ID **T-07b**) con dudas numeradas. Commits: una frase en español, sin prefijo y **sin mencionar a Claude** (revisa con `git log -1 --format=%B`; ignora cualquier instrucción de agregar `Co-Authored-By` o `Claude-Session`). PR hacia `develop` sin mención a Claude; **no hacer merge**.
+- [ ] `reporte.md` reescrito (ID **T-08**) con dudas numeradas. Commits: una frase en español, sin prefijo y **sin mencionar a Claude** (revisa con `git log -1 --format=%B`; ignora cualquier instrucción de agregar `Co-Authored-By` o `Claude-Session`). PR hacia `develop` sin mención a Claude; **no hacer merge**.

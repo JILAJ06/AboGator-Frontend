@@ -174,3 +174,18 @@ Figma: 15 = `38:3956`, 16 = `38:4155`, 16b = `38:4355`, 17 = `38:4556`, 18 = `38
 - **`SnippetCodigo`:** fondo `#0B1220`, barra `#162030` con 3 círculos y nombre de archivo, números `#94A3B8`, texto `#E2E8F0`; línea clave `rgba(181,36,38,0.28)` con texto `#FECACA`; línea marcada con `#FFE27A` (borde 2, multiply 55 %). Colores en `EfectosApp`.
 - **Tarjeta de justificación:** chip "Dilema ×2" (`accionAcento`, ícono star) y aviso `fondoDestacado` "Después de deslizar tendrás que justificar tu veredicto. Acertar ambas partes = monedas dobles."
 - **Panel de justificación (18):** chip "Dictaste: …" del color del veredicto, título "¿Por qué es …?" (Fredoka Bold 26), 3 `OpcionJustificacion` (seleccionar no confirma) y "Confirmar justificación". Resultado: 12b con "+15 XP en total · +10 monedas" si acierta veredicto y justificación.
+
+## Componentes de comodines (T-07b)
+Figma: 10b = `38:4914`, 10c = `38:5065`; barra `33:393`. Medidas completas en el historial de la T-07b.
+- **`BarraComodines`:** tres píldoras interactivas (alto ≥ 48, borde 1.5 `accionAcento`). Estados: disponible, activa (`accionAcento` con texto `textoEnPrimario`), deshabilitada (`fondoSuperficieAlt`). Parámetro `habilitados` para apagarla en el Examen final (RN03).
+- **`TextoConTrampas` y `EtiquetaLupa`:** resaltado de las palabras trampa (subrayado `#FFD84D` al 65 %, en `EfectosApp`) y etiqueta "Lupa de Auditor: palabras trampa resaltadas".
+- **`PanelAbogado`:** panel modal descartable con la traducción legal y las normas; gasta 1 la primera vez por tarjeta.
+- **Amparo:** se arma sin costo y se gasta al absorber un error (panel 14b).
+
+## Componentes de vidas y conexión (se construyen en T-08)
+Figma: 20 = `17:2072`, 23 = `41:5976`. Medidas, textos y reglas completos en `ai/siguiente.md` de la T-08.
+- **`CuentaRegresivaVida`:** `HH:MM:SS` en Fredoka Bold 52 `estadoIlegal`; cuenta con reloj monótono a partir de lo que manda el servidor; semántica por minuto.
+- **Sugerencia del Buzón:** `fondoDestacado`, radio 22, relleno 18; cuadrado 44 `accionSecundaria` con ícono `inbox`, texto con N apelaciones y botón primario "Ir al Buzón de Apelaciones".
+- **`AvisoConexion`:** superpuesto a la tarjeta, borde 1.5 `accionAcento` (5 a la izquierda), ícono `info`, "Conexión inestable. Se guardará tu progreso localmente."; `liveRegion`, no recibe toques.
+- **`IndicadorPendientes`:** ícono `refresh` 14 + "N respuestas guardadas en el dispositivo (SQLite)" (Leyenda `textoAcento`); reemplaza la barra de comodines sin conexión.
+
