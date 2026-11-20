@@ -8,9 +8,11 @@ import 'espera_simulada.dart';
 /// Los 5 sprints del módulo 1 (Protección de Datos, LFPDPPP) tienen tantas
 /// tarjetas como su `numeroTarjetas` y su composición: `spr-1-3` (Aviso de
 /// privacidad) 10 (6 normales, 3 con evidencia y 1 de justificación, con la
-/// GPL-3.0 de Figma como tarjeta 5) y los demás 8 (5, 2 y 1). Hasta T-07 las
-/// de evidencia y justificación se muestran como normales. `spr-2-1` solo
-/// tiene una tarjeta de ejemplo.
+/// GPL-3.0 de Figma como tarjeta 5, el `registro_form.dart` de Figma 15 y 16b
+/// como tarjeta 6 y el dilema de contraseñas de Figma 17 y 18 como tarjeta 10)
+/// y los demás 8 (5, 2 y 1). Las tarjetas con evidencia y las de dilema no
+/// llevan micro-pregunta: su bonus es la evidencia o la justificación.
+/// `spr-2-1` solo tiene una tarjeta de ejemplo.
 class MockTarjetas implements RepositorioTarjetas {
   MockTarjetas({this.espera = esperaSimuladaPorDefecto});
 
@@ -73,17 +75,19 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Las creencias religiosas son datos sensibles: piden consentimiento expreso '
             'y por escrito y una finalidad legítima. Es un caso para el área jurídica.',
-        evidencia: 'perfil: {\n  nombre, correo,\n  religion  // nuevo\n}',
+        evidencia: EvidenciaTarjeta(
+          archivo: 'perfil.dart',
+          lineas: ['perfil: {', '  nombre, correo,', '  religion  // nuevo', '}'],
+          lineasClave: [3],
+          mensajeAcierto:
+              'Marcaste el campo de religión: es un dato sensible. Ahora regresa a la tarjeta y '
+              'dicta tu veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(velocidad: 5, riesgoLegal: 20),
-        microPregunta: MicroPregunta(
-          enunciado: '¿por qué hay que escalarlo?',
-          opciones: [
-            'La religión es un dato sensible y pide consentimiento expreso',
-            'Porque el perfil ya tiene demasiados campos',
-          ],
-          indiceCorrecto: 0,
-        ),
       ),
       Tarjeta(
         id: 'tar-datos-04',
@@ -115,7 +119,17 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Exponer datos personales en un panel público incumple el deber de '
             'seguridad y de confidencialidad.',
-        evidencia: 'log.info("Login fallido: \${u.nombre} \${u.correo}");\n// panel: público',
+        evidencia: EvidenciaTarjeta(
+          archivo: 'sesion.dart',
+          lineas: [r'log.info("Login fallido: ${u.nombre} ${u.correo}");', '// panel: público'],
+          lineasClave: [1, 2],
+          mensajeAcierto:
+              'Marcaste el registro que expone el nombre y el correo en un panel público. Ahora '
+              'regresa a la tarjeta y dicta tu veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(reputacion: -10, riesgoLegal: 20),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
@@ -179,6 +193,15 @@ class MockTarjetas implements RepositorioTarjetas {
             'contrato.',
         impactoAcierto: ImpactoTarjeta(reputacion: 10, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(presupuesto: 5, riesgoLegal: 25),
+        justificacion: Justificacion(
+          opciones: [
+            'Porque los expedientes son de otra empresa y no los podemos usar.',
+            'Son datos de salud (sensibles) que llegan por una transferencia: jurídico debe revisar el '
+                'consentimiento y el contrato.',
+            'Porque los modelos de IA no pueden usar datos reales.',
+          ],
+          indiceCorrecto: 1,
+        ),
       ),
     ],
     'spr-1-2': [
@@ -220,9 +243,22 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Los datos de salud son sensibles: sin consentimiento expreso no se pueden '
             'usar.',
-        evidencia:
-            'if (perfil.salud != null) {\n  recomendar(perfil.salud);\n}\n'
+        evidencia: EvidenciaTarjeta(
+          archivo: 'rutinas.dart',
+          lineas: [
+            'if (perfil.salud != null) {',
+            '  recomendar(perfil.salud);',
+            '}',
             '// consentimientoSalud: false',
+          ],
+          lineasClave: [1, 2],
+          mensajeAcierto:
+              'Marcaste el uso de los datos de salud sin consentimiento. Ahora regresa a la tarjeta '
+              'y dicta tu veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(velocidad: 5, riesgoLegal: 25),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
@@ -299,19 +335,24 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'El titular puede revocar su consentimiento en cualquier momento; desde '
             'entonces ya no se pueden usar sus datos para esa finalidad.',
-        evidencia: 'usuario: luis@correo.mx\npromociones: revocado (2 de marzo)\nboletin: activo',
+        evidencia: EvidenciaTarjeta(
+          archivo: 'suscripciones.yaml',
+          lineas: [
+            'usuario: luis@correo.mx',
+            'promociones: revocado (2 de marzo)',
+            'boletin: activo',
+          ],
+          lineasClave: [3],
+          mensajeAcierto:
+              'Marcaste el boletín que sigue activo tras la revocación. Ahora regresa a la tarjeta '
+              'y dicta tu veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(reputacion: -10, riesgoLegal: 15),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
-        microPregunta: MicroPregunta(
-          enunciado: '¿por qué es ilegal?',
-          opciones: [
-            'El consentimiento se puede revocar en cualquier momento',
-            'Porque los boletines están prohibidos',
-            'Porque el correo está mal escrito',
-          ],
-          indiceCorrecto: 0,
-        ),
       ),
       Tarjeta(
         id: 'tar-consen-06',
@@ -346,6 +387,14 @@ class MockTarjetas implements RepositorioTarjetas {
         impactoAcierto: ImpactoTarjeta(reputacion: 10, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(reputacion: -5, riesgoLegal: 20),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
+        justificacion: Justificacion(
+          opciones: [
+            'Se atiende la cancelación y se bloquean los datos que la ley fiscal obliga a conservar.',
+            'Porque las facturas valen más que la privacidad del usuario.',
+            'Porque los datos de clientes nunca se pueden borrar.',
+          ],
+          indiceCorrecto: 0,
+        ),
       ),
     ],
     'spr-1-4': [
@@ -409,8 +458,22 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Las solicitudes ARCO deben responderse dentro del plazo que marca la '
             'ley; dejarla sin respuesta incumple el derecho del titular.',
-        evidencia:
-            'Solicitud de acceso\nRecibida: hace semanas\nRespuesta: —\nPlazo legal: vencido',
+        evidencia: EvidenciaTarjeta(
+          archivo: 'solicitudes_arco.txt',
+          lineas: [
+            'Solicitud de acceso',
+            'Recibida: hace semanas',
+            'Respuesta: —',
+            'Plazo legal: vencido',
+          ],
+          lineasClave: [3, 4],
+          mensajeAcierto:
+              'Marcaste la solicitud sin respuesta con el plazo vencido. Ahora regresa a la tarjeta '
+              'y dicta tu veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(velocidad: 10, riesgoLegal: 20),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
@@ -462,18 +525,25 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Cancelar implica bloquear los datos y después suprimirlos. Ocultarlos y '
             'guardarlos sin límite no cumple el derecho de cancelación.',
-        evidencia: 'cancelarCuenta(id) {\n  perfiles.ocultar(id);\n  // los datos se quedan\n}',
+        evidencia: EvidenciaTarjeta(
+          archivo: 'cuentas.dart',
+          lineas: [
+            'cancelarCuenta(id) {',
+            '  perfiles.ocultar(id);',
+            '  // los datos se quedan',
+            '}',
+          ],
+          lineasClave: [2, 3],
+          mensajeAcierto:
+              'Marcaste que solo se oculta el perfil y los datos se quedan. Ahora regresa a la '
+              'tarjeta y dicta tu veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(velocidad: 5, riesgoLegal: 20),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
-        microPregunta: MicroPregunta(
-          enunciado: '¿por qué es ilegal?',
-          opciones: [
-            'Cancelar es bloquear y luego suprimir, no solo ocultar',
-            'Porque ocultar perfiles es lento',
-          ],
-          indiceCorrecto: 0,
-        ),
       ),
       Tarjeta(
         id: 'tar-derechos-07',
@@ -507,6 +577,15 @@ class MockTarjetas implements RepositorioTarjetas {
             'documento es válido es tarea del área jurídica.',
         impactoAcierto: ImpactoTarjeta(reputacion: 10, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(reputacion: -10, riesgoLegal: 25),
+        justificacion: Justificacion(
+          opciones: [
+            'Porque solo el titular puede pedir sus datos, nunca otra persona.',
+            'Porque los abogados no pueden hacer solicitudes de acceso.',
+            'Un representante debe acreditar su representación y validar el documento es tarea de '
+                'jurídico.',
+          ],
+          indiceCorrecto: 2,
+        ),
       ),
     ],
     'spr-1-5': [
@@ -563,23 +642,24 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Se puede enviar si agrega qué pasó, qué datos se afectaron, qué puede '
             'hacer el usuario y dónde pedir más información.',
-        evidencia: 'Asunto: Aviso\n\nHubo un incidente.\nSaludos, el equipo.',
+        evidencia: EvidenciaTarjeta(
+          archivo: 'aviso_incidente.txt',
+          lineas: ['Asunto: Aviso', '', 'Hubo un incidente.', 'Saludos, el equipo.'],
+          lineasClave: [3],
+          mensajeAcierto:
+              'Marcaste el aviso que no dice qué pasó ni qué puede hacer el usuario. Ahora regresa a '
+              'la tarjeta y dicta tu veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
         impactoAcierto: ImpactoTarjeta(reputacion: 10, riesgoLegal: -5),
         impactoFallo: ImpactoTarjeta(reputacion: -10, riesgoLegal: 15),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -5),
-        microPregunta: MicroPregunta(
-          enunciado: '¿qué le falta al aviso?',
-          opciones: [
-            'Qué datos se afectaron y qué puede hacer el usuario',
-            'Un logo más grande',
-            'Una promoción para compensar',
-          ],
-          indiceCorrecto: 0,
-        ),
       ),
       Tarjeta(
         id: 'tar-brecha-04',
-        tipo: TipoTarjeta.normal,
+        tipo: TipoTarjeta.evidencia,
         etiquetaCaso: 'CASO 4 · CONTRASEÑAS',
         personaje: 'Dev Backend',
         rol: 'Equipo de Backend',
@@ -590,13 +670,29 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'El responsable debe aplicar medidas de seguridad técnicas adecuadas. '
             'Guardar contraseñas sin cifrar deja expuestos a los usuarios.',
+        evidencia: EvidenciaTarjeta(
+          archivo: 'usuarios.dart',
+          lineas: [
+            'usuarios.guardar({',
+            '  correo: u.correo,',
+            '  contrasena: u.contrasena, // texto plano',
+            '});',
+          ],
+          lineasClave: [3],
+          mensajeAcierto:
+              'Marcaste la contraseña guardada en texto plano. Ahora regresa a la tarjeta y '
+              'dicta tu veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
         impactoAcierto: ImpactoTarjeta(velocidad: -5, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(velocidad: 10, riesgoLegal: 20),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
       ),
       Tarjeta(
         id: 'tar-brecha-05',
-        tipo: TipoTarjeta.evidencia,
+        tipo: TipoTarjeta.normal,
         etiquetaCaso: 'CASO 5 · BITÁCORA',
         personaje: 'QA',
         rol: 'Equipo de Calidad',
@@ -607,7 +703,6 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Documentar las vulneraciones y las medidas tomadas ayuda a demostrar el '
             'cumplimiento y a evitar que se repitan.',
-        evidencia: 'bitacora.agregar({\n  fecha, datosAfectados,\n  causa, acciones\n});',
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -5),
         impactoFallo: ImpactoTarjeta(reputacion: -5, riesgoLegal: 10),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
@@ -668,6 +763,15 @@ class MockTarjetas implements RepositorioTarjetas {
             'llevarse al área jurídica y a las autoridades.',
         impactoAcierto: ImpactoTarjeta(reputacion: 10, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(presupuesto: -20, riesgoLegal: 25),
+        justificacion: Justificacion(
+          opciones: [
+            'Pagar un rescate tiene riesgos legales y de seguridad: lo deciden jurídico y las '
+                'autoridades.',
+            'Porque el atacante podría pedir más dinero.',
+            'Porque los datos robados ya no son personales.',
+          ],
+          indiceCorrecto: 0,
+        ),
       ),
     ],
     'spr-1-3': [
@@ -729,19 +833,20 @@ class MockTarjetas implements RepositorioTarjetas {
         explicacion:
             'Usar los datos para una finalidad que no está en el aviso incumple el '
             'principio de finalidad.',
-        evidencia: 'onRegistro(u) {\n  crearCuenta(u);\n  listaPromos.agregar(u.correo);\n}',
+        evidencia: EvidenciaTarjeta(
+          archivo: 'registro.dart',
+          lineas: ['onRegistro(u) {', '  crearCuenta(u);', '  listaPromos.agregar(u.correo);', '}'],
+          lineasClave: [3],
+          mensajeAcierto:
+              'Marcaste el envío del correo a promociones, una finalidad que no está en el aviso. '
+              'Ahora regresa a la tarjeta y dicta tu veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(reputacion: -5, riesgoLegal: 20),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
-        microPregunta: MicroPregunta(
-          enunciado: '¿por qué es ilegal?',
-          opciones: [
-            'Usa el correo para una finalidad que no está en el aviso',
-            'Porque las listas de correo son ilegales',
-            'Porque el código no está documentado',
-          ],
-          indiceCorrecto: 0,
-        ),
       ),
       Tarjeta(
         id: 'tar-aviso-04',
@@ -774,18 +879,20 @@ class MockTarjetas implements RepositorioTarjetas {
             'La licencia GPL-3.0 es copyleft: si la integras, todo el producto derivado '
             'debe liberarse bajo la misma licencia. Responder bien el porqué demuestra que '
             'no adivinaste.',
-        evidencia: 'dependencies:\n  pdf_engine: ^2.1.0  # Licencia: GPL-3.0',
+        evidencia: EvidenciaTarjeta(
+          archivo: 'pubspec.yaml',
+          lineas: ['dependencies:', '  pdf_engine: ^2.1.0  # Licencia: GPL-3.0'],
+          lineasClave: [2],
+          mensajeAcierto:
+              'Marcaste la dependencia con licencia GPL-3.0. Ahora regresa a la tarjeta y dicta tu '
+              'veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(velocidad: 10, riesgoLegal: 25),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
-        microPregunta: MicroPregunta(
-          enunciado: '¿por qué es ilegal?',
-          opciones: [
-            'La GPL-3.0 obliga a liberar el código derivado',
-            'Porque el código de GitHub siempre es privado',
-          ],
-          indiceCorrecto: 0,
-        ),
         explicacionFallo:
             'Usar código GPL-3.0 dentro de software propietario sin liberar el código '
             'fuente infringe la licencia y la Ley Federal del Derecho de Autor. Busca una '
@@ -796,20 +903,40 @@ class MockTarjetas implements RepositorioTarjetas {
             'equipo.',
       ),
       Tarjeta(
-        id: 'tar-aviso-06',
-        tipo: TipoTarjeta.normal,
-        etiquetaCaso: 'CASO 6 · MENORES DE EDAD',
-        personaje: 'Dev Junior',
-        rol: 'Equipo de Backend',
+        id: 'tar-registro-01',
+        tipo: TipoTarjeta.evidencia,
+        etiquetaCaso: 'CASO 6 · PROTECCIÓN DE DATOS',
+        personaje: 'QA Tester',
+        rol: 'Control de calidad',
         texto:
-            'Detectamos que algunos usuarios tienen 15 años. ¿Seguimos registrándolos '
-            'igual que a los adultos?',
-        respuestaCorrecta: Veredicto.escalar,
+            'Revisé el formulario de registro antes del lanzamiento. Ya cumple con el aviso '
+            'de privacidad, ¿lo publicamos así?',
+        respuestaCorrecta: Veredicto.ilegal,
         explicacion:
-            'El tratamiento de datos de menores necesita el consentimiento de quien '
-            'ejerce la patria potestad; conviene escalarlo.',
-        impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -5),
-        impactoFallo: ImpactoTarjeta(reputacion: -5, riesgoLegal: 20),
+            'El consentimiento debe ser libre e informado: una casilla pre-marcada no lo es, y '
+            'el formulario no enlaza al aviso de privacidad.',
+        evidencia: EvidenciaTarjeta(
+          archivo: 'registro_form.dart',
+          lineas: [
+            'TextField(label: "Correo"),',
+            'TextField(label: "CURP"),',
+            'TextField(label: "Contraseña"),',
+            'Checkbox(value: true, // pre-marcado',
+            '  label: "Acepto compartir mis datos"),',
+            '// sin enlace al aviso de privacidad',
+            'ElevatedButton("Registrarme")',
+          ],
+          lineasClave: [4, 5, 6],
+          mensajeAcierto:
+              'Marcaste la casilla pre-marcada y el aviso de privacidad faltante. Ahora regresa a la '
+              'tarjeta y dicta tu veredicto.',
+          mensajeFallo:
+              'Esa línea no es la que viola la ley. Ahora regresa a la tarjeta y dicta '
+              'tu veredicto.',
+        ),
+        impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
+        impactoFallo: ImpactoTarjeta(velocidad: 10, riesgoLegal: 20),
+        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
       ),
       Tarjeta(
         id: 'tar-aviso-07',
@@ -829,20 +956,20 @@ class MockTarjetas implements RepositorioTarjetas {
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
       ),
       Tarjeta(
-        id: 'tar-aviso-08',
-        tipo: TipoTarjeta.evidencia,
-        etiquetaCaso: 'CASO 8 · COOKIES',
-        personaje: 'Dev Frontend',
-        rol: 'Equipo de Web',
+        id: 'tar-aviso-06',
+        tipo: TipoTarjeta.normal,
+        etiquetaCaso: 'CASO 8 · MENORES DE EDAD',
+        personaje: 'Dev Junior',
+        rol: 'Equipo de Backend',
         texto:
-            'La landing carga un píxel de anuncios en cuanto abre. ¿Podemos dejarlo '
-            'si lo mencionamos en el aviso?',
-        respuestaCorrecta: Veredicto.condicional,
-        explicacion: 'Es válido si el aviso lo informa y el usuario puede deshabilitarlo.',
-        evidencia: '<script src="https://anuncios.ejemplo/pixel.js"></script>',
+            'Detectamos que algunos usuarios tienen 15 años. ¿Seguimos registrándolos '
+            'igual que a los adultos?',
+        respuestaCorrecta: Veredicto.escalar,
+        explicacion:
+            'El tratamiento de datos de menores necesita el consentimiento de quien '
+            'ejerce la patria potestad; conviene escalarlo.',
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -5),
-        impactoFallo: ImpactoTarjeta(reputacion: -5, riesgoLegal: 15),
-        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -5),
+        impactoFallo: ImpactoTarjeta(reputacion: -5, riesgoLegal: 20),
       ),
       Tarjeta(
         id: 'tar-aviso-09',
@@ -870,20 +997,30 @@ class MockTarjetas implements RepositorioTarjetas {
         ),
       ),
       Tarjeta(
-        id: 'tar-aviso-10',
+        id: 'tar-contrasenas-01',
         tipo: TipoTarjeta.justificacion,
         etiquetaCaso: 'CASO 10 · DILEMA CLAVE',
-        personaje: 'CEO',
-        rol: 'Dirección',
+        personaje: 'Cliente',
+        rol: 'Inversionista ángel',
         texto:
-            'Un inversionista pide la base de usuarios para "validar tracción" '
-            'antes de cerrar la ronda. ¿Se la compartimos?',
-        respuestaCorrecta: Veredicto.escalar,
+            'El cliente nos pide guardar las contraseñas de los usuarios en texto plano "para '
+            'soporte". ¿Aceptamos?',
+        respuestaCorrecta: Veredicto.ilegal,
         explicacion:
-            'Compartir la base con un tercero es una transferencia que requiere '
-            'consentimiento; el área jurídica debe revisarlo.',
+            'Las contraseñas son datos personales y el responsable debe protegerlas con medidas '
+            'de seguridad: se guardan con hash, nunca en texto plano, aunque lo pida el cliente.',
         impactoAcierto: ImpactoTarjeta(reputacion: 10, riesgoLegal: -10),
-        impactoFallo: ImpactoTarjeta(presupuesto: 5, riesgoLegal: 25),
+        impactoFallo: ImpactoTarjeta(velocidad: 5, riesgoLegal: 25),
+        impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
+        justificacion: Justificacion(
+          opciones: [
+            'Las contraseñas son datos personales y deben guardarse con hash (bcrypt), nunca en '
+                'texto plano.',
+            'Porque el cliente no firmó un contrato de confidencialidad.',
+            'Solo sería ilegal si ocurre una filtración de datos.',
+          ],
+          indiceCorrecto: 0,
+        ),
       ),
     ],
     'spr-2-1': [

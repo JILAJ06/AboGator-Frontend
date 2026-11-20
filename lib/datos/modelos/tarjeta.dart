@@ -69,6 +69,43 @@ class MicroPregunta {
   final int indiceCorrecto;
 }
 
+/// Fragmento de código o registro que se inspecciona en una tarjeta con
+/// evidencia (visor 16 y 16b).
+class EvidenciaTarjeta {
+  const EvidenciaTarjeta({
+    required this.archivo,
+    required this.lineas,
+    required this.lineasClave,
+    required this.mensajeAcierto,
+    required this.mensajeFallo,
+  });
+
+  /// Nombre que se ve en la barra del snippet, por ejemplo "registro_form.dart".
+  final String archivo;
+
+  /// Texto de cada línea, sin saltos de línea.
+  final List<String> lineas;
+
+  /// Números de las líneas que violan la ley (empiezan en 1).
+  final List<int> lineasClave;
+
+  /// Texto de 16b cuando marca una línea clave.
+  final String mensajeAcierto;
+
+  /// Texto cuando marca una línea que no es la clave.
+  final String mensajeFallo;
+}
+
+/// Justificación que se elige tras dictar el veredicto en una tarjeta de
+/// dilema (panel 18). Las opciones están escritas para el veredicto correcto.
+class Justificacion {
+  const Justificacion({required this.opciones, required this.indiceCorrecto});
+
+  /// 3 opciones.
+  final List<String> opciones;
+  final int indiceCorrecto;
+}
+
 /// Caso práctico que el usuario lee y decide.
 class Tarjeta {
   const Tarjeta({
@@ -85,6 +122,7 @@ class Tarjeta {
     this.impactoFallo = const ImpactoTarjeta(),
     this.impactoParcial = const ImpactoTarjeta(),
     this.microPregunta,
+    this.justificacion,
     this.explicacionFallo,
     this.explicacionParcial,
   });
@@ -118,9 +156,13 @@ class Tarjeta {
   final ImpactoTarjeta impactoFallo;
   final ImpactoTarjeta impactoParcial;
 
-  /// Pregunta de bonus tras un acierto (opcional).
+  /// Pregunta de bonus tras un acierto (opcional; no la llevan las tarjetas
+  /// con evidencia ni las de dilema, que tienen su propio bonus).
   final MicroPregunta? microPregunta;
 
-  /// Fragmento de código o cláusula a inspeccionar (solo en tarjetas con evidencia).
-  final String? evidencia;
+  /// Fragmento a inspeccionar (solo en tarjetas con evidencia).
+  final EvidenciaTarjeta? evidencia;
+
+  /// Justificación del veredicto (solo en tarjetas de dilema).
+  final Justificacion? justificacion;
 }

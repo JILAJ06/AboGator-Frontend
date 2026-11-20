@@ -24,16 +24,18 @@ class ResultadoVeredicto {
   final bool pierdeVida;
   final ImpactoTarjeta impacto;
 
-  /// La micro-pregunta se respondió bien (+5 XP).
+  /// Bonus ganado (+5 XP): micro-pregunta bien respondida, evidencia bien
+  /// marcada o justificación correcta (esta además duplica las monedas).
   final bool bonus;
 
   /// Fallo (con o sin Amparo): la tarjeta va al Buzón de Apelaciones (T-09).
   bool get esFallo => tipo == TipoVeredicto.incorrecto || tipo == TipoVeredicto.amparo;
 
-  ResultadoVeredicto conBonus() => ResultadoVeredicto(
+  /// Suma el bonus: +5 XP y, con [monedasDobles], el doble de monedas.
+  ResultadoVeredicto conBonus({bool monedasDobles = false}) => ResultadoVeredicto(
     tipo: tipo,
     xp: xp + LogicaVeredicto.xpBonus,
-    monedas: monedas,
+    monedas: monedasDobles ? monedas * 2 : monedas,
     pierdeVida: pierdeVida,
     impacto: impacto,
     bonus: true,
@@ -116,6 +118,37 @@ abstract final class LogicaVeredicto {
       pierdeVida: true,
       impacto: tarjeta.impactoFallo,
     );
+  }
+
+  /// Si las [lineas] marcadas en la evidencia incluyen alguna línea clave.
+  static bool aciertaEvidencia(EvidenciaTarjeta evidencia, Iterable<int> lineas) =>
+      lineas.any(evidencia.lineasClave.contains);
+
+  /// Bonus de evidencia: la tarjeta es de evidencia, la línea clave se marcó
+  /// ([evidenciaCorrecta] es `true`; `null` si no se marcó) y el veredicto es
+  /// correcto. Solo da +5 XP: no cambia vidas, indicadores ni estrellas.
+  static bool bonusEvidencia({
+    required Tarjeta tarjeta,
+    required bool? evidenciaCorrecta,
+    required TipoVeredicto tipo,
+  }) =>
+      tarjeta.tipo == TipoTarjeta.evidencia &&
+      evidenciaCorrecta == true &&
+      tipo == TipoVeredicto.correcto;
+
+  /// Bonus de justificación: la tarjeta es de dilema, el veredicto es correcto
+  /// y la [opcion] elegida es la correcta. Da +5 XP y monedas dobles. Con el
+  /// veredicto equivocado la justificación no cuenta.
+  static bool bonusJustificacion({
+    required Tarjeta tarjeta,
+    required int? opcion,
+    required TipoVeredicto tipo,
+  }) {
+    final justificacion = tarjeta.justificacion;
+    return tarjeta.tipo == TipoTarjeta.justificacion &&
+        justificacion != null &&
+        opcion == justificacion.indiceCorrecto &&
+        tipo == TipoVeredicto.correcto;
   }
 
   /// Si la respuesta a la micro-pregunta es la correcta.

@@ -12,6 +12,8 @@ import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/indicadores_startup.dart';
 import '../../componentes/mensaje_pantalla.dart';
+import '../../componentes/panel_evidencia.dart';
+import '../../componentes/panel_justificacion.dart';
 import '../../componentes/panel_veredicto.dart';
 import '../../componentes/tarjeta_caso.dart';
 import '../../componentes/tinte_veredicto.dart';
@@ -84,43 +86,114 @@ class _Juego extends ConsumerStatefulWidget {
 class _JuegoState extends ConsumerState<_Juego> {
   final _mazo = GlobalKey<MazoSwipeState>();
   final _arrastre = ValueNotifier(const ArrastreVisible());
+  final _focoEvidencia = FocusNode(debugLabel: 'botón de evidencia');
+
+  /// Hay un panel abierto (visor, justificación o veredicto).
+  bool _panelAbierto = false;
 
   @override
   void dispose() {
     _arrastre.dispose();
+    _focoEvidencia.dispose();
     super.dispose();
   }
 
   JuegoNotifier get _juego => ref.read(juegoProvider(widget.sprintId).notifier);
 
-  /// Tras el vuelo de la tarjeta: califica, abre el panel (modal sin
-  /// descarte) y, al cerrarlo, resuelve qué sigue.
-  Future<void> _alConfirmar(Tarjeta tarjeta, Veredicto veredicto) async {
-    final resultado = _juego.responder(tarjeta, veredicto);
-    _vibrar(resultado.tipo);
+  /// Muestra un panel modal con el velo al 40 % y la subida de 280 ms (sin
+  /// animación con "reducir animaciones"). Sin [descartable] no se cierra con
+  /// atrás, Esc ni tocando fuera.
+  Future<T?> _mostrarPanel<T>({
+    required bool descartable,
+    required Widget Function(BuildContext contexto) constructor,
+  }) async {
     final sinAnimaciones = MediaQuery.disableAnimationsOf(context);
-    await showModalBottomSheet<void>(
-      context: context,
-      isDismissible: false,
-      enableDrag: false,
-      isScrollControlled: true,
-      backgroundColor: const Color(0x00000000),
-      elevation: 0,
-      barrierColor: EfectosApp.colorVelo,
-      sheetAnimationStyle: sinAnimaciones
-          ? AnimationStyle.noAnimation
-          : const AnimationStyle(
-              duration: EfectosApp.duracionPanel,
-              reverseDuration: EfectosApp.duracionPanel,
-              curve: Curves.easeOut,
+    _panelAbierto = true;
+    try {
+      return await showModalBottomSheet<T>(
+        context: context,
+        isDismissible: descartable,
+        enableDrag: false,
+        isScrollControlled: true,
+        backgroundColor: const Color(0x00000000),
+        elevation: 0,
+        barrierColor: EfectosApp.colorVelo,
+        sheetAnimationStyle: sinAnimaciones
+            ? AnimationStyle.noAnimation
+            : const AnimationStyle(
+                duration: EfectosApp.duracionPanel,
+                reverseDuration: EfectosApp.duracionPanel,
+                curve: Curves.easeOut,
+              ),
+        builder: (contexto) => descartable
+            ? constructor(contexto)
+            : PopScope(canPop: false, child: constructor(contexto)),
+      );
+    } finally {
+      _panelAbierto = false;
+    }
+  }
+
+  /// Visor de evidencia (16 y 16b): se cierra con "Volver y decidir", atrás,
+  /// Esc o tocando fuera (cerrar sin marcar equivale a no marcar nada). Al
+  /// cerrarse, el foco vuelve al botón de evidencia.
+  Future<void> _abrirEvidencia(Tarjeta tarjeta) async {
+    final evidencia = tarjeta.evidencia;
+    if (evidencia == null || _panelAbierto) return;
+    final alto = MediaQuery.sizeOf(context).height;
+    await _mostrarPanel<void>(
+      descartable: true,
+      constructor: (contexto) => Consumer(
+        builder: (contexto, ref, _) {
+          final marcadas = ref.watch(
+            juegoProvider(widget.sprintId).select((e) => e.lineasMarcadas[tarjeta.id]),
+          );
+          return ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: alto * 0.92),
+            child: PanelEvidencia(
+              archivo: evidencia.archivo,
+              lineas: evidencia.lineas,
+              lineasClave: evidencia.lineasClave,
+              mensajeAcierto: evidencia.mensajeAcierto,
+              mensajeFallo: evidencia.mensajeFallo,
+              marcadas: marcadas,
+              alMarcar: (lineas) => _juego.marcarEvidencia(tarjeta, lineas),
+              alVolver: () => Navigator.of(contexto).pop(),
             ),
-      builder: (contexto) => PopScope(
-        canPop: false,
-        child: _PanelDelJuego(
-          sprintId: widget.sprintId,
-          alCerrar: () => Navigator.of(contexto).pop(),
-        ),
+          );
+        },
       ),
+    );
+    if (mounted && _focoEvidencia.context != null) _focoEvidencia.requestFocus();
+  }
+
+  /// Tras el vuelo de la tarjeta: en un dilema pide primero la justificación
+  /// (18); luego califica, abre el panel de veredicto (modal sin descarte) y,
+  /// al cerrarlo, resuelve qué sigue.
+  Future<void> _alConfirmar(Tarjeta tarjeta, Veredicto veredicto) async {
+    int? justificacion;
+    final opciones = tarjeta.justificacion;
+    if (tarjeta.tipo == TipoTarjeta.justificacion && opciones != null) {
+      final alto = MediaQuery.sizeOf(context).height;
+      justificacion = await _mostrarPanel<int>(
+        descartable: false,
+        constructor: (contexto) => ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: alto * 0.92),
+          child: PanelJustificacion(
+            veredicto: veredicto,
+            justificacion: opciones,
+            alConfirmar: (opcion) => Navigator.of(contexto).pop(opcion),
+          ),
+        ),
+      );
+      if (!mounted) return;
+    }
+    final resultado = _juego.responder(tarjeta, veredicto, justificacion: justificacion);
+    _vibrar(resultado.tipo);
+    await _mostrarPanel<void>(
+      descartable: false,
+      constructor: (contexto) =>
+          _PanelDelJuego(sprintId: widget.sprintId, alCerrar: () => Navigator.of(contexto).pop()),
     );
     if (!mounted) return;
     final juego = _juego;
@@ -205,6 +278,9 @@ class _JuegoState extends ConsumerState<_Juego> {
     final indice = progreso.indice.clamp(0, total - 1);
     final tarjeta = datos.tarjetas[indice];
     final colorModulo = datos.modulo?.color ?? context.tokens.textoAcento;
+    final inspeccionar = tarjeta.tipo == TipoTarjeta.evidencia && tarjeta.evidencia != null
+        ? () => _abrirEvidencia(tarjeta)
+        : null;
 
     final contenido = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -236,7 +312,10 @@ class _JuegoState extends ConsumerState<_Juego> {
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight:
-                    TarjetaCaso.altoMinimoPara(MediaQuery.textScalerOf(context)) +
+                    TarjetaCaso.altoMinimoPara(
+                      MediaQuery.textScalerOf(context),
+                      tipo: tarjeta.tipo,
+                    ) +
                     MazoSwipe.altoPila,
               ),
               // Solo hijos posicionados: la zona no aporta alto intrínseco y
@@ -250,14 +329,25 @@ class _JuegoState extends ConsumerState<_Juego> {
                       claveTarjeta: tarjeta.id,
                       restantes: total - indice - 1,
                       arrastre: _arrastre,
-                      etiquetaSemantica: Textos.tarjetaSemantica(
-                        indice + 1,
-                        total,
-                        tarjeta.personaje,
-                        tarjeta.rol,
-                        tarjeta.texto,
+                      etiquetaSemantica: Textos.tarjetaConTipoSemantica(
+                        Textos.tarjetaSemantica(
+                          indice + 1,
+                          total,
+                          tarjeta.personaje,
+                          tarjeta.rol,
+                          tarjeta.texto,
+                        ),
+                        switch (tarjeta.tipo) {
+                          TipoTarjeta.normal => null,
+                          TipoTarjeta.evidencia =>
+                            progreso.evidenciaMarcada.containsKey(tarjeta.id)
+                                ? Textos.evidenciaInspeccionadaSemantica
+                                : Textos.conEvidenciaSemantica,
+                          TipoTarjeta.justificacion => Textos.dilemaSemantica,
+                        },
                       ),
                       alConfirmar: (v) => _alConfirmar(tarjeta, v),
+                      alInspeccionar: inspeccionar,
                       tarjeta: TarjetaCaso(
                         etiquetaCaso: tarjeta.etiquetaCaso,
                         colorModulo: colorModulo,
@@ -265,6 +355,9 @@ class _JuegoState extends ConsumerState<_Juego> {
                         personaje: tarjeta.personaje,
                         rol: tarjeta.rol,
                         texto: tarjeta.texto,
+                        tipo: tarjeta.tipo,
+                        alInspeccionar: inspeccionar,
+                        nodoFocoEvidencia: _focoEvidencia,
                       ),
                     ),
                   ),

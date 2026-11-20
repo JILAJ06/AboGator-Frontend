@@ -117,6 +117,9 @@ class RespuestaJuego {
 }
 
 /// Fase del panel de veredicto abierto.
+///
+/// La justificación de los dilemas (18) no es una fase: se elige en su propio
+/// panel **antes** de calificar, y este panel se abre ya con el resultado.
 enum FasePanel {
   /// Acierto con micro-pregunta sin responder (12).
   microPregunta,
@@ -125,7 +128,8 @@ enum FasePanel {
   /// saltada o fallada, 12c, 14 y 14b.
   explicacion,
 
-  /// Micro-pregunta bien respondida (12b).
+  /// Bonus ganado (12b): micro-pregunta bien respondida, evidencia bien
+  /// marcada o justificación correcta.
   bonus,
 }
 
@@ -190,6 +194,8 @@ class EstadoJuego {
     this.amparoActivo = false,
     this.fin,
     this.guardado = false,
+    this.evidenciaMarcada = const {},
+    this.lineasMarcadas = const {},
   });
 
   /// Tarjeta actual. Avanza al **cerrar** el panel, no al lanzar la tarjeta.
@@ -220,6 +226,13 @@ class EstadoJuego {
   /// Si el resultado ya se guardó en los repositorios.
   final bool guardado;
 
+  /// Evidencias marcadas: id de la tarjeta → si incluyó una línea clave. Se
+  /// marca una sola vez por tarjeta.
+  final Map<String, bool> evidenciaMarcada;
+
+  /// Líneas que marcó el jugador en cada evidencia (para volver a mostrarlas).
+  final Map<String, List<int>> lineasMarcadas;
+
   /// Tarjetas correctas (con o sin bonus).
   int get aciertos => LogicaFinSprint.aciertos(resultados);
 
@@ -239,6 +252,8 @@ class EstadoJuego {
     bool? amparoActivo,
     DestinoVeredicto? Function()? fin,
     bool? guardado,
+    Map<String, bool>? evidenciaMarcada,
+    Map<String, List<int>>? lineasMarcadas,
   }) => EstadoJuego(
     indice: indice ?? this.indice,
     totalTarjetas: totalTarjetas,
@@ -254,6 +269,8 @@ class EstadoJuego {
     amparoActivo: amparoActivo ?? this.amparoActivo,
     fin: fin != null ? fin() : this.fin,
     guardado: guardado ?? this.guardado,
+    evidenciaMarcada: evidenciaMarcada ?? this.evidenciaMarcada,
+    lineasMarcadas: lineasMarcadas ?? this.lineasMarcadas,
   );
 }
 
@@ -284,15 +301,48 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
   /// Activa o desactiva el Amparo para el siguiente error (T-07 lo usará).
   void establecerAmparo({required bool activo}) => state = state.copiar(amparoActivo: activo);
 
+  /// Marca las [lineas] de la evidencia de [tarjeta] y dice si incluyen una
+  /// línea clave. Solo se marca una vez: si ya estaba marcada, devuelve el
+  /// resultado anterior sin cambiarlo. `null` si la tarjeta no tiene evidencia
+  /// o no se marcó nada.
+  bool? marcarEvidencia(Tarjeta tarjeta, List<int> lineas) {
+    final evidencia = tarjeta.evidencia;
+    final previo = state.evidenciaMarcada[tarjeta.id];
+    if (previo != null) return previo;
+    if (evidencia == null || lineas.isEmpty) return null;
+    final acierta = LogicaVeredicto.aciertaEvidencia(evidencia, lineas);
+    state = state.copiar(
+      evidenciaMarcada: {...state.evidenciaMarcada, tarjeta.id: acierta},
+      lineasMarcadas: {...state.lineasMarcadas, tarjeta.id: List.unmodifiable(lineas)},
+    );
+    return acierta;
+  }
+
   /// Califica la respuesta, aplica sus efectos y abre el panel. No avanza la
   /// tarjeta: eso pasa al cerrar el panel.
-  ResultadoVeredicto responder(Tarjeta tarjeta, Veredicto veredicto) {
-    final resultado = LogicaVeredicto.calificar(
+  ///
+  /// [justificacion] es la opción elegida en el panel 18 (solo en dilemas).
+  /// El bonus de evidencia o de justificación abre el panel en Bonus (12b).
+  ResultadoVeredicto responder(Tarjeta tarjeta, Veredicto veredicto, {int? justificacion}) {
+    final calificado = LogicaVeredicto.calificar(
       tarjeta,
       veredicto,
       amparoActivo: state.amparoActivo,
     );
-    final conPregunta = resultado.tipo == TipoVeredicto.correcto && tarjeta.microPregunta != null;
+    final bonusEvidencia = LogicaVeredicto.bonusEvidencia(
+      tarjeta: tarjeta,
+      evidenciaCorrecta: state.evidenciaMarcada[tarjeta.id],
+      tipo: calificado.tipo,
+    );
+    final bonusJustificacion = LogicaVeredicto.bonusJustificacion(
+      tarjeta: tarjeta,
+      opcion: justificacion,
+      tipo: calificado.tipo,
+    );
+    final bonus = bonusEvidencia || bonusJustificacion;
+    final resultado = bonus ? calificado.conBonus(monedasDobles: bonusJustificacion) : calificado;
+    final conPregunta =
+        !bonus && resultado.tipo == TipoVeredicto.correcto && tarjeta.microPregunta != null;
     state = state.copiar(
       respuestas: [
         ...state.respuestas,
@@ -304,7 +354,7 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
       monedas: state.monedas + resultado.monedas,
       resultados: [
         ...state.resultados,
-        ResultadoTarjeta(tarjetaId: tarjeta.id, tipo: resultado.tipo),
+        ResultadoTarjeta(tarjetaId: tarjeta.id, tipo: resultado.tipo, bonus: bonus),
       ],
       falladas: resultado.esFallo ? [...state.falladas, tarjeta.id] : state.falladas,
       // El Amparo se gasta al absorber un error.
@@ -312,7 +362,11 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
       panel: () => PanelPendiente(
         tarjeta: tarjeta,
         resultado: resultado,
-        fase: conPregunta ? FasePanel.microPregunta : FasePanel.explicacion,
+        fase: bonus
+            ? FasePanel.bonus
+            : conPregunta
+            ? FasePanel.microPregunta
+            : FasePanel.explicacion,
       ),
     );
     return resultado;
