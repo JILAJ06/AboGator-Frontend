@@ -5,6 +5,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/tema/tokens_color.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
+import 'estrellas_sprint.dart';
 import 'icono_app.dart';
 
 /// Los 4 estados del nodo de nivel de Figma (10:119, 10:135, 10:143, 10:150).
@@ -131,7 +132,7 @@ class NodoSprint extends StatelessWidget {
               left: 0,
               right: 0,
               top: 86,
-              child: Center(child: EstrellasSprint(estrellas: estrellas)),
+              child: Center(child: EstrellasNodo(estrellas: estrellas)),
             ),
         ],
       ),
@@ -156,8 +157,8 @@ class NodoSprint extends StatelessWidget {
 
 /// Fila de 3 estrellas de 16 con separación 2: ganadas en accion/acento y las
 /// demás en borde/default. Decorativa.
-class EstrellasSprint extends StatelessWidget {
-  const EstrellasSprint({required this.estrellas, super.key});
+class EstrellasNodo extends StatelessWidget {
+  const EstrellasNodo({required this.estrellas, super.key});
 
   final int estrellas;
 
@@ -182,33 +183,4 @@ class EstrellasSprint extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Estrella rellena con la silueta de Lucide (Figma la usa rellena; el ícono
-/// de Lucide solo tiene contorno).
-class PintorEstrella extends CustomPainter {
-  const PintorEstrella({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final e = size.width / 16;
-    final camino = Path()
-      ..moveTo(8 * e, 1.333 * e)
-      ..lineTo(10.067 * e, 5.533 * e)
-      ..lineTo(14.667 * e, 6.2 * e)
-      ..lineTo(11.333 * e, 9.467 * e)
-      ..lineTo(12.133 * e, 14 * e)
-      ..lineTo(8 * e, 11.867 * e)
-      ..lineTo(3.867 * e, 14 * e)
-      ..lineTo(4.667 * e, 9.467 * e)
-      ..lineTo(1.333 * e, 6.2 * e)
-      ..lineTo(5.933 * e, 5.533 * e)
-      ..close();
-    canvas.drawPath(camino, Paint()..color = color);
-  }
-
-  @override
-  bool shouldRepaint(PintorEstrella anterior) => anterior.color != color;
 }
