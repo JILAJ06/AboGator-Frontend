@@ -1,98 +1,141 @@
 # Reporte
-- **Tarea:** T-09b · Juicio de apelación, apelación ganada y apelación perdida (pantallas 22 y 22b)
-- **Rama:** `09b-juicio-apelacion`
-- **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
+- **Tarea:** T-10 · Tienda y Perfil y progreso (pantallas 24 y 25)
+- **Rama:** `10-tienda-perfil-ajustes`
+- **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge. Los ajustes (26) y el modo oscuro forzado quedan para la T-10b.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11. Sin dependencias nuevas.
-- **Comparé contra Figma** con el conector (solo lectura): 22 (`41:5785`) y 22b (`41:5862`).
-- **Prueba en el navegador:** compilé la app para web y recorrí el flujo completo a 390×844 (modo oscuro), con la cuenta de prueba del mock en localhost:
-  - Buzón → "Iniciar apelaciones de hoy" → "Apelación 1 de 2" con la tarjeta GPL, la etiqueta "APELACIÓN · LICENCIAS OSS" y el aviso "La fallaste hace 3 días" dentro de la tarjeta;
-  - Ilegal → "¡Apelación ganada!" con Sarko alegre, corazones, insignia, texto, Día 3 hecho y Día 7/14 pendientes, y los dos botones;
-  - "Siguiente apelación" → "Apelación 2 de 2" ("La fallaste hace 7 días") → Legal → "Apelación perdida" con Sarko triste, "No pierdes vidas", la respuesta correcta y solo "Volver al Buzón";
-  - de vuelta en el Buzón: "Hoy no tienes juicios de apelación", la de la GPL como "Día 7 · en 4 días" y la del consentimiento como "Día 7 · mañana".
-
-  La estructura, el orden y los colores coinciden con Figma.
+- **Comparé contra Figma** con el conector (solo lectura): 24 (`18:2347`) y 25 (`18:2492`).
+- **Prueba en el navegador** (web a 390×844, modo claro, cuenta de prueba del mock en localhost):
+  - Tienda: título, saldo 240, inventario, catálogo de 2×2 y la nota RN03 coinciden con Figma.
+  - Compré la Lupa: diálogo "¿Comprar Lupa de Auditor?", y después saldo 180, "Lupa ×3" y el aviso "Compraste…".
+  - Perfil: tarjeta, estadísticas, insignias (con la bloqueada) y menú coinciden con Figma.
+  - El botón de ajustes abre el marcador sin barra inferior y "Atrás" vuelve al Perfil.
+  - "Cerrar sesión" pide confirmación y lleva al inicio de sesión.
+  - En pantalla ancha el diálogo ocupaba todo el ancho; lo limité a 400.
 
 ## Qué se hizo
-1. **Datos:**
-   - Modelo nuevo `ResultadoApelacion` (`ganada`, `diaSiguiente`, `diasParaVolver`, `dominada`).
-   - `RepositorioApelaciones.resolverApelacion(id, ganada:)`. `MockApelaciones` lo resuelve con su reloj:
-     - ganar: 3 → 7 a hoy + 4 días y 7 → 14 a hoy + 7 días (medianoche UTC); el de 14 sale del Buzón;
-     - perder: se queda en su día y se abre mañana;
-     - lanza `StateError` si no existe o no se abre hoy.
-   - `RepositorioVidas.recuperarVida()`: +1 sin pasar de 5. En `MockVidas`, al llegar a 5 quita la regeneración y si no, la conserva.
-2. **Lógica (`logica_apelacion.dart`):** gana solo la respuesta correcta; etiqueta "APELACIÓN · TEMA"; frase de regreso (en N días, dominada o mañana); días de repaso hechos al ganar (≤ el día) y al perder (< el día); texto del resultado.
-3. **Sesión (`sesion_apelaciones.dart`):** `sesionApelacionesProvider` (no se descarta entre rutas) con `ids`, `indice`, `fase` (juicio/resultado), el resultado y las vidas antes y después.
-   - "Iniciar apelaciones de hoy" la empieza con todas las de hoy en el orden de la lista; una fila de hoy, con una.
-   - El enlace profundo sin sesión, o con un id fuera de ella, empieza una de una.
-   - Resolver: llama al servidor y, si ganó con menos de 5 vidas, a `recuperarVida()`. Luego pasa a la fase de resultado.
-   - Al resolver y al salir invalida el Buzón, el Inicio, el mapa, "Sin vidas" y el juego, para que contadores y vidas se actualicen.
-4. **Pantalla 22 (`pantalla_juicio.dart`):**
-   - Barra: Salir, "Apelación k de n" con su progreso y la píldora "+1 vida" (o "Vidas al máximo").
-   - `TarjetaCaso` dentro de `MazoSwipe`, con el nuevo parámetro `aviso` para "La fallaste hace N días". Se arrastra en 4 direcciones y con teclado (flechas, Enter, Esc), como en el juego.
-   - Los 4 veredictos y la nota.
-   - Sin barra inferior, indicadores ni comodines.
-   - Salir o atrás vuelven al Buzón sin resolver.
-   - Estados: sin conexión ("Necesitas conexión para apelar"), no disponible ("Esta apelación ya no está disponible"), ambos con "Volver al Buzón"; esqueleto mientras carga.
-   - Si no se guarda, aparece un SnackBar en región en vivo y la tarjeta vuelve a entrar.
-5. **22b y la perdida:**
-   - Cruce de 200 ms (sin transición con "reducir animaciones").
-   - Sarko de 184 sobre un círculo `fondoDestacado` de 230, corazones con las vidas después, insignia, título, texto, Día 3/7/14 y botones fijos ("Siguiente apelación" + fantasma "Volver al Buzón"; en la última, solo el primario "Volver al Buzón").
-   - Vibración: ligera al ganar y media al perder (no en web).
-6. **Componentes nuevos** (`piezas_apelacion.dart`): `InsigniaVida` (chica en la barra, grande en 22b), `AvisoFallo`, `PildoraRepaso` y `FilaRepaso`. `BloqueLectura` suma `nodoFoco` opcional. Todo está en la galería.
-7. **Enrutador:** la ruta hija `/buzon/:apelacionId` muestra `PantallaJuicio` y sigue exigiendo sesión. Borré el marcador `Textos.pendienteJuicio`.
+1. **Datos de la Tienda:**
+   - `ArticuloTienda.comodin` es `Comodin?` (nulo = Congelar racha).
+   - Ids estables: `lupa`, `abogado`, `amparo` y `congelar-racha`. Máximo 9 por artículo.
+   - Precios y textos de Figma: 60, 90, 120 y 100, y las cuatro descripciones. "Amparo" pasa a "Amparo / Fianza".
+   - `comprarArticulo(id)` → `ResultadoCompra`. Lanza `ExcepcionTienda` (`monedasInsuficientes`, `maximoAlcanzado`, `articuloInexistente`) sin cambiar nada.
+   - `obtenerCongeladoresRacha()`: el mock empieza en 0.
+2. **Datos del Perfil:**
+   - `ResumenPerfil`, `Insignia` (el ícono es el nombre de `IconosApp.porNombre` y `moduloId` da el color), `RepositorioPerfil` y `MockPerfil`.
+   - `repositorioPerfilProvider` está en `proveedores_repositorios.dart`.
+   - El mock toma el usuario de la autenticación (Ana si no hay nadie). Los colores de las medallas salen de los módulos del repositorio, que usan `ColoresModulo`.
+3. **Pantalla 24 Tienda:**
+   - Saldo, inventario (los tres comodines siempre, aun con ×0; Congelar racha solo con N > 0), catálogo en filas de 2 con el mismo alto y la nota RN03 al final.
+   - **Botón de precio:** deshabilitado sin saldo ("Te faltan N" debajo), en máximo (dice "Máximo") y sin conexión. Sin conexión aparece la nota "Necesitas conexión para comprar." encima del catálogo.
+   - **Compra:**
+     - diálogo de confirmación;
+     - el botón muestra carga y no acepta otro toque;
+     - vibración ligera (no en web);
+     - se refrescan Tienda, Inicio, mapa y juego, y un SnackBar en región en vivo lo anuncia.
+   - **Errores:** con saldo cambiado o en máximo se refresca y se avisa; con cualquier otro, aviso genérico sin cambios.
+   - Esqueleto mientras carga y error con "Reintentar".
+4. **Pantalla 25 Perfil:**
+   - "Mi perfil" con el botón de ajustes (48, "Accesibilidad y ajustes").
+   - Tarjeta con iniciales y "Desarrollador · Nivel 4 · 1,250 XP".
+   - 4 estadísticas en 2×2, insignias (se desplazan en horizontal si no caben) y el menú de 4 filas.
+5. **Cerrar sesión:**
+   - Confirmación; si hay respuestas guardadas en el dispositivo, el diálogo lo avisa.
+   - `repositorioAutenticacion.cerrarSesion()`, luego `sesionProvider.cerrar()`, se invalidan los proveedores con datos de la persona y se va al inicio de sesión.
+   - Si falla, SnackBar y se queda.
+   - **Proveedores invalidados** (`proveedoresDeLaPersona`):
+     - `datosInicioProvider` y `datosModuloProvider`;
+     - `datosBuzonProvider`, `datosJuicioProvider` y `sesionApelacionesProvider`;
+     - `vidasActualesProvider` y `apelacionesPendientesProvider`;
+     - `datosJuegoProvider` y `juegoProvider`;
+     - `datosTiendaProvider` y `datosPerfilProvider`.
+   - **No** se tocan la cola local (`respuestasPendientesProvider`), el onboarding visto ni la conexión.
+6. **Rutas:**
+   - `/tienda` y `/perfil` reales; ambas redirigen sin sesión, y la del Perfil cubre a sus hijas.
+   - Hijas del Perfil, sin barra inferior: `ajustes`, `notificaciones` (`Rutas.notificacionesRacha`) y `aviso-privacidad` (`Rutas.avisoPrivacidad`; no había ruta del aviso en el registro).
+   - Usan `PantallaPendiente` con textos propios y un botón "Atrás" nuevo (`conVolver`).
+   - Quité `pendienteTienda` y `pendientePerfil`.
+7. **Componentes nuevos:**
+   - `piezas_tienda.dart`: píldora de saldo, píldora de inventario, botón de precio, tarjeta de artículo y nota.
+   - `piezas_perfil.dart`: tarjeta de perfil, tarjeta de estadística, medalla, fila y menú, botón cuadrado.
+   - `dialogo_confirmacion.dart`.
+
+   Todos están en la galería. También agregué el ícono `snowflake`.
 
 ## Decisiones que no vienen de Figma
-- **Apelación perdida:** Sarko triste, corazones sin cambio, insignia neutra "No pierdes vidas", título "Apelación perdida", "Esta vez no: " + `explicacionFallo` (o `explicacion`), "La respuesta correcta era X." y "La tarjeta vuelve mañana…". Los días anteriores al actual van como hechos y los botones siguen la misma regla de la última.
-- **Con 5 vidas:**
-  - la píldora de la barra dice "Vidas al máximo" en `fondoSuperficieAlt` con corazón y `textoSecundario`;
-  - en 22b la insignia neutra dice "Vidas al máximo", sin corazón (la de la perdida tampoco lo lleva).
-- **"14 días" de Figma 22b:** Figma dice que vuelve en 14 días tras ganar el día 3. Seguí la regla del proyecto: 4 días (al día 7). Lo dejo anotado.
-- **La vida la pide el cliente:** después de `resolverApelacion` se llama a `recuperarVida()`. En T-14 debería darla el servidor dentro de la misma operación, para no poder pedirla sin ganar.
-- **Foco al resultado:** el juicio tenía el foco y `autofocus` no lo quita, así que el título lo pide de forma explícita tras el primer cuadro (sin anillo, como en 19 y 19b).
+- **Confirmación de compra** y de cierre de sesión con el mismo diálogo.
+- **Máximo 9:** el botón dice "Máximo".
+- **Sin conexión:** botones deshabilitados y nota encima del catálogo. Sin conexión manda sobre "Te faltan N".
+- **Congelar racha como artículo:**
+  - es un artículo, no un comodín;
+  - va en el inventario solo con N > 0;
+  - lleva el ícono `snowflake`, como pide la tarea (Figma usa `flame`).
+- **Destinos pendientes:** ajustes (T-10b), notificaciones y aviso de privacidad, con marcador y "Atrás".
+- **Rol neutro:** "Desarrollador", con los textos del registro (Figma dice "Desarrolladora" porque es el ejemplo de Ana).
+- **XP:** "1,250" del mock (Figma muestra 1,240 como dato de ejemplo).
+- **Divisor final del menú:** Figma repite el borde inferior en la última fila; no lo puse para no tener borde doble.
+- **Iconografía:** en Figma la llama, la estrella y el escudo de las estadísticas y medallas van rellenos; aquí son los de Lucide (contorno), como en el resto de la app. El de ajustes es `settings` (Figma muestra unos deslizadores).
+- **Precisión:** "82%" sin espacio, como Figma (la tarea lo escribe "82 %").
+- **"Amparo / Fianza"** ocupa dos líneas en la tarjeta de 165 con nuestra fuente; en Figma cabe en una. El botón sigue al pie y la fila mantiene el mismo alto.
 
 ## Accesibilidad
-- La tarjeta se lee "Apelación k de n. Personaje, rol: texto. La fallaste hace N días."
-- La píldora de la barra se lee "Si ganas, recuperas 1 vida" (o "Tienes las vidas al máximo").
-- En el resultado, el título es encabezado, tiene el foco y se anuncia como "¡Apelación ganada! +1 vida recuperada. Vidas: 2 de 5.".
-- Los corazones se leen como un bloque.
-- Cada día se lee "Día 3, completado" o "Día 7, pendiente" y lleva ícono además de color.
-- **Contraste verificado en claro y oscuro:**
-  - `textoEnPrimario` sobre `estadoIlegal` y `estadoLegal`;
+- Títulos como encabezados; "Tienda" y "Mi perfil" reciben el foco al abrir.
+- Se leen como bloques:
+  - el saldo ("Tienes 240 monedas");
+  - cada píldora de inventario ("Lupa de Auditor, 2 en inventario");
+  - cada estadística ("Racha actual: 7 días", "Certificados: 0 de 5");
+  - cada insignia ("…, obtenida" / "…, bloqueada");
+  - la tarjeta de perfil.
+- Los botones de precio se leen "Comprar … por N monedas", "…, te faltan N monedas", "…, máximo alcanzado" o "…, necesitas conexión".
+- Íconos decorativos sin etiqueta. Botones y filas ≥ 48. Lo bloqueado lleva `lock` y la palabra; lo no comprable lleva texto.
+- El orden de foco sigue el orden visual que pide la tarea.
+- **Contrastes verificados con pruebas en claro y oscuro:**
+  - `textoEnPrimario` sobre `accionPrimaria`;
   - `textoSecundario` sobre `fondoSuperficieAlt`;
-  - `textoAcento` sobre `fondoDestacado`.
+  - `estadoIlegal` sobre `fondoSuperficie`;
+  - `accionSecundaria` sobre `fondoDestacado` (iniciales);
+  - `textoPrimario` sobre `fondoDestacado` y `fondoSuperficieAlt`.
 
-  Todos ≥ 4.5:1.
-- **Sin desbordes** en 390×844, 360×640 y 320×640 al 100 % y al 200 % (juicio y resultado).
+  Todos ≥ 4.5:1. El ícono blanco sobre cada color de módulo da ≥ 3:1.
+- **Sin desbordes** en 390×844, 360×640 y 320×640 al 100 % y 200 % (Tienda y Perfil).
 
 ## Verificación
 - `dart format`: sin cambios pendientes.
 - `flutter analyze`: `No issues found!`
-- `flutter test` (840 pruebas; antes de T-09b, 800):
+- `flutter test` (893 pruebas; antes de T-10, 840):
 ```
-+840: All tests passed!
++893: All tests passed!
 ```
-- **Pruebas nuevas en `juicio_test.dart`:**
-  - mock: 3 → 7 a +4, 7 → 14 a +7, 14 sale, perder abre mañana, y los errores;
-  - `recuperarVida`;
-  - lógica;
-  - pantalla 22: claro/oscuro con solo colores del tema, recompensa con 3 y 5 vidas, aviso dentro de la tarjeta, arrastre = botón, Salir y atrás sin resolver, sin conexión, no disponible y error al guardar con reintento;
-  - 22b y perdida: con 0, 3 y 5 vidas, insignias, días, botones, foco y anuncio, contrastes y sin desbordes;
-  - flujos: Iniciar 2 → ganar → siguiente → perder → Buzón (contadores y servidor al día); desde 0 vidas; fila de una; enlace profundo sin sesión de la app.
+- **Pruebas nuevas:**
+  - **`tienda_test.dart` (28):**
+    - mock: precios, compra, Congelar racha aparte y los tres rechazos sin cambios;
+    - lógica;
+    - pantalla: claro/oscuro con medidas (165, mismo alto, hueco 12), ×0, Congelar racha, sin saldo, máximo y sin conexión;
+    - diálogo: Cancelar, Esc y tocar fuera;
+    - compra que actualiza saldo, inventario, Inicio y juego, sin doble toque, y los tres errores;
+    - esqueleto, reintento, sin sesión, contrastes y desbordes.
+  - **`perfil_test.dart` (25):**
+    - iniciales (una, dos y tres palabras, acentos, espacios), miles, rol y mock;
+    - pantalla en claro/oscuro: botón de 48, 3 divisores y filas ≥ 48;
+    - colores de medalla y desplazamiento horizontal;
+    - los 4 destinos sin barra y con "Atrás"; atrás del sistema desde ajustes;
+    - cerrar sesión: cancelar, con pendientes, éxito (sesión y apelaciones en nulo, inicio de sesión, el Perfil ya redirige) y error;
+    - sin sesión, pestañas, contrastes y desbordes.
 - **Ajustes en pruebas existentes:**
-  - los repositorios falsos implementan `resolverApelacion`;
-  - el Buzón y el enlace profundo ya abren `PantallaJuicio`;
-  - la galería cuenta las piezas nuevas.
+  - descripciones de comodines y 4 artículos;
+  - 46 íconos;
+  - las pestañas Tienda y Perfil abren sus pantallas;
+  - galería;
+  - los ayudantes `abrirJuego` y `abrirInicio` montan `MockPerfil` sin espera (y `abrirJuego` acepta `autenticacion` y `perfil`).
 
 ## Grafo
-- **Actualizados (`en curso`):** ENRUTADOR, PANT-PENDIENTE, TEXTOS, MOD, REPO-APEL, MOCK-APEL, REPO-VIDAS, MOCK-VIDAS, CODIGO-PANT-21, PANT-GALERIA, COMP-TARJETA-CASO, COMP-BLOQUE-LECTURA, TEST-GALERIA y TEST-BUZON.
-- **Nuevos:** LOGICA-APEL, SESION-APEL, CODIGO-PANT-22, COMP-PIEZAS-APEL y TEST-JUICIO.
-- PANT-22 y PANT-22b ya apuntan a `pantalla_juicio.dart`.
+- **Actualizados (`en curso`):** ENRUTADOR, RUTAS, PANT-PENDIENTE, TEMA-ICONOS, TEXTOS, MOD, REPO-TIENDA, PROV-REPO, MOCK-TIENDA, PANT-GALERIA y las pruebas TEST-GALERIA, TEST-INICIO, TEST-COMODINES, TEST-DATOS y TEST-COMP.
+- **Nuevos:** REPO-PERFIL, MOCK-PERFIL, EST-TIENDA, LOGICA-TIENDA, CODIGO-PANT-24, LOGICA-PERFIL, EST-PERFIL, CODIGO-PANT-25, COMP-PIEZAS-TIENDA, COMP-PIEZAS-PERFIL, COMP-DIALOGO-CONFIRMACION, TEST-TIENDA y TEST-PERFIL.
+- PANT-24 y PANT-25 apuntan a su código.
 - **Obsoletos:** ninguno. Agregué una línea en el registro de cambios.
 
 ## Dudas
-1. **"La fallaste hace N días":** uso N = `diaRepaso`, como pide la tarea. Si una apelación se pierde y vuelve al día siguiente, N sigue siendo el día de repaso y no los días reales desde el primer fallo. ¿El servidor mandará la fecha del fallo (T-14)?
-2. **La vida del cliente:** hoy `recuperarVida()` se pide aparte después de ganar. ¿En T-14 `resolverApelacion` devolverá ya las vidas, para quitar esa llamada?
-3. **Atrás en Android:** el botón atrás del sistema y Salir terminan la sesión y van al Buzón, aunque la apelación venga de la notificación. ¿Está bien, o desde la notificación debería volver al Inicio?
-4. **Destino tras iniciar sesión** (pendiente de T-09): con el enlace profundo sin sesión de la app, después de entrar se va al Inicio y no al juicio.
+1. **Usuario tras comprar o subir de nivel:** racha, nivel y XP salen de `Usuario`, que hoy solo se carga al iniciar sesión. ¿En T-14 el Perfil pedirá el usuario fresco al servidor (como hace el mock con `usuarioActual`)?
+2. **Saldo en el diálogo:** "Te quedarían N" se calcula con el saldo que mostró el servidor. Si cambió, el servidor rechaza la compra y la pantalla se refresca. ¿Basta así, o el diálogo debería pedir el saldo al abrirse?
+3. **Foco tras el diálogo de compra:** al cerrarlo, el foco vuelve al título de la Tienda (en web con ratón se ve su anillo). ¿Debería volver al botón de precio?
+4. **Ícono de Congelar racha:** la tarea pide `snowflake` y Figma usa `flame`. ¿Se actualiza Figma?

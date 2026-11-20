@@ -598,8 +598,86 @@ abstract final class Textos {
   static String notificacionApelacionCuerpo(String titulo, int dias) =>
       'Hace $dias días fallaste “$titulo”. Gánala y recupera 1 vida.';
   static const String notificacionApelacionPie = 'Toca para abrir el juicio de apelación';
-  static const String pendienteTienda = 'Tienda · llega en T-10';
-  static const String pendientePerfil = 'Perfil · llega en T-10';
+  static const String pendienteAjustes = 'Ajustes de accesibilidad · llega en T-10b';
+  static const String pendienteNotificacionesRacha =
+      'Notificaciones de racha · pantalla pendiente de diseño';
+  static const String pendienteAvisoPrivacidad =
+      'Aviso de privacidad · pantalla pendiente de diseño';
+
+  // ---------------------------------------------------------------------
+  // 24 Tienda
+  // ---------------------------------------------------------------------
+  static const String tiendaTitulo = 'Tienda';
+  static String saldoSemantica(int monedas) =>
+      monedas == 1 ? 'Tienes 1 moneda' : 'Tienes $monedas monedas';
+  static const String tuInventario = 'Tu inventario';
+  static const String comodinesSeccion = 'Comodines';
+  static const String inventarioCongelar = 'Congelar racha';
+  static String inventarioPildora(String nombre, int cantidad) => '$nombre ×$cantidad';
+  static String inventarioSemantica(String nombre, int cantidad) =>
+      '$nombre, $cantidad en inventario';
+  static String inventarioLista(int articulos) =>
+      articulos == 1 ? 'Inventario, 1 artículo' : 'Inventario, $articulos artículos';
+  static const String precioMaximo = 'Máximo';
+  static String teFaltan(int monedas) => 'Te faltan $monedas';
+  static String comprarSemantica(String nombre, int precio) =>
+      'Comprar $nombre por $precio monedas';
+  static String comprarFaltanSemantica(String nombre, int precio, int faltan) =>
+      'Comprar $nombre por $precio monedas, te faltan $faltan monedas';
+  static String comprarMaximoSemantica(String nombre, int precio) =>
+      'Comprar $nombre por $precio monedas, máximo alcanzado';
+  static String comprarSinConexionSemantica(String nombre, int precio) =>
+      'Comprar $nombre por $precio monedas, necesitas conexión';
+  static const String notaRn03 =
+      'Los comodines solo funcionan en lecciones normales. En el Examen Final están bloqueados (RN03).';
+  static const String necesitasConexionComprar = 'Necesitas conexión para comprar.';
+  static String confirmarCompraTitulo(String nombre) => '¿Comprar $nombre?';
+  static String confirmarCompraTexto(int precio, int quedarian) =>
+      'Cuesta $precio monedas. Te quedarían $quedarian.';
+  static const String comprar = 'Comprar';
+  static const String cancelar = 'Cancelar';
+  static String compraHecha(String nombre, int cantidad, int monedas) =>
+      'Compraste $nombre. Ahora tienes $cantidad. '
+      'Te ${monedas == 1 ? 'queda 1 moneda' : 'quedan $monedas monedas'}.';
+  static const String compraSinMonedas = 'Ya no te alcanzan las monedas.';
+  static const String compraMaximo = 'Ya tienes el máximo.';
+  static const String compraError = 'No se pudo completar la compra. Inténtalo de nuevo.';
+  static const String comprando = 'Comprando';
+  static const String tiendaErrorCarga = 'No se pudo cargar la Tienda.';
+  static const String cargandoTienda = 'Cargando la Tienda';
+
+  // ---------------------------------------------------------------------
+  // 25 Perfil y progreso
+  // ---------------------------------------------------------------------
+  static const String perfilTitulo = 'Mi perfil';
+  static const String accesibilidadYAjustes = 'Accesibilidad y ajustes';
+  static String nivelYXp(String perfil, int nivel, String xp) => '$perfil · Nivel $nivel · $xp XP';
+  static String tarjetaPerfilSemantica(String nombre, String detalle) => '$nombre, $detalle';
+  static String rachaDias(int dias) => dias == 1 ? '1 día' : '$dias días';
+  static const String rachaActual = 'Racha actual';
+  static String precisionValor(int porcentaje) => '$porcentaje%';
+  static const String precision = 'Precisión';
+  static String certificadosValor(int obtenidos, int total) => '$obtenidos / $total';
+  static String certificadosSemanticaValor(int obtenidos, int total) => '$obtenidos de $total';
+  static const String certificados = 'Certificados';
+  static const String sprintsPerfectos = 'Sprints perfectos';
+  static String estadisticaSemantica(String etiqueta, String valor) => '$etiqueta: $valor';
+  static const String insigniasTitulo = 'Insignias';
+  static String insigniaSemantica(String nombre, {required bool obtenida}) =>
+      '$nombre, ${obtenida ? 'obtenida' : 'bloqueada'}';
+  static const String menuAccesibilidad = 'Accesibilidad';
+  static const String menuNotificacionesRacha = 'Notificaciones de racha';
+  static const String menuAvisoPrivacidad = 'Aviso de privacidad';
+  static const String cerrarSesion = 'Cerrar sesión';
+  static const String confirmarCerrarSesionTitulo = '¿Cerrar sesión?';
+  static const String confirmarCerrarSesionTexto =
+      'Tus datos de la cuenta quedan guardados en el servidor.';
+  static String respuestasGuardadasAviso(int n) => n == 1
+      ? 'Tienes 1 respuesta guardada en este dispositivo; se enviará cuando vuelvas a entrar.'
+      : 'Tienes $n respuestas guardadas en este dispositivo; se enviarán cuando vuelvas a entrar.';
+  static const String errorCerrarSesion = 'No se pudo cerrar la sesión. Inténtalo de nuevo.';
+  static const String perfilErrorCarga = 'No se pudo cargar tu perfil.';
+  static const String cargandoPerfil = 'Cargando tu perfil';
 
   // ---------------------------------------------------------------------
   // Galería de componentes (temporal, se elimina con las pantallas reales)
@@ -635,6 +713,8 @@ abstract final class Textos {
   static const String galeriaPaginador = 'Paginador';
   static const String galeriaFoco = 'Anillo de foco';
   static const String galeriaSarko = 'Sarko';
+  static const String galeriaTienda = 'Piezas de la Tienda';
+  static const String galeriaPerfil = 'Piezas del Perfil';
   static const String galeriaLogos = 'Logos (4 formas × 5 tonos)';
   static String galeriaLogo(String forma, String tono) => '$forma · $tono';
   static const String galeriaIconos = 'Íconos';

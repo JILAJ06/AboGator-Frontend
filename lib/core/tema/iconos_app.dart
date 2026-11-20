@@ -73,6 +73,9 @@ abstract final class IconosApp {
   /// Extra (no está en la lista de Figma): ocultar contraseña.
   static const IconData eyeOff = LucideIcons.eyeOff;
 
+  /// Congelar racha (Tienda, T-10).
+  static const IconData snowflake = LucideIcons.snowflake;
+
   /// Todos los íconos de Figma con su nombre (para la galería y las pruebas).
   static const Map<String, IconData> porNombre = {
     'heart': heart,
@@ -120,5 +123,6 @@ abstract final class IconosApp {
     'building': building,
     'megaphone': megaphone,
     'shield-check': shieldCheck,
+    'snowflake': snowflake,
   };
 }

@@ -13,7 +13,7 @@ import '../ayudantes/montar.dart';
 
 void main() {
   test('el catálogo tiene un ícono por cada nombre de Figma', () {
-    expect(IconosApp.porNombre, hasLength(45));
+    expect(IconosApp.porNombre, hasLength(46));
     expect(IconosApp.porNombre.values.every((i) => i.fontFamily == 'Lucide'), isTrue);
   });
 

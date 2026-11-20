@@ -45,6 +45,8 @@ import '../../componentes/panel_evidencia.dart';
 import '../../componentes/panel_justificacion.dart';
 import '../../componentes/panel_veredicto.dart';
 import '../../componentes/piezas_apelacion.dart';
+import '../../componentes/piezas_perfil.dart';
+import '../../componentes/piezas_tienda.dart';
 import '../../componentes/pila_tarjetas.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/sello_veredicto.dart';
@@ -497,6 +499,95 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 const AvisoFallo(dias: 3),
                 const FilaRepaso(hechos: [true, false, false]),
                 const FilaRepaso(hechos: [true, true, true]),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaTienda,
+              hijos: [
+                const PildoraSaldo(monedas: 240),
+                const PildoraInventario(
+                  icono: IconosApp.search,
+                  nombreCorto: Textos.comodinLupa,
+                  nombre: 'Lupa de Auditor',
+                  cantidad: 2,
+                ),
+                const PildoraInventario(
+                  icono: IconosApp.snowflake,
+                  nombreCorto: Textos.inventarioCongelar,
+                  nombre: 'Congelar racha',
+                  cantidad: 1,
+                ),
+                for (final (bloqueo, faltan) in const [
+                  (BloqueoCompra.ninguno, 0),
+                  (BloqueoCompra.sinMonedas, 20),
+                  (BloqueoCompra.maximo, 0),
+                  (BloqueoCompra.sinConexion, 0),
+                ])
+                  SizedBox(
+                    width: TarjetaArticulo.ancho,
+                    child: IntrinsicHeight(
+                      child: TarjetaArticulo(
+                        icono: IconosApp.search,
+                        nombre: 'Lupa de Auditor',
+                        descripcion: 'Resalta en amarillo las palabras trampa del caso.',
+                        precio: 60,
+                        bloqueo: bloqueo,
+                        faltan: faltan,
+                        alComprar: () {},
+                      ),
+                    ),
+                  ),
+                const NotaTienda(texto: Textos.notaRn03),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaPerfil,
+              hijos: [
+                const TarjetaPerfil(
+                  iniciales: 'AL',
+                  nombre: 'Ana López',
+                  detalle: 'Desarrollador · Nivel 4 · 1,250 XP',
+                ),
+                SizedBox(
+                  width: TarjetaEstadistica.ancho,
+                  child: TarjetaEstadistica(
+                    icono: IconosApp.flame,
+                    colorIcono: context.tokens.accionAcento,
+                    valor: '7 días',
+                    etiqueta: Textos.rachaActual,
+                  ),
+                ),
+                const MedallaInsignia(
+                  nombre: 'Guardián de datos',
+                  icono: IconosApp.shieldCheck,
+                  desbloqueada: true,
+                  colorModulo: ColoresModulo.proteccionDeDatos,
+                ),
+                const MedallaInsignia(
+                  nombre: 'Abogado de código',
+                  icono: IconosApp.lock,
+                  desbloqueada: false,
+                ),
+                BotonIconoCuadrado(
+                  icono: IconosApp.settings,
+                  etiqueta: Textos.accesibilidadYAjustes,
+                  alPresionar: () {},
+                ),
+                MenuAgrupado(
+                  filas: [
+                    FilaMenu(
+                      icono: IconosApp.accessibility,
+                      texto: Textos.menuAccesibilidad,
+                      alPresionar: () {},
+                    ),
+                    FilaMenu(
+                      icono: IconosApp.logout,
+                      texto: Textos.cerrarSesion,
+                      peligro: true,
+                      alPresionar: () {},
+                    ),
+                  ],
+                ),
               ],
             ),
             _Seccion(

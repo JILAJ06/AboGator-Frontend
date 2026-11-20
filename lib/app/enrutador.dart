@@ -18,6 +18,8 @@ import '../funciones/juego/pantalla_sprint_completado.dart';
 import '../funciones/juego/pantalla_startup_quiebra.dart';
 import '../funciones/mapa/pantalla_intro_sprint.dart';
 import '../funciones/mapa/pantalla_mapa_sprints.dart';
+import '../funciones/perfil/pantalla_perfil.dart';
+import '../funciones/tienda/pantalla_tienda.dart';
 import '../funciones/vidas/pantalla_sin_vidas.dart';
 import 'pantalla_pendiente.dart';
 import 'rutas.dart';
@@ -98,11 +100,35 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Rutas.tienda,
-        builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteTienda),
+        redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
+        builder: (context, state) => const PantallaTienda(),
       ),
       GoRoute(
         path: Rutas.perfil,
-        builder: (context, state) => const PantallaPendiente(texto: Textos.pendientePerfil),
+        // La redirección sin sesión cubre también las rutas hijas.
+        redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
+        builder: (context, state) => const PantallaPerfil(),
+        routes: [
+          // Sin navegación inferior. Ajustes llega en T-10b; los otros dos no
+          // tienen diseño todavía.
+          GoRoute(
+            path: Rutas.segmentoAjustes,
+            builder: (context, state) =>
+                const PantallaPendiente(texto: Textos.pendienteAjustes, conVolver: true),
+          ),
+          GoRoute(
+            path: Rutas.segmentoNotificaciones,
+            builder: (context, state) => const PantallaPendiente(
+              texto: Textos.pendienteNotificacionesRacha,
+              conVolver: true,
+            ),
+          ),
+          GoRoute(
+            path: Rutas.segmentoAvisoPrivacidad,
+            builder: (context, state) =>
+                const PantallaPendiente(texto: Textos.pendienteAvisoPrivacidad, conVolver: true),
+          ),
+        ],
       ),
       if (kDebugMode)
         GoRoute(path: Rutas.galeria, builder: (context, state) => const GaleriaComponentes()),

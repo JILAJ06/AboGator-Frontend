@@ -7,6 +7,7 @@ import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
 import 'package:abogator/datos/mocks/mock_apelaciones.dart';
+import 'package:abogator/datos/mocks/mock_perfil.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
 import 'package:abogator/datos/mocks/mock_respuestas.dart';
 import 'package:abogator/datos/mocks/mock_tarjetas.dart';
@@ -17,6 +18,8 @@ import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
 import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
+import 'package:abogator/datos/repositorios/repositorio_autenticacion.dart';
+import 'package:abogator/datos/repositorios/repositorio_perfil.dart';
 import 'package:abogator/datos/repositorios/repositorio_tarjetas.dart';
 import 'package:abogator/datos/sincronizacion/servicio_conexion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
@@ -85,6 +88,8 @@ Future<TarjetasFalsas> abrirJuego(
   RepositorioApelaciones? apelaciones,
   MockRespuestas? servidorRespuestas,
   ServicioConexion? conexion,
+  RepositorioAutenticacion? autenticacion,
+  RepositorioPerfil? perfil,
 }) async {
   await tester.binding.setSurfaceSize(tamano);
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -94,6 +99,9 @@ Future<TarjetasFalsas> abrirJuego(
     ProviderScope(
       overrides: [
         repositorioProgresoProvider.overrideWithValue(MockProgreso(espera: Duration.zero)),
+        repositorioPerfilProvider.overrideWithValue(perfil ?? MockPerfil(espera: Duration.zero)),
+        if (autenticacion != null)
+          repositorioAutenticacionProvider.overrideWithValue(autenticacion),
         repositorioTiendaProvider.overrideWithValue(tienda ?? MockTienda(espera: Duration.zero)),
         repositorioRespuestasProvider.overrideWithValue(
           servidorRespuestas ?? MockRespuestas(espera: Duration.zero),
