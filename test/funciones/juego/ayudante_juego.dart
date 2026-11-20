@@ -6,6 +6,7 @@ import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
+import 'package:abogator/core/servicios/servicio_haptico.dart';
 import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_perfil.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
@@ -14,15 +15,18 @@ import 'package:abogator/datos/mocks/mock_tarjetas.dart';
 import 'package:abogator/datos/mocks/mock_tienda.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
 import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
+import 'package:abogator/datos/modelos/ajustes.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
+import 'package:abogator/datos/repositorios/repositorio_ajustes.dart';
 import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
 import 'package:abogator/datos/repositorios/repositorio_autenticacion.dart';
 import 'package:abogator/datos/repositorios/repositorio_perfil.dart';
 import 'package:abogator/datos/repositorios/repositorio_tarjetas.dart';
 import 'package:abogator/datos/sincronizacion/servicio_conexion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
+import 'package:abogator/funciones/ajustes/estado_ajustes.dart';
 import 'package:abogator/funciones/juego/estado_juego.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -90,6 +94,9 @@ Future<TarjetasFalsas> abrirJuego(
   ServicioConexion? conexion,
   RepositorioAutenticacion? autenticacion,
   RepositorioPerfil? perfil,
+  Ajustes? ajustes,
+  RepositorioAjustes? repoAjustes,
+  ServicioHaptico? haptica,
 }) async {
   await tester.binding.setSurfaceSize(tamano);
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -115,11 +122,14 @@ Future<TarjetasFalsas> abrirJuego(
           apelaciones ?? MockApelaciones(espera: Duration.zero),
         ),
         repositorioOnboardingProvider.overrideWithValue(OnboardingEnMemoria(vistoAlInicio: true)),
+        if (repoAjustes != null) repositorioAjustesProvider.overrideWithValue(repoAjustes),
+        if (haptica != null) servicioHapticoProvider.overrideWithValue(haptica),
       ],
       child: const AppAbogator(),
     ),
   );
   final contenedor = ProviderScope.containerOf(tester.element(find.byType(AppAbogator)));
+  if (ajustes != null) contenedor.read(ajustesProvider.notifier).cargados(ajustes);
   if (conSesion) contenedor.read(sesionProvider.notifier).iniciar(ana);
   final enrutador = contenedor.read(enrutadorProvider);
   if (desdeIntro) {

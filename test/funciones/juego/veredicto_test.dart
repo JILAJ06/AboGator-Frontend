@@ -307,7 +307,7 @@ void main() {
     });
   });
 
-  testWidgets('vibraciones: ligera al acertar, de selección en parcial y media al fallar', (
+  testWidgets('vibraciones: ligera al acertar, de selección en parcial y doble media al fallar', (
     tester,
   ) async {
     final vibraciones = <Object?>[];
@@ -330,10 +330,12 @@ void main() {
     await pulsarBotonDelPanel(tester);
     await elegir(tester, Veredicto.escalar); // parcial
     await pulsarBotonDelPanel(tester);
-    await elegir(tester, Veredicto.legal); // incorrecto
+    await elegir(tester, Veredicto.legal); // incorrecto: doble
+    await tester.pump(const Duration(milliseconds: 100));
     expect(vibraciones, [
       'HapticFeedbackType.lightImpact',
       'HapticFeedbackType.selectionClick',
+      'HapticFeedbackType.mediumImpact',
       'HapticFeedbackType.mediumImpact',
     ]);
   });

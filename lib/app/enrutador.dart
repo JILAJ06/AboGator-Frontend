@@ -7,6 +7,7 @@ import '../datos/sincronizacion/estado_sincronizacion.dart';
 import '../funciones/acceso/pantalla_inicio_sesion.dart';
 import '../funciones/acceso/pantalla_registro.dart';
 import '../funciones/acceso/sesion.dart';
+import '../funciones/ajustes/pantalla_ajustes.dart';
 import '../funciones/apelaciones/pantalla_buzon.dart';
 import '../funciones/apelaciones/pantalla_juicio.dart';
 import '../funciones/bienvenida/galeria_componentes.dart';
@@ -109,12 +110,11 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
         builder: (context, state) => const PantallaPerfil(),
         routes: [
-          // Sin navegación inferior. Ajustes llega en T-10b; los otros dos no
-          // tienen diseño todavía.
+          // Sin navegación inferior: 26 Ajustes y dos destinos que aún no
+          // tienen diseño.
           GoRoute(
             path: Rutas.segmentoAjustes,
-            builder: (context, state) =>
-                const PantallaPendiente(texto: Textos.pendienteAjustes, conVolver: true),
+            builder: (context, state) => const PantallaAjustes(),
           ),
           GoRoute(
             path: Rutas.segmentoNotificaciones,

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +26,7 @@ import '../../datos/modelos/vidas.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
 import '../../datos/sincronizacion/estado_sincronizacion.dart';
 import '../../datos/sincronizacion/servicio_conexion.dart';
+import '../ajustes/estado_ajustes.dart';
 import '../inicio/logica_inicio.dart';
 import '../juego/logica_swipe.dart';
 import '../juego/mazo_swipe.dart';
@@ -250,10 +250,10 @@ class _JuicioState extends ConsumerState<_Juicio> {
     }
   }
 
-  /// Ganada: vibración ligera; perdida: media (no hay en web).
-  static void _vibrar({required bool ganada}) {
-    if (kIsWeb) return;
-    unawaited(ganada ? HapticFeedback.lightImpact() : HapticFeedback.mediumImpact());
+  /// Ganada: vibración suave; perdida: la de error (servicio háptico).
+  void _vibrar({required bool ganada}) {
+    final haptica = ref.read(servicioHapticoProvider);
+    unawaited(ganada ? haptica.suave() : haptica.error());
   }
 
   /// Flechas: previsualizan; Enter confirma y Esc cancela (como el juego).
@@ -293,6 +293,7 @@ class _JuicioState extends ConsumerState<_Juicio> {
     final datos = widget.datos;
     final tarjeta = datos.tarjeta;
     final colorModulo = datos.colorModulo ?? tokens.textoAcento;
+    final soloBotones = ref.watch(ajustesProvider.select((a) => a.soloBotones));
 
     final contenido = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -326,7 +327,9 @@ class _JuicioState extends ConsumerState<_Juicio> {
                           '${Textos.tarjetaApelacionSemantica(widget.actual, widget.total, tarjeta.personaje, tarjeta.rol, tarjeta.texto)} '
                           '${Textos.falladaHace(datos.diasDesdeFallo)}.',
                       alConfirmar: _alConfirmar,
+                      arrastreActivo: !soloBotones,
                       tarjeta: TarjetaCaso(
+                        soloBotones: soloBotones,
                         etiquetaCaso: LogicaApelacion.etiqueta(datos.apelacion.tema),
                         colorModulo: colorModulo,
                         iniciales: tarjeta.iniciales ?? LogicaInicio.iniciales(tarjeta.personaje),

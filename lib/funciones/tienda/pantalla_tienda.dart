@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -19,6 +17,7 @@ import '../../datos/modelos/excepcion_tienda.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
 import '../../datos/sincronizacion/estado_sincronizacion.dart';
 import '../../datos/sincronizacion/servicio_conexion.dart';
+import '../ajustes/estado_ajustes.dart';
 import 'estado_tienda.dart';
 import 'logica_tienda.dart';
 
@@ -134,7 +133,7 @@ class _TiendaState extends ConsumerState<_Tienda> {
     setState(() => _comprando = articulo.id);
     try {
       final r = await ref.read(repositorioTiendaProvider).comprarArticulo(articulo.id);
-      if (!kIsWeb) unawaited(HapticFeedback.lightImpact());
+      unawaited(ref.read(servicioHapticoProvider).suave());
       if (!mounted) return;
       refrescarTrasCompra(ref);
       _avisar(Textos.compraHecha(articulo.nombre, r.cantidadNueva, r.monedasRestantes));

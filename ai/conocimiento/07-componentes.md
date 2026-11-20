@@ -203,3 +203,9 @@ Figma: 24 = `18:2347`, 25 = `18:2492`. Medidas, textos y reglas completos en `ai
 - **Tienda:** píldora de saldo (`fondoDestacado`, moneda 22), píldoras de inventario (borde 1, ícono 16, "Lupa ×2"), tarjeta de artículo (ancho 165, radio 22, ícono en cuadro 52 `fondoDestacado`) y botón de precio (alto 48, `accionPrimaria`; deshabilitado en `fondoSuperficieAlt` con "Te faltan N" o "Máximo"). La compra pide confirmación en un diálogo y se anuncia en una región en vivo.
 - **Perfil:** tarjeta de perfil (`accionPrimaria`, avatar 60 con iniciales), tarjeta de estadística (166, radio 16), medalla de insignia (60, borde 3 `accionAcento`, color del módulo; bloqueada en `fondoSuperficieAlt` con `lock`) y menú agrupado con filas ≥ 48 y chevron.
 - **Diálogo de confirmación:** `fondoSuperficie`, radio 22, título Fredoka SemiBold 20, botón primario y fantasma de alto 48; lo usan la compra y "Cerrar sesión".
+
+## Componentes de Ajustes (se construyen en T-10b)
+Figma: 26 = `18:2634`. Medidas, textos y reglas completos en `ai/siguiente.md` de la T-10b.
+- **Tarjeta de sección:** `fondoSuperficie`, borde 1, radio 18, filas de relleno 16×12 con ícono 22, texto (Cuerpo/Énfasis + Leyenda) y control; el toque abarca toda la fila (≥ 56).
+- **Interruptor** 48×28 (radio 14, pulgar 22) con contraste ≥ 3:1; **chip de valor** (`fondoSuperficieAlt`, radio 10); **selector de tamaño** (hoja modal con 100/120/140/160 %).
+- **Servicio háptico:** acierto ligero, parcial de selección, error doble, suave; apagable desde Ajustes.

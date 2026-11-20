@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +33,7 @@ import '../../datos/modelos/tarjeta.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
 import '../../datos/sincronizacion/estado_sincronizacion.dart';
 import '../../datos/sincronizacion/servicio_conexion.dart';
+import '../ajustes/estado_ajustes.dart';
 import '../inicio/logica_inicio.dart';
 import '../vidas/pantalla_sin_vidas.dart';
 import 'estado_juego.dart';
@@ -294,18 +295,15 @@ class _JuegoState extends ConsumerState<_Juego> {
     }
   }
 
-  /// Vibración según el resultado (no hay en web): correcto ligera, parcial
-  /// de selección, error y Amparo media.
-  static void _vibrar(TipoVeredicto tipo) {
-    if (kIsWeb) return;
-    switch (tipo) {
-      case TipoVeredicto.correcto:
-        HapticFeedback.lightImpact();
-      case TipoVeredicto.parcial:
-        HapticFeedback.selectionClick();
-      case TipoVeredicto.incorrecto || TipoVeredicto.amparo:
-        HapticFeedback.mediumImpact();
-    }
+  /// Vibración según el resultado (servicio háptico: respeta el ajuste y no
+  /// vibra en web): correcto corta, parcial de selección, error y Amparo doble.
+  void _vibrar(TipoVeredicto tipo) {
+    final haptica = ref.read(servicioHapticoProvider);
+    unawaited(switch (tipo) {
+      TipoVeredicto.correcto => haptica.acierto(),
+      TipoVeredicto.parcial => haptica.parcial(),
+      TipoVeredicto.incorrecto || TipoVeredicto.amparo => haptica.error(),
+    });
   }
 
   Future<void> _salir() async {
@@ -358,6 +356,7 @@ class _JuegoState extends ConsumerState<_Juego> {
     final indice = progreso.indice.clamp(0, total - 1);
     final tarjeta = datos.tarjetas[indice];
     final colorModulo = datos.modulo?.color ?? context.tokens.textoAcento;
+    final soloBotones = ref.watch(ajustesProvider.select((a) => a.soloBotones));
     final lupaUsada = progreso.lupaUsada.contains(tarjeta.id);
     // 23 · Sin conexión: aviso sobre la tarjeta y, en lugar de los comodines
     // (su gasto lo controla el servidor), las respuestas guardadas.
@@ -439,7 +438,9 @@ class _JuegoState extends ConsumerState<_Juego> {
                       ),
                       alConfirmar: (v) => _alConfirmar(tarjeta, v),
                       alInspeccionar: inspeccionar,
+                      arrastreActivo: !soloBotones,
                       tarjeta: TarjetaCaso(
+                        soloBotones: soloBotones,
                         etiquetaCaso: tarjeta.etiquetaCaso,
                         colorModulo: colorModulo,
                         iniciales: tarjeta.iniciales ?? LogicaInicio.iniciales(tarjeta.personaje),
