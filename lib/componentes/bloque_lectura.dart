@@ -15,6 +15,7 @@ class BloqueLectura extends StatefulWidget {
     this.excluirHijos = false,
     this.autofocus = false,
     this.radio = 16,
+    this.nodoFoco,
     super.key,
   });
 
@@ -32,6 +33,9 @@ class BloqueLectura extends StatefulWidget {
   /// Radio del bloque (el anillo usa radio + 5).
   final double radio;
 
+  /// Nodo de foco propio (para pedir el foco desde fuera).
+  final FocusNode? nodoFoco;
+
   @override
   State<BloqueLectura> createState() => _BloqueLecturaState();
 }
@@ -47,6 +51,7 @@ class _BloqueLecturaState extends State<BloqueLectura> {
   Widget build(BuildContext context) {
     final contenido = FocusableActionDetector(
       autofocus: widget.autofocus,
+      focusNode: widget.nodoFoco,
       onShowFocusHighlight: (valor) => setState(() => _foco = valor && !_focoInicial),
       onFocusChange: (enfocado) {
         if (!enfocado && _focoInicial) setState(() => _focoInicial = false);

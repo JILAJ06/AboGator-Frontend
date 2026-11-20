@@ -8,6 +8,7 @@ import '../funciones/acceso/pantalla_inicio_sesion.dart';
 import '../funciones/acceso/pantalla_registro.dart';
 import '../funciones/acceso/sesion.dart';
 import '../funciones/apelaciones/pantalla_buzon.dart';
+import '../funciones/apelaciones/pantalla_juicio.dart';
 import '../funciones/bienvenida/galeria_componentes.dart';
 import '../funciones/bienvenida/pantalla_onboarding.dart';
 import '../funciones/bienvenida/pantalla_splash.dart';
@@ -87,11 +88,11 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
         builder: (context, state) => const PantallaBuzon(),
         routes: [
-          // 22 Juicio (enlace profundo de la notificación 21b). Marcador
-          // hasta T-09b.
+          // 22 Juicio y su resultado (también el enlace profundo de 21b).
           GoRoute(
             path: ':apelacionId',
-            builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteJuicio),
+            builder: (context, state) =>
+                PantallaJuicio(apelacionId: state.pathParameters['apelacionId']!),
           ),
         ],
       ),

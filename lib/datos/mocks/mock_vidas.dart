@@ -64,6 +64,17 @@ class MockVidas implements RepositorioVidas {
     return _vidas;
   }
 
+  /// +1 sin pasar de 5. Si llega a 5 se quita la regeneración programada; si
+  /// no, la programada se conserva.
+  @override
+  Future<Vidas> recuperarVida() async {
+    await esperar(espera);
+    _regenerar();
+    _cantidad = (_cantidad + 1).clamp(0, Vidas.maximo);
+    _programarSiFalta();
+    return _vidas;
+  }
+
   @override
   Future<Vidas> guardarVidas(int cantidad) async {
     await esperar(espera);

@@ -1,5 +1,6 @@
 import '../modelos/apelacion.dart';
 import '../modelos/buzon_apelaciones.dart';
+import '../modelos/resultado_apelacion.dart';
 import '../repositorios/repositorio_apelaciones.dart';
 import 'espera_simulada.dart';
 
@@ -91,6 +92,48 @@ class MockApelaciones implements RepositorioApelaciones {
   Future<BuzonApelaciones> obtenerBuzon() async {
     await esperar(espera);
     return BuzonApelaciones(ahoraServidor: _ahora().toUtc(), apelaciones: _apelaciones);
+  }
+
+  /// Siguiente día de repaso al ganar y en cuántos días se abre:
+  /// 3 → (7, 4), 7 → (14, 7); 14 → dominada (`null`).
+  static (int, int)? siguienteRepaso(int dia) => switch (dia) {
+    3 => (7, 4),
+    7 => (14, 7),
+    _ => null,
+  };
+
+  @override
+  Future<ResultadoApelacion> resolverApelacion(String apelacionId, {required bool ganada}) async {
+    await esperar(espera);
+    final ahora = _ahora().toUtc();
+    final i = _apelaciones.indexWhere((a) => a.id == apelacionId);
+    if (i < 0) throw StateError('No existe la apelación $apelacionId');
+    final actual = _apelaciones[i];
+    if (BuzonApelaciones.diasEntre(ahora, actual.disponibleEl) > 0) {
+      throw StateError('La apelación $apelacionId no está disponible hoy');
+    }
+    final hoy = DateTime.utc(ahora.year, ahora.month, ahora.day);
+    Apelacion con(int dia, int dias) => Apelacion(
+      id: actual.id,
+      tarjetaId: actual.tarjetaId,
+      moduloId: actual.moduloId,
+      titulo: actual.titulo,
+      tema: actual.tema,
+      diaRepaso: dia,
+      disponibleEl: hoy.add(Duration(days: dias)),
+    );
+    if (!ganada) {
+      _apelaciones[i] = con(actual.diaRepaso, 1);
+      return ResultadoApelacion(ganada: false, diaSiguiente: actual.diaRepaso, diasParaVolver: 1);
+    }
+    final siguiente = siguienteRepaso(actual.diaRepaso);
+    if (siguiente == null) {
+      _apelaciones.removeAt(i);
+      return const ResultadoApelacion(ganada: true);
+    }
+    final (dia, dias) = siguiente;
+    _apelaciones[i] = con(dia, dias);
+    return ResultadoApelacion(ganada: true, diaSiguiente: dia, diasParaVolver: dias);
   }
 
   @override

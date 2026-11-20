@@ -18,10 +18,12 @@ import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_tarjetas.dart';
 import 'package:abogator/datos/modelos/apelacion.dart';
 import 'package:abogator/datos/modelos/buzon_apelaciones.dart';
+import 'package:abogator/datos/modelos/resultado_apelacion.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/apelaciones/pantalla_buzon.dart';
+import 'package:abogator/funciones/apelaciones/pantalla_juicio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -69,6 +71,10 @@ class BuzonFijo implements RepositorioApelaciones {
 
   @override
   Future<void> registrarFallos(List<NuevaApelacion> fallos) async {}
+
+  @override
+  Future<ResultadoApelacion> resolverApelacion(String apelacionId, {required bool ganada}) =>
+      throw UnimplementedError();
 }
 
 Finder fila(String id) => find.byKey(ValueKey('fila-$id'));
@@ -163,11 +169,11 @@ void main() {
       });
     }
 
-    testWidgets('fila de hoy abre el juicio (marcador de T-09b)', (tester) async {
+    testWidgets('fila de hoy abre el juicio', (tester) async {
       await abrirBuzon(tester);
       await tocar(tester, fila('ape-001'));
       expect(rutaActual(tester), Rutas.juicioApelacionDe('ape-001'));
-      expect(find.text(Textos.pendienteJuicio), findsOneWidget);
+      expect(find.byType(PantallaJuicio), findsOneWidget);
     });
 
     testWidgets('fila futura no navega: avisa cuándo se abre', (tester) async {
@@ -451,7 +457,7 @@ void main() {
     testWidgets('el enlace profundo con sesión abre el juicio', (tester) async {
       await abrirJuego(tester, ruta: Rutas.juicioApelacionDe('ape-001'), apelaciones: servidor());
       expect(rutaActual(tester), '/buzon/ape-001');
-      expect(find.text(Textos.pendienteJuicio), findsOneWidget);
+      expect(find.byType(PantallaJuicio), findsOneWidget);
     });
 
     testWidgets('sin sesión va al inicio de sesión', (tester) async {

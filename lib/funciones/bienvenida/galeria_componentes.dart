@@ -44,6 +44,7 @@ import '../../componentes/panel_abogado.dart';
 import '../../componentes/panel_evidencia.dart';
 import '../../componentes/panel_justificacion.dart';
 import '../../componentes/panel_veredicto.dart';
+import '../../componentes/piezas_apelacion.dart';
 import '../../componentes/pila_tarjetas.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/sello_veredicto.dart';
@@ -63,6 +64,7 @@ import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/mocks/mock_tarjetas.dart';
 import '../../datos/modelos/estado_startup.dart';
 import '../../datos/modelos/tarjeta.dart';
+import '../apelaciones/pantalla_juicio.dart';
 import '../inicio/logica_inicio.dart';
 import '../vidas/pantalla_sin_vidas.dart';
 
@@ -486,6 +488,15 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                   dias: 7,
                   hora: 'hace 2 h',
                 ),
+                // 22, 22b y la perdida.
+                BarraJuicio(actual: 1, total: 2, vidas: 3, alSalir: () {}),
+                const InsigniaVida(texto: Textos.masUnaVida, destacada: true),
+                const InsigniaVida(texto: Textos.vidaRecuperadaInsignia, destacada: true),
+                const InsigniaVida(texto: Textos.vidasAlMaximo, destacada: false),
+                const InsigniaVida(texto: Textos.noPierdesVidas, destacada: false),
+                const AvisoFallo(dias: 3),
+                const FilaRepaso(hechos: [true, false, false]),
+                const FilaRepaso(hechos: [true, true, true]),
               ],
             ),
             _Seccion(

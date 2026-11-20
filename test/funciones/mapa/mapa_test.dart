@@ -20,6 +20,7 @@ import 'package:abogator/datos/modelos/apelacion.dart';
 import 'package:abogator/datos/modelos/buzon_apelaciones.dart';
 import 'package:abogator/datos/modelos/estado_startup.dart';
 import 'package:abogator/datos/modelos/modulo.dart';
+import 'package:abogator/datos/modelos/resultado_apelacion.dart';
 import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
 import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
@@ -95,6 +96,10 @@ class ApelacionesFalsas implements RepositorioApelaciones {
 
   @override
   Future<void> registrarFallos(List<NuevaApelacion> fallos) async {}
+
+  @override
+  Future<ResultadoApelacion> resolverApelacion(String apelacionId, {required bool ganada}) =>
+      throw UnimplementedError();
 }
 
 /// Módulo con los 5 sprints completados (el Examen final se puede abrir).
