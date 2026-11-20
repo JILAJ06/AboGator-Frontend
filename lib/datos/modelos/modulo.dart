@@ -18,8 +18,6 @@ class Sprint {
     this.estrellas = 0,
     this.esExamenFinal = false,
     this.tituloIntro,
-    this.mensajeCompletado,
-    this.mensajeQuiebra,
   }) : assert(estrellas >= 0 && estrellas <= maximoEstrellas);
 
   /// Máximo de estrellas que da un sprint completado.
@@ -50,33 +48,8 @@ class Sprint {
   /// sprint en los números de progreso.
   final bool esExamenFinal;
 
-  /// Subtítulo de "Sprint completado" (19).
-  final String? mensajeCompletado;
-
-  /// Descripción de "Startup en quiebra" (19b); si falta, se usa un texto
-  /// genérico según la causa.
-  final String? mensajeQuiebra;
-
   /// Total de tarjetas del sprint.
   int get numeroTarjetas => tarjetasNormales + tarjetasConEvidencia + dilemas;
-
-  /// Copia con otro estado o estrellas (al registrar un sprint completado).
-  Sprint copiar({EstadoSprint? estado, int? estrellas}) => Sprint(
-    id: id,
-    titulo: titulo,
-    objetivo: objetivo,
-    tarjetasNormales: tarjetasNormales,
-    tarjetasConEvidencia: tarjetasConEvidencia,
-    dilemas: dilemas,
-    monedasMaximas: monedasMaximas,
-    minutosEstimados: minutosEstimados,
-    estado: estado ?? this.estado,
-    estrellas: estrellas ?? this.estrellas,
-    esExamenFinal: esExamenFinal,
-    tituloIntro: tituloIntro,
-    mensajeCompletado: mensajeCompletado,
-    mensajeQuiebra: mensajeQuiebra,
-  );
 }
 
 /// Módulo temático (1 a 5), con su color propio.
@@ -100,8 +73,4 @@ class Modulo {
 
   /// Sprints en orden; el último es el Examen final.
   final List<Sprint> sprints;
-
-  /// Copia con otra lista de sprints.
-  Modulo copiar({required List<Sprint> sprints}) =>
-      Modulo(id: id, numero: numero, nombre: nombre, color: color, sprints: sprints);
 }

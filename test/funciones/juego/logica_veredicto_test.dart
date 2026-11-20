@@ -5,7 +5,7 @@ import 'package:abogator/funciones/juego/logica_veredicto.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// La tarjeta de la GPL-3.0 con los valores de Figma.
-final gpl = MockTarjetas.tarjetasPorSprint['spr-1-3']!.firstWhere((t) => t.id == 'tar-gpl-01');
+final gpl = MockTarjetas.tarjetasPorSprint['spr-2-1']!.firstWhere((t) => t.id == 'tar-gpl-01');
 
 const estadoBase = EstadoStartup(presupuesto: 70, reputacion: 60, velocidad: 50, riesgoLegal: 25);
 

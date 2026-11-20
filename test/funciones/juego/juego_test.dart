@@ -350,7 +350,7 @@ void main() {
       await tester.tap(find.byType(BotonVeredicto).first);
       await tester.pumpAndSettle();
       await cerrarPanel(tester);
-      expect(find.text(Textos.sprintCompletadoTitulo), findsOneWidget);
+      expect(find.text(Textos.pendienteSprintCompletado), findsOneWidget);
       expect(rutaActual(tester), Rutas.sprintCompletadoDe(sprintMock));
     });
 
@@ -433,7 +433,7 @@ void main() {
     });
 
     testWidgets('sprint sin tarjetas: mensaje y volver al mapa', (tester) async {
-      await abrirJuego(tester, sprintId: 'spr-1-1', tarjetas: {'spr-1-1': []});
+      await abrirJuego(tester, sprintId: 'spr-1-1');
       expect(find.text(Textos.sprintSinTarjetas), findsOneWidget);
       await tester.tap(find.text(Textos.volverAlMapa));
       await tester.pumpAndSettle();

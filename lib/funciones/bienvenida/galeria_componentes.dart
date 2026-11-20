@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 import '../../componentes/acciones_veredicto.dart';
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/avatar_app.dart';
-import '../../componentes/aviso_informativo.dart';
 import '../../componentes/barra_comodines.dart';
 import '../../componentes/barra_juego.dart';
 import '../../componentes/barra_progreso.dart';
@@ -16,13 +15,9 @@ import '../../componentes/campo_texto_app.dart';
 import '../../componentes/casilla_app.dart';
 import '../../componentes/chip_hud.dart';
 import '../../componentes/chip_seleccion.dart';
-import '../../componentes/confeti_sprint.dart';
 import '../../componentes/corazon_vida.dart';
 import '../../componentes/encabezado_modulo.dart';
 import '../../componentes/enlace_texto.dart';
-import '../../componentes/estadisticas_sprint.dart';
-import '../../componentes/estrellas_sprint.dart';
-import '../../componentes/etiqueta_quiebra.dart';
 import '../../componentes/fila_detalle_sprint.dart';
 import '../../componentes/globo_sprint_actual.dart';
 import '../../componentes/icono_app.dart';
@@ -342,23 +337,6 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                     alElegirOpcion: (_) {},
                     alContinuar: () {},
                   ),
-              ],
-            ),
-            _Seccion(
-              titulo: Textos.galeriaFinSprint,
-              hijos: [
-                const ConfetiSprint(),
-                for (var n = 1; n <= EstrellasSprint.total; n++) EstrellasSprint(ganadas: n),
-                const EstadisticasSprint(aciertos: 8, total: 10, xp: 95, monedas: 45),
-                AvisoInformativo(icono: IconosApp.inbox, texto: Textos.avisoBuzon(2)),
-                AvisoInformativo(
-                  icono: IconosApp.info,
-                  colorIcono: context.tokens.textoAcento,
-                  rellenoVertical: 12,
-                  texto: Textos.avisoReinicio,
-                ),
-                const EtiquetaQuiebra(causa: CausaQuiebra.riesgoLegal),
-                const EtiquetaQuiebra(causa: CausaQuiebra.presupuesto),
               ],
             ),
             _Seccion(

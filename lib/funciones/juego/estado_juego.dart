@@ -6,7 +6,6 @@ import '../../datos/modelos/tarjeta.dart';
 import '../../datos/modelos/vidas.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
 import '../mapa/logica_mapa.dart';
-import 'logica_fin_sprint.dart';
 import 'logica_veredicto.dart';
 
 /// Datos que necesita la pantalla de juego de un sprint.
@@ -162,18 +161,12 @@ class ResultadoTarjeta {
 
 /// Avance del sprint en curso.
 ///
-/// Vive mientras se juega y se muestra el final (19 o 19b). Al terminar, el
-/// resultado se guarda en los repositorios con [JuegoNotifier.guardarResultado].
+/// Es **local de la sesión del sprint**: los repositorios solo se leen al
+/// entrar; vidas, XP y monedas no se guardan todavía (lo hará el servidor en
+/// T-14).
 class EstadoJuego {
   const EstadoJuego({
     this.indice = 0,
-    this.totalTarjetas = 0,
-    this.estadoInicial = const EstadoStartup(
-      presupuesto: 0,
-      reputacion: 0,
-      velocidad: 0,
-      riesgoLegal: 0,
-    ),
     this.respuestas = const [],
     this.estadoStartup = const EstadoStartup(
       presupuesto: 0,
@@ -188,16 +181,10 @@ class EstadoJuego {
     this.falladas = const [],
     this.panel,
     this.amparoActivo = false,
-    this.fin,
-    this.guardado = false,
   });
 
   /// Tarjeta actual. Avanza al **cerrar** el panel, no al lanzar la tarjeta.
   final int indice;
-  final int totalTarjetas;
-
-  /// Estado de la Startup al empezar el sprint (para los cambios de 19 y 19b).
-  final EstadoStartup estadoInicial;
   final List<RespuestaJuego> respuestas;
   final EstadoStartup estadoStartup;
   final int vidas;
@@ -214,18 +201,6 @@ class EstadoJuego {
   /// Amparo activo para el siguiente error (se activa en T-07).
   final bool amparoActivo;
 
-  /// Cómo terminó el sprint; `null` mientras se juega.
-  final DestinoVeredicto? fin;
-
-  /// Si el resultado ya se guardó en los repositorios.
-  final bool guardado;
-
-  /// Tarjetas correctas (con o sin bonus).
-  int get aciertos => LogicaFinSprint.aciertos(resultados);
-
-  /// Estrellas que da el sprint si se completó.
-  int get estrellas => LogicaFinSprint.estrellas(aciertos: aciertos, total: totalTarjetas);
-
   EstadoJuego copiar({
     int? indice,
     List<RespuestaJuego>? respuestas,
@@ -237,12 +212,8 @@ class EstadoJuego {
     List<String>? falladas,
     PanelPendiente? Function()? panel,
     bool? amparoActivo,
-    DestinoVeredicto? Function()? fin,
-    bool? guardado,
   }) => EstadoJuego(
     indice: indice ?? this.indice,
-    totalTarjetas: totalTarjetas,
-    estadoInicial: estadoInicial,
     respuestas: respuestas ?? this.respuestas,
     estadoStartup: estadoStartup ?? this.estadoStartup,
     vidas: vidas ?? this.vidas,
@@ -252,17 +223,11 @@ class EstadoJuego {
     falladas: falladas ?? this.falladas,
     panel: panel != null ? panel() : this.panel,
     amparoActivo: amparoActivo ?? this.amparoActivo,
-    fin: fin != null ? fin() : this.fin,
-    guardado: guardado ?? this.guardado,
   );
 }
 
 /// Lleva el avance del juego de un sprint: califica, actualiza indicadores,
-/// vidas, XP y monedas, decide qué sigue al cerrar el panel y guarda el
-/// resultado al terminar.
-///
-/// Se mantiene vivo (`keepAlive`) aunque la pantalla de juego se cierre, para
-/// que 19 y 19b lean el resultado. Se reinicia solo con [reiniciarJuego].
+/// vidas, XP y monedas, y decide qué sigue al cerrar el panel.
 class JuegoNotifier extends Notifier<EstadoJuego> {
   JuegoNotifier(this.sprintId);
 
@@ -270,13 +235,9 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
 
   @override
   EstadoJuego build() {
-    ref.keepAlive();
     final datos = ref.watch(datosJuegoProvider(sprintId)).value;
-    final inicial = datos?.estadoStartup ?? const EstadoJuego().estadoStartup;
     return EstadoJuego(
-      totalTarjetas: datos?.tarjetas.length ?? 0,
-      estadoInicial: inicial,
-      estadoStartup: inicial,
+      estadoStartup: datos?.estadoStartup ?? const EstadoJuego().estadoStartup,
       vidas: datos?.vidas.cantidad ?? 0,
     );
   }
@@ -366,54 +327,14 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
       vidas: state.vidas,
       esUltima: state.indice + 1 >= totalTarjetas,
     );
-    final sigue = destino == DestinoVeredicto.siguiente;
     state = state.copiar(
       panel: () => null,
-      indice: sigue ? state.indice + 1 : state.indice,
-      fin: () => sigue ? null : destino,
+      indice: destino == DestinoVeredicto.siguiente ? state.indice + 1 : state.indice,
     );
     return destino;
-  }
-
-  /// Guarda el resultado del sprint terminado (una sola vez):
-  /// - completado (19): progreso con estrellas y estado final, vidas y monedas;
-  /// - quiebra (19b) o sin vidas: solo las vidas (el progreso no cambia).
-  ///
-  /// En T-14 lo recibirá el servidor.
-  Future<void> guardarResultado() async {
-    final fin = state.fin;
-    if (fin == null || state.guardado) return;
-    final terminado = state;
-    state = state.copiar(guardado: true);
-    final vidas = ref.read(repositorioVidasProvider);
-    if (fin == DestinoVeredicto.sprintCompletado) {
-      await (
-        ref
-            .read(repositorioProgresoProvider)
-            .registrarSprintCompletado(
-              sprintId: sprintId,
-              estrellas: terminado.estrellas,
-              estadoFinal: terminado.estadoStartup,
-            ),
-        vidas.guardarVidas(terminado.vidas),
-        ref.read(repositorioTiendaProvider).sumarMonedas(terminado.monedas),
-      ).wait;
-    } else {
-      await vidas.guardarVidas(terminado.vidas);
-    }
   }
 }
 
 final juegoProvider = NotifierProvider.autoDispose.family<JuegoNotifier, EstadoJuego, String>(
   JuegoNotifier.new,
 );
-
-/// Descarta el avance de [sprintId] y vuelve a pedir sus datos (vidas y
-/// estado de la Startup ya guardados): el siguiente juego empieza desde la
-/// tarjeta 1. Se llama al entrar con "Comenzar sprint", al salir del juego y
-/// con "Reiniciar sprint".
-void reiniciarJuego(WidgetRef ref, String sprintId) {
-  ref
-    ..invalidate(juegoProvider(sprintId))
-    ..invalidate(datosJuegoProvider(sprintId));
-}

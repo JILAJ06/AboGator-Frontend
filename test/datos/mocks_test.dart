@@ -114,12 +114,9 @@ void main() {
     expect((ana.nivel, ana.racha), (4, 7));
   });
 
-  test('la tarjeta "Librería GPL en app cerrada" es la 5 de spr-1-3', () async {
-    final tarjetas = await MockTarjetas(espera: Duration.zero).obtenerTarjetasDelSprint('spr-1-3');
-    final gpl = tarjetas[4];
-    expect(gpl.id, 'tar-gpl-01');
-    expect(gpl.etiquetaCaso, 'CASO 5 · LICENCIAS OSS');
-    expect(MockTarjetas.tarjetasPorSprint['spr-2-1']!.where((t) => t.id == 'tar-gpl-01'), isEmpty);
+  test('MockTarjetas incluye la tarjeta "Librería GPL en app cerrada"', () async {
+    final tarjetas = await MockTarjetas(espera: Duration.zero).obtenerTarjetasDelSprint('spr-2-1');
+    final gpl = tarjetas.firstWhere((t) => t.id == 'tar-gpl-01');
     expect(gpl.tipo, TipoTarjeta.evidencia);
     expect(gpl.respuestaCorrecta, Veredicto.ilegal);
     expect(gpl.evidencia, isNotNull);

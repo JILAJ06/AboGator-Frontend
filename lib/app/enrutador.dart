@@ -11,8 +11,6 @@ import '../funciones/bienvenida/pantalla_onboarding.dart';
 import '../funciones/bienvenida/pantalla_splash.dart';
 import '../funciones/inicio/pantalla_inicio.dart';
 import '../funciones/juego/pantalla_juego.dart';
-import '../funciones/juego/pantalla_sprint_completado.dart';
-import '../funciones/juego/pantalla_startup_quiebra.dart';
 import '../funciones/mapa/pantalla_intro_sprint.dart';
 import '../funciones/mapa/pantalla_mapa_sprints.dart';
 import 'pantalla_pendiente.dart';
@@ -56,22 +54,19 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
         builder: (context, state) => PantallaJuego(sprintId: state.pathParameters['sprintId']!),
       ),
-      GoRoute(
-        path: Rutas.sprintCompletado,
-        redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
-        builder: (context, state) =>
-            PantallaSprintCompletado(sprintId: state.pathParameters['sprintId']!),
-      ),
+      // Marcadores hasta T-06b, T-08, T-09, T-10 y T-11.
       GoRoute(
         path: Rutas.startupQuiebra,
-        redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
-        builder: (context, state) =>
-            PantallaStartupQuiebra(sprintId: state.pathParameters['sprintId']!),
+        builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteQuiebra),
       ),
-      // Marcadores hasta T-08, T-09, T-10 y T-11.
       GoRoute(
         path: Rutas.sinVidas,
         builder: (context, state) => const PantallaPendiente(texto: Textos.sinVidasPendiente),
+      ),
+      GoRoute(
+        path: Rutas.sprintCompletado,
+        builder: (context, state) =>
+            const PantallaPendiente(texto: Textos.pendienteSprintCompletado),
       ),
       GoRoute(
         path: Rutas.crisisJefe,

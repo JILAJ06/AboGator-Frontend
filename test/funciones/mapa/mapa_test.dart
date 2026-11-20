@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:abogator/app/app.dart';
 import 'package:abogator/app/enrutador.dart';
+import 'package:abogator/app/pantalla_pendiente.dart';
 import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/boton_buzon.dart';
@@ -65,13 +66,6 @@ class ProgresoFalso implements RepositorioProgreso {
   @override
   Future<EstadoStartup> obtenerEstadoStartup() async =>
       const EstadoStartup(presupuesto: 0, reputacion: 0, velocidad: 0, riesgoLegal: 0);
-
-  @override
-  Future<void> registrarSprintCompletado({
-    required String sprintId,
-    required int estrellas,
-    required EstadoStartup estadoFinal,
-  }) async {}
 }
 
 class ApelacionesFalsas implements RepositorioApelaciones {
@@ -567,8 +561,8 @@ void main() {
     }
   });
 
-  testWidgets('sprint completado sin un sprint terminado muestra un mensaje', (tester) async {
+  testWidgets('el marcador de sprint completado es una pantalla pendiente', (tester) async {
     await abrir(tester, ruta: Rutas.sprintCompletadoDe('spr-1-3'));
-    expect(find.text(Textos.sinResultado), findsOneWidget);
+    expect(find.byType(PantallaPendiente), findsOneWidget);
   });
 }

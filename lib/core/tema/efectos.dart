@@ -147,21 +147,6 @@ abstract final class EfectosApp {
   /// El panel sube en 280 ms (ease-out).
   static const Duration duracionPanel = Duration(milliseconds: 280);
 
-  // ---------------------------------------------------------------------
-  // 19 Sprint completado (Figma 38:5557)
-  // ---------------------------------------------------------------------
-
-  /// Colores del confeti (decorativos, no son tokens): ámbar mazo, verde
-  /// circuito, azul del módulo 1, rojo veredicto y ámbar claro.
-  static const Color confetiAmbar = Color(0xFFB86B23);
-  static const Color confetiVerde = Color(0xFF68B678);
-  static const Color confetiAzul = Color(0xFF2B5FA8);
-  static const Color confetiRojo = Color(0xFFB52426);
-  static const Color confetiAmbarClaro = Color(0xFFE0A060);
-
-  /// El confeti cae una vez al abrir la pantalla.
-  static const Duration duracionConfeti = Duration(milliseconds: 1200);
-
   /// Sombra sólida inferior, sin desenfoque.
   static List<BoxShadow> sombraSolida(double desplazamiento) => [
     BoxShadow(color: colorSombraSolida, offset: Offset(0, desplazamiento)),
