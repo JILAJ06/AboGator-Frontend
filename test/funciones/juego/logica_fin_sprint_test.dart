@@ -163,7 +163,7 @@ void main() {
       final mock = MockVidas(espera: Duration.zero);
       expect((await mock.guardarVidas(3)).cantidad, 3);
       expect((await mock.obtenerVidas()).cantidad, 3);
-      expect((await mock.obtenerVidas()).proximaEn, isNotNull);
+      expect((await mock.obtenerVidas()).faltaParaProxima, isNotNull);
       expect((await mock.guardarVidas(-2)).cantidad, 0);
       expect((await mock.guardarVidas(9)).cantidad, 5);
       expect((await MockVidas(espera: Duration.zero).obtenerVidas()).cantidad, 5);

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/textos/textos.dart';
+import '../datos/sincronizacion/estado_sincronizacion.dart';
 import '../funciones/acceso/pantalla_inicio_sesion.dart';
 import '../funciones/acceso/pantalla_registro.dart';
 import '../funciones/acceso/sesion.dart';
@@ -15,6 +16,7 @@ import '../funciones/juego/pantalla_sprint_completado.dart';
 import '../funciones/juego/pantalla_startup_quiebra.dart';
 import '../funciones/mapa/pantalla_intro_sprint.dart';
 import '../funciones/mapa/pantalla_mapa_sprints.dart';
+import '../funciones/vidas/pantalla_sin_vidas.dart';
 import 'pantalla_pendiente.dart';
 import 'rutas.dart';
 
@@ -68,11 +70,13 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             PantallaStartupQuiebra(sprintId: state.pathParameters['sprintId']!),
       ),
-      // Marcadores hasta T-08, T-09, T-10 y T-11.
       GoRoute(
         path: Rutas.sinVidas,
-        builder: (context, state) => const PantallaPendiente(texto: Textos.sinVidasPendiente),
+        redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
+        builder: (context, state) =>
+            PantallaSinVidas(moduloId: state.uri.queryParameters['modulo']),
       ),
+      // Marcadores hasta T-09, T-10 y T-11.
       GoRoute(
         path: Rutas.crisisJefe,
         builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteJefe),
@@ -94,5 +98,7 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
     ],
   );
   ref.onDispose(enrutador.dispose);
+  // Al abrir la app se envía lo que haya quedado en la cola local.
+  ref.read(respuestasPendientesProvider);
   return enrutador;
 });

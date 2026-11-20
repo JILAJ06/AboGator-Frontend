@@ -2,42 +2,74 @@ import '../modelos/vidas.dart';
 import '../repositorios/repositorio_vidas.dart';
 import 'espera_simulada.dart';
 
-/// Vidas simuladas (5 de 5, como en Figma). Si faltan vidas, la hora de la
-/// próxima imita la que mandaría el servidor.
+/// Vidas simuladas que imitan al servidor (5 de 5 por defecto, como en Figma).
 ///
-/// Guarda las vidas en memoria; cada instancia empieza con [cantidad] (las
-/// pruebas crean una nueva para reiniciar).
+/// Con un reloj inyectable ([ahoraServidor]) guarda el momento de la próxima
+/// regeneración:
+/// - al bajar de 5 sin regeneración programada, la programa a ahora + 2 h;
+/// - al pedir las vidas aplica las vencidas (+1 por cada 2 h cumplidas, sin
+///   pasar de 5); si aún faltan, programa la siguiente 2 h después de la
+///   anterior;
+/// - con 5 no hay regeneración.
+///
+/// `faltaParaProxima` = próxima − ahora. Cada instancia empieza con
+/// [cantidad] (las pruebas crean una nueva para reiniciar).
 class MockVidas implements RepositorioVidas {
   MockVidas({
     this.espera = esperaSimuladaPorDefecto,
-    this._cantidad = Vidas.maximo,
+    int cantidad = Vidas.maximo,
     DateTime Function()? ahoraServidor,
-  }) : _ahoraServidor = ahoraServidor ?? DateTime.now;
+  }) : _cantidad = cantidad.clamp(0, Vidas.maximo),
+       _ahoraServidor = ahoraServidor ?? DateTime.now {
+    _programarSiFalta();
+  }
 
   final Duration espera;
   int _cantidad;
   final DateTime Function() _ahoraServidor;
 
-  /// Vidas guardadas ahora mismo.
+  /// Momento (del servidor) de la próxima regeneración; `null` con 5 vidas.
+  DateTime? _proxima;
+
+  /// Vidas guardadas ahora mismo (sin aplicar regeneraciones pendientes).
   int get cantidad => _cantidad;
 
-  Vidas get _vidas => Vidas(
-    cantidad: _cantidad,
-    proximaEn: _cantidad >= Vidas.maximo
-        ? null
-        : _ahoraServidor().add(const Duration(hours: 1, minutes: 24)),
-  );
+  /// Próxima regeneración programada (para las pruebas).
+  DateTime? get proximaRegeneracion => _proxima;
+
+  void _programarSiFalta() {
+    if (_cantidad >= Vidas.maximo) {
+      _proxima = null;
+    } else {
+      _proxima ??= _ahoraServidor().add(Vidas.intervaloRegeneracion);
+    }
+  }
+
+  /// Aplica las regeneraciones vencidas.
+  void _regenerar() {
+    final ahora = _ahoraServidor();
+    while (_proxima != null && !ahora.isBefore(_proxima!)) {
+      _cantidad++;
+      _proxima = _cantidad >= Vidas.maximo ? null : _proxima!.add(Vidas.intervaloRegeneracion);
+    }
+  }
+
+  Vidas get _vidas =>
+      Vidas(cantidad: _cantidad, faltaParaProxima: _proxima?.difference(_ahoraServidor()));
 
   @override
   Future<Vidas> obtenerVidas() async {
     await esperar(espera);
+    _regenerar();
     return _vidas;
   }
 
   @override
   Future<Vidas> guardarVidas(int cantidad) async {
     await esperar(espera);
+    _regenerar();
     _cantidad = cantidad.clamp(0, Vidas.maximo);
+    _programarSiFalta();
     return _vidas;
   }
 }

@@ -8,6 +8,7 @@ import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
 import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
+import 'package:abogator/datos/mocks/mock_respuestas.dart';
 import 'package:abogator/datos/mocks/mock_tarjetas.dart';
 import 'package:abogator/datos/mocks/mock_tienda.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
@@ -16,6 +17,7 @@ import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
 import 'package:abogator/datos/repositorios/repositorio_tarjetas.dart';
+import 'package:abogator/datos/sincronizacion/servicio_conexion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/juego/estado_juego.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,6 +70,9 @@ Future<TarjetasFalsas> abrirJuego(
   bool conSesion = true,
   void Function(TarjetasFalsas)? antes,
   MockTienda? tienda,
+  MockVidas? vidasRepo,
+  MockRespuestas? servidorRespuestas,
+  ServicioConexion? conexion,
 }) async {
   await tester.binding.setSurfaceSize(tamano);
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -78,8 +83,12 @@ Future<TarjetasFalsas> abrirJuego(
       overrides: [
         repositorioProgresoProvider.overrideWithValue(MockProgreso(espera: Duration.zero)),
         repositorioTiendaProvider.overrideWithValue(tienda ?? MockTienda(espera: Duration.zero)),
+        repositorioRespuestasProvider.overrideWithValue(
+          servidorRespuestas ?? MockRespuestas(espera: Duration.zero),
+        ),
+        if (conexion != null) servicioConexionProvider.overrideWithValue(conexion),
         repositorioVidasProvider.overrideWithValue(
-          MockVidas(espera: Duration.zero, cantidad: vidas),
+          vidasRepo ?? MockVidas(espera: Duration.zero, cantidad: vidas),
         ),
         repositorioTarjetasProvider.overrideWithValue(repo),
         repositorioApelacionesProvider.overrideWithValue(MockApelaciones(espera: Duration.zero)),

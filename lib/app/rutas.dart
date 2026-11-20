@@ -81,11 +81,13 @@ abstract final class Rutas {
   static String startupQuiebraDe(String sprintId) => '/juego/$sprintId/quiebra';
 
   // Flujo 4 · Vidas y conexión
-  /// 20 Sin vidas
+  /// 20 Sin vidas. El parámetro `modulo` dice a qué mapa volver. (23 Sin
+  /// conexión no es una ruta: es un estado de la pantalla de juego.)
   static const String sinVidas = '/sin-vidas';
 
-  /// 23 Sin conexión
-  static const String sinConexion = '/sin-conexion';
+  /// "Sin vidas" que vuelve al mapa de [moduloId] (o al Inicio si es `null`).
+  static String sinVidasDe(String? moduloId) =>
+      moduloId == null ? sinVidas : '$sinVidas?modulo=${Uri.encodeQueryComponent(moduloId)}';
 
   // Flujo 5 · Nivel Jefe
   /// 27 Crisis: ransomware (28, 28b y 28c ocurren dentro de esta ruta)

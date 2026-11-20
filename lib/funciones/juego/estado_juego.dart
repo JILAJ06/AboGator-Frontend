@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utilidades/uuid.dart';
 import '../../datos/modelos/articulo_tienda.dart';
 import '../../datos/modelos/estado_startup.dart';
 import '../../datos/modelos/modulo.dart';
+import '../../datos/modelos/respuesta_pendiente.dart';
 import '../../datos/modelos/tarjeta.dart';
 import '../../datos/modelos/vidas.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
+import '../../datos/sincronizacion/estado_sincronizacion.dart';
 import '../mapa/logica_mapa.dart';
 import 'logica_comodines.dart';
 import 'logica_fin_sprint.dart';
@@ -44,7 +47,7 @@ class DatosJuego {
   /// Comodines que tiene el usuario al empezar (de la tienda).
   final Map<Comodin, int> comodines;
 
-  /// Con 0 vidas no se carga el juego (marcador de "Sin vidas", T-08).
+  /// Con 0 vidas no se carga el juego: se muestra "Sin vidas" (20).
   bool get sinVidas => vidas.cantidad <= 0;
 }
 
@@ -62,7 +65,21 @@ final datosJuegoProvider = FutureProvider.autoDispose.family<DatosJuego, String>
   final repoTienda = ref.watch(repositorioTiendaProvider);
 
   final vidas = await repoVidas.obtenerVidas();
-  if (vidas.cantidad <= 0) return DatosJuego(vidas: vidas);
+
+  (Modulo?, Sprint?) ubicar(List<Modulo> modulos) {
+    for (final m in modulos) {
+      final s = LogicaMapa.sprintPorId(m, sprintId);
+      if (s != null) return (m, s);
+    }
+    return (null, null);
+  }
+
+  // Sin vidas no se cargan las tarjetas, pero sí el módulo y el sprint (para
+  // saber a qué mapa volver desde "Sin vidas").
+  if (vidas.cantidad <= 0) {
+    final (modulo, sprint) = ubicar(await repoProgreso.obtenerModulos());
+    return DatosJuego(vidas: vidas, modulo: modulo, sprint: sprint);
+  }
 
   Future<List<Tarjeta>> tarjetas() async {
     try {
@@ -79,16 +96,7 @@ final datosJuegoProvider = FutureProvider.autoDispose.family<DatosJuego, String>
     repoTienda.obtenerComodines(),
   ).wait;
 
-  Modulo? modulo;
-  Sprint? sprint;
-  for (final m in modulos) {
-    final s = LogicaMapa.sprintPorId(m, sprintId);
-    if (s != null) {
-      modulo = m;
-      sprint = s;
-      break;
-    }
-  }
+  final (modulo, sprint) = ubicar(modulos);
 
   return DatosJuego(
     vidas: vidas,
@@ -401,6 +409,24 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
     );
     final bonus = bonusEvidencia || bonusJustificacion;
     final resultado = bonus ? calificado.conBonus(monedasDobles: bonusJustificacion) : calificado;
+    // Offline-first: la respuesta se guarda en la cola del dispositivo con un
+    // UUID del cliente y se sincroniza después. La calificación, el panel y el
+    // avance no esperan a la red.
+    unawaited(
+      ref
+          .read(respuestasPendientesProvider.notifier)
+          .agregar(
+            RespuestaPendiente(
+              id: generarUuidV4(),
+              sprintId: sprintId,
+              tarjetaId: tarjeta.id,
+              veredicto: veredicto,
+              justificacion: justificacion,
+              evidenciaCorrecta: state.evidenciaMarcada[tarjeta.id],
+              respondidaEn: DateTime.now().toUtc(),
+            ),
+          ),
+    );
     final conPregunta =
         !bonus && resultado.tipo == TipoVeredicto.correcto && tarjeta.microPregunta != null;
     state = state.copiar(
