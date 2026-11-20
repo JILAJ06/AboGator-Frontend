@@ -1,91 +1,58 @@
-# T-10 · Tienda y Perfil y progreso
+# T-10b · Ajustes de accesibilidad y modo oscuro
 
-**Rama:** `10-tienda-perfil-ajustes` (ya creada desde `develop`; el nombre se conserva aunque los ajustes pasaron a la T-10b)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-10**).
-**Pantallas:** 24 Tienda y 25 Perfil y progreso. Figma (archivo `SYNAyUal3xVk4k8SEBEb7f`): 24 = `18:2347`, 25 = `18:2492`. Compara en Chrome con el conector. **Los ajustes (26), el modo oscuro forzado y sus efectos son la T-10b**: aquí solo se deja el camino hacia ellos.
+**Rama:** `10b-ajustes-accesibilidad` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-10b**).
+**Pantalla:** 26 Ajustes de accesibilidad. Figma (archivo `SYNAyUal3xVk4k8SEBEb7f`): 26 = `18:2634`. Compara en Chrome con el conector. (26b, el orden de foco del juego, ya se hizo en la T-05 y se verifica en la T-13.)
 
 ## Objetivo
-Dos pestañas de la navegación inferior con datos reales de los repositorios: en la Tienda se pueden **comprar** comodines (y "Congelar racha") con monedas; en el Perfil se ven los datos y logros de la persona, se cierra sesión y se llega a los ajustes.
-
-## Reglas
-- Las monedas y las compras **las manda el servidor**; la app nunca calcula un saldo por su cuenta. Comprar **necesita conexión** (`conexionProvider`): sin conexión, los botones de precio quedan deshabilitados y se muestra el aviso "Necesitas conexión para comprar." (`AvisoConexion` no; usa una nota `fondoSuperficieAlt` igual a la de RN03, encima del catálogo).
-- Máximo **9** unidades de cada artículo. Con 9, el botón dice "Máximo" y queda deshabilitado.
-- Los comodines solo funcionan en lecciones normales; en el Examen Final están bloqueados (RN03). Esa nota va al final de la Tienda, como en Figma.
-- "Congelar racha" **no es un comodín** (no se usa en el juego): se compra y queda en el inventario; el servidor lo gasta solo si un día no se juega (T-14). Aquí solo se guarda la cantidad.
+Una pantalla de ajustes con seis opciones que **se guardan en el dispositivo y de verdad cambian la app**: modo oscuro, tamaño de texto, solo botones (sin deslizar), vibración, tiempo extendido y reducir animaciones.
 
 ## Datos
-### Tienda
-- `ArticuloTienda.comodin` pasa a `Comodin?` (nulo = Congelar racha). Ids estables: `lupa`, `abogado`, `amparo`, `congelar-racha`. Ajusta los usos existentes.
-- **Precios y textos de Figma** (reemplazan los del mock): Lupa de Auditor **60**, Abogado Senior **90**, Amparo / Fianza **120**, Congelar racha **100**. Descripciones: "Resalta en amarillo las palabras trampa del caso.", "Traduce el caso al artículo o licencia exacta.", "Escudo: tu próximo error no te quita vida.", "Protege tu racha si no juegas un día." Actualiza lo que dependa de ellos (pruebas, panel del Abogado, galería, textos).
-- `RepositorioTienda.comprarArticulo(String articuloId)` → `ResultadoCompra{articulo, cantidadNueva, monedasRestantes}`. Lanza `ExcepcionTienda` con un `motivo` (`monedasInsuficientes`, `maximoAlcanzado`, `articuloInexistente`); el mock valida las tres.
-- `RepositorioTienda.obtenerCongeladoresRacha()` → `int`. El mock empieza con **0**.
-- El inventario de Figma (Lupa ×2, Abogado ×1, Amparo ×1) coincide con el mock.
-- Tras una compra se invalidan los proveedores que leen monedas o comodines (Inicio, Mapa, `datosJuegoProvider`, el de la propia Tienda). Que el juego en curso no se rompa: solo se recargan al entrar.
+### Ajustes
+- Modelo `Ajustes{modoTema (ThemeMode), escalaTexto (int, %), soloBotones, haptica, tiempoExtendido, reducirAnimaciones}` con `copyWith`. **Valores por defecto:** `ThemeMode.system`, 100, `false`, **`true`**, `false`, `false`.
+- `RepositorioAjustes`: `cargar()` → `Ajustes` y `guardar(Ajustes)`. Implementación SQLite sobre la tabla `ajustes` de `BaseLocal` (clave/valor, mismo estilo que `OnboardingSqlite`; claves `modo_tema` = `system|light|dark`, `escala_texto`, `solo_botones`, `haptica`, `tiempo_extendido`, `reducir_animaciones`; un valor inválido o ausente = el por defecto) y una **en memoria** para web y pruebas; la elección vive en `proveedores_repositorios.dart` con `usarBaseLocal`, como el onboarding. Son ajustes **del dispositivo**: cerrar sesión no los borra.
+- `ajustesProvider` (`Notifier<Ajustes>`): estado inicial ya cargado, para que el tema correcto salga **desde el primer cuadro** (sin parpadeo). En `main()` se hace `await` de `cargar()` antes de `runApp` y se pasa por un override de Riverpod; si cargar falla, se usan los por defecto. Cada cambio actualiza el estado al instante y guarda; si guardar falla, **se revierte** y un `SnackBar` en región en vivo dice "No se pudo guardar el ajuste. Inténtalo de nuevo."
+- `modoTemaProvider` sigue existiendo con la misma API (la galería lo usa) pero su estado sale de los ajustes y `establecer` guarda. Actualiza `modo_tema.dart` (su comentario también).
+- **Cómo se lee el modo oscuro:** guardado es `system`, `light` o `dark`. El interruptor está **encendido** cuando el modo efectivo es oscuro (incluye `system` con el sistema en oscuro) y al tocarlo se guarda `dark` o `light` explícito. Mientras haya un modo explícito aparece bajo la tarjeta Visual un botón de texto (alto 48) "Usar el modo del sistema" que vuelve a `system`.
 
-### Perfil
-- Nuevo `RepositorioPerfil.obtenerPerfil()` → `ResumenPerfil{usuario, precision (0–100), certificados, certificadosTotales, sprintsPerfectos, insignias}`; `Insignia{id, nombre, icono, moduloId (solo para el color), desbloqueada}`. Interfaz en `lib/datos/repositorios/`, `MockPerfil` en `mocks/`, proveedor en `proveedores_repositorios.dart` (único sitio donde se elige la implementación).
-- Mock para Ana López: precisión 82, certificados 0 de 5, sprints perfectos 12; insignias "Guardián de datos" (`shield-check`, módulo Protección de datos), "Racha de 7" (`flame`, módulo Licencias), "Sprint perfecto" (`star`, módulo Contratos digitales) y "Abogado de código" (bloqueada, `lock`). Usa `ColoresModulo` para los colores, no hex nuevos.
-- Racha, nivel, XP y nombre vienen de `Usuario` (mock: 7, 4, 1250). El XP se formatea con separador de miles ("1,250"; Figma dice "1,240", es solo un dato de ejemplo). Sin sesión, las rutas Tienda y Perfil redirigen a `Rutas.inicioSesion`, como el Buzón.
+### Efectos reales (todos con prueba)
+1. **Modo oscuro:** `MaterialApp.themeMode` ya lo usa; verifica que cambia al instante y que se conserva al reabrir.
+2. **Tamaño de texto:** opciones **100, 120, 140 y 160 %**. La escala efectiva es `escala del sistema × porcentaje`, con **tope de 2.0** (200 %, WCAG 1.4.4; ya hay pruebas de layout hasta 200 %). Se aplica en `MaterialApp.builder` con `MediaQuery.copyWith(textScaler: TextScaler.linear(…))`, así llega a diálogos y paneles. Calcula la parte del sistema con `MediaQuery.textScalerOf(context).scale(1)`.
+3. **Reducir animaciones:** en el mismo `builder`, `MediaQuery.copyWith(disableAnimations: sistema || ajuste)`. Los componentes ya respetan `MediaQuery.disableAnimationsOf`; comprueba con una prueba en el juego y el Splash. Con el sistema ya en "reducir" el interruptor sigue mostrando lo que guardó la persona, pero el efecto es el del sistema (anótalo en el reporte).
+4. **Vibración háptica:** nuevo `ServicioHaptico` (interfaz + proveedor, sustituible en pruebas) con `acierto()` (`lightImpact`), `parcial()` (`selectionClick`), `error()` (**dos** `mediumImpact` con 90 ms entre ellos, como dice "doble = error") y `suave()` (`lightImpact`, para la compra y el juicio ganado). No hace nada en web ni con el ajuste apagado. Sustituye **todas** las llamadas directas a `HapticFeedback` (juego, juicio de apelación, tienda). Al encender el interruptor da un `suave()` de muestra.
+5. **Solo botones (sin deslizar):** con el ajuste encendido, `MazoSwipe` **no arrastra** (nuevo parámetro `arrastreActivo`, sin reconocedor de arrastre); los 4 botones de veredicto y las acciones del lector funcionan igual, y un toque sobre la tarjeta con evidencia sigue abriendo el visor. La pista de gesto de la tarjeta dice "Elige con los botones" en lugar de la de deslizar (texto nuevo). Aplica también en el juicio de apelación. Los sellos y el tinte solo aparecen al previsualizar con botón/teclado como hoy.
+6. **Tiempo extendido:** solo se guarda (`ajustesProvider` lo expone); lo usará el Examen Final de la T-11 (+50 % de tiempo por tarjeta y pausa). Dilo en el reporte; no inventes temporizadores aquí.
 
-## 24 · Tienda (marco 390×844, pestaña "Tienda", dentro de `MarcoPrincipal`)
-Columna desplazable, relleno horizontal 24, `fondoApp`; navegación inferior de 84 abajo.
-- **Encabezado** (y=58): "Tienda" Fredoka Bold 26/32 `textoPrimario` a la izquierda y a la derecha la **píldora de saldo** (279,58): `fondoDestacado`, radio 999, relleno izq. 12 / der. 16 / vert. 8, separación 8, moneda de 22 (la misma del chip HUD) y el saldo en Fredoka SemiBold 17/22. Se lee "Tienes 240 monedas".
-- **"Tu inventario"** (H2, Fredoka SemiBold 20/26, y=110) y debajo (y=144) una fila `Wrap` con separación 8 de píldoras: `fondoSuperficie`, borde 1 `bordeDefault`, radio 999, relleno izq. 10 / der. 12 / vert. 8, separación 6, ícono 16 y Etiqueta 12: "Lupa ×2" (`search`), "Abogado ×1" (`briefcase`), "Amparo ×1" (`shield-check`). Siempre las tres (aun con ×0); una cuarta, "Congelar racha ×N" (`snowflake`), solo si N > 0. Se leen "Lupa de Auditor, 2 en inventario".
-- **"Comodines"** (H2, y=196) y el **catálogo** (y=232, ancho 342): `Wrap` de 2 columnas, separación 12; las tarjetas de una fila miden lo mismo de alto.
-- **Tarjeta de artículo** (ancho 165): `fondoSuperficie`, borde 1 `bordeDefault`, radio 22, sombra (0, 8, 12, 14 %) como las demás, relleno 16, separación 10.
-  - Cuadro de ícono 52, `fondoDestacado`, radio 16, ícono 28 (`search`, `briefcase`, `shield-check`, `snowflake`).
-  - Nombre: Fredoka SemiBold 17/22 ("Lupa de Auditor", "Abogado Senior", "Amparo / Fianza", "Congelar racha").
-  - Descripción: Leyenda `textoSecundario`.
-  - **Botón de precio** (alto 48, radio 12, `accionPrimaria`): moneda de 18 + precio en Fredoka SemiBold 16 `textoEnPrimario`. Deshabilitado (sin saldo, sin conexión o en máximo): `fondoSuperficieAlt`, texto `textoSecundario`; con saldo insuficiente aparece bajo el botón la Leyenda "Te faltan N" (`textoSecundario`); en máximo el botón dice "Máximo".
-  - Etiqueta semántica del botón: "Comprar Lupa de Auditor por 60 monedas" / "…, te faltan 20 monedas" / "…, máximo alcanzado".
-- **Nota RN03** (al final del contenido; en Figma y=692): `fondoSuperficieAlt`, radio 16, relleno 14×12, separación 10, ícono `info` de 20 y Leyenda "Los comodines solo funcionan en lecciones normales. En el Examen Final están bloqueados (RN03)." Deja 24 de aire antes de la navegación inferior.
+## 26 · Ajustes de accesibilidad (marco 390×844, sin navegación inferior)
+Columna desplazable sobre `fondoApp`.
+- **Encabezado** (y=54): botón de regreso de 48 en (20,54) (`BotonCerrar` con etiqueta "Atrás", como en `PantallaPendiente`) y el título "Accesibilidad" Fredoka Bold 26/32 `textoPrimario` en (76,62). Debajo (24,112) "WCAG 2.1 AA · Ajusta la app a tu forma de aprender." Cuerpo/Base `textoSecundario`. Al abrir, el foco va al título.
+- **Secciones** (etiqueta Etiqueta 12 `textoSecundario` en x=28, encabezado semántico; tarjeta debajo en x=24, ancho 342): `fondoSuperficie`, borde 1 `bordeDefault`, radio 18, filas de relleno 16×12, separación 12, divisores de 1 `bordeDefault` entre filas. Cada fila: ícono de 22, columna de texto (Cuerpo/Énfasis + Leyenda `textoSecundario`) y el control a la derecha. Alto de fila ≥ 56 y el toque abarca **toda la fila**.
+  - **VISUAL** (etiqueta y=174, tarjeta y=196): "Modo oscuro" / "Contraste alto en fondos oscuros" (`moon`, interruptor) · "Tamaño de texto" / "Texto dinámico sin deformar" (`type`, chip "Aa 120 %") · "Etiquetas para lector" / "TalkBack / VoiceOver" (`eye`, chip "Activo").
+  - **MOTOR Y AUDITIVA** (etiqueta y=401, tarjeta y=423): "Botones en lugar de deslizar" / "Toca uno de los 4 veredictos (48 dp)" (`check`, interruptor) · "Vibración háptica" / "Corta = acierto · doble = error" (`vibrate`, interruptor).
+  - **COGNITIVA (WCAG 2.2.1)** (etiqueta y=567, tarjeta y=589): "Tiempo extendido en exámenes" / "+50 % por tarjeta y opción de pausa" (`clock`, interruptor) · "Reducir animaciones" / "Menos movimiento en tarjetas" (`pause`, interruptor).
+- **Interruptor:** 48×28, radio 14, pulgar de 22. **Lee los colores de las imágenes de Figma con el conector** (activo e inactivo) y ponlos con tokens (`accionPrimaria` / `bordeControl` si coinciden; si no, dímelo en el reporte). Hay que cumplir contraste ≥ 3:1 del control contra su fondo (WCAG 1.4.11). Si el `Switch` del tema alcanza esas medidas, úsalo; si no, un componente `InterruptorApp` propio. Valores de Figma: todos encendidos salvo "Reducir animaciones"; **los valores por defecto reales son los de arriba**, no los de Figma.
+- **Chip de valor** (`fondoSuperficieAlt`, radio 10, relleno 10×6, Etiqueta): tamaño "Aa 100 %" (el valor real); **"Etiquetas para lector"** es solo informativo (no tocable, sin foco): "Activo" si `MediaQuery.accessibleNavigationOf(context)` es verdadero y **"Disponible"** si no (las etiquetas siempre existen; Figma solo muestra "Activo"). Se lee "Etiquetas para lector: activo/disponible".
+- **Selector de tamaño** (tocar la fila): `showModalBottomSheet` con título "Tamaño de texto", cuatro opciones de radio (alto ≥ 48; "100 %", "120 %", "140 %", "160 %", cada una con el texto "Aa" a ese tamaño) y se cierra al elegir; se aplica al instante. Foco inicial en la opción actual.
+- **Semántica de las filas con interruptor:** una sola etiqueta "Modo oscuro, contraste alto en fondos oscuros", `toggled` con el estado, acción de tocar; sin que el lector lea dos veces el interruptor interno (exclúyelo). La fila de tamaño es botón con valor "120 por ciento".
 
-### Flujo de compra
-1. Tocar el precio abre un **diálogo de confirmación** (`showDialog`; `fondoSuperficie`, radio 22, relleno 24): título "¿Comprar {nombre}?" (Fredoka SemiBold 20), texto "Cuesta {precio} monedas. Te quedarían {saldo − precio}." y dos botones: primario "Comprar" y fantasma "Cancelar" (alto 48). Esc o tocar fuera cancelan. El foco inicial va al título.
-2. Al confirmar: botón en estado de carga (sin doble toque); se llama a `comprarArticulo`; vibración ligera (ignorar en web); se refrescan saldo e inventario y un `SnackBar` en región en vivo dice "Compraste {nombre}. Ahora tienes {N}. Te quedan {M} monedas."
-3. Errores: `monedasInsuficientes` / `maximoAlcanzado` (el saldo cambió desde el servidor): refresca los datos y avisa con `SnackBar` ("Ya no te alcanzan las monedas." / "Ya tienes el máximo."); cualquier otro: "No se pudo completar la compra. Inténtalo de nuevo." y no cambia nada.
-- Estados de la pantalla: esqueleto mientras carga; error con `MensajePantalla` y "Reintentar".
-
-## 25 · Perfil y progreso (marco 390×844, pestaña "Perfil")
-Columna desplazable, relleno horizontal 24.
-- **Encabezado** (y=54): "Mi perfil" Fredoka Bold 26/32 y a la derecha el botón de ajustes (322,54; 48×48): `fondoSuperficie`, borde 1 `bordeDefault`, radio 12, ícono `settings` de 20; etiqueta "Accesibilidad y ajustes"; va a `Rutas.ajustes`.
-- **Tarjeta de perfil** (y=112, ancho 342): `accionPrimaria`, radio 22, relleno 16, separación 14. Avatar de 60, `fondoDestacado`, con las iniciales (primera letra de las dos primeras palabras del nombre, en mayúsculas: "AL") en Fredoka SemiBold 20 `accionSecundaria`; a su lado el nombre (Fredoka SemiBold 20, `textoEnPrimario`) y "Desarrollador · Nivel 4 · 1,250 XP" (Leyenda `textoEnPrimario`). El rol usa los textos de `Textos` del registro (`perfilDesarrollador`, etc.); Figma dice "Desarrolladora" porque es el ejemplo de Ana: anota en el reporte que seguimos los textos neutros del registro.
-- **Estadísticas** (y=214): `Wrap` de 2 columnas, separación 10, tarjetas de 166: `fondoSuperficie`, borde 1 `bordeDefault`, radio 16, relleno 14×12, separación 10, ícono de 22, valor Fredoka SemiBold 17 y Leyenda `textoSecundario`: "7 días / Racha actual" (`flame`), "82 % / Precisión" (`check`), "0 / 5 / Certificados" (`trophy`), "12 / Sprints perfectos" (`star`). Cada una se lee como un bloque ("Racha actual: 7 días").
-- **"Insignias"** (H2, y=366) y la fila (y=402), separación 8, cada una de ancho 79 y centrada: medalla circular de 60, borde 3 `accionAcento`, fondo del color del módulo y ícono blanco de 26; debajo el nombre en Leyenda centrada (máximo dos líneas). **Bloqueada:** fondo `fondoSuperficieAlt`, borde `bordeDefault`, ícono `lock` y nombre en `textoSecundario`. Se leen "Guardián de datos, obtenida" / "Abogado de código, bloqueada". Si no caben en 342, la fila se desplaza en horizontal (sin barra visible), nunca se corta ni se encoge la medalla.
-- **Menú** (y=520, ancho 342): `fondoSuperficie`, borde 1 `bordeDefault`, radio 18, filas de relleno 16×14, separación 12, ícono de 20, texto Cuerpo/Énfasis, chevron `chevron-right` de 18, separadas por divisores de 1 `bordeDefault` (sin borde doble al final; Figma lo repite abajo: anótalo). Filas, todas con alto ≥ 48:
-  - "Accesibilidad" (`accessibility`) → `Rutas.ajustes`.
-  - "Notificaciones de racha" (`bell`) → `Rutas.notificacionesRacha` (nueva, `/perfil/notificaciones`).
-  - "Aviso de privacidad" (`doc`) → `Rutas.avisoPrivacidad` (si ya existe una ruta del aviso del registro, reúsala; si no, `/perfil/aviso-privacidad`).
-  - "Cerrar sesión" (`logout`), texto e ícono en `estadoIlegal`.
-- **Destinos aún sin pantalla** (ajustes → T-10b; notificaciones y aviso → faltan en Figma): usa `PantallaPendiente` con textos propios en `Textos` ("Ajustes de accesibilidad · llega en T-10b", "Notificaciones de racha · pantalla pendiente de diseño", "Aviso de privacidad · pantalla pendiente de diseño"). Quita `pendienteTienda` y `pendientePerfil`. La ruta `Rutas.ajustes` queda hija de `perfil` y **sin** navegación inferior.
-
-### Cerrar sesión
-- Diálogo igual al de compra: "¿Cerrar sesión?" / "Tus datos de la cuenta quedan guardados en el servidor." (y si `respuestasPendientesProvider` > 0, añade "Tienes N respuestas guardadas en este dispositivo; se enviarán cuando vuelvas a entrar.") / "Cerrar sesión" (primario, `estadoIlegal` no: usa `accionPrimaria`) y "Cancelar".
-- Al confirmar: `repositorioAutenticacion.cerrarSesion()`, `sesionProvider.cerrar()`, se invalidan los proveedores que guardan datos de la persona (Inicio, Mapa, Buzón, Tienda, Perfil, juego, sesión de apelaciones, vidas…; identifícalos y lístalos en el reporte) y `go(Rutas.inicioSesion)`. **No** se borra la cola local de respuestas ni el onboarding visto.
-- Si falla, `SnackBar` "No se pudo cerrar la sesión. Inténtalo de nuevo." y se queda.
-
-## Accesibilidad
-- Orden de foco: título → saldo → inventario → catálogo (cada tarjeta: botón de precio) → nota; en el Perfil: título → ajustes → tarjeta → estadísticas → insignias → menú.
-- Títulos como encabezados semánticos; saldo, inventario, estadísticas e insignias como bloques con etiqueta completa; íconos decorativos sin etiqueta; todo objetivo táctil ≥ 48 dp.
-- Nada depende solo del color: lo bloqueado lleva `lock` y la palabra "bloqueada"; lo no comprable lleva texto ("Te faltan 20", "Máximo").
-- Contrastes AA verificados con pruebas: `textoEnPrimario` sobre `accionPrimaria`, `textoSecundario` sobre `fondoSuperficieAlt`, `estadoIlegal` sobre `fondoSuperficie` (fila "Cerrar sesión"), ícono blanco sobre cada color de módulo, en claro y oscuro.
-- Texto al 200 % sin desbordes en 390×844, 360×640 y 320×640.
+## Rutas y limpieza
+- `Rutas.ajustes` deja de ser marcador: `PantallaAjustes`, hija del Perfil (el redirect sin sesión del Perfil la cubre) y **sin** barra inferior. Quita `Textos.pendienteAjustes`. "Atrás" vuelve al Perfil.
+- Que desde 25 el botón de ajustes y la fila "Accesibilidad" sigan llegando aquí.
 
 ## Archivos permitidos
-`lib/datos/` (tienda: interfaz, mock y modelos —`resultado_compra.dart`, `excepcion_tienda.dart`—; perfil: modelos `resumen_perfil.dart` e `insignia.dart`, `repositorio_perfil.dart`, `mock_perfil.dart`; `proveedores_repositorios.dart`), `lib/app/enrutador.dart` y `rutas.dart`, `lib/funciones/tienda/` y `lib/funciones/perfil/` (pantallas, estado y lógica), `lib/funciones/acceso/` solo para cerrar sesión, `lib/componentes/` (nuevos: píldora de saldo, píldora de inventario, tarjeta de artículo, botón de precio, tarjeta de perfil, tarjeta de estadística, medalla de insignia, fila de menú, diálogo de confirmación), proveedores de otras funciones solo para invalidarlos, `lib/core/textos/textos.dart`, `lib/core/tema/efectos.dart` e `iconos_app.dart` si falta `snowflake`, `chevron-right` u otro, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). **Sin dependencias nuevas.** No toques `modo_tema.dart` ni la base local: es de la T-10b.
+`lib/datos/` (`ajustes.dart` modelo, `repositorio_ajustes.dart`, su implementación SQLite en `lib/datos/local/` y la de memoria en `mocks/`, `proveedores_repositorios.dart`), `lib/main.dart`, `lib/app/app.dart`, `enrutador.dart` y `rutas.dart`, `lib/core/tema/modo_tema.dart`, `lib/core/servicios/` o donde cuadre para `ServicioHaptico`, `lib/funciones/ajustes/` (pantalla, estado, lógica), `lib/funciones/juego/` (`pantalla_juego.dart`, `mazo_swipe.dart`: haptics y solo botones), `lib/funciones/apelaciones/pantalla_juicio.dart` y `lib/funciones/tienda/pantalla_tienda.dart` (solo háptica y solo botones), `lib/componentes/` (`tarjeta_caso.dart` o su pista de gesto para el texto alterno; nuevos: fila de ajuste, interruptor, chip de valor, selector de tamaño), `lib/core/textos/textos.dart`, `iconos_app.dart` si faltan `moon`, `type`, `eye`, `vibrate`, `pause`, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). **Sin dependencias nuevas.**
 
 ## Pruebas
-- **Mock de tienda:** compra suma al inventario y resta monedas; sin saldo, en máximo (9) y con id inexistente lanzan `ExcepcionTienda` con su motivo y no cambian nada; Congelar racha cuenta aparte; precios y textos nuevos.
-- **Mock de perfil:** datos del resumen; iniciales (una palabra, dos, tres, con acentos y espacios de más); formato del XP.
-- **Pantalla 24:** estructura y medidas de Figma (claro y oscuro); inventario con ×0 y la píldora de Congelar racha solo con N > 0; botones habilitados, sin saldo ("Te faltan N"), en máximo y sin conexión (con su nota); diálogo (cancelar, Esc, confirmar), carga sin doble toque, saldo e inventario actualizados, anuncio, errores (saldo cambiado, máximo, genérico); Inicio y el juego ven el nuevo saldo y las nuevas cantidades; sin sesión redirige.
-- **Pantalla 25:** estructura y medidas de Figma (claro y oscuro); insignias desbloqueadas y bloqueada, desplazamiento horizontal si no caben; las cuatro filas del menú navegan a su destino; el botón de ajustes va a `Rutas.ajustes` sin navegación inferior; rol, nivel y XP; cerrar sesión (con y sin pendientes, cancelar, éxito invalida los proveedores y va al inicio de sesión, error); sin sesión redirige.
-- **Navegación:** las pestañas Tienda y Perfil conservan la barra inferior y la pestaña activa correcta; atrás desde ajustes vuelve al Perfil.
-- Texto al 200 % y tamaños pequeños sin desbordes; contrastes; semántica de bloques; orden de foco.
-- Las 840 pruebas previas siguen verdes (ajusta las que dependían de los precios 50/80/120 o de los marcadores).
+- **Repositorio:** valores por defecto; guardar y cargar cada ajuste (SQLite con `sqflite_common_ffi` y memoria); valor inválido → por defecto; los ajustes sobreviven a `cerrarSesion`.
+- **Estado:** cambio al instante; si guardar falla, se revierte y avisa; `modoTemaProvider` guarda.
+- **Efectos:** modo oscuro y claro cambian el tema y el interruptor refleja el modo efectivo con el sistema en oscuro; "Usar el modo del sistema" solo con modo explícito; tamaño 120/140/160 cambia el texto y el tope de 2.0 se respeta con el sistema en 150 %; reducir animaciones pone `disableAnimations` en verdadero (y con el sistema en verdadero se mantiene); háptica con ajuste apagado no llama a nada, encendida usa los patrones (error = dos pulsos) con un servicio falso, y la compra y el juicio usan el servicio; solo botones: arrastrar la tarjeta no la mueve, los 4 botones y el teclado sí califican, la pista cambia, un toque abre el visor de evidencia; también en el juicio.
+- **Pantalla 26:** estructura y medidas de Figma en claro y oscuro (secciones, filas ≥ 56, encabezado, etiquetas); estados de los interruptores con los valores por defecto; selector (abre, elige, cierra, aplica); chip "Activo" / "Disponible"; arranque con ajustes guardados (modo y escala ya aplicados en el primer cuadro); sin parpadeo; atrás vuelve al Perfil; sin barra inferior.
+- **Accesibilidad:** foco inicial en el título, semántica (`toggled`, valor, sin doble lectura), objetivos ≥ 48, contraste de los interruptores y chips en claro/oscuro, sin desbordes en 390×844, 360×640 y 320×640 al 100 % y 200 %.
+- Las 893 pruebas previas siguen verdes (ajusta las que llamaban a `HapticFeedback` directo o a `pendienteAjustes`).
 
 ## Criterios de aceptación
-- [ ] 24 y 25 coinciden con Figma; las decisiones que no vienen de Figma (confirmación, máximo 9, sin conexión, Congelar racha como artículo, destinos pendientes, cierre de sesión, rol neutro, divisor final del menú) quedan en el reporte.
-- [ ] Comprar descuenta monedas y suma al inventario, con confirmación y anuncio; Inicio y el juego reflejan el cambio; las compras imposibles se rechazan con aviso.
-- [ ] El Perfil muestra los datos del repositorio y cierra sesión sin dejar datos de la persona en los proveedores.
-- [ ] Ya no quedan los marcadores `pendienteTienda` y `pendientePerfil`; los destinos sin diseño usan `PantallaPendiente` con textos propios.
+- [ ] 26 coincide con Figma; lo que no viene de Figma (valores por defecto reales, "Disponible", selector, "Usar el modo del sistema", doble vibración de error) queda en el reporte.
+- [ ] Cada ajuste se guarda en el dispositivo, sobrevive al reinicio y cambia de verdad la app (tema, tamaño, animaciones, háptica, solo botones); el tiempo extendido queda guardado para la T-11.
+- [ ] El tema y el tamaño correctos salen desde el primer cuadro, sin parpadeo.
+- [ ] Ya no hay llamadas directas a `HapticFeedback` fuera del servicio ni el marcador `pendienteAjustes`.
 - [ ] Sin dependencias nuevas; análisis, formato y pruebas en verde; commits sin prefijo y sin menciones a Claude.
