@@ -16,7 +16,8 @@ Una rama por tarea, desde `develop`. El orden va de lo que todo necesita a lo qu
 | T-07 | `07-evidencia-y-comodines` | 15, 16, 16b, 17, 18: tarjetas con evidencia y de justificación (el nombre de la rama se conserva) |
 | T-07b | `07b-comodines` | 10b, 10c y el Amparo (14b activable); cantidades desde la tienda; deshabilitados en el examen |
 | T-08 | `08-vidas-y-offline` | 20 Sin vidas, 23 Sin conexión, cola local en SQLite |
-| T-09 | `09-apelaciones` | 21b, 21, 22, 22b |
+| T-09 | `09-apelaciones` | 21 Buzón, 21b notificación (texto y enlace profundo), registro de fallos en el Buzón |
+| T-09b | `09b-juicio-apelacion` | 22 Juicio de apelación, 22b Apelación ganada (y la perdida), +1 vida |
 | T-10 | `10-tienda-perfil-ajustes` | 24, 25, 26 y modo oscuro desde ajustes (26b es el orden de foco del juego: se hace en T-05 y se verifica en T-13) |
 | T-11 | `11-nivel-jefe` | 27, 28, 28b, 28c, 29, 30 |
 | T-12 | `12-tablet` | Vistas de tablet |
