@@ -37,6 +37,7 @@ class TarjetaCaso extends StatelessWidget {
     this.alInspeccionar,
     this.nodoFocoEvidencia,
     this.palabrasTrampa = const [],
+    this.aviso,
     super.key,
   });
 
@@ -50,7 +51,11 @@ class TarjetaCaso extends StatelessWidget {
   /// Alto mínimo con el texto dinámico: lo que ocupan el relleno, la
   /// etiqueta, el personaje, una línea del globo y la pista (≈ 260 al 100 %). Con texto
   /// grande la zona pide más alto y la pantalla se vuelve desplazable.
-  static double altoMinimoPara(TextScaler escala, {TipoTarjeta tipo = TipoTarjeta.normal}) {
+  static double altoMinimoPara(
+    TextScaler escala, {
+    TipoTarjeta tipo = TipoTarjeta.normal,
+    bool conAviso = false,
+  }) {
     double s(double tamano) => escala.scale(tamano);
     final contenido =
         24 +
@@ -68,7 +73,8 @@ class TarjetaCaso extends StatelessWidget {
           TipoTarjeta.normal => 0,
           TipoTarjeta.evidencia => 18 + math.max(48, s(20) + 12), // botón
           TipoTarjeta.justificacion => 18 + 24 + math.max(20, s(14) * 3), // aviso
-        };
+        } +
+        (conAviso ? 18 + 12 + math.max(14, s(14) * 1.3) : 0); // aviso propio
     return math.max(altoMinimo, contenido);
   }
 
@@ -88,6 +94,10 @@ class TarjetaCaso extends StatelessWidget {
 
   /// Palabras trampa resaltadas por la Lupa (10b); vacía si no se usó.
   final List<String> palabrasTrampa;
+
+  /// Aviso entre el globo y la pista de gesto (en la apelación, 22: "La
+  /// fallaste hace N días"). Lo lee el lector junto con la tarjeta.
+  final Widget? aviso;
 
   @override
   Widget build(BuildContext context) {
@@ -197,6 +207,7 @@ class TarjetaCaso extends StatelessWidget {
                     const SizedBox(height: 18),
                     const AvisoDilema(),
                   ],
+                  if (aviso case final aviso?) ...[const SizedBox(height: 18), aviso],
                   const Spacer(),
                   const SizedBox(height: 18),
                   const PistaGesto(),

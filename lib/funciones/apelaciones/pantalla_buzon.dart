@@ -15,6 +15,7 @@ import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/modelos/apelacion.dart';
 import '../../datos/modelos/buzon_apelaciones.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
+import 'sesion_apelaciones.dart';
 
 /// Lo que necesita el Buzón: el Buzón del servidor y el color de cada módulo.
 class DatosBuzon {
@@ -82,16 +83,22 @@ class _Titulo extends StatelessWidget {
   );
 }
 
-class _Buzon extends StatelessWidget {
+class _Buzon extends ConsumerWidget {
   const _Buzon({required this.datos});
 
   final DatosBuzon datos;
 
   static const double anchoSarko = 104;
 
-  void _abrir(BuildContext context, Apelacion a, int dias) {
+  /// Empieza una sesión con [ids] y abre el juicio de la primera.
+  static void _iniciar(BuildContext context, WidgetRef ref, List<String> ids) {
+    ref.read(sesionApelacionesProvider.notifier).iniciar(ids);
+    context.go(Rutas.juicioApelacionDe(ids.first));
+  }
+
+  void _abrir(BuildContext context, WidgetRef ref, Apelacion a, int dias) {
     if (dias <= 0) {
-      context.go(Rutas.juicioApelacionDe(a.id));
+      _iniciar(context, ref, [a.id]);
       return;
     }
     ScaffoldMessenger.of(context)
@@ -105,7 +112,7 @@ class _Buzon extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tokens = context.tokens;
     final estilos = context.estilos;
     final buzon = datos.buzon;
@@ -165,7 +172,7 @@ class _Buzon extends StatelessWidget {
                 dia: a.diaRepaso,
                 dias: buzon.diasHasta(a),
                 colorModulo: datos.coloresModulo[a.moduloId] ?? tokens.bordeControl,
-                alPresionar: () => _abrir(context, a, buzon.diasHasta(a)),
+                alPresionar: () => _abrir(context, ref, a, buzon.diasHasta(a)),
               ),
             ],
           ],
@@ -202,7 +209,7 @@ class _Buzon extends StatelessWidget {
                 texto: Textos.iniciarApelacionesHoy,
                 alPresionar: deHoy.isEmpty
                     ? null
-                    : () => context.go(Rutas.juicioApelacionDe(deHoy.first.id)),
+                    : () => _iniciar(context, ref, [for (final a in deHoy) a.id]),
               ),
               const SizedBox(height: 8),
               Text(

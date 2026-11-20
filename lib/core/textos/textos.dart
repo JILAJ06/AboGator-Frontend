@@ -508,7 +508,52 @@ abstract final class Textos {
   // Pantallas pendientes (marcadores temporales)
   // ---------------------------------------------------------------------
   static const String pendienteJefe = 'Examen final · llega en T-11';
-  static const String pendienteJuicio = 'Juicio de apelación · llega en T-09b';
+
+  // ---------------------------------------------------------------------
+  // 22 Juicio de apelación, 22b Apelación ganada y apelación perdida
+  // ---------------------------------------------------------------------
+  static String apelacionPaso(int actual, int total) => 'Apelación $actual de $total';
+  static const String masUnaVida = '+1 vida';
+  static const String vidasAlMaximo = 'Vidas al máximo';
+  static const String recompensaApelacionSemantica = 'Si ganas, recuperas 1 vida';
+  static const String vidasAlMaximoSemantica = 'Tienes las vidas al máximo';
+  static String etiquetaApelacion(String tema) => 'APELACIÓN · ${tema.toUpperCase()}';
+  static String falladaHace(int dias) => 'La fallaste hace $dias días';
+  static const String notaJuicio = 'Las apelaciones no dan avance en el mapa, pero sí vidas.';
+  static String tarjetaApelacionSemantica(
+    int actual,
+    int total,
+    String personaje,
+    String rol,
+    String texto,
+  ) => 'Apelación $actual de $total. $personaje, $rol: $texto';
+  static const String vidaRecuperadaInsignia = '+1 vida recuperada';
+  static const String noPierdesVidas = 'No pierdes vidas';
+  static const String apelacionGanadaTitulo = '¡Apelación ganada!';
+  static const String apelacionPerdidaTitulo = 'Apelación perdida';
+  static const String estaVezSi = 'Esta vez sí: ';
+  static const String estaVezNo = 'Esta vez no: ';
+  static String vuelveEnDias(int dias) =>
+      'La tarjeta vuelve en $dias días para asegurar que no se te olvide.';
+  static const String tarjetaDominada = 'Esta tarjeta ya quedó dominada: sale de tu Buzón.';
+  static const String vuelveManana = 'La tarjeta vuelve mañana para que lo intentes de nuevo.';
+  static String respuestaCorrectaEra(String veredicto) => 'La respuesta correcta era $veredicto.';
+  static const String veredictoLegalNombre = 'Legal';
+  static const String veredictoIlegalNombre = 'Ilegal';
+  static const String veredictoCondicionalNombre = 'Condicional';
+  static const String veredictoEscalarNombre = 'Escalar';
+  static String diaRepaso(int dia) => 'Día $dia';
+  static String diaRepasoSemantica(int dia, {required bool hecho}) =>
+      'Día $dia, ${hecho ? 'completado' : 'pendiente'}';
+  static const String siguienteApelacion = 'Siguiente apelación';
+  static const String volverAlBuzon = 'Volver al Buzón';
+  static String anuncioApelacion(String titulo, String insignia, int vidas) =>
+      '$titulo $insignia. Vidas: $vidas de 5.';
+  static const String necesitasConexionApelar = 'Necesitas conexión para apelar';
+  static const String apelacionNoDisponible = 'Esta apelación ya no está disponible';
+  static const String errorGuardarApelacion =
+      'No se pudo guardar tu apelación. Inténtalo de nuevo.';
+  static const String cargandoApelacion = 'Cargando la apelación';
 
   // ---------------------------------------------------------------------
   // 21 Buzón de Apelaciones

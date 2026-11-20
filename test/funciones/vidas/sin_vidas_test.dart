@@ -10,6 +10,7 @@ import 'package:abogator/core/utilidades/cronometro.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
 import 'package:abogator/datos/modelos/apelacion.dart';
 import 'package:abogator/datos/modelos/buzon_apelaciones.dart';
+import 'package:abogator/datos/modelos/resultado_apelacion.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
 import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
 import 'package:abogator/funciones/vidas/pantalla_sin_vidas.dart';
@@ -55,6 +56,10 @@ class BuzonFalso implements RepositorioApelaciones {
 
   @override
   Future<void> registrarFallos(List<NuevaApelacion> fallos) async {}
+
+  @override
+  Future<ResultadoApelacion> resolverApelacion(String apelacionId, {required bool ganada}) =>
+      throw UnimplementedError();
 }
 
 FilaVidas filaVidas(WidgetTester tester) =>

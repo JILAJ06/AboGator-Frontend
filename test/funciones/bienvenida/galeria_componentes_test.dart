@@ -33,6 +33,7 @@ import 'package:abogator/componentes/paginador_puntos.dart';
 import 'package:abogator/componentes/panel_evidencia.dart';
 import 'package:abogator/componentes/panel_justificacion.dart';
 import 'package:abogator/componentes/panel_veredicto.dart';
+import 'package:abogator/componentes/piezas_apelacion.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
 import 'package:abogator/componentes/sello_veredicto.dart';
 import 'package:abogator/componentes/snippet_codigo.dart';
@@ -86,7 +87,10 @@ void main() {
     expect(find.byType(FilaVidas), findsNWidgets(3));
     expect(find.byType(IndicadoresStartup), findsOneWidget);
     expect(find.byType(ImpactoStartup), findsNWidgets(6)); // 1 + 5 paneles
-    expect(find.byType(BarraProgreso), findsNWidgets(5)); // 4 + barra de juego
+    expect(find.byType(BarraProgreso), findsNWidgets(6)); // 4 + barras de juego y juicio
+    expect(find.byType(InsigniaVida), findsNWidgets(5)); // 4 + barra del juicio
+    expect(find.byType(AvisoFallo), findsOneWidget);
+    expect(find.byType(FilaRepaso), findsNWidgets(2));
     expect(find.byType(PaginadorPuntos), findsOneWidget);
     expect(find.byType(SarkoImagen), findsNWidgets(10)); // 5 + 5 paneles
     expect(find.byType(LogoApp), findsNWidgets(22));
