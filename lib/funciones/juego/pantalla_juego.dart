@@ -143,6 +143,9 @@ class _JuegoState extends ConsumerState<_Juego> {
         ),
       ),
     );
+    // La píldora se vuelve a habilitar al reconstruirse la barra: el foco se
+    // pide después de ese cuadro.
+    await WidgetsBinding.instance.endOfFrame;
     if (mounted && _focoAbogado.context != null) _focoAbogado.requestFocus();
   }
 

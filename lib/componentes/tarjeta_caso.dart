@@ -247,16 +247,20 @@ class TextoConTrampas extends StatelessWidget {
   Widget build(BuildContext context) {
     final texto = Text(this.texto, style: estilo);
     if (trampas.isEmpty) return texto;
+    // El pintor repite el acomodo del texto: mismo estilo efectivo (con el
+    // DefaultTextStyle) y mismo ancho (el texto ocupa todo el globo).
+    final porDefecto = DefaultTextStyle.of(context);
     return CustomPaint(
       key: const ValueKey('trampas-globo'),
       painter: PintorTrampas(
         texto: this.texto,
-        estilo: estilo,
+        estilo: porDefecto.style.merge(estilo),
+        alturaTexto: porDefecto.textHeightBehavior,
         escala: MediaQuery.textScalerOf(context),
         rangos: rangos(this.texto, trampas),
         color: EfectosApp.trampa(Theme.of(context).brightness),
       ),
-      child: texto,
+      child: SizedBox(width: double.infinity, child: texto),
     );
   }
 }
@@ -270,10 +274,12 @@ class PintorTrampas extends CustomPainter {
     required this.escala,
     required this.rangos,
     required this.color,
+    this.alturaTexto,
   });
 
   final String texto;
   final TextStyle estilo;
+  final TextHeightBehavior? alturaTexto;
   final TextScaler escala;
   final List<(int, int)> rangos;
   final Color color;
@@ -284,6 +290,7 @@ class PintorTrampas extends CustomPainter {
       text: TextSpan(text: texto, style: estilo),
       textDirection: TextDirection.ltr,
       textScaler: escala,
+      textHeightBehavior: alturaTexto,
     )..layout(maxWidth: size.width);
     final lineas = pintor.computeLineMetrics();
     final grosor = escala.scale(EfectosApp.grosorTrampa);
