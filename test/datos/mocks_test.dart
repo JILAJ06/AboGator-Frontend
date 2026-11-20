@@ -160,7 +160,7 @@ void main() {
   test('MockVidas da 5 vidas y 240 monedas en la tienda', () async {
     final vidas = await MockVidas(espera: Duration.zero).obtenerVidas();
     expect(vidas.cantidad, Vidas.maximo);
-    expect(vidas.proximaEn, isNull);
+    expect(vidas.faltaParaProxima, isNull);
     expect(await MockTienda(espera: Duration.zero).obtenerMonedas(), 240);
   });
 
@@ -172,7 +172,7 @@ void main() {
       ahoraServidor: () => servidor,
     ).obtenerVidas();
     expect(vidas.cantidad, 3);
-    expect(vidas.proximaEn!.isAfter(servidor), isTrue);
+    expect(vidas.faltaParaProxima, Vidas.intervaloRegeneracion);
   });
 
   test('MockApelaciones y MockTienda devuelven datos de ejemplo', () async {

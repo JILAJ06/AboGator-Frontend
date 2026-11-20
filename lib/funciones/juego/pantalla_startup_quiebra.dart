@@ -7,6 +7,7 @@ import '../../componentes/aviso_informativo.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/etiqueta_quiebra.dart';
+import '../../componentes/ilustracion_sarko.dart';
 import '../../componentes/indicadores_startup.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/sarko_imagen.dart';
@@ -79,7 +80,7 @@ class _PantallaStartupQuiebraState extends ConsumerState<PantallaStartupQuiebra>
           ),
         ),
         const SizedBox(height: 10),
-        IlustracionFinSprint(
+        IlustracionSarko(
           pose: PoseSarko.triste,
           diametro: 220,
           anchoSarko: 176,

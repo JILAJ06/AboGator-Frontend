@@ -9,6 +9,7 @@ import '../../componentes/boton_app.dart';
 import '../../componentes/confeti_sprint.dart';
 import '../../componentes/estadisticas_sprint.dart';
 import '../../componentes/estrellas_sprint.dart';
+import '../../componentes/ilustracion_sarko.dart';
 import '../../componentes/indicadores_startup.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/sarko_imagen.dart';
@@ -70,7 +71,7 @@ class _PantallaSprintCompletadoState extends ConsumerState<PantallaSprintComplet
       // final → aviso → botones.
       contenido: [
         const SizedBox(height: 22),
-        IlustracionFinSprint(
+        IlustracionSarko(
           pose: PoseSarko.alegre,
           diametro: 200,
           anchoSarko: 160,

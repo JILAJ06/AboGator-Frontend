@@ -2,6 +2,7 @@ import 'package:abogator/app/app.dart';
 import 'package:abogator/app/enrutador.dart';
 import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/acciones_veredicto.dart';
+import 'package:abogator/componentes/aviso_conexion.dart';
 import 'package:abogator/componentes/aviso_informativo.dart';
 import 'package:abogator/componentes/barra_comodines.dart';
 import 'package:abogator/componentes/barra_progreso.dart';
@@ -11,6 +12,7 @@ import 'package:abogator/componentes/campo_texto_app.dart';
 import 'package:abogator/componentes/chip_hud.dart';
 import 'package:abogator/componentes/confeti_sprint.dart';
 import 'package:abogator/componentes/corazon_vida.dart';
+import 'package:abogator/componentes/cuenta_regresiva_vida.dart';
 import 'package:abogator/componentes/encabezado_modulo.dart';
 import 'package:abogator/componentes/estadisticas_sprint.dart';
 import 'package:abogator/componentes/estrellas_sprint.dart';
@@ -18,7 +20,9 @@ import 'package:abogator/componentes/etiqueta_quiebra.dart';
 import 'package:abogator/componentes/fila_detalle_sprint.dart';
 import 'package:abogator/componentes/globo_sprint_actual.dart';
 import 'package:abogator/componentes/impacto_startup.dart';
+import 'package:abogator/componentes/indicador_pendientes.dart';
 import 'package:abogator/componentes/indicadores_startup.dart';
+import 'package:abogator/componentes/interruptor_conexion_debug.dart';
 import 'package:abogator/componentes/logo_app.dart';
 import 'package:abogator/componentes/navegacion_inferior_app.dart';
 import 'package:abogator/componentes/nodo_sprint.dart';
@@ -35,6 +39,7 @@ import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/funciones/bienvenida/galeria_componentes.dart';
+import 'package:abogator/funciones/vidas/pantalla_sin_vidas.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -42,7 +47,7 @@ import 'package:material_ui/material_ui.dart';
 /// Pantalla alta para que la galería entera quede construida.
 Future<void> montarGaleria(WidgetTester tester) async {
   await abrirGaleria(tester);
-  await agrandar(tester, const Size(390, 19000));
+  await agrandar(tester, const Size(390, 21000));
 }
 
 /// Agranda la superficie después de navegar (la transición de página no
@@ -71,8 +76,8 @@ void main() {
     expect(find.text(Textos.galeriaTitulo), findsOneWidget);
     expect(
       find.byType(BotonApp),
-      findsNWidgets(19),
-    ); // 8 + globo + 5 paneles + 3 visores + panel 18 + Abogado
+      findsNWidgets(21),
+    ); // 8 + globo + 5 paneles + 3 visores + panel 18 + Abogado + 2 del Buzón (20)
     expect(find.byType(BotonVeredicto), findsNWidgets(12)); // 8 + los de las acciones
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
     expect(find.byType(ChipHud), findsNWidgets(8)); // 5 + 2 encabezados + barra de juego
@@ -109,6 +114,11 @@ void main() {
     expect(find.byType(SelloVeredicto), findsNWidgets(4));
     expect(find.byType(AccionesVeredicto), findsOneWidget);
     expect(find.byType(BarraComodines), findsNWidgets(3));
+    expect(find.byType(CuentaRegresivaVida), findsOneWidget);
+    expect(find.byType(SugerenciaBuzon), findsNWidgets(2));
+    expect(find.byType(AvisoConexion), findsNWidgets(2));
+    expect(find.byType(IndicadorPendientes), findsNWidgets(2));
+    expect(find.byType(InterruptorConexionDebug), findsOneWidget);
     expect(
       tester.widgetList<PanelVeredicto>(find.byType(PanelVeredicto)).map((p) => p.tipo),
       TipoPanelVeredicto.values,
@@ -121,7 +131,7 @@ void main() {
   testWidgets('el interruptor alterna entre claro y oscuro', (tester) async {
     await montarGaleria(tester);
     expect(tokensActuales(tester).fondoApp, TokensColor.claro.fondoApp);
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pumpAndSettle();
     expect(tokensActuales(tester).fondoApp, TokensColor.oscuro.fondoApp);
     expect(tester.takeException(), isNull);

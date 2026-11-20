@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../componentes/acciones_veredicto.dart';
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/avatar_app.dart';
+import '../../componentes/aviso_conexion.dart';
 import '../../componentes/aviso_informativo.dart';
 import '../../componentes/barra_comodines.dart';
 import '../../componentes/barra_juego.dart';
@@ -18,6 +19,7 @@ import '../../componentes/chip_hud.dart';
 import '../../componentes/chip_seleccion.dart';
 import '../../componentes/confeti_sprint.dart';
 import '../../componentes/corazon_vida.dart';
+import '../../componentes/cuenta_regresiva_vida.dart';
 import '../../componentes/encabezado_modulo.dart';
 import '../../componentes/enlace_texto.dart';
 import '../../componentes/estadisticas_sprint.dart';
@@ -28,7 +30,9 @@ import '../../componentes/fila_detalle_sprint.dart';
 import '../../componentes/globo_sprint_actual.dart';
 import '../../componentes/icono_app.dart';
 import '../../componentes/impacto_startup.dart';
+import '../../componentes/indicador_pendientes.dart';
 import '../../componentes/indicadores_startup.dart';
+import '../../componentes/interruptor_conexion_debug.dart';
 import '../../componentes/logo_app.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/nodo_sprint.dart';
@@ -58,6 +62,7 @@ import '../../datos/mocks/mock_tarjetas.dart';
 import '../../datos/modelos/estado_startup.dart';
 import '../../datos/modelos/tarjeta.dart';
 import '../inicio/logica_inicio.dart';
+import '../vidas/pantalla_sin_vidas.dart';
 
 /// Tarjeta 6 (evidencia, Figma 15) y 10 (dilema, Figma 17) del sprint 3.
 final _ejemploEvidencia = MockTarjetas.tarjetasPorSprint['spr-1-3']![5];
@@ -445,6 +450,19 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                   justificacion: _ejemploDilema.justificacion!,
                   alConfirmar: (_) {},
                 ),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaVidasConexion,
+              hijos: [
+                const CuentaRegresivaVida(falta: Duration(hours: 1, minutes: 47, seconds: 32)),
+                SugerenciaBuzon(pendientes: 2, alIr: () {}),
+                SugerenciaBuzon(pendientes: 1, alIr: () {}),
+                const AvisoConexion(),
+                const AvisoConexion(restablecida: true),
+                const IndicadorPendientes(cantidad: 3),
+                const IndicadorPendientes(cantidad: 1),
+                InterruptorConexionDebug(sinConexion: true, alCambiar: (_) {}),
               ],
             ),
             _Seccion(

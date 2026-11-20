@@ -1,3 +1,4 @@
+import 'package:abogator/app/enrutador.dart';
 import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/barra_juego.dart';
 import 'package:abogator/componentes/boton_app.dart';
@@ -268,7 +269,12 @@ void main() {
       expect(vidasEnBarra(tester), 0);
       await pulsarBotonDelPanel(tester);
       expect(rutaActual(tester), Rutas.sinVidas);
-      expect(find.text(Textos.sinVidasPendiente), findsOneWidget);
+      // Vuelve al mapa del módulo del sprint.
+      expect(
+        contenedorDe(tester).read(enrutadorProvider).state.uri.queryParameters['modulo'],
+        'mod-1',
+      );
+      expect(find.text(Textos.sinVidasTitulo), findsOneWidget);
     });
 
     testWidgets('Riesgo legal en 100 → quiebra, con prioridad sobre 0 vidas', (tester) async {

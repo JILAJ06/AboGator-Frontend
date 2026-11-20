@@ -335,7 +335,45 @@ abstract final class Textos {
   static const String cargandoJuego = 'Cargando el sprint';
   static const String juegoErrorCarga = 'No pudimos cargar las tarjetas del sprint.';
   static const String sprintSinTarjetas = 'Este sprint todavía no tiene tarjetas.';
-  static const String sinVidasPendiente = 'Sin vidas · llega en T-08';
+
+  // ---------------------------------------------------------------------
+  // 20 Sin vidas
+  // ---------------------------------------------------------------------
+  static const String sinVidasTitulo = 'Te quedaste sin vidas';
+  static const String proximaVidaEn = 'Próxima vida en';
+  static const String vidaRecuperada = '¡Recuperaste una vida!';
+  static const String notaVidasServidor = '1 vida cada 2 horas · tiempo controlado por el servidor';
+  static const String mientrasTantoRepasa = 'Mientras tanto, repasa';
+  static String apelacionesPendientesSugerencia(int n) => n == 1
+      ? '1 apelación pendiente: si la ganas te devuelve 1 vida.'
+      : '$n apelaciones pendientes: cada una que ganes te devuelve 1 vida.';
+
+  /// "Próxima vida en 1 hora y 47 minutos" (se actualiza por minuto).
+  static String proximaVidaSemantica(Duration falta) {
+    final horas = falta.inHours;
+    final minutos = falta.inMinutes % 60;
+    if (horas == 0 && minutos == 0) return 'Próxima vida en menos de un minuto';
+    String unidad(int n, String singular, String plural) => '$n ${n == 1 ? singular : plural}';
+    final partes = [
+      if (horas > 0) unidad(horas, 'hora', 'horas'),
+      if (minutos > 0) unidad(minutos, 'minuto', 'minutos'),
+    ];
+    return 'Próxima vida en ${partes.join(' y ')}';
+  }
+
+  // ---------------------------------------------------------------------
+  // 23 Sin conexión (estado de la pantalla de juego)
+  // ---------------------------------------------------------------------
+  static const String conexionInestable = 'Conexión inestable. Se guardará tu progreso localmente.';
+  static const String conexionRestablecida =
+      'Conexión restablecida. Se está sincronizando tu progreso.';
+  static String respuestasGuardadas(int n) => n == 1
+      ? '1 respuesta guardada en el dispositivo (SQLite)'
+      : '$n respuestas guardadas en el dispositivo (SQLite)';
+  static String respuestasGuardadasSemantica(int n) => n == 1
+      ? '1 respuesta guardada en el dispositivo, pendiente de sincronizar'
+      : '$n respuestas guardadas en el dispositivo, pendientes de sincronizar';
+  static const String simularSinConexion = 'Simular sin conexión';
   static String veredictoAnuncio(String accion) => 'Veredicto: $accion';
 
   // ---------------------------------------------------------------------
@@ -492,6 +530,7 @@ abstract final class Textos {
   static const String galeriaJuego = 'Componentes del juego';
   static const String galeriaVeredicto = 'Paneles de veredicto';
   static const String galeriaEvidencia = 'Evidencia y dilema';
+  static const String galeriaVidasConexion = 'Vidas y conexión';
   static const String galeriaFinSprint = 'Componentes del fin de sprint';
   static const String galeriaExplicacion =
       'La licencia GPL-3.0 es copyleft: si la integras, todo el producto derivado debe '

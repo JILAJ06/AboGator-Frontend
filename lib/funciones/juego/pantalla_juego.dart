@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,12 +9,15 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/rutas.dart';
 import '../../componentes/acciones_veredicto.dart';
+import '../../componentes/aviso_conexion.dart';
 import '../../componentes/barra_comodines.dart';
 import '../../componentes/barra_juego.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/etiqueta_lupa.dart';
+import '../../componentes/indicador_pendientes.dart';
 import '../../componentes/indicadores_startup.dart';
+import '../../componentes/interruptor_conexion_debug.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/panel_abogado.dart';
 import '../../componentes/panel_evidencia.dart';
@@ -27,7 +30,11 @@ import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/modelos/articulo_tienda.dart';
 import '../../datos/modelos/tarjeta.dart';
+import '../../datos/repositorios/proveedores_repositorios.dart';
+import '../../datos/sincronizacion/estado_sincronizacion.dart';
+import '../../datos/sincronizacion/servicio_conexion.dart';
 import '../inicio/logica_inicio.dart';
+import '../vidas/pantalla_sin_vidas.dart';
 import 'estado_juego.dart';
 import 'logica_comodines.dart';
 import 'logica_swipe.dart';
@@ -58,11 +65,8 @@ class PantallaJuego extends ConsumerWidget {
     final datos = ref.watch(datosJuegoProvider(sprintId));
     return Scaffold(
       body: switch (datos) {
-        AsyncData(:final value) when value.sinVidas => MensajePantalla(
-          texto: Textos.sinVidasPendiente,
-          textoBoton: Textos.volverAlMapa,
-          alPresionar: () => volver(context, value.modulo?.id),
-        ),
+        // Sin vidas al abrir el sprint: directo a "Sin vidas" (20).
+        AsyncData(:final value) when value.sinVidas => PantallaSinVidas(moduloId: value.modulo?.id),
         AsyncData(:final value) when value.tarjetas.isEmpty => MensajePantalla(
           texto: Textos.sprintSinTarjetas,
           textoBoton: value.modulo == null ? Textos.volverAlInicio : Textos.volverAlMapa,
@@ -101,8 +105,27 @@ class _JuegoState extends ConsumerState<_Juego> {
   /// barra de comodines se deshabilita.
   final _panelAbierto = ValueNotifier(false);
 
+  /// Muestra "Conexión restablecida" unos segundos tras volver la conexión.
+  bool _restablecida = false;
+  Timer? _temporizadorRestablecida;
+
+  /// Cuánto se ve "Conexión restablecida…".
+  static const Duration duracionRestablecida = Duration(seconds: 3);
+
+  void _alCambiarConexion(EstadoConexion? antes, EstadoConexion ahora) {
+    _temporizadorRestablecida?.cancel();
+    final volvio = antes == EstadoConexion.sinConexion && ahora == EstadoConexion.enLinea;
+    setState(() => _restablecida = volvio);
+    if (volvio) {
+      _temporizadorRestablecida = Timer(duracionRestablecida, () {
+        if (mounted) setState(() => _restablecida = false);
+      });
+    }
+  }
+
   @override
   void dispose() {
+    _temporizadorRestablecida?.cancel();
     _arrastre.dispose();
     _focoEvidencia.dispose();
     _focoAbogado.dispose();
@@ -263,7 +286,7 @@ class _JuegoState extends ConsumerState<_Juego> {
       case DestinoVeredicto.quiebra:
         context.go(Rutas.startupQuiebraDe(widget.sprintId));
       case DestinoVeredicto.sinVidas:
-        context.go(Rutas.sinVidas);
+        context.go(Rutas.sinVidasDe(widget.datos.modulo?.id));
       case DestinoVeredicto.sprintCompletado:
         context.go(Rutas.sprintCompletadoDe(widget.sprintId));
       case DestinoVeredicto.siguiente:
@@ -336,6 +359,13 @@ class _JuegoState extends ConsumerState<_Juego> {
     final tarjeta = datos.tarjetas[indice];
     final colorModulo = datos.modulo?.color ?? context.tokens.textoAcento;
     final lupaUsada = progreso.lupaUsada.contains(tarjeta.id);
+    // 23 · Sin conexión: aviso sobre la tarjeta y, en lugar de los comodines
+    // (su gasto lo controla el servidor), las respuestas guardadas.
+    ref.listen(conexionProvider, _alCambiarConexion);
+    final sinConexion = ref.watch(conexionProvider) == EstadoConexion.sinConexion;
+    final pendientes = ref.watch(respuestasPendientesProvider);
+    final verAviso = sinConexion || _restablecida;
+    final sinAnimaciones = MediaQuery.disableAnimationsOf(context);
     final inspeccionar = tarjeta.tipo == TipoTarjeta.evidencia && tarjeta.evidencia != null
         ? () => _abrirEvidencia(tarjeta)
         : null;
@@ -432,6 +462,19 @@ class _JuegoState extends ConsumerState<_Juego> {
                       right: 0,
                       child: const Align(alignment: Alignment.topLeft, child: EtiquetaLupa()),
                     ),
+                  // Aviso de conexión (23): encima del borde superior de la
+                  // tarjeta, sin empujarla ni bloquear el arrastre.
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: posicionAvisoConexion,
+                    child: AnimatedSwitcher(
+                      duration: sinAnimaciones ? Duration.zero : EfectosApp.duracionPanel,
+                      child: verAviso
+                          ? AvisoConexion(key: ValueKey(sinConexion), restablecida: !sinConexion)
+                          : const SizedBox.shrink(),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -442,42 +485,63 @@ class _JuegoState extends ConsumerState<_Juego> {
           child: AccionesVeredicto(alElegir: (v) => _mazo.currentState?.confirmar(v)),
         ),
         const SizedBox(height: 22),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Semantics(
-            container: true,
-            label: Textos.comodinesTitulo,
-            child: ValueListenableBuilder<bool>(
-              valueListenable: _panelAbierto,
-              builder: (context, panelAbierto, _) {
-                final abierto = panelAbierto || progreso.panel != null;
-                final lupa = LogicaComodines.estadoLupa(progreso, tarjeta, panelAbierto: abierto);
-                final abogado = LogicaComodines.estadoAbogado(
-                  progreso,
-                  tarjeta,
-                  panelAbierto: abierto,
-                );
-                final amparo = LogicaComodines.estadoAmparo(progreso, panelAbierto: abierto);
-                bool tocable(Comodin c, EstadoComodin e) =>
-                    LogicaComodines.tocable(c, e, panelAbierto: abierto);
-                return BarraComodines(
-                  lupa: progreso.cantidad(Comodin.lupaAuditor),
-                  abogado: progreso.cantidad(Comodin.abogadoSenior),
-                  amparo: progreso.cantidad(Comodin.amparo),
-                  estadoLupa: lupa,
-                  estadoAbogado: abogado,
-                  estadoAmparo: amparo,
-                  alUsarLupa: tocable(Comodin.lupaAuditor, lupa) ? () => _usarLupa(tarjeta) : null,
-                  alUsarAbogado: tocable(Comodin.abogadoSenior, abogado)
-                      ? () => _usarAbogado(tarjeta)
-                      : null,
-                  alUsarAmparo: tocable(Comodin.amparo, amparo) ? _usarAmparo : null,
-                  nodoFocoAbogado: _focoAbogado,
-                );
-              },
+        if (sinConexion || pendientes > 0)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: BarraComodines.alto),
+              child: Center(child: IndicadorPendientes(cantidad: pendientes)),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Semantics(
+              container: true,
+              label: Textos.comodinesTitulo,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: _panelAbierto,
+                builder: (context, panelAbierto, _) {
+                  final abierto = panelAbierto || progreso.panel != null;
+                  final lupa = LogicaComodines.estadoLupa(progreso, tarjeta, panelAbierto: abierto);
+                  final abogado = LogicaComodines.estadoAbogado(
+                    progreso,
+                    tarjeta,
+                    panelAbierto: abierto,
+                  );
+                  final amparo = LogicaComodines.estadoAmparo(progreso, panelAbierto: abierto);
+                  bool tocable(Comodin c, EstadoComodin e) =>
+                      LogicaComodines.tocable(c, e, panelAbierto: abierto);
+                  return BarraComodines(
+                    lupa: progreso.cantidad(Comodin.lupaAuditor),
+                    abogado: progreso.cantidad(Comodin.abogadoSenior),
+                    amparo: progreso.cantidad(Comodin.amparo),
+                    estadoLupa: lupa,
+                    estadoAbogado: abogado,
+                    estadoAmparo: amparo,
+                    alUsarLupa: tocable(Comodin.lupaAuditor, lupa)
+                        ? () => _usarLupa(tarjeta)
+                        : null,
+                    alUsarAbogado: tocable(Comodin.abogadoSenior, abogado)
+                        ? () => _usarAbogado(tarjeta)
+                        : null,
+                    alUsarAmparo: tocable(Comodin.amparo, amparo) ? _usarAmparo : null,
+                    nodoFocoAbogado: _focoAbogado,
+                  );
+                },
+              ),
             ),
           ),
-        ),
+        // Solo en depuración: la única forma de ver el estado 23 sin backend.
+        if (kDebugMode && ref.read(servicioConexionProvider) is ConexionSimulada) ...[
+          const SizedBox(height: 8),
+          InterruptorConexionDebug(
+            sinConexion: sinConexion,
+            alCambiar: (sin) => (ref.read(servicioConexionProvider) as ConexionSimulada).establecer(
+              sin ? EstadoConexion.sinConexion : EstadoConexion.enLinea,
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
       ],
     );
@@ -514,6 +578,9 @@ class _JuegoState extends ConsumerState<_Juego> {
     );
   }
 }
+
+/// Altura del aviso de conexión respecto a la tarjeta (Figma 23: 6 arriba).
+const double posicionAvisoConexion = -6;
 
 /// Cambios de un impacto por indicador (para el panel y las barras).
 Map<IndicadorStartup, int> cambiosDe(ImpactoTarjeta i) => {

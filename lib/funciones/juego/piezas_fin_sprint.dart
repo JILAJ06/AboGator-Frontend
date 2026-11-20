@@ -2,51 +2,7 @@ import 'package:flutter/semantics.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../componentes/bloque_lectura.dart';
-import '../../componentes/sarko_imagen.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
-
-/// Sarko sobre su fondo circular (19 y 19b): el círculo de [diametro] arriba
-/// y Sarko de [anchoSarko] (caja 4:5) 4 dp más abajo, centrados. Es
-/// decorativa, como en el panel de veredicto: el título dice lo que pasó.
-class IlustracionFinSprint extends StatelessWidget {
-  const IlustracionFinSprint({
-    required this.pose,
-    required this.diametro,
-    required this.anchoSarko,
-    required this.colorFondo,
-    super.key,
-  });
-
-  /// Sarko empieza 4 dp debajo del borde superior del círculo.
-  static const double desfaseSarko = 4;
-
-  final PoseSarko pose;
-  final double diametro;
-  final double anchoSarko;
-  final Color colorFondo;
-
-  @override
-  Widget build(BuildContext context) {
-    final sarko = SarkoImagen(pose: pose, ancho: anchoSarko, decorativa: true);
-    return SizedBox(
-      width: diametro,
-      height: desfaseSarko + sarko.alto,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
-        children: [
-          Container(
-            key: const ValueKey('fondo-sarko'),
-            width: diametro,
-            height: diametro,
-            decoration: BoxDecoration(color: colorFondo, shape: BoxShape.circle),
-          ),
-          Positioned(top: desfaseSarko, child: sarko),
-        ],
-      ),
-    );
-  }
-}
 
 /// Título de 19 y 19b: Título/H1 `texto/primario` centrado. Se anuncia al
 /// abrir la pantalla y recibe el foco (sin anillo, como el panel de T-06).

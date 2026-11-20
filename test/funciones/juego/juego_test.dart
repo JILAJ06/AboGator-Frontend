@@ -20,6 +20,7 @@ import 'package:abogator/funciones/juego/logica_swipe.dart';
 import 'package:abogator/funciones/juego/pantalla_juego.dart';
 import 'package:abogator/funciones/mapa/pantalla_intro_sprint.dart';
 import 'package:abogator/funciones/mapa/pantalla_mapa_sprints.dart';
+import 'package:abogator/funciones/vidas/pantalla_sin_vidas.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -450,11 +451,10 @@ void main() {
       expect(find.text(Textos.volverAlInicio), findsOneWidget);
     });
 
-    testWidgets('con 0 vidas muestra el marcador de "Sin vidas" sin cargar tarjetas', (
-      tester,
-    ) async {
+    testWidgets('con 0 vidas muestra "Sin vidas" (20) sin cargar tarjetas', (tester) async {
       final repo = await abrirJuego(tester, vidas: 0);
-      expect(find.text(Textos.sinVidasPendiente), findsOneWidget);
+      expect(find.byType(PantallaSinVidas), findsOneWidget);
+      expect(find.text(Textos.sinVidasTitulo), findsOneWidget);
       expect(find.byType(TarjetaCaso), findsNothing);
       expect(repo.llamadas, 0);
     });

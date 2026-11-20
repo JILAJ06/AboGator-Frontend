@@ -1,6 +1,7 @@
 /// Recuerda si el usuario ya vio el onboarding (pantallas 02–04).
 ///
-/// Hoy vive en memoria; en T-08 se guardará en SQLite sin cambiar la interfaz.
+/// En el dispositivo se guarda en SQLite (`OnboardingSqlite`); en web y en
+/// pruebas, en memoria (`OnboardingEnMemoria`).
 abstract interface class RepositorioOnboarding {
   Future<bool> fueVisto();
 
