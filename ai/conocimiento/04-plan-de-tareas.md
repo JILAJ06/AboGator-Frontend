@@ -20,7 +20,8 @@ Una rama por tarea, desde `develop`. El orden va de lo que todo necesita a lo qu
 | T-09b | `09b-juicio-apelacion` | 22 Juicio de apelación, 22b Apelación ganada (y la perdida), +1 vida |
 | T-10 | `10-tienda-perfil-ajustes` | 24 Tienda (con compra) y 25 Perfil y progreso (el nombre de la rama se conserva) |
 | T-10b | `10b-ajustes-accesibilidad` | 26 Ajustes de accesibilidad, modo oscuro forzado y ajustes guardados en SQLite (26b es el orden de foco del juego: se hizo en T-05 y se verifica en T-13) |
-| T-11 | `11-nivel-jefe` | 27, 28, 28b, 28c, 29, 30 |
+| T-11 | `11-nivel-jefe` | Motor del Examen Final y 27 Crisis, 28 Decisión de crisis, 28b Contraargumento del Jefe, 28c Golpe al Jefe |
+| T-11b | `11b-resultado-examen` | 29 Auditoría superada (certificado), 30 La Inspectora ganó, registro del resultado y desbloqueo del módulo siguiente |
 | T-12 | `12-tablet` | Vistas de tablet |
 | T-13 | `13-accesibilidad-y-pulido` | Revisión WCAG 2.1 AA, lector de pantalla, texto dinámico, reducir animaciones |
 | T-14 | `14-integracion-api` | Cuando el backend esté listo: reemplazar mocks por llamadas HTTP (contrato lo define el equipo de backend) |
