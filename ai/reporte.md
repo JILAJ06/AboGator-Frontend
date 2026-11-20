@@ -1,131 +1,99 @@
 # Reporte
-- **Tarea:** T-07b · Comodines (pantallas 10b y 10c, y el Amparo)
-- **Rama:** `07b-comodines`
+- **Tarea:** T-08 · Sin vidas, sin conexión y cola local (SQLite)
+- **Rama:** `08-vidas-y-offline`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11.
-- **Comparé contra Figma** con el conector (solo lectura): contexto de diseño de 10b (`38:4914`) y 10c (`38:5065`). De ahí salen el subrayado (`#FFD84D` al 65 %, 11 de grosor), la etiqueta de la Lupa en (41, 150), el panel del Abogado y el contenido de la GPL (trampas, traducción y las dos normas).
-- **Prueba en el navegador:** compilé la app para web y jugué `spr-1-3` a 390×844.
-  - **Lupa:** en la tarjeta 1 y en la GPL marca las trampas, aparece la etiqueta y la píldora pasa a "Lupa ×1" activa. En oscuro el resaltado se lee bien.
-  - **Abogado:** el panel empieza a la misma altura que en Figma (419); al cerrarlo, el foco vuelve a la píldora, que queda activa con "Abogado ×0".
-  - **Amparo:** lo armé y fallé: sale 14b "¡El Amparo te protegió!", las vidas siguen en 5 y la cantidad baja a 0.
-  - En la primera prueba el subrayado salía desplazado: el pintor acomodaba el texto con otro ancho y otro estilo. Lo corregí (mismo ancho del globo y mismo estilo efectivo) y lo volví a comprobar.
+- **Dependencias nuevas** (solo las autorizadas, con `flutter pub add`): `sqflite ^2.4.6` y `path ^1.9.1`; en desarrollo, `sqflite_common_ffi ^2.4.7`.
+- **Comparé contra Figma** con el conector (solo lectura): capturas de 20 (`17:2072`) y 23 (`41:5976`); las medidas salen de la tarea.
+- **Prueba en el navegador:** compilé la app para web en modo depuración (el interruptor solo existe en depuración) y la probé a 390×844.
+  - **23:** con "Simular sin conexión", el aviso queda sobre la tarjeta y la barra de comodines cambia por "0 respuestas guardadas…". Tras responder una tarjeta dice "1 respuesta guardada…". Al volver la conexión sale "Conexión restablecida…", el contador vuelve a 0, a los 3 s desaparece el aviso y vuelve la barra.
+  - **20:** perdí las 5 vidas en el sprint y la app me llevó a `/sin-vidas?modulo=mod-1`, con la cuenta en `01:59:58`, los 5 corazones vacíos y "6 apelaciones pendientes…".
+- **Web:** sqflite no corre en el navegador, así que en web la cola y el onboarding van **en memoria** y se pierden al recargar. Es solo para probar; la app real es móvil y tableta.
 
 ## Qué se hizo
-1. **Datos:**
-   - `RepositorioTienda.obtenerComodines()` y `consumirComodin(c)` (resta 1, nunca baja de 0). `MockTienda` los guarda en memoria por instancia y empieza con lupa 2, abogado 1 y amparo 1. No implementé la compra (T-10).
-   - Descripciones de `MockTienda.articulos`: Lupa "Resalta las palabras trampa del caso.", Abogado "Traduce el caso a términos legales y cita la norma.", Amparo igual.
-   - `Tarjeta` con `palabrasTrampa`, `traduccionLegal`, `normas` e `iniciales` (opcionales). La Lupa solo aplica con trampas y el Abogado con traducción y al menos una norma.
-   - **Contenido:** las 42 tarjetas del módulo 1 tienen 2 a 4 trampas copiadas tal cual del texto, una traducción de una frase y 1 o 2 normas por nombre. Solo las dos normas de Figma (GPL) llevan número de sección o de artículo. Sin plazos, montos ni cifras legales.
-   - **Iniciales:** "QA" (QA y QA Tester) y "CL" (Cliente), como en Figma; y para que ninguna quede de una letra, "MK" (Marketing), "CT" (CTO), "CE" (CEO) y "SP" (Soporte).
-2. **Estado y lógica:**
-   - Se quitó `ComodinesJuego`; `datosJuegoProvider` carga las cantidades de la tienda.
-   - `EstadoJuego` lleva `comodines`, `lupaUsada` y `abogadoUsado` (por tarjeta).
-   - `usarLupa` (una vez por tarjeta), `consultarAbogado` (gasta la primera vez; reabrir es gratis) y `alternarAmparo` (armar y desarmar es gratis; no se arma con 0).
-   - El gasto se guarda con `consumirComodin` **al usarlo**; el del Amparo, cuando absorbe el error (resultado `amparo`). Si se acierta, el Amparo sigue armado.
-   - Lógica pura en `LogicaComodines`: estado de cada píldora y si es tocable. Nada se puede tocar con un panel abierto (veredicto, justificación, evidencia o Abogado) ni con `habilitados: false`.
-   - Al salir y volver a entrar, lo gastado sigue gastado (se recarga de la tienda).
-3. **Barra de comodines:** cada píldora es un botón (≥ 48, foco, Enter y Espacio). Estados (los dos últimos no están en Figma):
-   - **Disponible:** como en Figma.
-   - **Activa:** Lupa usada en la tarjeta, Abogado consultado o Amparo armado. Fondo `accion/acento` con texto e ícono `texto/en-primario`; se lee "activa" (el Amparo, "Amparo armado: tu próximo error no te quita vida"). La Lupa activa no responde al toque; el Abogado activo se reabre gratis y el Amparo activo se desarma.
-   - **Deshabilitada:** sin cantidad, sin trampas o traducción en la tarjeta, con un panel abierto o en el Examen. Fondo `fondo/superficie-alt`, borde `borde/default` y `texto/secundario`; se lee "no disponible" y sigue mostrando la cantidad ("Abogado ×0").
-   - Al usar uno se anuncia cuántos quedan ("Lupa, quedan 1").
-4. **10b · Lupa:**
-   - `TextoConTrampas` pinta detrás del texto un subrayado de 11 (escalado con el texto) centrado en la línea base. Lo calcula con las cajas del texto, así que sigue a las trampas aunque cambien de línea.
-   - En claro es `#FFD84D` al 65 %. En oscuro baja al 35 %, porque al 65 % el texto claro no llegaba a AA (al 35 % da 5.5:1). No tiene animación.
-   - La etiqueta `EtiquetaLupa` flota sobre la tarjeta, se anuncia y no recibe foco; desaparece al pasar de tarjeta.
-   - El lector lee "palabra trampa: …" en el texto de la tarjeta.
-5. **10c · Abogado:** `PanelAbogado` usa el `ContenedorPanelModal` de la T-07 y se cierra con el botón, atrás o Esc. El foco va al título al abrir y vuelve a la píldora al cerrar.
-6. **Galería:** barra en sus estados y apagada, etiqueta de la Lupa, tarjeta de la GPL con trampas y panel del Abogado.
-
-## Bases legales por tarjeta (para verificar)
-"LDP" es la ley de datos personales en posesión de particulares vigente; en la app aparece como "Ley de datos personales en posesión de particulares: …". Las únicas normas con número son las dos de Figma.
-
-| Tarjeta | Correcta | Normas |
-|---|---|---|
-| `tar-datos-01` (spr-1-1, 1) | ilegal | LDP: definición de dato personal; LDP: principios de licitud y finalidad |
-| `tar-datos-02` (spr-1-1, 2) | legal | LDP: datos disociados o anonimizados |
-| `tar-datos-03` (spr-1-1, 3) | escalar | LDP: datos personales sensibles; LDP: consentimiento expreso y por escrito para datos sensibles |
-| `tar-datos-04` (spr-1-1, 4) | legal | LDP: principios de finalidad y proporcionalidad; LDP: aviso de privacidad |
-| `tar-datos-05` (spr-1-1, 5) | ilegal | LDP: deber de seguridad; LDP: deber de confidencialidad |
-| `tar-datos-06` (spr-1-1, 6) | ilegal | LDP: principio de proporcionalidad (minimización de datos); LDP: principio de finalidad |
-| `tar-datos-07` (spr-1-1, 7) | condicional | LDP: principio de finalidad y consentimiento para finalidades nuevas; Derecho a la propia imagen |
-| `tar-datos-08` (spr-1-1, 8) | escalar | LDP: datos personales sensibles (salud); LDP: transferencias y consentimiento del titular |
-| `tar-consen-01` (spr-1-2, 1) | legal | LDP: excepciones al consentimiento por una relación jurídica con el titular |
-| `tar-consen-02` (spr-1-2, 2) | ilegal | LDP: consentimiento expreso y por escrito para datos sensibles; LDP: principio de licitud |
-| `tar-consen-03` (spr-1-2, 3) | ilegal | LDP: consentimiento expreso y por escrito para datos sensibles; LDP: consentimiento tácito y expreso |
-| `tar-arco-02` (spr-1-2, 4) | ilegal | LDP: transferencias y consentimiento del titular; LDP: aviso de privacidad |
-| `tar-consen-04` (spr-1-2, 5) | condicional | LDP: principio de finalidad; LDP: cambios al aviso de privacidad |
-| `tar-consen-05` (spr-1-2, 6) | ilegal | LDP: revocación del consentimiento; LDP: principio de finalidad |
-| `tar-consen-06` (spr-1-2, 7) | legal | LDP: consentimiento expreso y por escrito para datos sensibles; LDP: firma electrónica o medio de autenticación |
-| `tar-arco-01` (spr-1-2, 8) | condicional | LDP: derecho de cancelación: bloqueo y supresión; Obligaciones fiscales de conservación de comprobantes |
-| `tar-aviso-01` (spr-1-3, 1) | ilegal | LDP: aviso de privacidad; LDP: principio de información |
-| `tar-aviso-02` (spr-1-3, 2) | legal | LDP: modalidades del aviso de privacidad: integral, simplificado y corto |
-| `tar-aviso-03` (spr-1-3, 3) | ilegal | LDP: principio de finalidad; LDP: aviso de privacidad |
-| `tar-aviso-04` (spr-1-3, 4) | condicional | LDP: finalidades secundarias y mecanismo para negarse; LDP: aviso de privacidad |
-| `tar-gpl-01` (spr-1-3, 5) | ilegal | Licencia GPL-3.0, sección 5: obras derivadas; Ley Federal del Derecho de Autor, art. 102 (programas de cómputo) |
-| `tar-registro-01` (spr-1-3, 6) | ilegal | LDP: consentimiento libre, específico e informado; LDP: aviso de privacidad |
-| `tar-aviso-07` (spr-1-3, 7) | legal | LDP: remisiones al encargado; LDP: responsable y encargado del tratamiento |
-| `tar-aviso-06` (spr-1-3, 8) | escalar | LDP: datos de menores: consentimiento de quien ejerce la patria potestad; Interés superior de la niñez |
-| `tar-aviso-09` (spr-1-3, 9) | ilegal | LDP: cambios al aviso de privacidad; LDP: principio de finalidad |
-| `tar-contrasenas-01` (spr-1-3, 10) | ilegal | LDP: deber de seguridad: medidas técnicas; LDP: responsable y encargado del tratamiento |
-| `tar-derechos-01` (spr-1-4, 1) | legal | LDP: derecho de acceso; LDP: acreditación de la identidad del titular |
-| `tar-derechos-02` (spr-1-4, 2) | ilegal | LDP: gratuidad de los derechos ARCO; LDP: costos de envío o de reproducción |
-| `tar-derechos-03` (spr-1-4, 3) | ilegal | LDP: plazos de respuesta a los derechos ARCO; LDP: derecho de acceso |
-| `tar-derechos-04` (spr-1-4, 4) | legal | LDP: derecho de rectificación; LDP: principio de calidad de los datos |
-| `tar-derechos-05` (spr-1-4, 5) | condicional | LDP: derecho de cancelación: periodo de bloqueo; LDP: excepciones a la cancelación |
-| `tar-derechos-06` (spr-1-4, 6) | ilegal | LDP: derecho de cancelación: bloqueo y supresión; LDP: principio de calidad: conservación limitada |
-| `tar-derechos-07` (spr-1-4, 7) | legal | LDP: derecho de oposición; LDP: finalidades secundarias |
-| `tar-derechos-08` (spr-1-4, 8) | escalar | LDP: ejercicio de los derechos ARCO por representante; LDP: acreditación de la identidad y la representación |
-| `tar-brecha-01` (spr-1-5, 1) | ilegal | LDP: vulneraciones de seguridad: aviso a los titulares; LDP: deber de seguridad |
-| `tar-brecha-02` (spr-1-5, 2) | legal | LDP: deber de seguridad; LDP: vulneraciones de seguridad: acciones correctivas |
-| `tar-brecha-03` (spr-1-5, 3) | condicional | LDP: vulneraciones de seguridad: contenido del aviso a los titulares |
-| `tar-brecha-04` (spr-1-5, 4) | ilegal | LDP: deber de seguridad: medidas técnicas; LDP: vulneraciones de seguridad |
-| `tar-brecha-05` (spr-1-5, 5) | legal | LDP: vulneraciones de seguridad: registro de incidentes; LDP: principio de responsabilidad |
-| `tar-brecha-06` (spr-1-5, 6) | escalar | LDP: vulneraciones de seguridad: comunicación a los titulares; Código Civil Federal: responsabilidad por daño moral |
-| `tar-brecha-07` (spr-1-5, 7) | ilegal | LDP: responsable y encargado del tratamiento; LDP: vulneraciones de seguridad: aviso a los titulares |
-| `tar-brecha-08` (spr-1-5, 8) | escalar | LDP: vulneraciones de seguridad: aviso y acciones correctivas; Denuncia ante las autoridades competentes |
+1. **Vidas del servidor:**
+   - `Vidas.faltaParaProxima` (Duration) reemplaza a `proximaEn`: es lo que falta según el servidor en el momento de la respuesta (`null` con 5).
+   - `MockVidas` imita al servidor con reloj inyectable:
+     - al bajar de 5 sin regeneración programada, la programa a ahora + 2 h;
+     - al pedir las vidas aplica las regeneraciones vencidas (+1 por cada 2 h, sin pasar de 5), y la siguiente se cuenta desde la anterior;
+     - con 5 vidas no hay regeneración.
+2. **Cuenta regresiva (`CuentaRegresivaVida`):**
+   - Descuenta `faltaParaProxima − cronómetro`, con un `Cronometro` monótono (`Stopwatch`; uno falso en las pruebas). **Nunca** usa `DateTime.now()`.
+   - Al llegar a 0 avisa una vez y la pantalla vuelve a pedir las vidas. Cada respuesta del servidor empieza una cuenta nueva (`ObjectKey`), aunque traiga el mismo tiempo.
+   - Formato `HH:MM:SS`; con texto grande encoge dentro de su caja de 64 (`FittedBox.scaleDown`).
+3. **Cola local (offline-first):**
+   - `RespuestaPendiente`: UUID v4 del cliente, sprint, tarjeta, veredicto, justificación, evidencia, hora UTC (solo informativa) e intentos.
+   - `ColaRespuestas` con dos implementaciones, `ColaRespuestasSqlite` y `ColaRespuestasEnMemoria`. La de SQLite inserta con `ConflictAlgorithm.ignore`, así que el mismo id no se duplica.
+   - `BaseLocal` abre `abogator.db` (versión 1, `onCreate`) con las tablas `respuestas_pendientes` y `ajustes`, y solo en la primera operación.
+   - `generarUuidV4()` sin paquete, con `Random.secure()` (versión 4 y variante RFC 4122).
+4. **Servidor y sincronización:**
+   - `RepositorioRespuestas` y `MockRespuestas`: sin duplicar por id, con `recibidas` y con un parámetro para fallar.
+   - `SincronizadorRespuestas`: envía, borra solo lo aceptado y, si falla, suma intentos sin perder nada.
+   - No corre dos veces a la vez. Si lo llaman mientras corre, no envía en paralelo pero deja pedida **una** pasada más al terminar, para que una respuesta guardada durante el envío no espere al siguiente disparo (ver duda 3).
+   - `ServicioConexion` y `ConexionSimulada` (arranca en línea, cambia con `establecer`).
+   - `conexionProvider` y `respuestasPendientesProvider`: guarda en la cola y sincroniza al guardar en línea, al volver la conexión y al abrir la app (lo dispara el enrutador al crearse).
+5. **Juego:**
+   - `responder()` califica en local como antes y además guarda cada respuesta en la cola con un UUID nuevo; la sincronización corre sin bloquear el panel ni el avance.
+   - Con 0 vidas, `datosJuegoProvider` no carga tarjetas pero sí resuelve el módulo y el sprint.
+   - Quedarse sin vidas lleva a `Rutas.sinVidasDe(modulo)`, después de que `guardarResultado()` guardó las 0 vidas (probado).
+   - **Fuera de alcance:** el resultado del sprint (estrellas, vidas, monedas) se sigue guardando con los mocks como antes; cómo se sincroniza con el servidor se define en T-14. Los comodines también siguen en la tienda mock.
+6. **Onboarding en SQLite:** `OnboardingSqlite` guarda `onboarding_visto = 1` en `ajustes`, sin cambiar `RepositorioOnboarding`. `usarBaseLocal` elige SQLite en el dispositivo y memoria en web y en `flutter test`; esto último lo detecta con la variable `FLUTTER_TEST` (ver duda 2).
+7. **Pantalla 20:** cerrar, 5 corazones, Sarko triste sobre su círculo, título, "Próxima vida en", tiempo, nota del servidor, sugerencia del Buzón y "Volver al mapa".
+   - Cerrar y "Volver al mapa" van al mapa del módulo, o al Inicio si no se conoce. El botón del Buzón va a `Rutas.buzon` (todavía un marcador; la pantalla real llega en T-09).
+   - **N de apelaciones** sale del repositorio: el mock tiene **6** y Figma muestra 2. Hay singular ("1 apelación pendiente: si la ganas te devuelve 1 vida.") y con 0 no se muestra la tarjeta.
+   - **Recuperación de vida (no está en Figma):** cuando la cuenta llega a 0 y el servidor devuelve vidas, los corazones se llenan, el texto cambia a "¡Recuperaste una vida!" y se anuncia al lector. Si faltan más vidas, se ve la cuenta de la siguiente; con 5, no hay cuenta.
+   - La ilustración se extrajo a `IlustracionSarko` (`lib/componentes/`); antes era `IlustracionFinSprint`, dentro de las piezas de 19 y 19b, que ahora usan el componente.
+8. **23 · Sin conexión (estado de la pantalla 10):**
+   - **`AvisoConexion`:** va sobre el borde de la tarjeta, sin empujarla ni bloquear el arrastre.
+   - **Mensaje de vuelta (no está en Figma):** al volver la conexión se ve unos 3 s "Conexión restablecida. Se está sincronizando tu progreso."; con "reducir animaciones", sin transición.
+   - **`IndicadorPendientes`:** reemplaza a la barra de comodines mientras no hay conexión o hay respuestas en cola.
+   - **`InterruptorConexionDebug` (no está en Figma):** solo con `kDebugMode`, abajo de la barra, con alto 48.
+9. **Limpieza:** se quitaron `Textos.sinVidasPendiente`, el marcador de la ruta de "Sin vidas" y `Rutas.sinConexion`. No queda nada "pendiente de T-08".
+10. **Galería:** sección "Vidas y conexión".
 
 ## Accesibilidad
-- Orden de foco de 26b: acciones y luego Lupa, Abogado y Amparo (probado con Tab).
-- Las píldoras muestran el anillo de foco. El estado no depende solo del color: se lee "activa" o "no disponible" y la cantidad siempre se ve.
-- Contraste AA verificado en pruebas: el texto en cada estado de la barra (claro y oscuro) y el texto sobre el subrayado de las trampas.
-- Al 200 % la barra baja de línea y el panel del Abogado se desplaza, sin desbordes.
+- **20:** el foco empieza en el título. El tiempo visible no se lee; en su lugar el lector dice "Próxima vida en 1 hora y 47 minutos", que cambia por minuto y no se anuncia solo. La recuperación de la vida sí se anuncia.
+- **Contraste verificado:** `estado/ilegal` sobre `fondo/app` ≥ 3:1 (texto grande) y `texto/acento` del contador en AA, en claro y oscuro.
+- **23:** el aviso y el contador son regiones en vivo y no reciben foco.
+- **Sin desbordes:** la 20 en 390×844, 360×640 y 320×640, al 100 % y al 200 %, en claro y oscuro.
 
 ## Verificación
 - `dart format`: sin cambios pendientes.
 - `flutter analyze`: `No issues found!`
-- `flutter test` (691 pruebas; antes de T-07b, 647):
+- `flutter test` (763 pruebas; antes de T-08, 691):
 ```
-+691: All tests passed!
++763: All tests passed!
 ```
-- **Pruebas nuevas o cambiadas:**
-  - **`comodines_test.dart`:**
-    - tienda: cantidades, consumo sin bajar de 0 y descripciones;
-    - contenido de las 42 tarjetas, normas sin artículos fuera de Figma e iniciales de dos letras;
-    - lógica: Lupa, Abogado, Amparo, cantidad 0, panel abierto y `habilitados: false`;
-    - pantalla 10, Lupa: resalta, gasta, solo una vez y desaparece al cambiar de tarjeta;
-    - pantalla 10, Abogado: abre, gasta una vez, se reabre gratis, se cierra con Esc y atrás, y devuelve el foco;
-    - pantalla 10, Amparo: armar y desarmar es gratis, 14b sin perder vida y sigue armado al acertar;
-    - la barra con un panel abierto, el gasto que se conserva al volver a entrar y sin desbordes en 390×844, 360×640 y 320×640 al 100 % y 200 %.
-  - **`comodines_componentes_test.dart`:** barra en claro y oscuro, semántica, teclado, `habilitados: false` y 200 %; subrayado de las trampas y su contraste; etiqueta de la Lupa; panel del Abogado con normas largas al 200 %.
-  - La prueba de cifras legales revisa también trampas, traducciones y normas; la de orden de foco recorre las tres píldoras.
+- **Pruebas nuevas:**
+  - **`base_local_test.dart`:** la misma batería sobre SQLite (con `sqflite_common_ffi`) y sobre memoria: agregar, orden, id duplicado, enviadas, intentos, tablas y persistencia al cerrar y reabrir la base; y el onboarding en SQLite y en memoria.
+  - **`vidas_y_sincronizacion_test.dart`:**
+    - UUID: formato y 1000 distintos;
+    - `MockVidas`: 0, 1 y 2 regeneraciones, nunca pasa de 5, `faltaParaProxima` correcto;
+    - `MockRespuestas`: no duplica y puede fallar;
+    - sincronizador: envía, falla sin perder, reenvío del mismo UUID, sin correr dos veces a la vez y la pasada extra;
+    - conexión simulada.
+  - **`sin_vidas_test.dart`:** formato y semántica de la cuenta; cuenta con reloj falso que avisa una vez; llegar a 0 llena los corazones y se anuncia; N de apelaciones 0, 1 y varias; navegación; teclado; sin desbordes.
+  - **`conexion_componentes_test.dart`** y **`sin_conexion_test.dart`:**
+    - componentes de 23;
+    - en línea: cada respuesta sale con UUID y sin duplicar;
+    - sin conexión: aviso, contador, sin comodines y 3 respuestas guardadas; al volver, se sincroniza y reaparece la barra;
+    - el aviso no bloquea el arrastre; el sprint se completa sin red; un fallo del servidor no pierde nada; el interruptor funciona;
+    - perder la última vida y abrir un sprint con 0 vidas llevan a la 20.
 
 ## Grafo
-- **Actualizados (`en curso`):** MOD, REPO-TIENDA, MOCK-TIENDA, MOCK-TARJ, TEMA-EFECTOS, TEXTOS, PANT-GALERIA, EST-JUEGO, CODIGO-PANT-10, COMP-TARJETA-CASO, COMP-COMODINES, TEST-JUEGO, TEST-FIN-SPRINT, TEST-COMP, TEST-AYUDA y TEST-GALERIA.
-- **Nuevos:** LOGICA-COMODINES, COMP-ETIQUETA-LUPA, COMP-PANEL-ABOGADO y TEST-COMODINES.
-- **Obsoletos:** ninguno (`ComodinesJuego` se eliminó del código). Agregué una línea en el registro de cambios.
+- **Actualizados (`en curso`):** ENRUTADOR, RUTAS, PANT-PENDIENTE, TEXTOS, MOD, REPO-VIDAS, REPO-ONBOARDING, PROV-REPO, MOCK-VIDAS, PANT-GALERIA, EST-JUEGO, CODIGO-PANT-10, PIEZAS-FIN-SPRINT, CODIGO-PANT-19, CODIGO-PANT-19b, COMP-CORAZON, CONF y las pruebas TEST-JUEGO, TEST-VEREDICTO, TEST-FIN-SPRINT, TEST-AYUDA, TEST-GALERIA y TEST-DATOS.
+- **Nuevos:**
+  - datos y lógica: BASE-LOCAL, COLA-RESPUESTAS, ONBOARDING-SQLITE, REPO-RESPUESTAS, SINCRONIZADOR, SERVICIO-CONEXION, EST-SINCRONIZACION, UTIL-UUID, UTIL-CRONOMETRO;
+  - pantalla y componentes: CODIGO-PANT-20, COMP-CUENTA-REGRESIVA, COMP-AVISO-CONEXION, COMP-PENDIENTES, COMP-INTERRUPTOR-DEBUG, COMP-ILUSTRACION-SARKO;
+  - pruebas: TEST-BASE-LOCAL, TEST-SINCRONIZACION, TEST-SIN-VIDAS, TEST-SIN-CONEXION.
+- **Obsoletos:** ninguno. Agregué una línea en el registro de cambios.
 
 ## Dudas
-1. **Nombre de la ley:** usé "Ley de datos personales en posesión de particulares", sin nombre oficial ni número, porque la LFPDPPP se reemplazó en 2025. ¿Quieres el nombre oficial de la ley vigente?
-2. **Normas fuera de la ley de datos:** conviene confirmarlas con el usuario:
-   - "Derecho a la propia imagen" (`tar-datos-07`);
-   - "Obligaciones fiscales de conservación de comprobantes" (`tar-arco-01`);
-   - "Interés superior de la niñez" (`tar-aviso-06`);
-   - "Código Civil Federal: responsabilidad por daño moral" (`tar-brecha-06`);
-   - "Denuncia ante las autoridades competentes" (`tar-brecha-08`).
-3. **Estado activo:** en Figma 10b la píldora de la Lupa sigue como Disponible ("Lupa ×1") aunque la Lupa ya se usó; seguí la tarea y la marqué como activa. ¿Está bien?
-4. **Iniciales nuevas:** "MK", "CT", "CE" y "SP" no están en Figma; las elegí para que ninguna quede de una letra.
-5. **Resaltado en oscuro:** baja al 35 % para que el texto siga en AA. ¿Está bien o prefieres otro color en oscuro?
-6. **Etiqueta de la Lupa:** se queda fija mientras la tarjeta se arrastra (no se mueve con ella).
+1. **SQLite en el CI (Linux):** las pruebas de SQLite pasan aquí en Windows con `sqflite_common_ffi`. En Ubuntu necesitan la biblioteca nativa `libsqlite3`, que los ejecutores de GitHub suelen traer, pero no lo pude comprobar porque el CI corre al abrir el PR. Si falla, el arreglo es instalarla en `ci.yml` (`sudo apt-get install -y libsqlite3-dev`); ese archivo no estaba entre los permitidos y no lo toqué. Las mismas pruebas corren también sobre la implementación en memoria.
+2. **Detección de pruebas:** para no abrir SQLite en `flutter test`, `usarBaseLocal` revisa la variable `FLUTTER_TEST`. ¿Prefieres que las pruebas sobrescriban siempre los proveedores y quitar esa revisión?
+3. **Sincronizador:** si lo llaman mientras corre, en lugar de ignorar la llamada del todo deja pedida una pasada más al terminar (nunca en paralelo). ¿Está bien?
+4. **Corazones de 20:** la tarea pide contorno `borde/control` y así quedaron; en la captura de Figma se ven rellenos en gris. ¿Cuál dejamos?
+5. **N de apelaciones:** el mock tiene 6 y Figma muestra 2; uso el dato real.
+6. **Interruptor de depuración:** queda abajo de la barra de comodines en depuración; en release no existe.
