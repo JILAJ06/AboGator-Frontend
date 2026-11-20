@@ -288,6 +288,10 @@ abstract final class Textos {
     String rol,
     String texto,
   ) => 'Tarjeta $actual de $total. $personaje, $rol: $texto';
+
+  /// Agrega el tipo especial de la tarjeta, si tiene, a [base].
+  static String tarjetaConTipoSemantica(String base, String? tipo) =>
+      tipo == null ? base : '$base ($tipo)';
   static String casoSemantica(String personaje, String rol, String texto) =>
       '$personaje, $rol: $texto';
   static const String selloLegal = 'LEGAL';
@@ -342,6 +346,65 @@ abstract final class Textos {
       '$titulo. ${subtitulo.replaceAll('  ', ' ')}. $impacto';
   static String opcionSemantica(String opcion, int posicion, int total) =>
       'Opción $posicion de $total: $opcion';
+  static const String seleccionada = 'seleccionada';
+  static const String noSeleccionada = 'no seleccionada';
+  static String opcionSeleccionSemantica(
+    String opcion,
+    int posicion,
+    int total, {
+    required bool seleccionada,
+  }) =>
+      '${opcionSemantica(opcion, posicion, total)}; '
+      '${seleccionada ? Textos.seleccionada : noSeleccionada}';
+
+  // ---------------------------------------------------------------------
+  // 15, 16 y 16b Tarjeta con evidencia y visor
+  // ---------------------------------------------------------------------
+  static const String tipoEvidencia = 'Evidencia';
+  static const String inspeccionarEvidencia = 'Toca la tarjeta para inspeccionar';
+  static const String accionInspeccionar = 'Inspeccionar evidencia';
+  static const String conEvidenciaSemantica = 'con evidencia por inspeccionar';
+  static const String evidenciaInspeccionadaSemantica = 'evidencia ya inspeccionada';
+  static const String inspeccionaTitulo = 'Inspecciona la evidencia';
+  static const String inspeccionaInstruccion =
+      'Subraya con el dedo la línea que viola la ley antes de deslizar. Busca casillas '
+      'pre-marcadas, datos excesivos o avisos faltantes.';
+  static const String marcaUnaLinea = 'Marca una línea para continuar';
+  static const String lineaMarcadaTitulo = 'Línea marcada';
+  static const String lineaEquivocadaTitulo = 'Esa no es la línea clave';
+  static const String evidenciaCorrectaBonus = 'Evidencia correcta: +5 XP al acertar el veredicto';
+  static const String volverYDecidir = 'Volver y decidir';
+  static const String marcada = 'marcada';
+  static const String noMarcada = 'no marcada';
+  static const String lineaClave = 'línea clave';
+  static String lineaSemantica(
+    int numero,
+    String texto, {
+    required bool marcada,
+    bool clave = false,
+  }) =>
+      'Línea $numero: ${texto.trim().isEmpty ? 'vacía' : texto.trim()}; '
+      '${marcada ? Textos.marcada : noMarcada}${clave ? '; $lineaClave' : ''}';
+  static String snippetSemantica(String archivo, int lineas) => 'Archivo $archivo, $lineas líneas';
+
+  // ---------------------------------------------------------------------
+  // 17 Tarjeta de dilema y 18 Justificar veredicto
+  // ---------------------------------------------------------------------
+  static const String tipoDilema = 'Dilema ×2';
+  static const String dilemaSemantica = 'dilema: tendrás que justificar tu veredicto';
+  static const String avisoDilema =
+      'Después de deslizar tendrás que justificar tu veredicto. Acertar ambas partes = '
+      'monedas dobles.';
+  static String dictaste(String veredicto) => 'Dictaste: $veredicto';
+  static const String porQueIlegal = '¿Por qué es ilegal?';
+  static const String porQueLegal = '¿Por qué es legal?';
+  static const String porQueCondicional = '¿Por qué es legal con condiciones?';
+  static const String porQueEscalar = '¿Por qué escalar a jurídico?';
+  static const String justificacionSubtitulo =
+      'Elige la justificación correcta para ganar monedas dobles.';
+  static const String confirmarJustificacion = 'Confirmar justificación';
+  static String justificacionAnuncio(String veredicto, String pregunta) =>
+      'Dictaste $veredicto. $pregunta';
 
   // ---------------------------------------------------------------------
   // 19 Sprint completado y 19b Startup en quiebra
@@ -409,6 +472,7 @@ abstract final class Textos {
   static const String galeriaMapa = 'Componentes del mapa y la intro del sprint';
   static const String galeriaJuego = 'Componentes del juego';
   static const String galeriaVeredicto = 'Paneles de veredicto';
+  static const String galeriaEvidencia = 'Evidencia y dilema';
   static const String galeriaFinSprint = 'Componentes del fin de sprint';
   static const String galeriaExplicacion =
       'La licencia GPL-3.0 es copyleft: si la integras, todo el producto derivado debe '

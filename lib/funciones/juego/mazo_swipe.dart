@@ -60,6 +60,7 @@ class MazoSwipe extends StatefulWidget {
     required this.restantes,
     required this.alConfirmar,
     required this.arrastre,
+    this.alInspeccionar,
     super.key,
   });
 
@@ -80,6 +81,14 @@ class MazoSwipe extends StatefulWidget {
 
   /// Se actualiza con el arrastre (lo usa el tinte de la pantalla).
   final ValueNotifier<ArrastreVisible> arrastre;
+
+  /// Solo en tarjetas con evidencia: un toque sobre la tarjeta (soltar sin
+  /// haberla movido) abre el visor, y el lector tiene la acción "Inspeccionar
+  /// evidencia".
+  final VoidCallback? alInspeccionar;
+
+  /// Movimiento máximo para que soltar cuente como toque.
+  static const double toleranciaToque = 8;
 
   /// Duraciones.
   static const Duration duracionVuelo = Duration(milliseconds: 280);
@@ -216,7 +225,10 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
       ancho: _zona.width,
     );
     if (veredicto == null) {
+      // Un toque no es un arrastre: abre el visor si la tarjeta lo tiene.
+      final toque = _arrastreBruto.distance <= MazoSwipe.toleranciaToque;
       _regresar();
+      if (toque) widget.alInspeccionar?.call();
     } else {
       confirmar(veredicto);
     }
@@ -320,6 +332,7 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
               Veredicto.escalar,
             ])
               CustomSemanticsAction(label: _accion(v)): () => confirmar(v),
+            const CustomSemanticsAction(label: Textos.accionInspeccionar): ?widget.alInspeccionar,
           },
           excludeSemantics: true,
           child: RawGestureDetector(

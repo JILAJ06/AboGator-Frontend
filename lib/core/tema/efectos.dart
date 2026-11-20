@@ -148,6 +148,41 @@ abstract final class EfectosApp {
   static const Duration duracionPanel = Duration(milliseconds: 280);
 
   // ---------------------------------------------------------------------
+  // 16 y 16b Snippet de código (Figma 10:89)
+  // ---------------------------------------------------------------------
+
+  /// Fondo del snippet (igual en claro y oscuro: es un editor de código).
+  static const Color fondoSnippet = Color(0xFF0B1220);
+
+  /// Barra superior del snippet.
+  static const Color barraSnippet = Color(0xFF162030);
+
+  /// Botones de ventana de la barra (Figma 10:91, 10:92 y 10:93).
+  static const Color ventanaRojo = Color(0xFFFF5F57);
+  static const Color ventanaAmbar = Color(0xFFFEBC2E);
+  static const Color ventanaVerde = Color(0xFF28C840);
+
+  /// Nombre del archivo y números de línea.
+  static const Color textoSecundarioSnippet = Color(0xFF94A3B8);
+
+  /// Texto de las líneas.
+  static const Color textoSnippet = Color(0xFFE2E8F0);
+
+  /// Línea clave revelada (16b): rojo veredicto al 28 % y texto rosado.
+  static const Color fondoLineaClave = Color(0x47B52426);
+  static const Color textoLineaClave = Color(0xFFFECACA);
+
+  /// Subrayado del jugador (estado/resaltado #FFE27A). En Figma es una capa
+  /// con mezcla "multiply" al 55 %; sobre el fondo oscuro multiply casi no se
+  /// ve (el relleno apenas tiñe y destaca el borde), así que se usa un relleno
+  /// al 12 % más el borde de 2.
+  static const Color resaltado = Color(0xFFFFE27A);
+  static const double opacidadResaltado = 0.12;
+
+  /// El resaltado aparece en 150 ms (sin animación con "reducir animaciones").
+  static const Duration duracionResaltado = Duration(milliseconds: 150);
+
+  // ---------------------------------------------------------------------
   // 19 Sprint completado (Figma 38:5557)
   // ---------------------------------------------------------------------
 

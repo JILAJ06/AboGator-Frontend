@@ -24,12 +24,16 @@ import 'package:abogator/componentes/navegacion_inferior_app.dart';
 import 'package:abogator/componentes/nodo_sprint.dart';
 import 'package:abogator/componentes/opcion_justificacion.dart';
 import 'package:abogator/componentes/paginador_puntos.dart';
+import 'package:abogator/componentes/panel_evidencia.dart';
+import 'package:abogator/componentes/panel_justificacion.dart';
 import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
 import 'package:abogator/componentes/sello_veredicto.dart';
+import 'package:abogator/componentes/snippet_codigo.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
 import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
+import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/funciones/bienvenida/galeria_componentes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,7 +42,7 @@ import 'package:material_ui/material_ui.dart';
 /// Pantalla alta para que la galería entera quede construida.
 Future<void> montarGaleria(WidgetTester tester) async {
   await abrirGaleria(tester);
-  await agrandar(tester, const Size(390, 13000));
+  await agrandar(tester, const Size(390, 17000));
 }
 
 /// Agranda la superficie después de navegar (la transición de página no
@@ -65,7 +69,10 @@ void main() {
   testWidgets('la app abre en la galería con todos los componentes', (tester) async {
     await montarGaleria(tester);
     expect(find.text(Textos.galeriaTitulo), findsOneWidget);
-    expect(find.byType(BotonApp), findsNWidgets(14)); // 8 + globo + 5 paneles
+    expect(
+      find.byType(BotonApp),
+      findsNWidgets(18),
+    ); // 8 + globo + 5 paneles + 3 visores + panel 18
     expect(find.byType(BotonVeredicto), findsNWidgets(12)); // 8 + los de las acciones
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
     expect(find.byType(ChipHud), findsNWidgets(8)); // 5 + 2 encabezados + barra de juego
@@ -91,7 +98,14 @@ void main() {
     );
     expect(find.byType(GloboSprintActual), findsOneWidget);
     expect(find.byType(FilaDetalleSprint), findsNWidgets(3));
-    expect(find.byType(TarjetaCaso), findsOneWidget);
+    expect(find.byType(TarjetaCaso), findsNWidgets(3));
+    expect(
+      tester.widgetList<TarjetaCaso>(find.byType(TarjetaCaso)).map((t) => t.tipo),
+      TipoTarjeta.values,
+    );
+    expect(find.byType(SnippetCodigo), findsNWidgets(5)); // 2 sueltos + 3 visores
+    expect(find.byType(PanelEvidencia), findsNWidgets(3));
+    expect(find.byType(PanelJustificacion), findsOneWidget);
     expect(find.byType(SelloVeredicto), findsNWidgets(4));
     expect(find.byType(AccionesVeredicto), findsOneWidget);
     expect(find.byType(BarraComodines), findsOneWidget);
@@ -99,7 +113,8 @@ void main() {
       tester.widgetList<PanelVeredicto>(find.byType(PanelVeredicto)).map((p) => p.tipo),
       TipoPanelVeredicto.values,
     );
-    expect(find.byType(OpcionJustificacion), findsNWidgets(2));
+    // 2 de la micro-pregunta, 3 sueltas en modo selección y 3 del panel 18.
+    expect(find.byType(OpcionJustificacion), findsNWidgets(8));
     expect(tester.takeException(), isNull);
   });
 

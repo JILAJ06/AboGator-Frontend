@@ -31,11 +31,15 @@ import '../../componentes/indicadores_startup.dart';
 import '../../componentes/logo_app.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/nodo_sprint.dart';
+import '../../componentes/opcion_justificacion.dart';
 import '../../componentes/paginador_puntos.dart';
+import '../../componentes/panel_evidencia.dart';
+import '../../componentes/panel_justificacion.dart';
 import '../../componentes/panel_veredicto.dart';
 import '../../componentes/pila_tarjetas.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/sello_veredicto.dart';
+import '../../componentes/snippet_codigo.dart';
 import '../../componentes/tarjeta_caso.dart';
 import '../../componentes/tarjeta_heroe_startup.dart';
 import '../../componentes/tarjeta_modulo.dart';
@@ -48,8 +52,14 @@ import '../../core/tema/tipografia.dart';
 import '../../core/tema/tokens_color.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
+import '../../datos/mocks/mock_tarjetas.dart';
 import '../../datos/modelos/estado_startup.dart';
 import '../../datos/modelos/tarjeta.dart';
+import '../inicio/logica_inicio.dart';
+
+/// Tarjeta 6 (evidencia, Figma 15) y 10 (dilema, Figma 17) del sprint 3.
+final _ejemploEvidencia = MockTarjetas.tarjetasPorSprint['spr-1-3']![5];
+final _ejemploDilema = MockTarjetas.tarjetasPorSprint['spr-1-3']![9];
 
 /// Galería temporal de componentes: todos los tipos y estados, con
 /// interruptor claro/oscuro. Se elimina cuando existan las pantallas reales.
@@ -342,6 +352,64 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                     alElegirOpcion: (_) {},
                     alContinuar: () {},
                   ),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaEvidencia,
+              hijos: [
+                for (final t in [_ejemploEvidencia, _ejemploDilema])
+                  SizedBox(
+                    height: TarjetaCaso.alto,
+                    child: TarjetaCaso(
+                      etiquetaCaso: t.etiquetaCaso,
+                      colorModulo: ColoresModulo.enOrden[0],
+                      iniciales: LogicaInicio.iniciales(t.personaje),
+                      personaje: t.personaje,
+                      rol: t.rol,
+                      texto: t.texto,
+                      tipo: t.tipo,
+                      alInspeccionar: () {},
+                    ),
+                  ),
+                SnippetCodigo(
+                  archivo: _ejemploEvidencia.evidencia!.archivo,
+                  lineas: _ejemploEvidencia.evidencia!.lineas,
+                  alMarcar: (_) {},
+                ),
+                SnippetCodigo(
+                  archivo: _ejemploEvidencia.evidencia!.archivo,
+                  lineas: _ejemploEvidencia.evidencia!.lineas,
+                  reveladas: _ejemploEvidencia.evidencia!.lineasClave.toSet(),
+                  marcadas: const {4, 5, 6},
+                ),
+                for (final marcadas in [
+                  null,
+                  const [4, 5, 6],
+                  const [1],
+                ])
+                  PanelEvidencia(
+                    archivo: _ejemploEvidencia.evidencia!.archivo,
+                    lineas: _ejemploEvidencia.evidencia!.lineas,
+                    lineasClave: _ejemploEvidencia.evidencia!.lineasClave,
+                    mensajeAcierto: _ejemploEvidencia.evidencia!.mensajeAcierto,
+                    mensajeFallo: _ejemploEvidencia.evidencia!.mensajeFallo,
+                    marcadas: marcadas,
+                    alMarcar: (_) {},
+                    alVolver: () {},
+                  ),
+                for (final (i, opcion) in _ejemploDilema.justificacion!.opciones.indexed)
+                  OpcionJustificacion(
+                    texto: opcion,
+                    posicion: i + 1,
+                    total: 3,
+                    seleccionada: i == 0,
+                    alElegir: () {},
+                  ),
+                PanelJustificacion(
+                  veredicto: Veredicto.ilegal,
+                  justificacion: _ejemploDilema.justificacion!,
+                  alConfirmar: (_) {},
+                ),
               ],
             ),
             _Seccion(

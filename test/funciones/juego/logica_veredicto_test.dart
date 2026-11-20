@@ -23,8 +23,15 @@ void main() {
       final r = LogicaVeredicto.calificar(gpl, Veredicto.ilegal).conBonus();
       expect((r.xp, r.monedas, r.bonus), (15, 5, true));
       expect(r.impacto, gpl.impactoAcierto);
-      expect(LogicaVeredicto.aciertaMicroPregunta(gpl.microPregunta!, 0), isTrue);
-      expect(LogicaVeredicto.aciertaMicroPregunta(gpl.microPregunta!, 1), isFalse);
+      final pregunta = MockTarjetas.tarjetasPorSprint['spr-1-3']!.first.microPregunta!;
+      expect(LogicaVeredicto.aciertaMicroPregunta(pregunta, 0), isTrue);
+      expect(LogicaVeredicto.aciertaMicroPregunta(pregunta, 1), isFalse);
+    });
+
+    test('bonus con monedas dobles: +15 XP y +10 monedas (justificación)', () {
+      final r = LogicaVeredicto.calificar(gpl, Veredicto.ilegal).conBonus(monedasDobles: true);
+      expect((r.xp, r.monedas, r.bonus, r.pierdeVida), (15, 10, true, false));
+      expect(r.impacto, gpl.impactoAcierto);
     });
 
     test('parcial: Escalar cuando no era Escalar: +3 XP, sin vida (Figma 12c)', () {
@@ -165,7 +172,7 @@ void main() {
     );
   });
 
-  test('mock: las 10 tarjetas del sprint en curso tienen impactos y 4 micro-preguntas', () {
+  test('mock: las 10 tarjetas del sprint en curso tienen impactos y 2 micro-preguntas', () {
     final tarjetas = MockTarjetas.tarjetasPorSprint['spr-1-3']!;
     expect(tarjetas, hasLength(10));
     for (final t in tarjetas) {
@@ -173,12 +180,72 @@ void main() {
       expect(t.impactoFallo, isNot(const ImpactoTarjeta()), reason: t.id);
     }
     final conPregunta = tarjetas.where((t) => t.microPregunta != null).toList();
-    expect(conPregunta, hasLength(4));
+    expect(conPregunta, hasLength(2));
     for (final t in conPregunta) {
       final p = t.microPregunta!;
       expect(p.opciones.length, inInclusiveRange(2, 3));
       expect(p.indiceCorrecto, inInclusiveRange(0, p.opciones.length - 1));
     }
-    expect(gpl.microPregunta!.opciones.first, 'La GPL-3.0 obliga a liberar el código derivado');
+    // La GPL tiene evidencia: su bonus es marcar la línea, no la micro-pregunta.
+    expect(gpl.microPregunta, isNull);
+  });
+
+  group('evidencia', () {
+    final registro = MockTarjetas.tarjetasPorSprint['spr-1-3']![5];
+
+    test('acierta si las líneas marcadas incluyen alguna línea clave', () {
+      final e = registro.evidencia!;
+      expect(LogicaVeredicto.aciertaEvidencia(e, [4]), isTrue);
+      expect(LogicaVeredicto.aciertaEvidencia(e, [6]), isTrue);
+      expect(LogicaVeredicto.aciertaEvidencia(e, [2, 3, 4]), isTrue);
+      expect(LogicaVeredicto.aciertaEvidencia(e, [1]), isFalse);
+      expect(LogicaVeredicto.aciertaEvidencia(e, [1, 7]), isFalse);
+      expect(LogicaVeredicto.aciertaEvidencia(e, []), isFalse);
+    });
+
+    test('bonus solo si marcó bien y el veredicto es correcto', () {
+      bool bonus(bool? marco, TipoVeredicto tipo) =>
+          LogicaVeredicto.bonusEvidencia(tarjeta: registro, evidenciaCorrecta: marco, tipo: tipo);
+      expect(bonus(true, TipoVeredicto.correcto), isTrue);
+      expect(bonus(false, TipoVeredicto.correcto), isFalse, reason: 'marcó mal');
+      expect(bonus(null, TipoVeredicto.correcto), isFalse, reason: 'no marcó');
+      for (final tipo in [TipoVeredicto.incorrecto, TipoVeredicto.parcial, TipoVeredicto.amparo]) {
+        expect(bonus(true, tipo), isFalse, reason: tipo.name);
+      }
+    });
+
+    test('una tarjeta normal nunca da bonus de evidencia', () {
+      expect(
+        LogicaVeredicto.bonusEvidencia(
+          tarjeta: MockTarjetas.tarjetasPorSprint['spr-1-3']!.first,
+          evidenciaCorrecta: true,
+          tipo: TipoVeredicto.correcto,
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('justificación', () {
+    final dilema = MockTarjetas.tarjetasPorSprint['spr-1-3']![9];
+
+    test('bonus solo con veredicto y justificación correctos', () {
+      bool bonus(int? opcion, TipoVeredicto tipo) =>
+          LogicaVeredicto.bonusJustificacion(tarjeta: dilema, opcion: opcion, tipo: tipo);
+      expect(bonus(0, TipoVeredicto.correcto), isTrue);
+      expect(bonus(1, TipoVeredicto.correcto), isFalse);
+      expect(bonus(null, TipoVeredicto.correcto), isFalse);
+      // Con el veredicto equivocado la justificación no cuenta.
+      for (final tipo in [TipoVeredicto.incorrecto, TipoVeredicto.parcial, TipoVeredicto.amparo]) {
+        expect(bonus(0, tipo), isFalse, reason: tipo.name);
+      }
+    });
+
+    test('una tarjeta que no es dilema nunca da bonus de justificación', () {
+      expect(
+        LogicaVeredicto.bonusJustificacion(tarjeta: gpl, opcion: 0, tipo: TipoVeredicto.correcto),
+        isFalse,
+      );
+    });
   });
 }

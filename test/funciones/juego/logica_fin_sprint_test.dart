@@ -206,9 +206,54 @@ void main() {
           if (t.respuestaCorrecta != Veredicto.escalar) {
             expect(t.impactoParcial, isNot(const ImpactoTarjeta()), reason: t.id);
           }
-          if (t.tipo == TipoTarjeta.evidencia) expect(t.evidencia, isNotNull, reason: t.id);
+          // Evidencia solo en las de evidencia y justificación solo en los dilemas.
+          expect(t.evidencia != null, t.tipo == TipoTarjeta.evidencia, reason: t.id);
+          expect(t.justificacion != null, t.tipo == TipoTarjeta.justificacion, reason: t.id);
+          if (t.evidencia case final e?) {
+            expect(e.archivo, isNotEmpty, reason: t.id);
+            expect(e.lineas, isNotEmpty, reason: t.id);
+            expect(e.lineas.any((l) => l.contains('\n')), isFalse, reason: t.id);
+            expect(e.lineasClave, isNotEmpty, reason: t.id);
+            expect(e.lineasClave, everyElement(inInclusiveRange(1, e.lineas.length)), reason: t.id);
+            expect([e.mensajeAcierto, e.mensajeFallo], everyElement(isNotEmpty), reason: t.id);
+          }
+          if (t.justificacion case final j?) {
+            expect(j.opciones, hasLength(3), reason: t.id);
+            expect(j.indiceCorrecto, inInclusiveRange(0, 2), reason: t.id);
+          }
         }
       }
+    });
+
+    test('la tarjeta 6 de spr-1-3 es el registro_form.dart de Figma 15 y 16b', () {
+      final t = MockTarjetas.tarjetasPorSprint['spr-1-3']![5];
+      expect(t.tipo, TipoTarjeta.evidencia);
+      expect(t.etiquetaCaso, 'CASO 6 · PROTECCIÓN DE DATOS');
+      expect(t.respuestaCorrecta, Veredicto.ilegal);
+      final e = t.evidencia!;
+      expect(e.archivo, 'registro_form.dart');
+      expect(e.lineas, hasLength(7));
+      expect(e.lineas[3], 'Checkbox(value: true, // pre-marcado');
+      expect(e.lineasClave, [4, 5, 6]);
+      expect(
+        e.mensajeAcierto,
+        'Marcaste la casilla pre-marcada y el aviso de privacidad faltante. Ahora regresa a la '
+        'tarjeta y dicta tu veredicto.',
+      );
+    });
+
+    test('la tarjeta 10 de spr-1-3 es el dilema de contraseñas de Figma 17 y 18', () {
+      final t = MockTarjetas.tarjetasPorSprint['spr-1-3']![9];
+      expect(t.tipo, TipoTarjeta.justificacion);
+      expect(t.etiquetaCaso, 'CASO 10 · DILEMA CLAVE');
+      expect(t.respuestaCorrecta, Veredicto.ilegal);
+      expect(t.justificacion!.indiceCorrecto, 0);
+      expect(t.justificacion!.opciones, [
+        'Las contraseñas son datos personales y deben guardarse con hash (bcrypt), nunca en '
+            'texto plano.',
+        'Porque el cliente no firmó un contrato de confidencialidad.',
+        'Solo sería ilegal si ocurre una filtración de datos.',
+      ]);
     });
 
     test('ninguna tarjeta menciona plazos ni montos legales con cifra', () {
@@ -237,7 +282,10 @@ void main() {
           t.explicacion,
           ?t.explicacionFallo,
           ?t.explicacionParcial,
-          ?t.evidencia,
+          ...?t.evidencia?.lineas,
+          ?t.evidencia?.mensajeAcierto,
+          ?t.evidencia?.mensajeFallo,
+          ...?t.justificacion?.opciones,
           ?t.microPregunta?.enunciado,
           ...?t.microPregunta?.opciones,
         ];
@@ -247,12 +295,13 @@ void main() {
       }
     });
 
-    test('3 o 4 micro-preguntas por sprint, con 2 o 3 opciones', () {
+    test('2 micro-preguntas por sprint, solo en tarjetas normales y con 2 o 3 opciones', () {
       for (final s in sprints) {
         final conPregunta = MockTarjetas.tarjetasPorSprint[s.id]!
             .where((t) => t.microPregunta != null)
             .toList();
-        expect(conPregunta.length, inInclusiveRange(3, 4), reason: s.id);
+        expect(conPregunta.length, 2, reason: s.id);
+        expect(conPregunta.map((t) => t.tipo), everyElement(TipoTarjeta.normal), reason: s.id);
         for (final t in conPregunta) {
           final p = t.microPregunta!;
           expect(p.opciones.length, inInclusiveRange(2, 3), reason: t.id);

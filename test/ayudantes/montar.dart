@@ -104,6 +104,20 @@ Set<int> coloresPermitidos(Brightness brillo) {
       EfectosApp.confetiAmbarClaro,
     ])
       _rgb(c),
+    // Snippet de código de 16 y 16b: un editor oscuro, igual en ambos modos.
+    for (final c in [
+      EfectosApp.fondoSnippet,
+      EfectosApp.barraSnippet,
+      EfectosApp.ventanaRojo,
+      EfectosApp.ventanaAmbar,
+      EfectosApp.ventanaVerde,
+      EfectosApp.textoSecundarioSnippet,
+      EfectosApp.textoSnippet,
+      EfectosApp.fondoLineaClave,
+      EfectosApp.textoLineaClave,
+      EfectosApp.resaltado,
+    ])
+      _rgb(c),
     for (final cara in [t.accionPrimaria, t.accionAcento, t.fondoSuperficieAlt, t.accionSecundaria])
       _rgb(EfectosApp.baseNodo(cara)),
   };
