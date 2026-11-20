@@ -13,7 +13,6 @@ import '../../core/tema/iconos_app.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/modelos/modulo.dart';
-import '../juego/estado_juego.dart';
 import 'estado_mapa.dart';
 import 'logica_mapa.dart';
 
@@ -72,7 +71,7 @@ class PantallaIntroSprint extends ConsumerWidget {
   }
 }
 
-class _Intro extends ConsumerWidget {
+class _Intro extends StatelessWidget {
   const _Intro({
     required this.modulo,
     required this.sprint,
@@ -85,14 +84,12 @@ class _Intro extends ConsumerWidget {
   final int vidas;
   final VoidCallback alCerrar;
 
-  /// Empieza el sprint desde la tarjeta 1 (descarta un avance anterior).
-  void _comenzar(BuildContext context, WidgetRef ref) {
-    if (!sprint.esExamenFinal) reiniciarJuego(ref, sprint.id);
+  void _comenzar(BuildContext context) {
     context.push(sprint.esExamenFinal ? Rutas.crisisJefeDe(modulo.id) : Rutas.juegoDe(sprint.id));
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
     final abierto = LogicaMapa.puedeAbrir(modulo, sprint);
@@ -197,7 +194,7 @@ class _Intro extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
             child: BotonApp(
               texto: Textos.comenzarSprint,
-              alPresionar: abierto ? () => _comenzar(context, ref) : null,
+              alPresionar: abierto ? () => _comenzar(context) : null,
             ),
           ),
         ],

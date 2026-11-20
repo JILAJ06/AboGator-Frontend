@@ -2,19 +2,14 @@ import 'package:abogator/app/app.dart';
 import 'package:abogator/app/enrutador.dart';
 import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/acciones_veredicto.dart';
-import 'package:abogator/componentes/aviso_informativo.dart';
 import 'package:abogator/componentes/barra_comodines.dart';
 import 'package:abogator/componentes/barra_progreso.dart';
 import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/boton_veredicto.dart';
 import 'package:abogator/componentes/campo_texto_app.dart';
 import 'package:abogator/componentes/chip_hud.dart';
-import 'package:abogator/componentes/confeti_sprint.dart';
 import 'package:abogator/componentes/corazon_vida.dart';
 import 'package:abogator/componentes/encabezado_modulo.dart';
-import 'package:abogator/componentes/estadisticas_sprint.dart';
-import 'package:abogator/componentes/estrellas_sprint.dart';
-import 'package:abogator/componentes/etiqueta_quiebra.dart';
 import 'package:abogator/componentes/fila_detalle_sprint.dart';
 import 'package:abogator/componentes/globo_sprint_actual.dart';
 import 'package:abogator/componentes/impacto_startup.dart';
@@ -78,12 +73,6 @@ void main() {
     expect(find.byType(LogoApp), findsNWidgets(20));
     expect(find.byType(NavegacionInferiorApp), findsOneWidget);
     expect(find.byType(EncabezadoModulo), findsNWidgets(2));
-    // Fin de sprint (19 y 19b).
-    expect(find.byType(ConfetiSprint), findsOneWidget);
-    expect(find.byType(EstrellasSprint), findsNWidgets(3));
-    expect(find.byType(EstadisticasSprint), findsOneWidget);
-    expect(find.byType(AvisoInformativo), findsNWidgets(2));
-    expect(find.byType(EtiquetaQuiebra), findsNWidgets(2));
     expect(find.byType(NodoSprint), findsNWidgets(5));
     expect(
       tester.widgetList<NodoSprint>(find.byType(NodoSprint)).map((n) => n.tipo).toSet(),

@@ -123,12 +123,7 @@ class _JuegoState extends ConsumerState<_Juego> {
       ),
     );
     if (!mounted) return;
-    final juego = _juego;
-    final destino = juego.cerrarPanel(totalTarjetas: widget.datos.tarjetas.length);
-    // Al terminar, guarda el resultado antes de salir (el mapa y el Inicio
-    // lo leen de los repositorios).
-    if (destino != DestinoVeredicto.siguiente) await juego.guardarResultado();
-    if (!mounted) return;
+    final destino = _juego.cerrarPanel(totalTarjetas: widget.datos.tarjetas.length);
     switch (destino) {
       case DestinoVeredicto.quiebra:
         context.go(Rutas.startupQuiebraDe(widget.sprintId));

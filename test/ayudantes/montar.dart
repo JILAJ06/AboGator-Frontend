@@ -1,5 +1,4 @@
 import 'package:abogator/componentes/corazon_vida.dart';
-import 'package:abogator/componentes/estrellas_sprint.dart';
 import 'package:abogator/core/tema/colores_marca.dart';
 import 'package:abogator/core/tema/efectos.dart';
 import 'package:abogator/core/tema/tema_app.dart';
@@ -81,7 +80,6 @@ Set<int> coloresUsados(WidgetTester tester) {
   for (final pintura in tester.widgetList<CustomPaint>(dentro(CustomPaint))) {
     final pintor = pintura.painter;
     if (pintor is PintorCorazon) colores.add(_rgb(pintor.color));
-    if (pintor is PintorEstrella) colores.add(_rgb(pintor.color));
   }
   return colores;
 }
@@ -95,15 +93,6 @@ Set<int> coloresPermitidos(Brightness brillo) {
     for (final c in ColoresModulo.enOrden) _rgb(c),
     _rgb(EfectosApp.colorSombraSolida),
     _rgb(EfectosApp.brilloBarra),
-    // Confeti de 19: decorativo, sus colores viven en EfectosApp.
-    for (final c in [
-      EfectosApp.confetiAmbar,
-      EfectosApp.confetiVerde,
-      EfectosApp.confetiAzul,
-      EfectosApp.confetiRojo,
-      EfectosApp.confetiAmbarClaro,
-    ])
-      _rgb(c),
     for (final cara in [t.accionPrimaria, t.accionAcento, t.fondoSuperficieAlt, t.accionSecundaria])
       _rgb(EfectosApp.baseNodo(cara)),
   };
