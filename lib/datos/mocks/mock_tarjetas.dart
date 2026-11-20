@@ -338,7 +338,7 @@ class MockTarjetas implements RepositorioTarjetas {
         rol: 'Atención a clientes',
         texto:
             'Un usuario pide que borren sus datos personales, pero tienen facturas '
-            'fiscales a su nombre de hace dos años. ¿Qué haces?',
+            'fiscales recientes a su nombre. ¿Qué haces?',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Se atiende la cancelación, pero se conservan bloqueados los datos que '
@@ -381,7 +381,7 @@ class MockTarjetas implements RepositorioTarjetas {
         personaje: 'CEO',
         rol: 'Dirección',
         texto:
-            'Atender solicitudes de acceso nos quita tiempo. ¿Cobramos 500 pesos por '
+            'Atender solicitudes de acceso nos quita tiempo. ¿Cobramos una cuota por '
             'cada una?',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
@@ -392,7 +392,7 @@ class MockTarjetas implements RepositorioTarjetas {
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),
         microPregunta: MicroPregunta(
           enunciado: '¿por qué es ilegal?',
-          opciones: ['Ejercer los derechos ARCO es gratuito', 'Porque 500 pesos es muy poco'],
+          opciones: ['Ejercer los derechos ARCO es gratuito', 'Porque la cuota es muy baja'],
           indiceCorrecto: 0,
         ),
       ),
@@ -403,13 +403,14 @@ class MockTarjetas implements RepositorioTarjetas {
         personaje: 'Product Owner',
         rol: 'Equipo de Producto',
         texto:
-            'Esta solicitud de acceso lleva más de dos meses sin respuesta. ¿La '
-            'dejamos para después del lanzamiento?',
+            'Esta solicitud de acceso lleva semanas sin respuesta y ya venció el plazo '
+            'legal. ¿La dejamos para después del lanzamiento?',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Las solicitudes ARCO deben responderse dentro del plazo que marca la '
             'ley; dejarla sin respuesta incumple el derecho del titular.',
-        evidencia: 'Solicitud #4821 · Acceso\nRecibida: 3 de marzo\nRespuesta: —\nHoy: 20 de mayo',
+        evidencia:
+            'Solicitud de acceso\nRecibida: hace semanas\nRespuesta: —\nPlazo legal: vencido',
         impactoAcierto: ImpactoTarjeta(reputacion: 5, riesgoLegal: -10),
         impactoFallo: ImpactoTarjeta(velocidad: 10, riesgoLegal: 20),
         impactoParcial: ImpactoTarjeta(presupuesto: -5, velocidad: -10),

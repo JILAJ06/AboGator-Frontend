@@ -82,7 +82,7 @@ RepositorioTienda tienda(WidgetTester tester) =>
 Sprint sprintDe(List<Modulo> modulos, String id) =>
     modulos.expand((m) => m.sprints).firstWhere((s) => s.id == id);
 
-/// Juega el mazo de 5 Legal: 4 aciertos y 1 error (80 %, 3 estrellas).
+/// Juega el mazo de 5 Legal: 4 aciertos y 1 error (80 %, 2 estrellas).
 Future<void> completarConUnFallo(WidgetTester tester) async {
   await abrirJuego(tester, tarjetas: mazoLegal(5));
   for (var i = 0; i < 4; i++) {
@@ -131,7 +131,7 @@ void main() {
         find.text('Tu MVP ya cumple con el aviso de privacidad y la Startup sigue en pie.'),
         findsOneWidget,
       );
-      expect(tester.widget<EstrellasSprint>(find.byType(EstrellasSprint)).ganadas, 3);
+      expect(tester.widget<EstrellasSprint>(find.byType(EstrellasSprint)).ganadas, 2);
       final e = tester.widget<EstadisticasSprint>(find.byType(EstadisticasSprint));
       expect((e.aciertos, e.total, e.xp, e.monedas), (4, 5, 40, 20));
       Finder enEstadisticas(String texto) =>
@@ -165,7 +165,7 @@ void main() {
       await completarConUnFallo(tester);
       final modulos = await progreso(tester).obtenerModulos();
       expect(sprintDe(modulos, 'spr-1-3').estado, EstadoSprint.completado);
-      expect(sprintDe(modulos, 'spr-1-3').estrellas, 3);
+      expect(sprintDe(modulos, 'spr-1-3').estrellas, 2);
       expect(sprintDe(modulos, 'spr-1-4').estado, EstadoSprint.enCurso);
       expect(
         await progreso(tester).obtenerEstadoStartup(),
@@ -244,7 +244,7 @@ void main() {
       int posicion(String texto) => recorrido.indexWhere((l) => l.contains(texto));
       final pasos = [
         Textos.sprintCompletadoTitulo,
-        Textos.estrellasSemantica(3, 3),
+        Textos.estrellasSemantica(2, 3),
         '4 de 5 aciertos',
         Textos.estadoFinalStartup,
         Textos.avisoBuzon(1),

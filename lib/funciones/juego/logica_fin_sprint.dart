@@ -8,7 +8,7 @@ import 'logica_veredicto.dart';
 /// Reglas puras del fin de sprint (pantallas 19 y 19b).
 abstract final class LogicaFinSprint {
   /// Con este porcentaje de aciertos o más se ganan 3 estrellas.
-  static const int porcentajeTresEstrellas = 80;
+  static const int porcentajeTresEstrellas = 90;
 
   /// Con este porcentaje de aciertos o más se ganan 2 estrellas.
   static const int porcentajeDosEstrellas = 60;
@@ -23,8 +23,9 @@ abstract final class LogicaFinSprint {
       .where((r) => r.tipo == TipoVeredicto.incorrecto || r.tipo == TipoVeredicto.amparo)
       .length;
 
-  /// Estrellas de un sprint completado: ≥ 80 % de aciertos da 3, ≥ 60 % da 2 y
-  /// menos da 1 (completar da siempre al menos una).
+  /// Estrellas de un sprint completado: ≥ 90 % de aciertos da 3, ≥ 60 % da 2 y
+  /// menos da 1 (completar da siempre al menos una). Como en Figma 19: 8 de 10
+  /// aciertos dan 2 estrellas.
   static int estrellas({required int aciertos, required int total}) {
     if (total <= 0) return 1;
     // Sin decimales: aciertos / total ≥ p / 100.

@@ -19,24 +19,26 @@ const inicio = EstadoStartup(presupuesto: 70, reputacion: 60, velocidad: 50, rie
 
 void main() {
   group('estrellas por porcentaje de aciertos', () {
-    test('≥ 80 % da 3, ≥ 60 % da 2 y menos da 1', () {
+    test('≥ 90 % da 3, ≥ 60 % da 2 y menos da 1', () {
       int e(int aciertos, int total) => LogicaFinSprint.estrellas(aciertos: aciertos, total: total);
       expect(e(10, 10), 3);
-      expect(e(8, 10), 3);
+      expect(e(9, 10), 3);
+      // Como en Figma 19: 8 de 10 aciertos dan 2 estrellas.
+      expect(e(8, 10), 2);
       expect(e(7, 10), 2);
       expect(e(6, 10), 2);
       expect(e(5, 10), 1);
       expect(e(0, 10), 1);
     });
 
-    test('límites exactos de 80 % y 60 %', () {
+    test('límites exactos de 90 % y 60 %', () {
       int e(int aciertos, int total) => LogicaFinSprint.estrellas(aciertos: aciertos, total: total);
-      expect(e(80, 100), 3);
-      expect(e(79, 100), 2);
+      expect(e(90, 100), 3);
+      expect(e(89, 100), 2);
       expect(e(60, 100), 2);
       expect(e(59, 100), 1);
-      // 8 tarjetas: 7/8 = 87.5 %, 6/8 = 75 %, 5/8 = 62.5 %, 4/8 = 50 %.
-      expect([for (var a = 4; a <= 7; a++) e(a, 8)], [1, 2, 2, 3]);
+      // 8 tarjetas: 8/8 = 100 %, 7/8 = 87.5 %, 5/8 = 62.5 %, 4/8 = 50 %.
+      expect([for (var a = 4; a <= 8; a++) e(a, 8)], [1, 2, 2, 2, 3]);
     });
 
     test('completar da al menos 1 estrella, aun sin tarjetas', () {
@@ -205,6 +207,42 @@ void main() {
             expect(t.impactoParcial, isNot(const ImpactoTarjeta()), reason: t.id);
           }
           if (t.tipo == TipoTarjeta.evidencia) expect(t.evidencia, isNotNull, reason: t.id);
+        }
+      }
+    });
+
+    test('ninguna tarjeta menciona plazos ni montos legales con cifra', () {
+      const numero =
+          r'(\d+|un|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|quince|veinte|treinta)';
+      final cifra = RegExp(
+        r'\b' +
+            numero +
+            r'\s+(días?|semanas?|mes|meses|horas?|pesos)\b|\bhace\s+\w+\s+años?\b|\$\s*\d',
+        caseSensitive: false,
+      );
+      // La expresión sí detecta los casos que se quitaron.
+      for (final viejo in [
+        'lleva más de dos meses sin respuesta',
+        '¿Cobramos 500 pesos?',
+        'facturas de hace dos años',
+        'en 72 horas',
+      ]) {
+        expect(cifra.hasMatch(viejo), isTrue, reason: viejo);
+      }
+      // Una edad no es un plazo.
+      expect(cifra.hasMatch('usuarios tienen 15 años'), isFalse);
+      for (final t in MockTarjetas.tarjetasPorSprint.values.expand((l) => l)) {
+        final textos = [
+          t.texto,
+          t.explicacion,
+          ?t.explicacionFallo,
+          ?t.explicacionParcial,
+          ?t.evidencia,
+          ?t.microPregunta?.enunciado,
+          ...?t.microPregunta?.opciones,
+        ];
+        for (final texto in textos) {
+          expect(cifra.hasMatch(texto), isFalse, reason: '${t.id}: $texto');
         }
       }
     });
