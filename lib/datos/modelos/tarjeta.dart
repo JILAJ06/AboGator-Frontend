@@ -127,6 +127,8 @@ class Tarjeta {
     this.traduccionLegal,
     this.normas = const [],
     this.iniciales,
+    this.titulo,
+    this.tema,
     this.explicacionFallo,
     this.explicacionParcial,
   });
@@ -181,6 +183,23 @@ class Tarjeta {
 
   /// Iniciales del avatar; si faltan, se calculan del [personaje].
   final String? iniciales;
+
+  /// Título corto del caso (≤ 45), el que se ve en el Buzón de Apelaciones.
+  final String? titulo;
+
+  /// Tema corto, por ejemplo "Licencias OSS" o "Derechos ARCO".
+  final String? tema;
+
+  /// Largo máximo del título en el Buzón.
+  static const int largoTitulo = 45;
+
+  /// [titulo] o, si falta, el comienzo del [texto] cortado en 45 con "…".
+  String get tituloCorto {
+    final t = titulo;
+    if (t != null && t.isNotEmpty) return t;
+    if (texto.length <= largoTitulo) return texto;
+    return '${texto.substring(0, largoTitulo - 1).trimRight()}…';
+  }
 
   /// La Lupa solo sirve si hay palabras trampa.
   bool get aplicaLupa => palabrasTrampa.isNotEmpty;

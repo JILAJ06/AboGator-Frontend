@@ -176,10 +176,7 @@ void main() {
   });
 
   test('MockApelaciones y MockTienda devuelven datos de ejemplo', () async {
-    expect(
-      await MockApelaciones(espera: Duration.zero).obtenerApelacionesPendientes(),
-      hasLength(6),
-    );
+    expect((await MockApelaciones(espera: Duration.zero).obtenerBuzon()).total, 6);
     expect(await MockTienda(espera: Duration.zero).obtenerArticulos(), hasLength(3));
   });
 

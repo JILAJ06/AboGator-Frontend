@@ -1,100 +1,68 @@
-# T-08 · Sin vidas, sin conexión y cola local (SQLite)
+# T-09 · Buzón de Apelaciones y notificación
 
-**Rama:** `08-vidas-y-offline` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-08**).
-**Pantallas:** 20 Sin vidas y 23 Sin conexión (offline-first). Figma (archivo `SYNAyUal3xVk4k8SEBEb7f`): 20 = `17:2072`, 23 = `41:5976`. Compara en Chrome con el conector.
+**Rama:** `09-apelaciones` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-09**).
+**Pantallas:** 21 Buzón de Apelaciones y 21b Notificación de apelación. Figma (archivo `SYNAyUal3xVk4k8SEBEb7f`): 21 = `41:5631`, 21b = `41:5499`. Compara en Chrome con el conector.
+**Se divide en dos:** esta tarea hace el Buzón, el registro de fallos y la notificación. El **juicio (22) y la apelación ganada (22b)** son la **T-09b**; aquí las filas del Buzón abren la ruta del juicio, que sigue siendo un marcador.
 
 ## Objetivo
-1. **Sin vidas (20):** pantalla real con cuenta regresiva a la próxima vida, **calculada a partir de lo que manda el servidor** (no del reloj del dispositivo), sugerencia hacia el Buzón y regreso al mapa. Sustituye los marcadores `sinVidasPendiente`.
-2. **Sin conexión (23):** no es una pantalla aparte, es un **estado de la pantalla de juego**: aviso de conexión inestable y contador de respuestas guardadas en el dispositivo.
-3. **Cola local con SQLite (offline-first):** cada respuesta se guarda primero en el dispositivo con un UUID de cliente y se sincroniza después; el servidor la recibe una sola vez (idempotencia). Como aún no hay backend, el "servidor" es un mock.
-4. El estado "onboarding visto" pasa a guardarse en SQLite **sin cambiar su interfaz** (`RepositorioOnboarding`).
+1. **Registrar los fallos:** las tarjetas falladas en un sprint llegan al Buzón (hasta hoy solo se contaban).
+2. **Buzón (21):** pantalla real con la lista de apelaciones, cuáles se pueden hacer hoy y cuándo se abren las demás, calculado con la **fecha del servidor**.
+3. **Notificación (21b):** es una notificación del sistema (pantalla de bloqueo), no una pantalla de la app. Aquí se construyen su texto, su componente visual (para la galería) y el **enlace profundo** que abre el juicio. El envío real de notificaciones llega con el backend (T-14).
 
-## Dependencias (autorizadas solo estas)
-- `sqflite` (SQLite en Android/iOS) y `path` si lo necesita para la ruta de la base.
-- `dev_dependencies`: `sqflite_common_ffi` (para probar el SQL en `flutter test`).
-- **UUID sin paquete:** escribe `generarUuidV4()` en `lib/core/utilidades/` con `Random.secure()` (formato 8-4-4-4-12, versión 4 y variante correcta) y pruébalo (formato, unicidad en 1000 llamadas).
-- Instálalas con `flutter pub add` (elige las versiones compatibles con Flutter 3.50 / Dart 3.14). **Cualquier otra dependencia: no la agregues, pregúntalo en una duda del reporte.**
-- **Web (Chrome):** sqflite no corre en web. En web (`kIsWeb`) usa implementaciones **en memoria** de la cola y del onboarding (se pierden al recargar; es solo para probar). Documenta esa limitación en el reporte. La app real es móvil y tableta.
+## Datos
+### Modelo y repositorio (`Apelacion`, `RepositorioApelaciones`, `MockApelaciones`)
+- `Apelacion` suma: `moduloId` (para el color de la franja), `tema` (p. ej. "Licencias OSS") y reemplaza `resumen` por `titulo` (p. ej. "Librería GPL en app cerrada"). Se conservan `id`, `tarjetaId`, `diaRepaso` (3, 7 o 14) y `disponibleEl`.
+- `RepositorioApelaciones`:
+  - `Future<BuzonApelaciones> obtenerBuzon()` reemplaza `obtenerApelacionesPendientes()`. `BuzonApelaciones` lleva `ahoraServidor` y `apelaciones` (ordenadas: primero las disponibles hoy, luego las futuras por fecha) y expone `deHoy` (las de `disponibleEl` ≤ fin del día de `ahoraServidor`; una vencida cuenta como de hoy) y `total`.
+  - `Future<void> registrarFallos(List<NuevaApelacion> fallos)`. `NuevaApelacion`: `tarjetaId`, `moduloId`, `titulo`, `tema`. Crea una apelación de **día 3** con `disponibleEl = ahoraServidor + 3 días` por cada tarjeta que **no** esté ya en el Buzón (sin duplicar por `tarjetaId`).
+- `MockApelaciones`: estado en memoria por instancia y reloj inyectable `ahoraServidor` (por defecto `DateTime.now`; es el mock quien hace de servidor). Semilla de **6** apelaciones relativas a ese reloj, con las dos primeras como en Figma 21: (1) "Librería GPL en app cerrada" · Licencias OSS · día 3 · **hoy**; (2) una de consentimiento (usa una tarjeta existente; Figma: "Casilla de consentimiento pre-marcada" · Protección de datos) · día 7 · **hoy**; (3) día 3 · **mañana**; (4) día 7 · **en 2 días**; (5) y (6) día 14 en fechas posteriores. Usa `tarjetaId` que existan en `MockTarjetas` y `moduloId` que existan en el mock de progreso.
+- `RepositorioTarjetas.obtenerTarjeta(String id)` (nuevo; `StateError` si no existe) para que T-09b abra la tarjeta de una apelación. Impleméntalo en `MockTarjetas`.
+### Tarjeta (`tarjeta.dart`)
+- Campos opcionales nuevos: `titulo` (≤ 45 caracteres, lo que se ve en el Buzón) y `tema` (corto, p. ej. "Consentimiento", "Derechos ARCO", "Brechas de seguridad", "Aviso de privacidad", "Licencias OSS"). Dales valor a **las 42 tarjetas** del módulo 1. Sin cifras, plazos ni números de artículo (la prueba de cifras debe revisar también estos textos). Si falta `titulo`, el respaldo es el comienzo del `texto` cortado en 45 con "…".
+### Registro de fallos al terminar el sprint
+- En `JuegoNotifier.guardarResultado()` (una sola vez, en los **tres** finales: sprint completado, quiebra y sin vidas) llama a `registrarFallos` con las tarjetas de `state.falladas` (las que ya cuenta hoy; no cambies qué es un fallo). Si el jugador sale a la mitad del sprint con "Salir", no se registran (el avance se descarta como hoy). Anótalo en el reporte.
+- Después de registrar, invalida los proveedores que leen el Buzón (Inicio, Mapa, pantalla 20) para que los contadores se actualicen.
+- Semántica de los contadores: el botón Buzón de Inicio y Mapa sigue mostrando el **total** del Buzón (`total`). La pantalla 20 y el encabezado del Buzón usan las **de hoy** (`deHoy`): Figma las muestra como "2". Actualiza la pantalla 20 (T-08) y sus pruebas.
+### Textos de la notificación
+`Textos.notificacionApelacionTitulo` = "⚖️ Tienes un juicio de apelación pendiente" y `Textos.notificacionApelacionCuerpo(titulo, dias)` = "Hace {dias} días fallaste “{titulo}”. Gánala y recupera 1 vida." (con las comillas tipográficas). Pie de la maqueta: "Toca para abrir el juicio de apelación".
 
-## Datos y repositorios
-### Vidas (`Vidas`, `RepositorioVidas`, `MockVidas`)
-- Reemplaza `Vidas.proximaEn` (DateTime) por `Duration? faltaParaProxima`: lo que **falta** según el servidor en el momento de la respuesta (`null` con vidas completas). Actualiza usos y pruebas (`mocks_test.dart`, `logica_fin_sprint_test.dart`).
-- `MockVidas` simula el servidor con reloj inyectable (`ahoraServidor`, ya existe): guarda internamente el momento de la próxima regeneración. Reglas: al bajar de 5 vidas sin regeneración programada, la programa a `ahora + 2 h`; `obtenerVidas()` aplica las regeneraciones vencidas (+1 vida por cada 2 h cumplidas, sin pasar de 5; si aún faltan, programa la siguiente 2 h después de la anterior); con 5 vidas no hay regeneración. `faltaParaProxima = proxima − ahora`.
-- **Cuenta regresiva en la UI (`CuentaRegresivaVida`):** al recibir `faltaParaProxima` se guarda un `Stopwatch` (tiempo monótono) y cada segundo se muestra `faltaParaProxima − stopwatch.elapsed`. **Nunca** `DateTime.now()`. Al llegar a 0 vuelve a pedir `obtenerVidas()` al repositorio.
+## 21 · Buzón de Apelaciones (pestaña con navegación inferior, activa "Buzón")
+Usa `MarcoPrincipal(pestana: buzon)` **sin** el botón Buzón flotante. Medidas del marco 390×844; en código, columna desplazable con estas separaciones y el botón fijo.
+- **Título** (24,60): "Buzón de Apelaciones", Fredoka Bold 26/32 `textoPrimario`, ancho 260. **Subtítulo** (24,96): "Tus fallos regresan a los 3 y 7 días para que no se te olviden." Cuerpo/Base `textoSecundario`, ancho 230.
+- **Sarko** 104×130 en (262,50) (recortado como Figma). La pose es la de Figma `41:5645`; compárala con el conector y, si no se distingue, usa alegre.
+- **Recompensa** (24,180; ancho 342): `fondoDestacado`, radio 18, relleno 14×12, separación 12. Cuadrado 40 `estadoIlegal` radio 12 con `heart` 22 `textoEnPrimario`; textos: "N juicios de apelación hoy" (Cuerpo/Énfasis `textoPrimario`; singular "1 juicio de apelación hoy") y "Gana cada apelación y recupera 1 vida" (Leyenda `textoSecundario`). Con 0 de hoy: "Hoy no tienes juicios de apelación" y "Tus próximas apelaciones aparecen abajo" (con la lista vacía: ver estado vacío).
+- **Lista** (24,256; ancho 342): contenedor `fondoSuperficie`, borde 1 `bordeDefault`, radio 20, recortado; filas con divisor inferior 1 `bordeDefault` (todas menos la última).
+  - **Fila** (relleno 14×12, separación 12): franja de 6×40 radio 3 en el color del módulo (`Modulo.color` por `moduloId`; si no se conoce, `bordeControl`); columna (separación 3, ocupa el resto): `titulo` (Cuerpo/Énfasis `textoPrimario`, hasta 2 líneas), `tema` (Leyenda `textoSecundario`) y la **píldora de plazo** (radio 999, relleno 8×2, separación 4); a la derecha `chevron` 18.
+  - **Plazo, de hoy:** fondo `estadoIlegal`, ícono `gavel` 12 y "Día 3 · hoy · +1 vida" (Leyenda `textoEnPrimario`). **Futura:** fondo `fondoSuperficieAlt`, ícono `clock` 12 y "Día 3 · mañana" / "Día 7 · en 2 días" (Leyenda `textoSecundario`). "mañana" = día siguiente al de `ahoraServidor`; "en N días" para N ≥ 2; todo con la **fecha del servidor** (días calendario en UTC), nunca `DateTime.now()` del dispositivo.
+  - **Toque:** fila de hoy → `Rutas.juicioApelacionDe(id)` (marcador "Juicio de apelación · llega en T-09b"). Fila futura → no navega: muestra un aviso (`SnackBar` con `liveRegion`) "Esta apelación se abre mañana" / "…en N días".
+  - **Semántica de la fila:** "Librería GPL en app cerrada, Licencias OSS, día 3, disponible hoy, +1 vida si la ganas" (o "…disponible mañana"). Botón en las de hoy; en las futuras, botón también (da el aviso). Foco con teclado y anillo `focoAnillo`.
+- **Botón primario** "Iniciar apelaciones de hoy" (24,664; 342×52) y debajo "No consume vidas · No avanza el mapa" (Leyenda `textoSecundario`, centrado, y=724): van **fijos** encima de la barra inferior. Abre la primera apelación de hoy (T-09b lo convierte en sesión). Con 0 de hoy el botón se ve **deshabilitado** (misma etiqueta).
+- **Vacío** (0 apelaciones en total, no está en Figma): Sarko sorprendido, "Tu Buzón está vacío" (H1) y "Cuando falles una tarjeta, volverá aquí a los 3 y 7 días." (Cuerpo/Base). Sin botón. **Cargando:** esqueleto simple. **Error:** `MensajePantalla` con "Reintentar".
+- Reemplaza `PantallaPendiente(pendienteBuzon)` y borra `Textos.pendienteBuzon`. Revisa que "Repasar mis fallos" (19) y "Ir al Buzón de Apelaciones" (19b y 20) lleven a esta pantalla.
+- Accesibilidad: título como encabezado y foco inicial en él; lista leída como lista ("Lista, N apelaciones"); nada depende solo del color (la píldora lleva ícono y texto); texto al 200 % sin desbordes (las filas crecen); contraste `textoEnPrimario` sobre `estadoIlegal` ≥ 4.5:1 y `textoSecundario` sobre `fondoSuperficieAlt` en claro y oscuro (pruébalo).
 
-### Respuestas pendientes (cola local)
-Modelo `RespuestaPendiente`: `id` (UUID v4 del cliente), `sprintId`, `tarjetaId`, `veredicto`, `justificacion` (int?, opción elegida), `evidenciaCorrecta` (bool?), `respondidaEn` (UTC; solo informativa, el servidor no se fía de ella), `intentos`.
-- Interfaz `ColaRespuestas` (en `lib/datos/repositorios/`): `agregar(RespuestaPendiente)`, `pendientes()`, `cantidadPendientes()`, `marcarEnviadas(List<String> ids)` (las borra), `registrarIntentoFallido(List<String> ids)`. Implementaciones: `ColaRespuestasSqlite` y `ColaRespuestasEnMemoria`.
-- Tabla `respuestas_pendientes(id TEXT PRIMARY KEY, sprint_id, tarjeta_id, veredicto, justificacion INTEGER NULL, evidencia_correcta INTEGER NULL, respondida_en TEXT, intentos INTEGER NOT NULL DEFAULT 0)`. Base `abogator.db`, versión 1, `onCreate`. Apertura perezosa (la base se abre en la primera operación, no al arrancar la app). El insert debe ser idempotente por `id` (`ConflictAlgorithm.ignore`).
-- Interfaz `RepositorioRespuestas` (lado servidor): `Future<List<String>> enviarRespuestas(List<RespuestaPendiente>)` devuelve los ids aceptados. `MockRespuestas`: guarda lo recibido **sin duplicar por id** (enviar dos veces el mismo UUID cuenta una vez) y expone `recibidas` para las pruebas. Puede lanzar error (parámetro para las pruebas) y entonces nada se acepta.
-- `SincronizadorRespuestas` (servicio, `lib/datos/` o `lib/funciones/juego/`): `sincronizar()` toma los pendientes, los envía y borra de la cola solo los ids aceptados; si falla, `registrarIntentoFallido` y no pierde nada. No se ejecuta dos veces a la vez (si ya está corriendo, ignora la llamada). Se dispara: al guardar una respuesta estando en línea, al volver la conexión y al abrir la app.
-
-### Conexión
-- Interfaz `ServicioConexion` con `EstadoConexion { enLinea, sinConexion }` y un `Stream`. Implementación actual `ConexionSimulada` (arranca en línea, método `establecer`). En T-14 se cambiará por detección real.
-- `conexionProvider` (Riverpod) y `respuestasPendientesProvider` (cantidad en cola, se refresca al agregar, enviar o volver la conexión).
-- **Interruptor de depuración** (`InterruptorConexionDebug`): solo con `kDebugMode`, una píldora pequeña "Simular sin conexión" con un `Switch`, abajo en la pantalla de juego (alto táctil ≥ 48, sin tapar nada del diseño). En release no existe. Es la única forma de ver el estado 23 sin backend.
-
-### Guardado de respuestas en el juego
-`JuegoNotifier.responder(...)` sigue calificando en local como hoy. Además, **cada respuesta** (en línea o no) se agrega primero a la cola con un UUID nuevo y luego, si hay conexión, se intenta sincronizar sin bloquear la UI ni el panel de veredicto. La calificación y el avance de tarjetas no dependen de la red. Los comodines se gastan como hoy (en memoria / tienda mock); su sincronización llega en T-14.
-- **Fuera de alcance:** el resultado del sprint (estrellas, vidas, monedas) sigue guardándose con los repositorios mock como hoy; cómo se sincroniza con el servidor se define en T-14. Anótalo en el reporte.
-
-### Onboarding en SQLite
-- Tabla `ajustes(clave TEXT PRIMARY KEY, valor TEXT NOT NULL)`; `OnboardingSqlite implements RepositorioOnboarding` guarda `onboarding_visto = 1`. Mismo archivo de base que la cola (una sola clase `BaseLocal` que abre y expone la base). En web y en pruebas, `OnboardingEnMemoria`.
-- Actualiza `repositorioOnboardingProvider` y `repositorioColaRespuestasProvider` en `proveedores_repositorios.dart`: `kIsWeb` → memoria; si no, SQLite. Quita el comentario "en T-08 se guardará en SQLite".
-
-## 20 · Sin vidas — medidas (marco 390×844; en código usa una columna desplazable con estas separaciones)
-Fondo `fondoApp`. Sin navegación inferior.
-- **Cerrar** (20,54): cuadrado 48, `fondoSuperficie`, borde 1 `bordeDefault`, radio 12, ícono `x` de 20. Reusa `BotonCerrar`. Vuelve al mapa (igual que "Volver al mapa").
-- **Vidas** (y=70): 5 corazones **vacíos** (`CorazonVida` contorno `bordeControl`) de 31.2 con hueco 10.4, centrados. Si al refrescar hay vidas, se llenan en orden.
-- **Ilustración** (y=120): círculo de fondo de 220 en (85,120) (reusa el círculo de la intro del sprint / 19b; si es privado, extráelo a un componente compartido y dilo en el reporte) y `SarkoImagen` **triste** de 176×220 en (107,124).
-- **Título** (y=360): "Te quedaste sin vidas", Fredoka Bold 26/32 `textoPrimario`, centrado, ancho 342.
-- **"Próxima vida en"** (y=400): Cuerpo/Base `textoSecundario`, centrado.
-- **Tiempo** (y=422): `HH:MM:SS` (con ceros, p. ej. `01:47:32`), Fredoka Bold 52 `estadoIlegal`, centrado, alto 64. Con texto muy grande o 200 % debe encoger (`FittedBox.scaleDown`), nunca desbordar.
-- **Nota del servidor** (y=494): fila centrada, ícono `clock` 16 `textoSecundario`, hueco 6 y "1 vida cada 2 horas · tiempo controlado por el servidor" (Leyenda `textoSecundario`).
-- **Sugerencia del Buzón** (24,540; ancho 342): `fondoDestacado`, radio 22, relleno 18, separación 12.
-  - Fila (separación 12): cuadrado 44 `accionSecundaria` radio 14 con ícono `inbox` 22 blanco; columna (separación 2): "Mientras tanto, repasa" (Cuerpo/Énfasis `textoPrimario`) y "N apelaciones pendientes: cada una que ganes te devuelve 1 vida." (Leyenda `textoSecundario`).
-  - Botón primario "Ir al Buzón de Apelaciones" (52, ancho completo).
-  - **N sale del mock de apelaciones** (`obtenerApelacionesPendientes().length`; el mock tiene 6, Figma muestra 2: usa el dato real y anótalo en el reporte). Singular: "1 apelación pendiente: si la ganas te devuelve 1 vida." Con 0 pendientes la tarjeta completa no se muestra.
-  - El botón navega a `Rutas.buzon` (hoy `PantallaPendiente`; la pantalla real llega en T-09).
-- **Volver al mapa** (24,738): botón fantasma 342×48.
-- **Cuando la cuenta llega a 0 y el servidor devuelve ≥ 1 vida:** los corazones se llenan, "Próxima vida en" pasa a "¡Recuperaste una vida!" (el tiempo se oculta, o muestra la siguiente si faltan más) y se anuncia al lector. No está en Figma: decisión tuya, descríbela en el reporte.
-- **Accesibilidad:** el tiempo visible va excluido del lector; en su lugar un `Semantics` "Próxima vida en 1 hora y 47 minutos" que se actualiza cada minuto **sin** `liveRegion` (no se anuncia cada segundo). Al llegar a 0 sí se anuncia. El foco inicial va al título. Contraste de `estadoIlegal` sobre `fondoApp` ≥ 3:1 (texto grande) en claro y oscuro: pruébalo.
-
-### Cómo se llega a la 20
-- Ruta `Rutas.sinVidas` con parámetro de consulta opcional `modulo` (`Rutas.sinVidasDe(moduloId)`); "Volver al mapa" y Cerrar van a `Rutas.mapaSprintsDe(modulo)` o a Inicio si no se conoce.
-- Al quedarse sin vidas en el juego: `context.go(Rutas.sinVidasDe(modulo))` (hoy `Rutas.sinVidas`). Comprueba que `guardarResultado()` ya guardó las 0 vidas antes de salir.
-- Al abrir un sprint con 0 vidas (`DatosJuego.sinVidas`): en vez de `MensajePantalla(sinVidasPendiente)` muestra directamente `PantallaSinVidas`. Con 0 vidas `datosJuegoProvider` sigue sin cargar tarjetas pero **sí resuelve `modulo` y `sprint`** (para saber a dónde volver).
-- Borra `Textos.sinVidasPendiente`, el `PantallaPendiente` de la ruta y la constante `Rutas.sinConexion` (no se usa: PANT-23 es un estado del juego).
-
-## 23 · Sin conexión — medidas (sobre la pantalla de juego 10)
-Figma muestra la tarjeta 7 de 10 con la barra y los indicadores como siempre, más dos elementos nuevos y **sin la barra de comodines**:
-- **Aviso de conexión** (24,158; ancho 342) `AvisoConexion`: superpuesto sobre el borde superior de la tarjeta (no la empuja), `fondoSuperficie`, borde 1.5 `accionAcento` con **5 de grosor a la izquierda**, radio 14, relleno 14×12, separación 10, sombra elevada (la de los paneles), ícono `info` 20 y texto "Conexión inestable. Se guardará tu progreso localmente." (Cuerpo/Base `textoPrimario`, varias líneas permitidas). No recibe toques (`IgnorePointer`: el arrastre de la tarjeta pasa). Es un anuncio (`liveRegion`) y no recibe foco.
-  - Se muestra mientras `conexionProvider` sea `sinConexion`. Al volver la conexión cambia ~3 s a "Conexión restablecida. Se está sincronizando tu progreso." (mismo estilo) y luego desaparece; con "reducir animaciones", sin transición. Ese segundo texto no está en Figma: decisión tuya, anótala.
-- **Pendientes** (`IndicadorPendientes`, centrado en y≈744, ocupa el lugar de la barra de comodines): ícono `refresh` 14 + "N respuestas guardadas en el dispositivo (SQLite)" (Leyenda `textoAcento`, hueco 6). Singular: "1 respuesta guardada en el dispositivo (SQLite)". Semántica: "N respuestas guardadas en el dispositivo, pendientes de sincronizar". Se muestra cuando `sinConexion` **o** hay pendientes en cola (mientras se sincroniza); si no, vuelve la barra de comodines.
-  - Sin conexión los comodines no están disponibles (su gasto lo controla el servidor): la barra se reemplaza por este indicador, como en Figma.
-- El juego sigue funcionando completo sin conexión (deslizar, paneles, evidencia, justificación); solo cambian el aviso y el contador.
+## 21b · Notificación de apelación
+- **Componente `NotificacionApelacion`** (para la galería y como referencia de diseño; no se muestra dentro de la app): ancho 358, fondo blanco al 88 % con desenfoque 10, radio 22, sombra (0,8) desenfoque 12 negro al 18 %, relleno 14×12, separación 12. Ícono de app: cuadrado 38, `#1F4E35`, radio 8.4, con el isotipo (reusa `LogoApp`/isotipo existente) de 31.7. Texto (separación 2): fila "ABOGATOR" / "ahora" (Leyenda `#475569`, justificada), título (Cuerpo/Énfasis `#111827`) y cuerpo (Cuerpo/Base `#111827`). Los colores propios de la notificación van en `EfectosApp` (imitan el sistema, no son tokens). Parámetros: título del caso y días (3 o 7) para el cuerpo, y la hora ("ahora", "hace 2 h").
+- **Enlace profundo:** `Rutas.juicioApelacionDe(id)` (`/buzon/<id>`) con la misma redirección de sesión que las demás rutas: sin sesión → inicio de sesión. Por ahora abre el marcador de T-09b. (Cómo se conserva el destino tras iniciar sesión no está definido: anótalo en el reporte como duda si lo ves necesario.)
+- **Fuera de alcance:** recibir o programar notificaciones reales (no agregues paquetes de notificaciones); el fondo de la pantalla de bloqueo de Figma no se construye.
 
 ## Archivos permitidos
-`pubspec.yaml` / `pubspec.lock` (solo las dependencias de arriba), `lib/datos/` (modelos `vidas.dart` y nuevo `respuesta_pendiente.dart`; repositorios y mocks de vidas, respuestas, cola, onboarding; `proveedores_repositorios.dart`; nueva base local), `lib/app/rutas.dart` y `enrutador.dart`, `lib/funciones/juego/` y nueva carpeta `lib/funciones/vidas/` (pantalla 20), `lib/funciones/mapa/` solo si hace falta para vidas, `lib/componentes/` (nuevos: `cuenta_regresiva_vida`, `aviso_conexion`, `indicador_pendientes`, interruptor de depuración; ajustes a `corazon_vida` y al círculo de ilustración compartido), `lib/core/utilidades/` (UUID), `lib/core/textos/textos.dart`, `lib/core/tema/iconos_app.dart` si falta algún ícono, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). **No** implementar el Buzón (T-09), la tienda (T-10) ni detección real de red (T-14).
+`lib/datos/modelos/` (`apelacion.dart`, `tarjeta.dart`, nuevo `buzon_apelaciones.dart`), `lib/datos/repositorios/` (apelaciones, tarjetas), `lib/datos/mocks/` (`mock_apelaciones.dart`, `mock_tarjetas.dart`), `lib/app/rutas.dart` y `enrutador.dart`, `lib/funciones/apelaciones/` (nueva pantalla 21 y su estado), `lib/funciones/juego/estado_juego.dart` (registro de fallos), `lib/funciones/mapa/`, `lib/funciones/inicio/` y `lib/funciones/vidas/` solo para el cambio de repositorio y contadores, `lib/componentes/` (nuevos: fila de apelación, plazo, tarjeta de recompensa, `NotificacionApelacion`), `lib/core/textos/textos.dart`, `lib/core/tema/efectos.dart` e `iconos_app.dart` si falta algún ícono, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). **Sin dependencias nuevas.** **No** implementar el juicio ni la apelación ganada (T-09b).
 
 ## Pruebas
-- **UUID:** formato v4, unicidad.
-- **MockVidas:** programa la regeneración al bajar de 5, aplica 0/1/2 regeneraciones vencidas con reloj inyectado, nunca pasa de 5, `faltaParaProxima` correcto, `null` con 5.
-- **Cola:** (con `sqflite_common_ffi` en memoria) agregar, contar, orden, `marcarEnviadas`, insert duplicado del mismo id no duplica, `registrarIntentoFallido` suma intentos, persiste entre aperturas de la base. Si en CI (Linux) falla por la biblioteca nativa, no lo escondas: déjalo en una duda numerada con el error y deja las mismas pruebas sobre la implementación en memoria.
-- **Onboarding SQLite** (misma estrategia) y `OnboardingEnMemoria`.
-- **Sincronizador:** envía y vacía; con fallo no pierde nada y suma intentos; reenvío del mismo UUID al mock cuenta una vez; no corre dos veces a la vez.
-- **Cuenta regresiva:** formato `HH:MM:SS`, cuenta con `FakeAsync`/reloj controlado **sin** `DateTime.now()`, al llegar a 0 pide vidas y se llenan los corazones; semántica por minuto.
-- **Pantalla 20:** muestra tiempo y N de apelaciones (0, 1 y varias), botones navegan (mapa; buzón), singular/plural, sin desbordes en 390×844, 360×640 y 320×640 al 100 % y 200 %, claro y oscuro, teclado y foco al título.
-- **Flujo:** perder la última vida en el juego lleva a la 20 (con las vidas 0 ya guardadas); abrir un sprint con 0 vidas muestra la 20.
-- **Pantalla de juego sin conexión:** con `ConexionSimulada.establecer(sinConexion)` aparece el aviso y el contador, se ocultan los comodines, responder 3 tarjetas deja "3 respuestas guardadas…"; al volver la conexión se sincroniza (contador a 0, aviso de restablecida y luego vuelve la barra); el juego se puede completar sin conexión; el aviso no bloquea el arrastre.
-- Prueba existente de cifras legales y las 691 pruebas previas siguen verdes.
+- **Mock:** semilla (2 de hoy, el orden, "mañana", "en 2 días"), `registrarFallos` crea día 3 a +3 días y no duplica, reloj inyectado, `deHoy` con una vencida.
+- **Tarjetas:** las 42 con `titulo` (≤ 45) y `tema`; prueba de cifras ampliada a estos textos; `obtenerTarjeta`.
+- **Juego:** al terminar (completado, quiebra, sin vidas) las falladas llegan al Buzón una sola vez; salir a la mitad no registra; el contador de Inicio/Mapa sube; sin duplicar si la misma tarjeta falla en otro sprint.
+- **Pantalla 21:** estructura y medidas de Figma (claro y oscuro), textos de plazo (hoy, mañana, en N días) con reloj controlado, singular/plural de la recompensa, fila de hoy navega, fila futura da el aviso, botón fijo (habilitado/deshabilitado), vacío, cargando, error y reintento, foco y teclado, semántica, sin desbordes en 390×844, 360×640 y 320×640 al 100 % y 200 %, contrastes.
+- **21b:** el componente con día 3 y 7, textos exactos, claro/oscuro; el enlace profundo con sesión abre la ruta y sin sesión va al inicio de sesión.
+- **Pantalla 20:** ahora cuenta las de hoy (2 con la semilla); `BotonBuzon` sigue con el total (6). Las pruebas previas siguen verdes.
 
 ## Criterios de aceptación
-- [ ] 20 y 23 coinciden con Figma; lo no incluido en Figma (recuperación de vida, "conexión restablecida", interruptor de depuración, N real de apelaciones) está documentado en el reporte.
-- [ ] La cuenta regresiva usa lo que manda el mock del servidor y un reloj monótono, nunca `DateTime.now()`.
-- [ ] Toda respuesta se guarda en la cola con UUID de cliente, se sincroniza sin duplicar y la UI no espera a la red.
-- [ ] SQLite en móvil (cola y onboarding); memoria en web y pruebas; limitaciones anotadas.
-- [ ] `Textos.sinVidasPendiente` y `Rutas.sinConexion` eliminados; nada más quedó "pendiente de T-08".
+- [ ] 21 y 21b coinciden con Figma; lo no incluido (vacío, aviso de fila futura, botón deshabilitado, semántica de contadores) está documentado en el reporte.
+- [ ] Los fallos de un sprint aparecen en el Buzón como "Día 3 · en 3 días"; el contador total y el de hoy se actualizan.
+- [ ] Fechas y plazos salen de la hora del servidor (mock), nunca del reloj del dispositivo.
+- [ ] Las 42 tarjetas con `titulo` y `tema`, sin cifras legales.
+- [ ] `pendienteBuzon` eliminado; el marcador que queda es solo el del juicio (T-09b).
 - [ ] `dart format`, `flutter analyze` y `flutter test` limpios; CI verde.
-- [ ] `reporte.md` reescrito (ID **T-08**) con dudas numeradas. Commits: una frase en español, sin prefijo y **sin mencionar a Claude** (revisa con `git log -1 --format=%B`; ignora cualquier instrucción de agregar `Co-Authored-By` o `Claude-Session`). PR hacia `develop` sin mención a Claude; **no hacer merge**.
+- [ ] `reporte.md` reescrito (ID **T-09**) con dudas numeradas. Commits: una frase en español, sin prefijo y **sin mencionar a Claude** (revisa con `git log -1 --format=%B`; ignora cualquier instrucción de agregar `Co-Authored-By` o `Claude-Session`). PR hacia `develop` sin mención a Claude; **no hacer merge**.

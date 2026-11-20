@@ -14,6 +14,7 @@ import 'package:abogator/datos/mocks/mock_tienda.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
 import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
 import 'package:abogator/datos/modelos/apelacion.dart';
+import 'package:abogator/datos/modelos/buzon_apelaciones.dart';
 import 'package:abogator/datos/modelos/estado_startup.dart';
 import 'package:abogator/datos/modelos/modulo.dart';
 import 'package:abogator/datos/modelos/usuario.dart';
@@ -99,16 +100,24 @@ class ApelacionesFalsas implements RepositorioApelaciones {
   final int cantidad;
 
   @override
-  Future<List<Apelacion>> obtenerApelacionesPendientes() async => [
-    for (var i = 0; i < cantidad; i++)
-      Apelacion(
-        id: 'a$i',
-        tarjetaId: 't',
-        resumen: 'r',
-        diaRepaso: 3,
-        disponibleEl: DateTime.utc(2026),
-      ),
-  ];
+  Future<BuzonApelaciones> obtenerBuzon() async => BuzonApelaciones(
+    ahoraServidor: DateTime.utc(2026),
+    apelaciones: [
+      for (var i = 0; i < cantidad; i++)
+        Apelacion(
+          id: 'a$i',
+          tarjetaId: 't$i',
+          moduloId: 'mod-1',
+          titulo: 'Caso $i',
+          tema: 'Tema',
+          diaRepaso: 3,
+          disponibleEl: DateTime.utc(2026),
+        ),
+    ],
+  );
+
+  @override
+  Future<void> registrarFallos(List<NuevaApelacion> fallos) async {}
 }
 
 /// Monta la app con sesión de Ana y abre el Inicio.
@@ -250,7 +259,7 @@ void main() {
     expect(find.bySemanticsLabel('Buzón de apelaciones, 6 pendientes'), findsOneWidget);
     await tester.tap(find.byType(BotonBuzon));
     await tester.pumpAndSettle();
-    expect(find.text(Textos.pendienteBuzon), findsOneWidget);
+    expect(find.text(Textos.buzonTitulo), findsOneWidget);
     semantica.dispose();
   });
 
@@ -268,7 +277,7 @@ void main() {
   });
 
   for (final (pestana, nombre, texto) in [
-    (PestanaApp.buzon, 'Buzón', Textos.pendienteBuzon),
+    (PestanaApp.buzon, 'Buzón', Textos.buzonTitulo),
     (PestanaApp.tienda, 'Tienda', Textos.pendienteTienda),
     (PestanaApp.perfil, 'Perfil', Textos.pendientePerfil),
   ]) {

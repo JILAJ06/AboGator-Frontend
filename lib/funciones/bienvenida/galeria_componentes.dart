@@ -26,6 +26,7 @@ import '../../componentes/estadisticas_sprint.dart';
 import '../../componentes/estrellas_sprint.dart';
 import '../../componentes/etiqueta_lupa.dart';
 import '../../componentes/etiqueta_quiebra.dart';
+import '../../componentes/fila_apelacion.dart';
 import '../../componentes/fila_detalle_sprint.dart';
 import '../../componentes/globo_sprint_actual.dart';
 import '../../componentes/icono_app.dart';
@@ -36,6 +37,7 @@ import '../../componentes/interruptor_conexion_debug.dart';
 import '../../componentes/logo_app.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/nodo_sprint.dart';
+import '../../componentes/notificacion_apelacion.dart';
 import '../../componentes/opcion_justificacion.dart';
 import '../../componentes/paginador_puntos.dart';
 import '../../componentes/panel_abogado.dart';
@@ -463,6 +465,27 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 const IndicadorPendientes(cantidad: 3),
                 const IndicadorPendientes(cantidad: 1),
                 InterruptorConexionDebug(sinConexion: true, alCambiar: (_) {}),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaApelaciones,
+              hijos: [
+                for (final n in const [2, 1, 0]) TarjetaRecompensaBuzon(deHoy: n),
+                for (final (dia, dias) in const [(3, 0), (7, 0), (3, 1), (7, 2)])
+                  FilaApelacion(
+                    titulo: 'Librería GPL en app cerrada',
+                    tema: 'Licencias OSS',
+                    dia: dia,
+                    dias: dias,
+                    colorModulo: ColoresModulo.enOrden[0],
+                    alPresionar: () {},
+                  ),
+                const NotificacionApelacion(tituloCaso: 'Librería GPL en app cerrada', dias: 3),
+                const NotificacionApelacion(
+                  tituloCaso: 'Casilla de consentimiento pre-marcada',
+                  dias: 7,
+                  hora: 'hace 2 h',
+                ),
               ],
             ),
             _Seccion(

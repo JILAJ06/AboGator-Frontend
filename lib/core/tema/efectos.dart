@@ -198,6 +198,27 @@ abstract final class EfectosApp {
   static Color trampa(Brightness brillo) => brillo == Brightness.dark ? trampaOscuro : trampaClaro;
 
   // ---------------------------------------------------------------------
+  // 21b Notificación de apelación (imita la del sistema: no son tokens)
+  // ---------------------------------------------------------------------
+
+  /// Fondo: blanco al 88 % con desenfoque de 10.
+  static const Color fondoNotificacion = Color(0xE0FFFFFF);
+  static const double desenfoqueNotificacion = 10;
+
+  /// Sombra (0, 8), desenfoque 12, negro al 18 % (0x2E).
+  static const List<BoxShadow> sombraNotificacion = [
+    BoxShadow(color: Color(0x2E000000), offset: Offset(0, 8), blurRadius: 12),
+  ];
+
+  /// Texto del sistema: nombre de la app y hora (#475569) y título y cuerpo
+  /// (#111827).
+  static const Color textoSecundarioNotificacion = Color(0xFF475569);
+  static const Color textoNotificacion = Color(0xFF111827);
+
+  /// Ícono de la app: verde de marca #1F4E35 (radio 8.4).
+  static const Color iconoAppNotificacion = Color(0xFF1F4E35);
+
+  // ---------------------------------------------------------------------
   // 19 Sprint completado (Figma 38:5557)
   // ---------------------------------------------------------------------
 

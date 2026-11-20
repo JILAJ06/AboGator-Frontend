@@ -17,6 +17,7 @@ import 'package:abogator/datos/mocks/mock_tienda.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
 import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
 import 'package:abogator/datos/modelos/apelacion.dart';
+import 'package:abogator/datos/modelos/buzon_apelaciones.dart';
 import 'package:abogator/datos/modelos/estado_startup.dart';
 import 'package:abogator/datos/modelos/modulo.dart';
 import 'package:abogator/datos/modelos/usuario.dart';
@@ -76,16 +77,24 @@ class ProgresoFalso implements RepositorioProgreso {
 
 class ApelacionesFalsas implements RepositorioApelaciones {
   @override
-  Future<List<Apelacion>> obtenerApelacionesPendientes() async => [
-    for (var i = 0; i < 6; i++)
-      Apelacion(
-        id: 'a$i',
-        tarjetaId: 't',
-        resumen: 'r',
-        diaRepaso: 3,
-        disponibleEl: DateTime.utc(2026),
-      ),
-  ];
+  Future<BuzonApelaciones> obtenerBuzon() async => BuzonApelaciones(
+    ahoraServidor: DateTime.utc(2026),
+    apelaciones: [
+      for (var i = 0; i < 6; i++)
+        Apelacion(
+          id: 'a$i',
+          tarjetaId: 't$i',
+          moduloId: 'mod-1',
+          titulo: 'Caso $i',
+          tema: 'Tema',
+          diaRepaso: 3,
+          disponibleEl: DateTime.utc(2026),
+        ),
+    ],
+  );
+
+  @override
+  Future<void> registrarFallos(List<NuevaApelacion> fallos) async {}
 }
 
 /// Módulo con los 5 sprints completados (el Examen final se puede abrir).
@@ -312,7 +321,7 @@ void main() {
       await abrir(tester);
       await tester.tap(find.byType(BotonBuzon));
       await tester.pumpAndSettle();
-      expect(find.text(Textos.pendienteBuzon), findsOneWidget);
+      expect(find.text(Textos.buzonTitulo), findsOneWidget);
     });
 
     testWidgets('mientras carga muestra el esqueleto y luego el mapa', (tester) async {

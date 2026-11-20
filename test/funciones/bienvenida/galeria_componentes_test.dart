@@ -17,6 +17,7 @@ import 'package:abogator/componentes/encabezado_modulo.dart';
 import 'package:abogator/componentes/estadisticas_sprint.dart';
 import 'package:abogator/componentes/estrellas_sprint.dart';
 import 'package:abogator/componentes/etiqueta_quiebra.dart';
+import 'package:abogator/componentes/fila_apelacion.dart';
 import 'package:abogator/componentes/fila_detalle_sprint.dart';
 import 'package:abogator/componentes/globo_sprint_actual.dart';
 import 'package:abogator/componentes/impacto_startup.dart';
@@ -26,6 +27,7 @@ import 'package:abogator/componentes/interruptor_conexion_debug.dart';
 import 'package:abogator/componentes/logo_app.dart';
 import 'package:abogator/componentes/navegacion_inferior_app.dart';
 import 'package:abogator/componentes/nodo_sprint.dart';
+import 'package:abogator/componentes/notificacion_apelacion.dart';
 import 'package:abogator/componentes/opcion_justificacion.dart';
 import 'package:abogator/componentes/paginador_puntos.dart';
 import 'package:abogator/componentes/panel_evidencia.dart';
@@ -47,7 +49,7 @@ import 'package:material_ui/material_ui.dart';
 /// Pantalla alta para que la galería entera quede construida.
 Future<void> montarGaleria(WidgetTester tester) async {
   await abrirGaleria(tester);
-  await agrandar(tester, const Size(390, 21000));
+  await agrandar(tester, const Size(390, 23000));
 }
 
 /// Agranda la superficie después de navegar (la transición de página no
@@ -87,7 +89,7 @@ void main() {
     expect(find.byType(BarraProgreso), findsNWidgets(5)); // 4 + barra de juego
     expect(find.byType(PaginadorPuntos), findsOneWidget);
     expect(find.byType(SarkoImagen), findsNWidgets(10)); // 5 + 5 paneles
-    expect(find.byType(LogoApp), findsNWidgets(20));
+    expect(find.byType(LogoApp), findsNWidgets(22));
     expect(find.byType(NavegacionInferiorApp), findsOneWidget);
     expect(find.byType(EncabezadoModulo), findsNWidgets(2));
     // Fin de sprint (19 y 19b).
@@ -119,6 +121,9 @@ void main() {
     expect(find.byType(AvisoConexion), findsNWidgets(2));
     expect(find.byType(IndicadorPendientes), findsNWidgets(2));
     expect(find.byType(InterruptorConexionDebug), findsOneWidget);
+    expect(find.byType(TarjetaRecompensaBuzon), findsNWidgets(3));
+    expect(find.byType(FilaApelacion), findsNWidgets(4));
+    expect(find.byType(NotificacionApelacion), findsNWidgets(2));
     expect(
       tester.widgetList<PanelVeredicto>(find.byType(PanelVeredicto)).map((p) => p.tipo),
       TipoPanelVeredicto.values,

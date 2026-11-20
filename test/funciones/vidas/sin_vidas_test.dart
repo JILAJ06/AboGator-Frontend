@@ -7,9 +7,9 @@ import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/core/utilidades/contraste.dart';
 import 'package:abogator/core/utilidades/cronometro.dart';
-import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
 import 'package:abogator/datos/modelos/apelacion.dart';
+import 'package:abogator/datos/modelos/buzon_apelaciones.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
 import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
 import 'package:abogator/funciones/vidas/pantalla_sin_vidas.dart';
@@ -30,16 +30,31 @@ class CronometroFalso implements Cronometro {
   void reiniciar() => transcurrido = Duration.zero;
 }
 
-/// Buzón con [n] apelaciones pendientes.
+/// Buzón con [n] apelaciones de hoy.
 class BuzonFalso implements RepositorioApelaciones {
   BuzonFalso(this.n);
 
   final int n;
 
   @override
-  Future<List<Apelacion>> obtenerApelacionesPendientes() async => (await MockApelaciones(
-    espera: Duration.zero,
-  ).obtenerApelacionesPendientes()).take(n).toList();
+  Future<BuzonApelaciones> obtenerBuzon() async => BuzonApelaciones(
+    ahoraServidor: DateTime.utc(2026),
+    apelaciones: [
+      for (var i = 0; i < n; i++)
+        Apelacion(
+          id: 'a$i',
+          tarjetaId: 't$i',
+          moduloId: 'mod-1',
+          titulo: 'Caso $i',
+          tema: 'Tema',
+          diaRepaso: 3,
+          disponibleEl: DateTime.utc(2026),
+        ),
+    ],
+  );
+
+  @override
+  Future<void> registrarFallos(List<NuevaApelacion> fallos) async {}
 }
 
 FilaVidas filaVidas(WidgetTester tester) =>
@@ -209,11 +224,11 @@ void main() {
       expect(find.byType(SugerenciaBuzon), findsNothing);
     });
 
-    testWidgets('con los datos reales: 6 apelaciones del mock, foco al título', (tester) async {
+    testWidgets('con los datos reales: las 2 de hoy del mock, foco al título', (tester) async {
       await abrirJuego(tester, ruta: Rutas.sinVidasDe('mod-1'), vidas: 0);
       expect(find.text(Textos.sinVidasTitulo), findsOneWidget);
       expect(
-        find.text('6 apelaciones pendientes: cada una que ganes te devuelve 1 vida.'),
+        find.text('2 apelaciones pendientes: cada una que ganes te devuelve 1 vida.'),
         findsOneWidget,
       );
       expect(find.text(Textos.notaVidasServidor), findsOneWidget);

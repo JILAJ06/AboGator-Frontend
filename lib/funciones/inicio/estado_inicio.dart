@@ -26,17 +26,18 @@ final datosInicioProvider = FutureProvider.autoDispose<DatosInicio>((ref) async 
   final vidas = ref.watch(repositorioVidasProvider);
   final apelaciones = ref.watch(repositorioApelacionesProvider);
 
-  final (modulos, monedas, vidasActuales, pendientes) = await (
+  final (modulos, monedas, vidasActuales, buzon) = await (
     progreso.obtenerModulos(),
     tienda.obtenerMonedas(),
     vidas.obtenerVidas(),
-    apelaciones.obtenerApelacionesPendientes(),
+    apelaciones.obtenerBuzon(),
   ).wait;
 
   return DatosInicio(
     modulos: modulos,
     monedas: monedas,
     vidas: vidasActuales,
-    apelacionesPendientes: pendientes.length,
+    // El botón Buzón muestra el total del Buzón.
+    apelacionesPendientes: buzon.total,
   );
 });

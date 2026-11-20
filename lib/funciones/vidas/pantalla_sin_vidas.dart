@@ -26,10 +26,9 @@ final vidasActualesProvider = FutureProvider.autoDispose<Vidas>(
   (ref) => ref.watch(repositorioVidasProvider).obtenerVidas(),
 );
 
-/// Apelaciones pendientes en el Buzón (para la sugerencia de 20).
+/// Apelaciones que se pueden hacer hoy (para la sugerencia de 20).
 final apelacionesPendientesProvider = FutureProvider.autoDispose<int>(
-  (ref) async =>
-      (await ref.watch(repositorioApelacionesProvider).obtenerApelacionesPendientes()).length,
+  (ref) async => (await ref.watch(repositorioApelacionesProvider).obtenerBuzon()).deHoy.length,
 );
 
 /// Pantalla 20 · Sin vidas (Figma 17:2072).
