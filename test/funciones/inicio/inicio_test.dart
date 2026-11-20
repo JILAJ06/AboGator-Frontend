@@ -9,6 +9,7 @@ import 'package:abogator/componentes/tarjeta_heroe_startup.dart';
 import 'package:abogator/componentes/tarjeta_modulo.dart';
 import 'package:abogator/core/tema/colores_marca.dart';
 import 'package:abogator/core/textos/textos.dart';
+import 'package:abogator/datos/mocks/mock_perfil.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
 import 'package:abogator/datos/mocks/mock_tienda.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
@@ -143,6 +144,7 @@ Future<ProgresoFalso> abrirInicio(
     ProviderScope(
       overrides: [
         repositorioProgresoProvider.overrideWithValue(progreso),
+        repositorioPerfilProvider.overrideWithValue(MockPerfil(espera: Duration.zero)),
         repositorioTiendaProvider.overrideWithValue(MockTienda(espera: Duration.zero)),
         repositorioVidasProvider.overrideWithValue(MockVidas(espera: Duration.zero)),
         repositorioApelacionesProvider.overrideWithValue(ApelacionesFalsas(apelaciones)),
@@ -283,10 +285,10 @@ void main() {
 
   for (final (pestana, nombre, texto) in [
     (PestanaApp.buzon, 'Buzón', Textos.buzonTitulo),
-    (PestanaApp.tienda, 'Tienda', Textos.pendienteTienda),
-    (PestanaApp.perfil, 'Perfil', Textos.pendientePerfil),
+    (PestanaApp.tienda, 'Tienda', Textos.tuInventario),
+    (PestanaApp.perfil, 'Perfil', Textos.perfilTitulo),
   ]) {
-    testWidgets('la pestaña ${pestana.name} lleva a su marcador', (tester) async {
+    testWidgets('la pestaña ${pestana.name} lleva a su pantalla', (tester) async {
       await abrirInicio(tester);
       await tester.tap(
         find.descendant(of: find.byType(NavegacionInferiorApp), matching: find.text(nombre)),

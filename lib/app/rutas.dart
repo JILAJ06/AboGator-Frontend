@@ -62,8 +62,19 @@ abstract final class Rutas {
   /// 25 Perfil y progreso
   static const String perfil = '/perfil';
 
-  /// 26 / 26b Ajustes de accesibilidad
-  static const String ajustes = '/perfil/ajustes';
+  /// Tramos hijos del Perfil (rutas anidadas: atrás vuelve al Perfil).
+  static const String segmentoAjustes = 'ajustes';
+  static const String segmentoNotificaciones = 'notificaciones';
+  static const String segmentoAvisoPrivacidad = 'aviso-privacidad';
+
+  /// 26 / 26b Ajustes de accesibilidad (T-10b), sin navegación inferior.
+  static const String ajustes = '$perfil/$segmentoAjustes';
+
+  /// Notificaciones de racha (desde el Perfil; sin diseño en Figma).
+  static const String notificacionesRacha = '$perfil/$segmentoNotificaciones';
+
+  /// Aviso de privacidad (desde el Perfil; sin diseño en Figma).
+  static const String avisoPrivacidad = '$perfil/$segmentoAvisoPrivacidad';
 
   // Flujo 3 · Juego
   /// 10–18, 10b, 10c: tarjetas, veredictos, evidencia y comodines.

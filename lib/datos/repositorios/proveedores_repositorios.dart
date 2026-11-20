@@ -9,6 +9,7 @@ import '../local/onboarding_sqlite.dart';
 import '../mocks/cola_respuestas_en_memoria.dart';
 import '../mocks/mock_apelaciones.dart';
 import '../mocks/mock_autenticacion.dart';
+import '../mocks/mock_perfil.dart';
 import '../mocks/mock_progreso.dart';
 import '../mocks/mock_respuestas.dart';
 import '../mocks/mock_tarjetas.dart';
@@ -20,6 +21,7 @@ import 'cola_respuestas.dart';
 import 'repositorio_apelaciones.dart';
 import 'repositorio_autenticacion.dart';
 import 'repositorio_onboarding.dart';
+import 'repositorio_perfil.dart';
 import 'repositorio_progreso.dart';
 import 'repositorio_respuestas.dart';
 import 'repositorio_tarjetas.dart';
@@ -47,6 +49,10 @@ final repositorioVidasProvider = Provider<RepositorioVidas>((ref) => MockVidas()
 final repositorioApelacionesProvider = Provider<RepositorioApelaciones>((ref) => MockApelaciones());
 
 final repositorioTiendaProvider = Provider<RepositorioTienda>((ref) => MockTienda());
+
+final repositorioPerfilProvider = Provider<RepositorioPerfil>(
+  (ref) => MockPerfil(autenticacion: ref.watch(repositorioAutenticacionProvider)),
+);
 
 /// Lado del servidor de las respuestas del juego (mock hasta T-14).
 final repositorioRespuestasProvider = Provider<RepositorioRespuestas>((ref) => MockRespuestas());

@@ -197,3 +197,9 @@ Figma: 21 = `41:5631`, 21b = `41:5499`, 22 = `41:5785`, 22b = `41:5862`. Medidas
 - **Juicio (22), T-09b:** barra "Apelación k de n" con chip "+1 vida", tarjeta "APELACIÓN · TEMA", aviso "La fallaste hace N días" y las 4 acciones, sin indicadores ni comodines.
 - **Apelación ganada (22b), T-09b** (y la perdida, sin Figma: Sarko triste, "No pierdes vidas", "Apelación perdida"): Sarko, 5 corazones, "+1 vida recuperada", título, explicación y fila "Día 3 · Día 7 · Día 14" (hecho = `estadoLegal` con `check`).
 
+
+## Componentes de la Tienda y el Perfil (se construyen en T-10)
+Figma: 24 = `18:2347`, 25 = `18:2492`. Medidas, textos y reglas completos en `ai/siguiente.md` de la T-10.
+- **Tienda:** píldora de saldo (`fondoDestacado`, moneda 22), píldoras de inventario (borde 1, ícono 16, "Lupa ×2"), tarjeta de artículo (ancho 165, radio 22, ícono en cuadro 52 `fondoDestacado`) y botón de precio (alto 48, `accionPrimaria`; deshabilitado en `fondoSuperficieAlt` con "Te faltan N" o "Máximo"). La compra pide confirmación en un diálogo y se anuncia en una región en vivo.
+- **Perfil:** tarjeta de perfil (`accionPrimaria`, avatar 60 con iniciales), tarjeta de estadística (166, radio 16), medalla de insignia (60, borde 3 `accionAcento`, color del módulo; bloqueada en `fondoSuperficieAlt` con `lock`) y menú agrupado con filas ≥ 48 y chevron.
+- **Diálogo de confirmación:** `fondoSuperficie`, radio 22, título Fredoka SemiBold 20, botón primario y fantasma de alto 48; lo usan la compra y "Cerrar sesión".

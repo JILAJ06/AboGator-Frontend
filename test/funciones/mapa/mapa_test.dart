@@ -11,6 +11,7 @@ import 'package:abogator/componentes/globo_sprint_actual.dart';
 import 'package:abogator/componentes/navegacion_inferior_app.dart';
 import 'package:abogator/componentes/nodo_sprint.dart';
 import 'package:abogator/core/textos/textos.dart';
+import 'package:abogator/datos/mocks/mock_perfil.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
 import 'package:abogator/datos/mocks/mock_tarjetas.dart';
 import 'package:abogator/datos/mocks/mock_tienda.dart';
@@ -130,6 +131,7 @@ Future<ProgresoFalso> abrir(
     ProviderScope(
       overrides: [
         repositorioProgresoProvider.overrideWithValue(progreso),
+        repositorioPerfilProvider.overrideWithValue(MockPerfil(espera: Duration.zero)),
         repositorioTiendaProvider.overrideWithValue(MockTienda(espera: Duration.zero)),
         repositorioVidasProvider.overrideWithValue(MockVidas(espera: Duration.zero)),
         repositorioTarjetasProvider.overrideWithValue(MockTarjetas(espera: Duration.zero)),

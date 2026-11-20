@@ -81,9 +81,9 @@ void main() {
 
     test('las descripciones dicen lo que hace cada comodín', () {
       String de(Comodin c) => MockTienda.articulos.firstWhere((a) => a.comodin == c).descripcion;
-      expect(de(Comodin.lupaAuditor), 'Resalta las palabras trampa del caso.');
-      expect(de(Comodin.abogadoSenior), 'Traduce el caso a términos legales y cita la norma.');
-      expect(de(Comodin.amparo), 'Tu siguiente error no te quita vida.');
+      expect(de(Comodin.lupaAuditor), 'Resalta en amarillo las palabras trampa del caso.');
+      expect(de(Comodin.abogadoSenior), 'Traduce el caso al artículo o licencia exacta.');
+      expect(de(Comodin.amparo), 'Escudo: tu próximo error no te quita vida.');
     });
   });
 
