@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/utilidades/uuid.dart';
+import '../../datos/modelos/apelacion.dart';
 import '../../datos/modelos/articulo_tienda.dart';
 import '../../datos/modelos/estado_startup.dart';
 import '../../datos/modelos/modulo.dart';
@@ -11,7 +12,10 @@ import '../../datos/modelos/tarjeta.dart';
 import '../../datos/modelos/vidas.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
 import '../../datos/sincronizacion/estado_sincronizacion.dart';
+import '../inicio/estado_inicio.dart';
+import '../mapa/estado_mapa.dart';
 import '../mapa/logica_mapa.dart';
+import '../vidas/pantalla_sin_vidas.dart';
 import 'logica_comodines.dart';
 import 'logica_fin_sprint.dart';
 import 'logica_veredicto.dart';
@@ -519,9 +523,11 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
 
   /// Guarda el resultado del sprint terminado (una sola vez):
   /// - completado (19): progreso con estrellas y estado final, vidas y monedas;
-  /// - quiebra (19b) o sin vidas: solo las vidas (el progreso no cambia).
+  /// - quiebra (19b) o sin vidas: solo las vidas (el progreso no cambia);
+  /// - en los tres, las tarjetas falladas van al Buzón de Apelaciones.
   ///
-  /// En T-14 lo recibirá el servidor.
+  /// Salir a la mitad con "Salir" no llega aquí: no se guarda nada. En T-14 lo
+  /// recibirá el servidor.
   Future<void> guardarResultado() async {
     final fin = state.fin;
     if (fin == null || state.guardado) return;
@@ -543,6 +549,32 @@ class JuegoNotifier extends Notifier<EstadoJuego> {
     } else {
       await vidas.guardarVidas(terminado.vidas);
     }
+    await _registrarFallos(terminado.falladas);
+  }
+
+  /// Manda al Buzón las tarjetas falladas del sprint terminado (en los tres
+  /// finales) y refresca los contadores del Inicio, el mapa y "Sin vidas".
+  Future<void> _registrarFallos(List<String> falladas) async {
+    if (falladas.isEmpty) return;
+    final datos = ref.read(datosJuegoProvider(sprintId)).value;
+    final porId = {for (final t in datos?.tarjetas ?? const <Tarjeta>[]) t.id: t};
+    final moduloId = datos?.modulo?.id ?? '';
+    final fallos = [
+      for (final id in {...falladas})
+        if (porId[id] case final t?)
+          NuevaApelacion(
+            tarjetaId: t.id,
+            moduloId: moduloId,
+            titulo: t.tituloCorto,
+            tema: t.tema ?? t.etiquetaCaso,
+          ),
+    ];
+    await ref.read(repositorioApelacionesProvider).registrarFallos(fallos);
+    if (!ref.mounted) return;
+    ref
+      ..invalidate(datosInicioProvider)
+      ..invalidate(datosModuloProvider)
+      ..invalidate(apelacionesPendientesProvider);
   }
 }
 

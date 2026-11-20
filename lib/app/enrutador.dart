@@ -7,6 +7,7 @@ import '../datos/sincronizacion/estado_sincronizacion.dart';
 import '../funciones/acceso/pantalla_inicio_sesion.dart';
 import '../funciones/acceso/pantalla_registro.dart';
 import '../funciones/acceso/sesion.dart';
+import '../funciones/apelaciones/pantalla_buzon.dart';
 import '../funciones/bienvenida/galeria_componentes.dart';
 import '../funciones/bienvenida/pantalla_onboarding.dart';
 import '../funciones/bienvenida/pantalla_splash.dart';
@@ -76,14 +77,23 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             PantallaSinVidas(moduloId: state.uri.queryParameters['modulo']),
       ),
-      // Marcadores hasta T-09, T-10 y T-11.
+      // Marcadores hasta T-10 y T-11.
       GoRoute(
         path: Rutas.crisisJefe,
         builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteJefe),
       ),
       GoRoute(
         path: Rutas.buzon,
-        builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteBuzon),
+        redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
+        builder: (context, state) => const PantallaBuzon(),
+        routes: [
+          // 22 Juicio (enlace profundo de la notificación 21b). Marcador
+          // hasta T-09b.
+          GoRoute(
+            path: ':apelacionId',
+            builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteJuicio),
+          ),
+        ],
       ),
       GoRoute(
         path: Rutas.tienda,

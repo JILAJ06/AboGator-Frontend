@@ -29,15 +29,16 @@ final datosModuloProvider = FutureProvider.autoDispose.family<DatosModulo, Strin
   final vidas = ref.watch(repositorioVidasProvider);
   final apelaciones = ref.watch(repositorioApelacionesProvider);
 
-  final (modulos, vidasActuales, pendientes) = await (
+  final (modulos, vidasActuales, buzon) = await (
     progreso.obtenerModulos(),
     vidas.obtenerVidas(),
-    apelaciones.obtenerApelacionesPendientes(),
+    apelaciones.obtenerBuzon(),
   ).wait;
 
   return DatosModulo(
     modulo: LogicaMapa.moduloPorId(modulos, moduloId),
     vidas: vidasActuales,
-    apelacionesPendientes: pendientes.length,
+    // El botón Buzón muestra el total del Buzón.
+    apelacionesPendientes: buzon.total,
   );
 });

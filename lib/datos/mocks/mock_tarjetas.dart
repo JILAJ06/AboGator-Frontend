@@ -35,6 +35,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: definición de dato personal',
           'Ley de datos personales en posesión de particulares: principios de licitud y finalidad',
         ],
+        titulo: 'Nombre y correo sin seguir la ley',
+        tema: 'Datos personales',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El nombre y el correo identifican a una persona: son datos personales y '
@@ -65,6 +67,8 @@ class MockTarjetas implements RepositorioTarjetas {
         normas: [
           'Ley de datos personales en posesión de particulares: datos disociados o anonimizados',
         ],
+        titulo: 'Totales de usuarios en el blog',
+        tema: 'Datos personales',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Las cifras totales no permiten identificar a nadie, así que ya no son '
@@ -88,6 +92,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: datos personales sensibles',
           'Ley de datos personales en posesión de particulares: consentimiento expreso y por escrito para datos sensibles',
         ],
+        titulo: 'Religión en el perfil del usuario',
+        tema: 'Datos sensibles',
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'Las creencias religiosas son datos sensibles: piden consentimiento expreso '
@@ -121,6 +127,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: principios de finalidad y proporcionalidad',
           'Ley de datos personales en posesión de particulares: aviso de privacidad',
         ],
+        titulo: 'Dirección solo para el envío',
+        tema: 'Datos personales',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Es un dato personal necesario para una finalidad informada en el aviso: '
@@ -145,6 +153,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: deber de confidencialidad',
         ],
         iniciales: 'QA',
+        titulo: 'Correos en un panel de registros público',
+        tema: 'Seguridad de datos',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Exponer datos personales en un panel público incumple el deber de '
@@ -180,6 +190,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: principio de proporcionalidad (minimización de datos)',
           'Ley de datos personales en posesión de particulares: principio de finalidad',
         ],
+        titulo: 'CURP y estado civil en una app de recetas',
+        tema: 'Datos personales',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Solo se deben pedir los datos necesarios para la finalidad. La CURP y el '
@@ -213,6 +225,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Derecho a la propia imagen',
         ],
         iniciales: 'MK',
+        titulo: 'Fotos de perfil en los anuncios',
+        tema: 'Consentimiento',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'La foto identifica a la persona. Usarla en anuncios es otra finalidad: '
@@ -237,6 +251,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: transferencias y consentimiento del titular',
         ],
         iniciales: 'CT',
+        titulo: 'Expedientes médicos para entrenar IA',
+        tema: 'Datos sensibles',
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'Los datos de salud son sensibles y recibirlos de otra empresa es una '
@@ -270,6 +286,8 @@ class MockTarjetas implements RepositorioTarjetas {
         normas: [
           'Ley de datos personales en posesión de particulares: excepciones al consentimiento por una relación jurídica con el titular',
         ],
+        titulo: 'Dirección para entregar el pedido',
+        tema: 'Consentimiento',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'No hace falta: los datos necesarios para cumplir la relación con el '
@@ -302,6 +320,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: consentimiento expreso y por escrito para datos sensibles',
           'Ley de datos personales en posesión de particulares: principio de licitud',
         ],
+        titulo: 'Datos de salud sin autorización',
+        tema: 'Consentimiento',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Los datos de salud son sensibles: sin consentimiento expreso no se pueden '
@@ -341,6 +361,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: consentimiento expreso y por escrito para datos sensibles',
           'Ley de datos personales en posesión de particulares: consentimiento tácito y expreso',
         ],
+        titulo: 'Diario de ánimo con consentimiento tácito',
+        tema: 'Consentimiento',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El estado de ánimo es un dato de salud, y los datos sensibles piden '
@@ -373,6 +395,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: aviso de privacidad',
         ],
         iniciales: 'MK',
+        titulo: 'Venta de la base de correos',
+        tema: 'Transferencias',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Transferir datos personales a terceros requiere informarlo en el '
@@ -397,6 +421,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: cambios al aviso de privacidad',
         ],
         iniciales: 'SP',
+        titulo: 'Encuestas que el aviso no menciona',
+        tema: 'Consentimiento',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Una finalidad nueva vale si se informa en el aviso y se obtiene el '
@@ -421,6 +447,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: principio de finalidad',
         ],
         iniciales: 'MK',
+        titulo: 'Boletín tras revocar el consentimiento',
+        tema: 'Consentimiento',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El titular puede revocar su consentimiento en cualquier momento; desde '
@@ -459,6 +487,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: consentimiento expreso y por escrito para datos sensibles',
           'Ley de datos personales en posesión de particulares: firma electrónica o medio de autenticación',
         ],
+        titulo: 'Autorización expresa para datos de salud',
+        tema: 'Consentimiento',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Es un consentimiento expreso y firmado con un medio de autenticación, '
@@ -483,6 +513,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Obligaciones fiscales de conservación de comprobantes',
         ],
         iniciales: 'SP',
+        titulo: 'Borrado con facturas fiscales',
+        tema: 'Derechos ARCO',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Se atiende la cancelación, pero se conservan bloqueados los datos que '
@@ -517,6 +549,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: acreditación de la identidad del titular',
         ],
         iniciales: 'SP',
+        titulo: 'Acceso con identidad acreditada',
+        tema: 'Derechos ARCO',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Sí: para ejercer los derechos ARCO el titular debe acreditar su identidad, '
@@ -549,6 +583,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: costos de envío o de reproducción',
         ],
         iniciales: 'CE',
+        titulo: 'Cuota por las solicitudes de acceso',
+        tema: 'Derechos ARCO',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Ejercer los derechos ARCO es gratuito; solo se pueden cobrar los gastos de '
@@ -577,6 +613,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: plazos de respuesta a los derechos ARCO',
           'Ley de datos personales en posesión de particulares: derecho de acceso',
         ],
+        titulo: 'Solicitud de acceso con el plazo vencido',
+        tema: 'Derechos ARCO',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Las solicitudes ARCO deben responderse dentro del plazo que marca la '
@@ -617,6 +655,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: principio de calidad de los datos',
         ],
         iniciales: 'SP',
+        titulo: 'Corrección de un apellido',
+        tema: 'Derechos ARCO',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Es el derecho de rectificación: el titular puede pedir que se corrijan '
@@ -640,6 +680,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: derecho de cancelación: periodo de bloqueo',
           'Ley de datos personales en posesión de particulares: excepciones a la cancelación',
         ],
+        titulo: 'Cancelación con un reembolso en trámite',
+        tema: 'Derechos ARCO',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Se atiende, pero los datos necesarios para terminar el reembolso se '
@@ -663,6 +705,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: derecho de cancelación: bloqueo y supresión',
           'Ley de datos personales en posesión de particulares: principio de calidad: conservación limitada',
         ],
+        titulo: 'Cancelar la cuenta solo ocultando el perfil',
+        tema: 'Derechos ARCO',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Cancelar implica bloquear los datos y después suprimirlos. Ocultarlos y '
@@ -703,6 +747,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: finalidades secundarias',
         ],
         iniciales: 'MK',
+        titulo: 'Oposición a la publicidad',
+        tema: 'Derechos ARCO',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Es el derecho de oposición: se deja de usar sus datos para esa finalidad '
@@ -727,6 +773,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: acreditación de la identidad y la representación',
         ],
         iniciales: 'SP',
+        titulo: 'Abogada con una carta simple',
+        tema: 'Derechos ARCO',
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'Un representante debe acreditar su representación. Revisar si el '
@@ -761,6 +809,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: deber de seguridad',
         ],
         iniciales: 'CE',
+        titulo: 'Fuga de datos en secreto',
+        tema: 'Brechas de seguridad',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Las vulneraciones que afectan de forma significativa a los titulares '
@@ -793,6 +843,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: deber de seguridad',
           'Ley de datos personales en posesión de particulares: vulneraciones de seguridad: acciones correctivas',
         ],
+        titulo: 'Contener el acceso comprometido',
+        tema: 'Brechas de seguridad',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Contener la vulneración es parte del deber de seguridad: primero se '
@@ -815,6 +867,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: vulneraciones de seguridad: contenido del aviso a los titulares',
         ],
         iniciales: 'SP',
+        titulo: 'Aviso incompleto a los afectados',
+        tema: 'Brechas de seguridad',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Se puede enviar si agrega qué pasó, qué datos se afectaron, qué puede '
@@ -849,6 +903,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: deber de seguridad: medidas técnicas',
           'Ley de datos personales en posesión de particulares: vulneraciones de seguridad',
         ],
+        titulo: 'Contraseñas sin cifrar en la base',
+        tema: 'Brechas de seguridad',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El responsable debe aplicar medidas de seguridad técnicas adecuadas. '
@@ -890,6 +946,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: principio de responsabilidad',
         ],
         iniciales: 'QA',
+        titulo: 'Bitácora del incidente',
+        tema: 'Brechas de seguridad',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'Documentar las vulneraciones y las medidas tomadas ayuda a demostrar el '
@@ -914,6 +972,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Código Civil Federal: responsabilidad por daño moral',
         ],
         iniciales: 'MK',
+        titulo: 'Culpar al proveedor sin pruebas',
+        tema: 'Brechas de seguridad',
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'Una declaración pública sobre una fuga y sobre un tercero tiene riesgos '
@@ -937,6 +997,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: vulneraciones de seguridad: aviso a los titulares',
         ],
         iniciales: 'CT',
+        titulo: 'Fuga en el proveedor de nube',
+        tema: 'Brechas de seguridad',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El responsable sigue respondiendo por los datos aunque los trate un '
@@ -969,6 +1031,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Denuncia ante las autoridades competentes',
         ],
         iniciales: 'CE',
+        titulo: 'Rescate por datos robados',
+        tema: 'Brechas de seguridad',
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'Un rescate es una decisión con riesgos legales y de seguridad; debe '
@@ -1002,6 +1066,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: aviso de privacidad',
           'Ley de datos personales en posesión de particulares: principio de información',
         ],
+        titulo: 'Registro sin aviso de privacidad',
+        tema: 'Aviso de privacidad',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'La LFPDPPP obliga a poner el aviso de privacidad a disposición del '
@@ -1035,6 +1101,8 @@ class MockTarjetas implements RepositorioTarjetas {
         normas: [
           'Ley de datos personales en posesión de particulares: modalidades del aviso de privacidad: integral, simplificado y corto',
         ],
+        titulo: 'Aviso simplificado con enlace',
+        tema: 'Aviso de privacidad',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'El aviso simplificado es válido si informa lo esencial y remite al '
@@ -1058,6 +1126,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: principio de finalidad',
           'Ley de datos personales en posesión de particulares: aviso de privacidad',
         ],
+        titulo: 'Correo enviado a la lista de promociones',
+        tema: 'Aviso de privacidad',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Usar los datos para una finalidad que no está en el aviso incumple el '
@@ -1093,6 +1163,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: aviso de privacidad',
         ],
         iniciales: 'MK',
+        titulo: 'Promociones con casilla para negarse',
+        tema: 'Aviso de privacidad',
         respuestaCorrecta: Veredicto.condicional,
         explicacion:
             'Las finalidades secundarias son válidas si están en el aviso y el '
@@ -1116,6 +1188,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Licencia GPL-3.0, sección 5: obras derivadas',
           'Ley Federal del Derecho de Autor, art. 102 (programas de cómputo)',
         ],
+        titulo: 'Librería GPL en app cerrada',
+        tema: 'Licencias OSS',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'La licencia GPL-3.0 es copyleft: si la integras, todo el producto derivado '
@@ -1160,6 +1234,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: aviso de privacidad',
         ],
         iniciales: 'QA',
+        titulo: 'Casilla de consentimiento pre-marcada',
+        tema: 'Protección de datos',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'El consentimiento debe ser libre e informado: una casilla pre-marcada no lo es, y '
@@ -1203,6 +1279,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: responsable y encargado del tratamiento',
         ],
         iniciales: 'CT',
+        titulo: 'Nube que procesa por encargo',
+        tema: 'Transferencias',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'La remisión a un encargado que trata los datos por cuenta del '
@@ -1226,6 +1304,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: datos de menores: consentimiento de quien ejerce la patria potestad',
           'Interés superior de la niñez',
         ],
+        titulo: 'Registro de menores de edad',
+        tema: 'Datos de menores',
         respuestaCorrecta: Veredicto.escalar,
         explicacion:
             'El tratamiento de datos de menores necesita el consentimiento de quien '
@@ -1248,6 +1328,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: cambios al aviso de privacidad',
           'Ley de datos personales en posesión de particulares: principio de finalidad',
         ],
+        titulo: 'Nueva finalidad sin avisar a los usuarios',
+        tema: 'Aviso de privacidad',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Los cambios al aviso deben comunicarse a los titulares antes de '
@@ -1280,6 +1362,8 @@ class MockTarjetas implements RepositorioTarjetas {
           'Ley de datos personales en posesión de particulares: responsable y encargado del tratamiento',
         ],
         iniciales: 'CL',
+        titulo: 'Contraseñas en texto plano para soporte',
+        tema: 'Seguridad de datos',
         respuestaCorrecta: Veredicto.ilegal,
         explicacion:
             'Las contraseñas son datos personales y el responsable debe protegerlas con medidas '
@@ -1308,6 +1392,8 @@ class MockTarjetas implements RepositorioTarjetas {
         texto:
             'Usas una librería con licencia MIT en un producto comercial y '
             'conservas el aviso de copyright en los créditos. ¿Es legal?',
+        titulo: 'Créditos de una librería MIT',
+        tema: 'Licencias OSS',
         respuestaCorrecta: Veredicto.legal,
         explicacion:
             'La licencia MIT permite el uso comercial siempre que se conserve '
@@ -1324,5 +1410,16 @@ class MockTarjetas implements RepositorioTarjetas {
       throw StateError(Textos.errorSprintNoEncontrado);
     }
     return tarjetas;
+  }
+
+  @override
+  Future<Tarjeta> obtenerTarjeta(String id) async {
+    await esperar(espera);
+    for (final lista in tarjetasPorSprint.values) {
+      for (final t in lista) {
+        if (t.id == id) return t;
+      }
+    }
+    throw StateError(Textos.errorTarjetaNoEncontrada);
   }
 }

@@ -289,6 +289,8 @@ void main() {
           ...t.palabrasTrampa,
           ?t.traduccionLegal,
           ...t.normas,
+          ?t.titulo,
+          ?t.tema,
           ?t.microPregunta?.enunciado,
           ...?t.microPregunta?.opciones,
         ];

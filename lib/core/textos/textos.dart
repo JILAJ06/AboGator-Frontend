@@ -508,7 +508,51 @@ abstract final class Textos {
   // Pantallas pendientes (marcadores temporales)
   // ---------------------------------------------------------------------
   static const String pendienteJefe = 'Examen final · llega en T-11';
-  static const String pendienteBuzon = 'Buzón · llega en T-09';
+  static const String pendienteJuicio = 'Juicio de apelación · llega en T-09b';
+
+  // ---------------------------------------------------------------------
+  // 21 Buzón de Apelaciones
+  // ---------------------------------------------------------------------
+  static const String buzonTitulo = 'Buzón de Apelaciones';
+  static const String buzonSubtitulo =
+      'Tus fallos regresan a los 3 y 7 días para que no se te olviden.';
+  static String juiciosHoy(int n) => switch (n) {
+    0 => 'Hoy no tienes juicios de apelación',
+    1 => '1 juicio de apelación hoy',
+    _ => '$n juicios de apelación hoy',
+  };
+  static const String recompensaApelacion = 'Gana cada apelación y recupera 1 vida';
+  static const String proximasApelaciones = 'Tus próximas apelaciones aparecen abajo';
+  static String plazoApelacion(int dia, int dias) => switch (dias) {
+    <= 0 => 'Día $dia · hoy · +1 vida',
+    1 => 'Día $dia · mañana',
+    _ => 'Día $dia · en $dias días',
+  };
+  static String avisoApelacionFutura(int dias) =>
+      dias == 1 ? 'Esta apelación se abre mañana' : 'Esta apelación se abre en $dias días';
+  static String filaApelacionSemantica(String titulo, String tema, int dia, int dias) =>
+      '$titulo, $tema, día $dia, ${switch (dias) {
+        <= 0 => 'disponible hoy, +1 vida si la ganas',
+        1 => 'disponible mañana',
+        _ => 'disponible en $dias días',
+      }}';
+  static String listaApelaciones(int n) => n == 1 ? 'Lista, 1 apelación' : 'Lista, $n apelaciones';
+  static const String iniciarApelacionesHoy = 'Iniciar apelaciones de hoy';
+  static const String notaApelaciones = 'No consume vidas · No avanza el mapa';
+  static const String buzonVacioTitulo = 'Tu Buzón está vacío';
+  static const String buzonVacioTexto = 'Cuando falles una tarjeta, volverá aquí a los 3 y 7 días.';
+  static const String buzonErrorCarga = 'No pudimos cargar tu Buzón.';
+  static const String cargandoBuzon = 'Cargando el Buzón';
+
+  // ---------------------------------------------------------------------
+  // 21b Notificación de apelación (la del sistema; aquí, su texto y maqueta)
+  // ---------------------------------------------------------------------
+  static const String notificacionApp = 'ABOGATOR';
+  static const String notificacionAhora = 'ahora';
+  static const String notificacionApelacionTitulo = '⚖️ Tienes un juicio de apelación pendiente';
+  static String notificacionApelacionCuerpo(String titulo, int dias) =>
+      'Hace $dias días fallaste “$titulo”. Gánala y recupera 1 vida.';
+  static const String notificacionApelacionPie = 'Toca para abrir el juicio de apelación';
   static const String pendienteTienda = 'Tienda · llega en T-10';
   static const String pendientePerfil = 'Perfil · llega en T-10';
 
@@ -531,6 +575,7 @@ abstract final class Textos {
   static const String galeriaVeredicto = 'Paneles de veredicto';
   static const String galeriaEvidencia = 'Evidencia y dilema';
   static const String galeriaVidasConexion = 'Vidas y conexión';
+  static const String galeriaApelaciones = 'Buzón de Apelaciones';
   static const String galeriaFinSprint = 'Componentes del fin de sprint';
   static const String galeriaExplicacion =
       'La licencia GPL-3.0 es copyleft: si la integras, todo el producto derivado debe '
@@ -588,4 +633,5 @@ abstract final class Textos {
   static const String errorConsentimientos =
       'Debes aceptar el Aviso de Privacidad y los Términos de uso para crear tu cuenta.';
   static const String errorSprintNoEncontrado = 'No encontramos ese sprint.';
+  static const String errorTarjetaNoEncontrada = 'No encontramos esa tarjeta.';
 }

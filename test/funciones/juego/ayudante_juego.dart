@@ -16,6 +16,7 @@ import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
+import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
 import 'package:abogator/datos/repositorios/repositorio_tarjetas.dart';
 import 'package:abogator/datos/sincronizacion/servicio_conexion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
@@ -54,6 +55,16 @@ class TarjetasFalsas implements RepositorioTarjetas {
     if (lista == null) throw StateError('no existe');
     return lista;
   }
+
+  @override
+  Future<Tarjeta> obtenerTarjeta(String id) async {
+    for (final lista in porSprint.values) {
+      for (final t in lista) {
+        if (t.id == id) return t;
+      }
+    }
+    throw StateError('no existe');
+  }
 }
 
 /// Monta la app con sesión y abre [ruta] (el juego del sprint 3 del módulo 1
@@ -71,6 +82,7 @@ Future<TarjetasFalsas> abrirJuego(
   void Function(TarjetasFalsas)? antes,
   MockTienda? tienda,
   MockVidas? vidasRepo,
+  RepositorioApelaciones? apelaciones,
   MockRespuestas? servidorRespuestas,
   ServicioConexion? conexion,
 }) async {
@@ -91,7 +103,9 @@ Future<TarjetasFalsas> abrirJuego(
           vidasRepo ?? MockVidas(espera: Duration.zero, cantidad: vidas),
         ),
         repositorioTarjetasProvider.overrideWithValue(repo),
-        repositorioApelacionesProvider.overrideWithValue(MockApelaciones(espera: Duration.zero)),
+        repositorioApelacionesProvider.overrideWithValue(
+          apelaciones ?? MockApelaciones(espera: Duration.zero),
+        ),
         repositorioOnboardingProvider.overrideWithValue(OnboardingEnMemoria(vistoAlInicio: true)),
       ],
       child: const AppAbogator(),
