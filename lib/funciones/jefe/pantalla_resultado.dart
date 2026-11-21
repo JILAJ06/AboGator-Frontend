@@ -11,10 +11,12 @@ import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/confeti_sprint.dart';
 import '../../componentes/cuenta_regresiva_vida.dart';
+import '../../componentes/disposicion_resultado_tablet.dart';
 import '../../componentes/icono_app.dart';
 import '../../componentes/ilustracion_sarko.dart';
 import '../../componentes/piezas_resultado.dart';
 import '../../componentes/sarko_imagen.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
@@ -73,31 +75,60 @@ abstract class _EstadoResultado<T extends ConsumerStatefulWidget> extends Consum
   void volverAlMapa() => salirA(Rutas.mapaSprintsDe(moduloId));
 
   /// Marco común: atrás va al mapa; contenido desplazable y botones fijos.
-  Widget marco({required Widget contenido, required List<Widget> botones}) {
+  /// En tablet horizontal (con [ilustracionTablet]) usa la composición de
+  /// resultado: la ilustración a la izquierda y [contenidoTablet] con los
+  /// botones en la columna de 470 (T29 y T30, T-12d).
+  Widget marco({
+    required Widget contenido,
+    required List<Widget> botones,
+    Widget? ilustracionTablet,
+    List<Widget>? contenidoTablet,
+    Widget? fondoTablet,
+  }) {
+    final tablet = ilustracionTablet != null && context.clasePantalla.esAncho;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (hecho, _) {
         if (!hecho) volverAlMapa();
       },
       child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  key: const ValueKey('resultado-desplazable'),
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: contenido,
+        body: tablet
+            ? DisposicionResultadoTablet(
+                key: const ValueKey('resultado-tablet'),
+                ilustracion: ilustracionTablet,
+                fondo: fondoTablet,
+                contenido: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ...?contenidoTablet,
+                    const SizedBox(height: 16),
+                    Column(
+                      key: const ValueKey('botones-resultado'),
+                      mainAxisSize: MainAxisSize.min,
+                      children: botones,
+                    ),
+                  ],
+                ),
+              )
+            : SafeArea(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        key: const ValueKey('resultado-desplazable'),
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: contenido,
+                      ),
+                    ),
+                    Padding(
+                      key: const ValueKey('botones-resultado'),
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                      child: Column(mainAxisSize: MainAxisSize.min, children: botones),
+                    ),
+                  ],
                 ),
               ),
-              Padding(
-                key: const ValueKey('botones-resultado'),
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
-                child: Column(mainAxisSize: MainAxisSize.min, children: botones),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -330,7 +361,34 @@ class _AuditoriaSuperadaState extends _EstadoResultado<PantallaAuditoriaSuperada
         ),
       ];
     }
-    return marco(contenido: contenido, botones: botones);
+    return marco(
+      contenido: contenido,
+      botones: botones,
+      // T29 (Figma 101:5592): trofeo y Sarko × 1.6 a la izquierda y el
+      // confeti sobre el panel.
+      fondoTablet: const ConfetiSprint(
+        key: ValueKey('confeti-auditoria'),
+        piezas: ConfetiSprint.piezasAuditoriaTablet,
+        anchoLienzo: DisposicionResultadoTablet.anchoPanel,
+      ),
+      ilustracionTablet: const IlustracionAmpliada(
+        anchoBase: 296,
+        escala: 1.6,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TrofeoCertificado(),
+            SizedBox(width: 14),
+            SarkoImagen(pose: PoseSarko.alegre, ancho: 176, decorativa: true),
+          ],
+        ),
+      ),
+      contenidoTablet: [
+        _TituloResultado(Textos.auditoriaSuperada, color: tokens.textoPrimario),
+        const SizedBox(height: 16),
+        cuerpo,
+      ],
+    );
   }
 }
 
@@ -395,33 +453,37 @@ class _InspectoraGanoState extends _EstadoResultado<PantallaInspectoraGano> {
       );
     }
 
+    final ilustracion = IlustracionSarko(
+      pose: PoseSarko.triste,
+      diametro: 230,
+      anchoSarko: 184,
+      colorFondo: tokens.fondoSuperficieAlt,
+    );
+    final titulo = _TituloResultado(Textos.inspectoraGano, color: tokens.estadoIlegal);
+    final texto = Text(
+      sinVidas ? Textos.reprobadoSinVidas : Textos.reprobadoSinDecisiones,
+      key: const ValueKey('texto-reprobado'),
+      textAlign: TextAlign.center,
+      style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
+    );
+    final filaResumen = FilaResumenExamen(
+      jugadas: resumen.decisionesJugadas,
+      total: examen.total,
+      aciertos: resumen.aciertos,
+      porTiempo: resumen.porTiempo,
+    );
     final contenido = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
           const SizedBox(height: 42),
-          IlustracionSarko(
-            pose: PoseSarko.triste,
-            diametro: 230,
-            anchoSarko: 184,
-            colorFondo: tokens.fondoSuperficieAlt,
-          ),
+          ilustracion,
           const SizedBox(height: 16),
-          _TituloResultado(Textos.inspectoraGano, color: tokens.estadoIlegal),
+          titulo,
           const SizedBox(height: 4),
-          Text(
-            sinVidas ? Textos.reprobadoSinVidas : Textos.reprobadoSinDecisiones,
-            key: const ValueKey('texto-reprobado'),
-            textAlign: TextAlign.center,
-            style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
-          ),
+          texto,
           const SizedBox(height: 24),
-          FilaResumenExamen(
-            jugadas: resumen.decisionesJugadas,
-            total: examen.total,
-            aciertos: resumen.aciertos,
-            porTiempo: resumen.porTiempo,
-          ),
+          filaResumen,
           const SizedBox(height: 20),
           proximaVida,
         ],
@@ -471,7 +533,21 @@ class _InspectoraGanoState extends _EstadoResultado<PantallaInspectoraGano> {
         alPresionar: volverAlMapa,
       ),
     ];
-    return marco(contenido: contenido, botones: botones);
+    return marco(
+      contenido: contenido,
+      botones: botones,
+      // T30 (Figma 101:5666): Sarko triste × 1.7 a la izquierda; separación 16.
+      ilustracionTablet: IlustracionAmpliada(anchoBase: 230, escala: 1.7, child: ilustracion),
+      contenidoTablet: [
+        titulo,
+        const SizedBox(height: 16),
+        texto,
+        const SizedBox(height: 16),
+        filaResumen,
+        const SizedBox(height: 16),
+        proximaVida,
+      ],
+    );
   }
 }
 

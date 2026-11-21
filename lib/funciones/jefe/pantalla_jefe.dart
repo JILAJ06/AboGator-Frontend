@@ -13,15 +13,20 @@ import '../../componentes/aviso_conexion.dart';
 import '../../componentes/barra_juego.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/composicion_juego_tablet.dart';
 import '../../componentes/dialogo_confirmacion.dart';
+import '../../componentes/disposicion_resultado_tablet.dart';
+import '../../componentes/hoja_lateral.dart';
 import '../../componentes/icono_app.dart';
 import '../../componentes/mensaje_pantalla.dart';
+import '../../componentes/panel_lateral_juego.dart';
 import '../../componentes/piezas_jefe.dart';
 import '../../componentes/piezas_perfil.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/sello_veredicto.dart';
 import '../../componentes/tarjeta_caso.dart';
 import '../../componentes/tinte_veredicto.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/tema/tema_app.dart';
@@ -32,10 +37,12 @@ import '../../datos/modelos/tarjeta.dart';
 import '../../datos/repositorios/repositorio_examen.dart';
 import '../../datos/sincronizacion/estado_sincronizacion.dart';
 import '../../datos/sincronizacion/servicio_conexion.dart';
+import '../acceso/sesion.dart';
 import '../ajustes/estado_ajustes.dart';
 import '../inicio/logica_inicio.dart';
 import '../juego/logica_swipe.dart';
 import '../juego/mazo_swipe.dart';
+import '../juego/pantalla_juego.dart' show saldoJuegoProvider;
 import 'estado_examen.dart';
 import 'logica_jefe.dart';
 import 'reloj_crisis.dart';
@@ -223,6 +230,63 @@ class _Crisis extends ConsumerWidget {
         ],
       ),
     );
+
+    final alerta = Container(
+      key: const ValueKey('alerta-jefe'),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: EfectosApp.alertaCrisis,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const IconoApp(IconosApp.alert, tamano: 16, color: EfectosApp.blancoCrisis),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              Textos.alertaJefe,
+              style: estilos.etiqueta.copyWith(color: EfectosApp.blancoCrisis),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // T27 (Figma 101:4895): alerta, Sarko, la barra del Jefe y la línea de
+    // crisis × 1.4 en el panel izquierdo; título, reglas y botones a la derecha.
+    if (context.clasePantalla.esAncho) {
+      return _CrisisTablet(
+        alerta: alerta,
+        titulo: BloqueLectura(
+          key: const ValueKey('titulo-crisis'),
+          encabezado: true,
+          autofocus: true,
+          radio: 8,
+          child: Text(
+            info.titulo,
+            textAlign: TextAlign.center,
+            style: estilos.h1.copyWith(color: EfectosApp.blancoCrisis),
+          ),
+        ),
+        descripcion: Text(
+          info.descripcion,
+          textAlign: TextAlign.center,
+          style: estilos.cuerpoBase.copyWith(color: EfectosApp.textoCrisis),
+        ),
+        reglas: [
+          regla(IconosApp.zap, Textos.reglaDecisiones(info.totalDecisiones, segundos)),
+          regla(IconosApp.megaphone, Textos.reglaContraargumento),
+          regla(IconosApp.lock, Textos.reglaComodines),
+          regla(IconosApp.heart, Textos.reglaVidas),
+        ],
+        extendido: extendido ? Textos.tiempoExtendidoActivo(segundos) : null,
+        enLinea: enLinea,
+        iniciando: iniciando,
+        alEnfrentar: alEnfrentar,
+        alAhoraNo: alAhoraNo,
+      );
+    }
 
     final contenido = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -650,6 +714,30 @@ class _DecisionState extends ConsumerState<_Decision> {
           TemporizadorCrisis(restante: restante, limite: decision.limite),
     );
 
+    final tablet = context.clasePantalla.esAncho;
+    final altoMinimoZona =
+        TarjetaCaso.altoMinimoPara(MediaQuery.textScalerOf(context)) + MazoSwipe.altoPila;
+    final zona = Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned.fill(child: zonaTarjeta),
+        Positioned(left: 16, top: -14, child: ChipHoraCrisis(hora: decision.hora)),
+        Positioned(right: -12, top: -24, child: temporizador),
+        if (sinConexion)
+          const Positioned(
+            left: 0,
+            right: 0,
+            top: 24,
+            child: AvisoConexion(key: ValueKey('aviso-conexion-examen')),
+          ),
+      ],
+    );
+    final acciones = AccionesVeredicto(
+      alElegir: faseVisible == FaseJefe.decision && !examen.enviando
+          ? (v) => _mazo.currentState?.confirmar(v)
+          : null,
+    );
+
     final contenido = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -671,38 +759,13 @@ class _DecisionState extends ConsumerState<_Decision> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight:
-                    TarjetaCaso.altoMinimoPara(MediaQuery.textScalerOf(context)) +
-                    MazoSwipe.altoPila,
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned.fill(child: zonaTarjeta),
-                  Positioned(left: 16, top: -14, child: ChipHoraCrisis(hora: decision.hora)),
-                  Positioned(right: -12, top: -24, child: temporizador),
-                  if (sinConexion)
-                    const Positioned(
-                      left: 0,
-                      right: 0,
-                      top: 24,
-                      child: AvisoConexion(key: ValueKey('aviso-conexion-examen')),
-                    ),
-                ],
-              ),
+              constraints: BoxConstraints(minHeight: altoMinimoZona),
+              child: zona,
             ),
           ),
         ),
         const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: AccionesVeredicto(
-            alElegir: faseVisible == FaseJefe.decision && !examen.enviando
-                ? (v) => _mazo.currentState?.confirmar(v)
-                : null,
-          ),
-        ),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: acciones),
         const SizedBox(height: 18),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -757,17 +820,42 @@ class _DecisionState extends ConsumerState<_Decision> {
                   ),
                 ),
               ),
-              SafeArea(
-                child: LayoutBuilder(
-                  builder: (context, restricciones) => SingleChildScrollView(
-                    key: const ValueKey('decision-desplazable'),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: restricciones.maxHeight),
-                      child: IntrinsicHeight(child: contenido),
+              // T28 (Figma 101:5001): la composición del juego en tablet con
+              // "El Jefe" y los atajos en el panel lateral.
+              if (tablet)
+                ComposicionJuegoTablet(
+                  barra: BarraJuegoTablet(
+                    numeroSprint: 0,
+                    actual: decision.indice,
+                    total: examen.total,
+                    vidas: examen.vidas,
+                    racha: ref.watch(sesionProvider)?.racha ?? 0,
+                    monedas: ref.watch(saldoJuegoProvider).value ?? 0,
+                    paso: Textos.pasoCrisis(decision.indice, examen.total),
+                    alSalir: _salir,
+                    alPausar: ajustes.tiempoExtendido ? _examen.pausar : null,
+                  ),
+                  zonaTarjeta: zona,
+                  altoMinimoZona: altoMinimoZona,
+                  acciones: acciones,
+                  comodines: const PildoraComodinesBloqueados(),
+                  panel: [
+                    TarjetaJefe(hp: examen.hp),
+                    const TarjetaAtajos(lineas: Textos.atajosLineasExamen),
+                  ],
+                )
+              else
+                SafeArea(
+                  child: LayoutBuilder(
+                    builder: (context, restricciones) => SingleChildScrollView(
+                      key: const ValueKey('decision-desplazable'),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: restricciones.maxHeight),
+                        child: IntrinsicHeight(child: contenido),
+                      ),
                     ),
                   ),
                 ),
-              ),
               // Chip de daño o de fallo, sobre la barra del Jefe.
               if (faseVisible == FaseJefe.feedback && feedback != null)
                 Positioned(
@@ -801,10 +889,9 @@ class _DecisionState extends ConsumerState<_Decision> {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.sizeOf(context).height * 0.92,
-                    ),
+                  top: tablet ? 0 : null,
+                  child: _ContenedorReplica(
+                    tablet: tablet,
                     child: SingleChildScrollView(
                       child: RelojCrisis(
                         key: ValueKey('reloj-replica-${examen.ronda}'),
@@ -899,6 +986,179 @@ class _CapaPausa extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Contenedor del contraargumento (28b): en el móvil, abajo y hasta el 92 % del
+/// alto; en tablet horizontal, la hoja lateral de 376 (T28b, Figma 101:5194).
+class _ContenedorReplica extends StatelessWidget {
+  const _ContenedorReplica({required this.tablet, required this.child});
+
+  final bool tablet;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (tablet) return HojaLateral(etiqueta: Textos.hojaContraargumento, child: child);
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.92),
+      child: child,
+    );
+  }
+}
+
+/// T27 en tablet horizontal: el panel izquierdo de la crisis (`#162030` con un
+/// halo) con la alerta, Sarko enojado, la barra del Jefe y la línea de crisis
+/// de la versión móvil × 1.4; a la derecha, en la columna de 470, el título,
+/// la descripción, las reglas, el tiempo extendido y los botones.
+class _CrisisTablet extends StatelessWidget {
+  const _CrisisTablet({
+    required this.alerta,
+    required this.titulo,
+    required this.descripcion,
+    required this.reglas,
+    required this.extendido,
+    required this.enLinea,
+    required this.iniciando,
+    required this.alEnfrentar,
+    required this.alAhoraNo,
+  });
+
+  /// Lienzo de la ilustración (el ancho del móvil) y su escala (Figma: la
+  /// barra del Jefe mide 478.8).
+  static const double anchoBase = 342;
+  static const double altoBase = 370;
+  static const double escala = 1.4;
+  static const double halo = 560;
+
+  final Widget alerta;
+  final Widget titulo;
+  final Widget descripcion;
+  final List<Widget> reglas;
+  final String? extendido;
+  final bool enLinea;
+  final bool iniciando;
+  final VoidCallback alEnfrentar;
+  final VoidCallback alAhoraNo;
+
+  @override
+  Widget build(BuildContext context) {
+    final estilos = context.estilos;
+    final texto = extendido;
+    return DisposicionResultadoTablet(
+      key: const ValueKey('crisis-tablet'),
+      colorPanel: EfectosApp.barraJefe,
+      ilustracion: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          // El halo no cuenta para el tamaño de la ilustración (sobresale).
+          Positioned.fill(
+            child: OverflowBox(
+              maxWidth: halo,
+              maxHeight: halo,
+              child: Container(
+                key: const ValueKey('halo-crisis'),
+                width: halo,
+                height: halo,
+                decoration: const BoxDecoration(
+                  color: EfectosApp.haloCrisis,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+          IlustracionAmpliada(
+            anchoBase: anchoBase,
+            escala: escala,
+            child: SizedBox(
+              height: altoBase,
+              child: Stack(
+                children: [
+                  Positioned(left: 4, top: 4, child: alerta),
+                  const Positioned(
+                    left: 234,
+                    top: 26,
+                    child: SarkoImagen(pose: PoseSarko.enojado, ancho: 112, decorativa: true),
+                  ),
+                  const Positioned(left: 4, right: 4, top: 226, child: BarraDelJefe(hp: 100)),
+                  const Positioned(left: 12, right: 0, top: 318, child: LineaDeCrisis()),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      contenido: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          titulo,
+          const SizedBox(height: 14),
+          descripcion,
+          const SizedBox(height: 14),
+          Container(
+            key: const ValueKey('reglas-crisis'),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: EfectosApp.fondoReglasCrisis,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(children: reglas),
+          ),
+          if (texto != null) ...[
+            const SizedBox(height: 14),
+            Row(
+              key: const ValueKey('tiempo-extendido-crisis'),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const IconoApp(IconosApp.accessibility, tamano: 16, color: EfectosApp.verdeCrisis),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    texto,
+                    style: estilos.leyenda.copyWith(color: EfectosApp.verdeCrisis),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 14),
+          if (!enLinea) ...[
+            Text(
+              Textos.necesitasConexionExamen,
+              key: const ValueKey('aviso-sin-conexion-examen'),
+              textAlign: TextAlign.center,
+              style: estilos.leyenda.copyWith(color: EfectosApp.textoCrisis),
+            ),
+            const SizedBox(height: 8),
+          ],
+          BotonApp(
+            key: const ValueKey('boton-enfrentar'),
+            texto: Textos.enfrentarAuditoria,
+            tipo: TipoBoton.acento,
+            cargando: iniciando,
+            textoCargando: Textos.iniciandoExamen,
+            alPresionar: enLinea ? alEnfrentar : null,
+          ),
+          const SizedBox(height: 4),
+          Center(
+            child: TextButton(
+              key: const ValueKey('boton-ahora-no'),
+              style: TextButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                foregroundColor: EfectosApp.textoCrisis,
+              ),
+              onPressed: alAhoraNo,
+              child: Text(
+                Textos.ahoraNo,
+                style: estilos.cuerpoEnfasis.copyWith(color: EfectosApp.textoCrisis),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

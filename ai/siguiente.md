@@ -1,68 +1,81 @@
-# T-12c · Tablet: zona de juego con panel lateral y hojas laterales
+# T-12d · Tablet: resultados del sprint, Sin vidas, Buzón + Juicio, Sin conexión y Examen Final
 
-**Rama:** `12c-tablet-juego` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-12c**).
-**Figma** (archivo `SYNAyUal3xVk4k8SEBEb7f`, página "Tablet · Vistas"). **T10 Tarjeta normal `97:772`** está detallada aquí. Las demás **las mides tú con el conector** y dejas las medidas en el reporte: T11 `97:1204`, T11b `97:3001`, T11c `97:3342`, T13 `97:2291` (arrastres), T12 `97:1563`, T12b `97:1922`, T12c `97:3711`, T14 `97:2660`, T14b `98:4644` (hojas de veredicto, bonus, parcial, incorrecto, Amparo), T15 `98:2569`, T16 `98:2894`, T16b `98:3207` (evidencia), T17 `98:3526`, T18 `98:3819` (justificación), T10b `98:4108` (Lupa), T10c `98:4367` (Abogado Senior). Reglas: `106:10163`.
-**Ya mergeado de T-12 y T-12b que usas:** `ClasePantalla`, `Adaptativo`, `MedidasAdaptativas` (incluye `hojaLateral` = 376), `tamanoPantalla(tester, Tamano.…)` y el patrón de dos paneles de `_MapaConDetalle`.
-**Nota:** T19 (Sprint completado) y T19b (Startup en quiebra) son pantallas de resultado y **pasan a la T-12d**; aquí no se tocan.
+**Rama:** `12d-tablet-buzon-y-examen` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-12d**).
+**Figma** (archivo `SYNAyUal3xVk4k8SEBEb7f`, página "Tablet · Vistas"). **T19 `98:5016` y T21 `100:4028` están detalladas aquí.** Las demás **las mides tú con el conector** y dejas las medidas en el reporte: T19b Startup en quiebra `98:2433`, T20 Sin vidas `100:3887`, T21b Buzón vacío `100:3950`, T22 Juicio `100:4212`, T22b Resultado del juicio `100:4281`, T23 Sin conexión `100:4342`, y el Examen: T27 `101:4895`, T28 `101:5001`, T28b `101:5194`, T28c `101:5420`, T29 `101:5592`, T30 `101:5666`. Reglas de adaptación: `106:10163`.
+**Ya mergeado que usas:** `ClasePantalla`, `Adaptativo`, `MedidasAdaptativas` (columnaFormulario 470, hojaLateral 376…), `tamanoPantalla(tester, Tamano.…)`, `RielNavegacion` en `MarcoPrincipal`, el patrón lista-detalle de `_MapaConDetalle` (T-12b), `HojaLateral` y `BarraJuegoTablet` (T-12c, ver el reporte anterior), diálogos centrados de 440.
 
 ## Objetivo
-El juego de un sprint en tablet: la **zona de juego** (tarjeta, botones de veredicto y comodines) a la izquierda y un **panel lateral** (indicadores, contexto y atajos de teclado) a la derecha; las **hojas laterales** de 376 para veredicto, evidencia, justificación, Abogado Senior y bonus. Misma lógica del juego (T-05 a T-09b); solo cambia la composición.
+Terminar la versión de tablet: las pantallas de resultado del sprint, Sin vidas, el Buzón con el Juicio en lista-detalle, Sin conexión y el Examen Final. **Misma lógica que en móvil**; solo cambia la composición. Con esta tarea todas las vistas de Figma de tablet quedan hechas.
 
-## Reglas de adaptación (Figma `106:10163`)
-- **Modo foco:** en los sprints **no hay riel** (el juego ya está fuera de `MarcoPrincipal`; así se queda).
-- Solo con `ClasePantalla.ancho` (≥ 960) se aplican las dos zonas y las hojas laterales. **En móvil y entre 600 y 959 el juego queda como hoy** (panel de veredicto inferior, etc.), centrado con ancho máximo si hace falta. Las pruebas existentes del juego siguen verdes sin cambiar de tamaño.
-- La retroalimentación, la evidencia, la justificación, el Abogado Senior y el bonus se abren como **hoja de 376 a la derecha**; la tarjeta sigue visible con su sello y el velo baja al **40 %** (`#0B1220`, 280 ms, igual que el móvil; sin movimiento con "Reducir animaciones").
+## Reglas generales (Figma `106:10163`)
+- Solo con `ClasePantalla.ancho` (≥ 960) se aplican las composiciones de abajo. **En móvil y entre 600 y 959 las pantallas quedan como hoy** (en 600–959 con ancho máximo y centradas, como en T-12 y T-12b). Las pruebas existentes siguen verdes sin cambiar de tamaño.
+- Las `y` de abajo ya tienen **restados los 32 de la barra de estado** (que es del sistema y no se dibuja). Los `x` son desde la izquierda de la ventana de 1194; si la ventana es más ancha o más angosta, las zonas **se reparten proporcionalmente como en T-12b** (no uses posiciones fijas absolutas).
+- **Pantallas de resultado** (T19, T19b, T20, T29, T30): sin riel (modo foco). Sarko en la **mitad izquierda** (panel `fondoSuperficie` de 597 de ancho a toda la altura, borde derecho si Figma lo muestra) y el contenido en una **columna centrada de 470** en la mitad derecha.
+- **Buzón y Juicio:** con riel (el Buzón es destino del riel), en **lista-detalle**.
 
-## Composición de T10 (`x` desde la izquierda de la ventana, `y` **sin** la barra de estado de 32, ya restada)
-- **Barra de juego de tablet** (`BarraJuego` con medidas de tablet, Figma `93:528`): ancho `ventana − 48` (1146 a 1194), alto 64, x 24, y 8, separación 20. De izquierda a derecha: **Salir** (círculo 48, `fondoSuperficie`, borde 1, ícono `x` 22); **progreso** que ocupa el espacio sobrante (texto "Sprint 3 · Tarjeta 5 de 10" Etiqueta `textoSecundario` y barra de **12** de alto, radio 6, pista `fondoSuperficieAlt`, relleno `accionPrimaria`); **HUD** con tres chips (racha, monedas, vidas) separación 8; **Botón pausa** (círculo 48, ícono `pause` 22).
-  - **El botón de pausa no existe en el móvil.** El sprint no tiene tiempo, así que decídelo así y repórtalo: abre un diálogo "Juego en pausa" (centrado, 440) con "Seguir jugando" (primario) y "Salir del sprint" (fantasma, abre la misma confirmación de Salir). No detiene nada porque no hay reloj; las respuestas no se pierden. En móvil no aparece.
-- **Zona izquierda** (de x 24 a `ventana − 424`, es decir de 24 a 770 a 1194; la tarjeta va **centrada** en ella, centro en x ≈ 397 a 1194):
-  - **Pila de tarjetas**, de atrás hacia adelante: "Pila 2" 332 × 470 con opacidad 50 % en (+24 , +20) respecto a la tarjeta, "Pila 1" 356 × 470 con 80 % en (+12, +10) y **la tarjeta 380 × 470** (radio 28) en (207, 108). Es `PilaTarjetas`/`TarjetaCaso` con medidas de tablet: **parametriza** (no dupliques); el contenido es el de la tarjeta móvil (etiqueta del caso, personaje, globo de texto, pista de gestos) en 380 de ancho.
-  - **Sellos** (Legal, Ilegal, Condicional, Escalar) y **tintes** de pantalla completa: los mismos del móvil; el tinte cubre **toda la ventana** (sin riel que lo recorte).
-  - **Botones de veredicto** en (230.5, 594), separación 14, **orden: Ilegal, Escalar, Condicional, Legal**, círculos de 68, borde 3 del color del veredicto, etiqueta Etiqueta del color. Centrados bajo la tarjeta.
-  - **Barra de comodines** en (222.5, 700), separación 8, píldoras de alto 48 (Lupa ×2, Abogado ×1, Amparo ×1): la misma `BarraComodines`.
-  - Si la ventana es más baja de 834, la tarjeta se encoge **como en el móvil** (mínimo 360 de alto) y la pantalla se desplaza si aun así no cabe.
-- **Panel lateral derecho** (x = `ventana − 400`, es decir 794 a 1194, ancho **376**, margen derecho 24), tres tarjetas con separación de 20 aprox. (y 88, 266 y 424):
-  1. **"Tu Startup"** (y 88): `fondoSuperficie`, borde 1, radio 20, relleno 16 × 20, separación 12; título Fredoka SemiBold 17 `textoPrimario`; **los indicadores** (los de `IndicadoresStartup`, a ancho completo, con sus deltas tras cada respuesta como en el móvil); nota Leyenda `textoSecundario`: "Cada veredicto mueve los indicadores. Si el Riesgo legal llega a 100 % o el Presupuesto a 0, la Startup quiebra."
-  2. **Contexto del sprint** (y 266): `fondoSuperficie`, borde 1, radio 20, relleno 20, separación 12; "MÓDULO N · SPRINT k" (Leyenda `textoAcento`), título del sprint (Fredoka SemiBold 17) y el objetivo del sprint (Cuerpo/Base `textoSecundario`). Figma usa un texto de ejemplo ("Revisa licencias, datos personales y avisos antes del lanzamiento del viernes."); **usa el objetivo real del sprint** (con la primera letra en mayúscula, sin el "Objetivo: ") y repórtalo.
-  3. **Atajos de teclado** (y 424): `fondoSuperficieAlt`, radio 20, relleno 16, separación 8; "TECLADO / SWITCH CONTROL" (Leyenda `textoSecundario`) y tres líneas Cuerpo/Base `textoPrimario`: "←  Ilegal        →  Legal", "↑  Condicional   ↓  Escalar" y "Enter confirma · Esc cierra el panel". Se muestran siempre en ancho (no solo con teclado físico). Las flechas, Enter y Esc **ya funcionan** en el móvil (T-05, T-06): verifica que siguen funcionando aquí.
-- Con **"Solo botones"** activo (T-10b) el arrastre se desactiva y la pila no se mueve, como hoy.
-- **Estados** de carga, error con reintento, sin tarjetas, sin vidas y sin conexión (23): se ven bien en tablet (a ancho de contenido, centrados); el aviso de conexión va **sobre la tarjeta** como en el móvil y las respuestas guardadas ocupan el lugar de los comodines.
+## T19 · Sprint completado (`98:5016`, ancho)
+- **Panel izquierdo:** `fondoSuperficie`, x 0, y 0, 597 × toda la altura. Dentro, la ilustración de 357 × 476 en (≈120, 147): fondo de 340 × 340 en (+8.5, +17) con la ilustración de fondo actual, **Sarko alegre** de 272 × 340 en (+42.5, +23.8) y las **tres estrellas** debajo, en (+68, +380.8), separación 10.2, tamaños 61.2 / **78.2** / 61.2 (la del medio más grande). Todo es lo que ya usa la pantalla móvil; **solo se reescala y se coloca**.
+- **Confeti** de 12 × 6 (radio 2) sobre el panel izquierdo, siete piezas en las posiciones de Figma (cuenta con `ConfetiSprint(piezas:)` de T-11b: reutilízalo, no dibujes aparte; con "Reducir animaciones", estático como hoy). Colores `#B86B23`, `#68B678`, `#2B5FA8`, `#B52426`, `#E0A060`.
+- **Columna de contenido** (470 de ancho, centrada en la mitad derecha: x ≈ 661, arriba y 155; separación 16): 
+  1. Título "¡Sprint completado!" Fredoka Bold 26/32 `textoPrimario`, centrado.
+  2. Texto de cierre (el real del sprint) Cuerpo/Base 14/20 `textoSecundario`, centrado.
+  3. **Estadísticas:** tres tarjetas `fondoSuperficie`, borde 1, radio 18, relleno vertical 12, separación 10, ícono de 20, valor Fredoka SemiBold 20/26 `textoPrimario` y etiqueta Leyenda `textoSecundario`: Aciertos ("8/10"), XP (con bonus) ("+95"), Monedas ("+45"). **Reparte el ancho de 470 en tres iguales** (Figma las deja a 107; con la columna de 470 se ven angostas y sobra espacio: usa tres `Expanded` y repórtalo si el frame muestra otra cosa).
+  4. "Estado final de tu Startup" Etiqueta `textoSecundario`, centrado.
+  5. **Indicadores de Startup** a ancho completo (470): `fondoSuperficie`, borde 1, radio 16, relleno 10, los cuatro indicadores con su delta del sprint (+15 reputación, +5 riesgo, etc.).
+  6. **Aviso del buzón** (solo si hay tarjetas falladas): `fondoDestacado`, radio 16, relleno 14 × 10, separación 10, ícono `inbox` 20 y texto Leyenda `textoPrimario` ("2 tarjetas falladas irán a apelación en 3 y 7 días. Resuélvelas para recuperar vidas.").
+  7. Botón primario "Continuar al mapa" (alto 52, ancho completo) y fantasma "Repasar mis fallos" (alto 48, texto `textoAcento`).
+- Todo lo demás (mensajes según desempeño, XP, regreso al mapa, guardado) **igual que hoy**; archivo `pantalla_sprint_completado.dart`.
 
-## Hojas laterales (T12, T12b, T12c, T14, T14b, T15 a T18, T10b y T10c)
-- **Hoja de 376** a la derecha (x 794 a 1170, margen 24), con la forma del panel móvil: `fondoSuperficie`, borde 1, radio 28, sombra elevada, relleno 12 24 34, **agarre de 40 × 5**, separación 14. Mide **su posición vertical, su alto y sus contenidos en los marcos T12, T14, T16, T17, T18, T10b y T10c** y respétalos. La tarjeta (con su sello) sigue visible a la izquierda y el panel lateral derecho queda **debajo** de la hoja (la hoja lo cubre en su zona).
-- Una sola **`HojaLateral`** reutilizable (en `lib/componentes/`) que envuelve el contenido actual de cada panel móvil: veredicto (correcto, incorrecto, parcial, Amparo), bonus con micro-pregunta, **visor de evidencia** (T16, T16b), **justificación** (T18), **Abogado Senior** y el aviso de la **Lupa**. **No dupliques la lógica ni los textos**: lo que cambia es el contenedor, no el contenido. El comportamiento de descarte es el mismo que en el móvil (el veredicto y el panel de justificación **no se descartan**; la evidencia y el Abogado sí: atrás, Esc o tocar fuera) y el foco vuelve al control de origen como hoy.
-- **Entrada:** la hoja entra deslizándose desde la derecha (280 ms, curva de salida suave); con "Reducir animaciones", aparece sin movimiento. El velo: 40 % de opacidad sobre toda la ventana excepto la tarjeta y su sello si Figma así lo muestra (mídelo en T12; si no, velo completo).
-- **Accesibilidad:** al abrirse, el foco pasa al encabezado de la hoja; la hoja es un `Semantics` de contenedor "Retroalimentación"/"Evidencia"/"Justificación"/etc. con el mismo texto que en el móvil; Tab no sale de la hoja mientras es modal; Esc la cierra si es descartable; al cerrarse, el foco vuelve al control de origen. El orden de foco en la pantalla: Salir → progreso/HUD → Pausa → tarjeta → botones de veredicto → comodines → (panel lateral, solo lectura).
-- Entre 600 y 959 y en móvil, estos paneles siguen siendo la hoja inferior de hoy (en tablet vertical, con ancho máximo de 440 centrada); no cambies su contenido.
+## T21 · Buzón de Apelaciones (`100:4028`, ancho): lista-detalle
+- **Riel** a la izquierda (el Buzón activo, con su insignia, como en T-12).
+- **Columna de lista** (x ≈ 136 = 8.33 % + 36.5, **ancho 500**):
+  - Título "Buzón de Apelaciones" Fredoka Bold 26/32 en y 20; texto "Tus fallos regresan a los 3 y 7 días para que no se te olviden." Cuerpo/Base `textoSecundario` en y 60.
+  - **Recompensa** en y 108: `fondoDestacado`, radio 18, relleno 14 × 12, separación 12; ícono de 40 × 40 radio 12 `estadoIlegal` con `heart` 22 blanco; "2 juicios de apelación hoy" (Cuerpo/Énfasis) y "Gana cada apelación y recupera 1 vida" (Leyenda `textoSecundario`).
+  - **Lista de tarjetas falladas** en y 188: contenedor `fondoSuperficie`, borde 1, radio 20, filas con borde inferior 1; cada fila: relleno 14 × 12, separación 12, **barra de 6 × 40 (radio 3) con el color del módulo de la tarjeta**, texto (título Cuerpo/Énfasis, módulo Leyenda `textoSecundario`, **chip de plazo**) y chevron de 18. Chip de plazo: si toca hoy, `estadoIlegal` con ícono `gavel` 12 y texto blanco "Día 3 · hoy · +1 vida"; si no, `fondoSuperficieAlt` con ícono `clock` 12 y texto `textoSecundario` ("Día 3 · mañana", "Día 7 · en 2 días"). **La fila seleccionada** (la primera al abrir) lleva fondo `fondoDestacado`.
+  - Botón primario "Iniciar apelaciones de hoy" (500 × 52) en y 562 y, debajo en y 626, "No consume vidas · No avanza el mapa" Leyenda `textoSecundario` centrada.
+- **Panel de detalle** (x ≈ 668 = 50 % + 71, **ancho 526**, toda la altura, `fondoSuperficie`, borde izquierdo 1): sin lista = el panel muestra la vista previa del juicio de la tarjeta **seleccionada**:
+  - "PRÓXIMO JUICIO · DÍA 3" (Leyenda `textoAcento`) en (39, 24) y el título de la tarjeta en Fredoka SemiBold 20/26 en (39, 46).
+  - **Tarjeta de caso** de 342 × 440 en (91, 108) con la etiqueta "APELACIÓN · LICENCIAS OSS", personaje, globo con el texto del caso y pista de gestos (es la `TarjetaCaso` con el tamaño del móvil; no la ensanches).
+  - Aviso "La fallaste hace 3 días" (`fondoDestacado`, píldora, ícono `clock` 14, Leyenda `textoAcento`) en (113, 456).
+  - **Sarko** de 96 × 120 en (405, 8) (el actual de la pantalla de Juicio).
+  - Botón primario "Iniciar juicio" (342 × 52) en (91, 568).
+- **Comportamiento:** tocar una fila **selecciona** y actualiza el detalle (no abre nada). "Iniciar juicio" abre el Juicio (T22) de **esa** tarjeta; "Iniciar apelaciones de hoy" empieza la sesión de hoy como en móvil. Las filas se recorren con flechas arriba/abajo; Enter selecciona (y con el foco en "Iniciar juicio", lo inicia).
+- **Vacío (T21b):** el Buzón vacío también lleva el riel; el panel de detalle muestra el estado vacío (mide `100:3950`). Sin tarjetas seleccionables.
+- **En 600–959 y móvil:** como hoy (lista; tocar una fila abre el Juicio). En tablet vertical, lista a ancho máximo de 640 centrada.
 
-## Accesibilidad general
-- Mismos criterios WCAG 2.1 AA, objetivos ≥ 48 (botones de veredicto de 68), alternativa de un toque al swipe y atajos de teclado documentados en cada sprint.
-- Texto al 200 % sin desbordes en **1194×834, 834×1194 y 600×960**, claro y oscuro: el panel lateral derecho pasa **debajo** de la zona de juego (una columna que se desplaza) cuando el texto grande no cabe; la hoja lateral se desplaza por dentro.
-- Contrastes AA verificados en pruebas: `textoSecundario` sobre `fondoSuperficieAlt` (atajos), `textoAcento` sobre `fondoSuperficie` (contexto), los colores de veredicto sobre `fondoSuperficie` y los de las hojas ya verificados en el móvil.
-- "Solo botones", "Reducir animaciones", háptica y tamaño de texto (T-10b) se respetan igual.
+## T22 / T22b · Juicio y su resultado, T20, T23, T19b y Examen
+Mide con el conector y aplica las reglas generales; respeta estas intenciones:
+- **T22 Juicio de apelación:** es la mecánica del juego con la tarjeta; **usa la misma composición que el juego de T-12c** si Figma la muestra así (zona de juego + panel lateral con la hoja de 376) y, si es una columna distinta, la de Figma. El resultado (T22b) usa la **hoja lateral** de 376 si Figma lo muestra así; si no, la columna de 470. Repórtalo.
+- **T19b Startup en quiebra** y **T20 Sin vidas:** pantalla de resultado (Sarko triste a la izquierda, columna de 470). T20 con vidas en 0 muestra la hora de la próxima vida y los accesos a Buzón y Tienda como hoy.
+- **T23 Sin conexión:** mide si es a pantalla completa o un aviso sobre el contenido; mismo comportamiento de la cola offline que en móvil.
+- **Examen Final (T27–T30):** T27 intro, T28 las preguntas (T28b y T28c, sus estados) y T29 y T30 los resultados (Aprobado y No aprobado, con el certificado). Sin riel. **El contraargumento del Jefe usa `HojaLateral`**, como dice el reporte de T-12c (si su panel usa `ContenedorPanelModal`, o lee `HojaLateral.radioDe/bordeDe/rellenoInferior`, se adapta solo). Los comodines siguen desactivados; el reloj de crisis y las reglas del examen **no cambian**. La barra del examen puede reutilizar `BarraJuegoTablet` (con su paso propio) si Figma la muestra igual.
+
+## Accesibilidad
+- WCAG 2.1 AA, objetivos ≥ 48, y todo lo existente (lector de pantalla, "Solo botones", "Reducir animaciones", háptica, tamaño de texto).
+- Orden de foco: en lista-detalle, riel → título → lista (una parada por fila, flechas ↑ ↓) → botón de la lista → detalle → "Iniciar juicio". La fila seleccionada se anuncia como "seleccionada"; al seleccionar, anunciar el título del juicio (`liveRegion` discreta).
+- Resultados: el título se anuncia al abrir y el foco inicial va a él; las estadísticas se leen como una frase ("8 de 10 aciertos, 95 de experiencia, 45 monedas").
+- Texto al 200 % sin desbordes en **1194×834, 834×1194 y 600×960**, claro y oscuro: cuando no caben las dos zonas, el detalle pasa debajo de la lista (una columna que se desplaza) y Sarko se achica o sube arriba como en móvil.
+- Contrastes AA verificados en pruebas: `textoSecundario` sobre `fondoDestacado` y sobre `fondoSuperficieAlt` (chips de plazo), blanco sobre `estadoIlegal` (chip de hoy y insignia) y `textoAcento` sobre `fondoDestacado`.
 
 ## Archivos permitidos
-`lib/funciones/juego/` (pantalla de juego y composición de tablet), `lib/componentes/` (`BarraJuego`, `TarjetaCaso`, `PilaTarjetas`, `IndicadoresStartup`, `BarraComodines`, los paneles `PanelVeredicto`, `PanelEvidencia`, `PanelJustificacion`, `PanelAbogado` solo para que se puedan alojar en la hoja; `HojaLateral` y las tres tarjetas del panel lateral nuevas), `lib/core/adaptativo/` solo para ayudantes nuevos, `lib/core/tema/efectos.dart`, `iconos_app.dart`, `lib/core/textos/textos.dart`, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). **No toques** el estado ni las reglas del juego (`estado_juego.dart`, `logica_*`), las pantallas de resultado (19, 19b, 20), el mapa, el Buzón ni el Examen; **sin dependencias nuevas**.
+`lib/funciones/juego/` (solo `pantalla_sprint_completado.dart`, `pantalla_startup_quiebra.dart`, `piezas_fin_sprint.dart`), `lib/funciones/apelaciones/`, `lib/funciones/vidas/`, `lib/funciones/jefe/` (pantallas y piezas de composición, **no** `estado_examen.dart`, `logica_*` ni `reloj_crisis.dart`), el aviso de conexión que hoy usa T23, `lib/componentes/` (piezas de las pantallas anteriores y nuevas, p. ej. `FilaApelacion`, `PanelDetalleJuicio`, `ColumnaResultado`), `lib/core/adaptativo/`, `lib/core/tema/efectos.dart`, `iconos_app.dart`, `lib/core/textos/textos.dart`, galería, pruebas y documentación de `ai/`. **No toques** reglas de juego, estado, repositorios ni mocks; **sin dependencias nuevas**.
 
 ## Pruebas
-- **Zona de juego en ancho (1194×834):** barra de tablet (salir, progreso, HUD, pausa) y sus medidas; pila de 3 con opacidades y desplazamientos; tarjeta de 380 × 470 centrada en la zona; botones de veredicto en el orden y con las medidas de Figma; comodines; panel lateral con sus tres tarjetas y textos; "Tu Startup" con indicadores y deltas; contexto con el objetivo real; atajos.
-- **Mecánica igual que en móvil:** arrastre en 4 direcciones con sellos y tintes de pantalla completa, botones, teclado (flechas, Enter, Esc), "Solo botones", calificación, vidas, XP, monedas, bonus, evidencia, justificación, comodines y Amparo, quiebra y fin del sprint (los resultados usan las pantallas actuales). Un recorrido de un sprint completo en tablet con cada tipo de tarjeta.
-- **Hojas laterales:** posición, ancho 376 y contenido de cada una; velo al 40 %; modal y descarte (veredicto y justificación no se descartan; evidencia y Abogado con atrás, Esc y tocar fuera); entrada con y sin "Reducir animaciones"; foco al abrir y al cerrar.
-- **Pausa:** el diálogo, "Seguir jugando" y "Salir del sprint" con su confirmación; no existe en móvil.
-- **600×960, 834×1194 y móvil:** el juego como hoy (hoja inferior); las pruebas existentes siguen verdes sin cambiar su tamaño; en 834×1194 la tarjeta y los botones centrados sin panel lateral.
-- **Estados:** carga, error, sin tarjetas, sin vidas, sin conexión (aviso sobre la tarjeta).
-- **Accesibilidad:** semántica de la barra y de la hoja, orden de foco, anuncios, contrastes, desbordes (1194×834, 834×1194, 600×960 al 100 % y 200 %, claro y oscuro).
-- La galería suma `HojaLateral` y las tres tarjetas del panel lateral; `TEST-GALERIA` actualiza su cuenta.
-- Las 1188 pruebas previas siguen verdes.
+- **T19 en 1194×834:** panel izquierdo de 597 con Sarko y tres estrellas (la del medio mayor), columna de 470 con todos los elementos y medidas; tres estadísticas iguales; aviso del buzón solo con fallos; botones; sin riel. Lo mismo para T19b y T20 (sus medidas de Figma) y T29/T30.
+- **T21:** riel con insignia, lista (500) y detalle (526); fila seleccionada con `fondoDestacado`; chips de hoy y de otro día; seleccionar actualiza el detalle; "Iniciar juicio" abre el Juicio de la tarjeta seleccionada; flechas y Enter; vacío (T21b).
+- **T22/T22b, T23 y Examen:** las composiciones de Figma, contraargumento en `HojaLateral`, y un recorrido completo del Examen y de un Juicio en tablet. Las reglas (no consume vidas, no avanza el mapa, comodines desactivados, apelaciones 3 → 7 → 14 → dominada, reloj de crisis) siguen verdes.
+- **600×960, 834×1194 y móvil:** como hoy; las pruebas existentes siguen verdes sin cambiar su tamaño.
+- **Accesibilidad:** semántica, orden de foco, anuncios, contrastes y desbordes (1194×834, 834×1194, 600×960 al 100 % y 200 %, claro y oscuro).
+- La galería suma las piezas nuevas; `TEST-GALERIA` actualiza su cuenta.
+- Las 1219 pruebas previas siguen verdes.
 
 ## Criterios de aceptación
-- [ ] En 1194×834 el sprint se juega como T10 a T18 (zona de juego a la izquierda y panel lateral a la derecha, hojas laterales de 376), con arrastre, botones y teclado, sin cambiar ninguna regla del juego.
-- [ ] En móvil y en 600–959 el juego no cambia.
-- [ ] Todas las hojas (veredicto, bonus, evidencia, justificación, Abogado, Lupa, Amparo) funcionan como hoja lateral, con el mismo contenido y comportamiento que en el móvil.
-- [ ] Lo que no viene de Figma (botón de pausa, objetivo real en el contexto, entrada de la hoja, 600–959, texto grande) queda en el reporte, igual que las medidas que tomaste de T11 a T18 y T10b y T10c.
+- [ ] En 1194×834 las pantallas de T19, T19b, T20, T21, T21b, T22, T22b, T23 y T27–T30 se ven como Figma, sin cambiar ninguna regla.
+- [ ] El Buzón funciona como lista-detalle (seleccionar actualiza el detalle; "Iniciar juicio" abre el Juicio de esa tarjeta).
+- [ ] En móvil y en 600–959 nada cambia.
+- [ ] Lo que no viene de Figma (tres estadísticas iguales, selección inicial, flechas en la lista, comportamiento de tablet vertical) y las medidas que tomaste de T19b, T20, T21b, T22, T22b, T23 y T27–T30 quedan en el reporte.
 - [ ] Sin dependencias nuevas; análisis, formato y pruebas en verde; commits sin prefijo y sin menciones a Claude.
 
 ## Para el reporte
-Dudas numeradas (D1, D2…), decisiones propias, las medidas tomadas de los marcos de arriba y una nota para T-12d con lo que ya ofrece `HojaLateral` (el Examen usa la misma hoja para el contraargumento del Jefe).
+Dudas numeradas (D1, D2…), decisiones propias, las medidas tomadas y una nota para T-13 con lo que viste de pulido en tablet (foco, anuncios, la tarjeta que sale volando al confirmar en el juego, etc.).

@@ -79,7 +79,10 @@ class TarjetaContextoSprint extends StatelessWidget {
 /// 16 y separación 8; "TECLADO / SWITCH CONTROL" (Leyenda texto/secundario) y
 /// tres líneas en Cuerpo/Base texto/primario. Solo lectura.
 class TarjetaAtajos extends StatelessWidget {
-  const TarjetaAtajos({super.key});
+  const TarjetaAtajos({this.lineas = Textos.atajosLineas, super.key});
+
+  /// Las tres líneas (el Examen cambia la última por "P pausa · Esc…").
+  final List<String> lineas;
 
   @override
   Widget build(BuildContext context) {
@@ -101,10 +104,7 @@ class TarjetaAtajos extends StatelessWidget {
               Textos.atajosTitulo,
               style: estilos.leyenda.copyWith(color: tokens.textoSecundario),
             ),
-            for (final texto in Textos.atajosLineas) ...[
-              const SizedBox(height: 8),
-              Text(texto, style: linea),
-            ],
+            for (final texto in lineas) ...[const SizedBox(height: 8), Text(texto, style: linea)],
           ],
         ),
       ),

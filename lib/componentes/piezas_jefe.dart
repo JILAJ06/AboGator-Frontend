@@ -7,6 +7,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import '../datos/modelos/examen.dart';
+import 'hoja_lateral.dart';
 import 'icono_app.dart';
 import 'opcion_justificacion.dart';
 
@@ -466,7 +467,9 @@ class PanelContraargumento extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 34),
       decoration: BoxDecoration(
         color: tokens.fondoSuperficie,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        // En tablet (hoja lateral, T28b): las cuatro esquinas y borde de 1.
+        borderRadius: HojaLateral.radioDe(context, 28),
+        border: HojaLateral.bordeDe(context, tokens.bordeDefault),
         boxShadow: EfectosApp.sombraBuzon,
       ),
       child: Column(
@@ -557,6 +560,47 @@ class PanelContraargumento extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "El Jefe" del panel lateral del Examen en tablet (T28, Figma `101:5171`):
+/// fondo/superficie, borde 1, radio 20, relleno 20 y separación 12;
+/// "INSPECTORA VEGA · AUDITORÍA" (Leyenda texto/acento), la barra del Jefe y
+/// la regla (Cuerpo/Base texto/secundario).
+class TarjetaJefe extends StatelessWidget {
+  const TarjetaJefe({required this.hp, super.key});
+
+  final int hp;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final estilos = context.estilos;
+    return Container(
+      key: const ValueKey('tarjeta-jefe'),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: tokens.fondoSuperficie,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: tokens.bordeDefault),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            Textos.tarjetaJefeEtiqueta,
+            style: estilos.leyenda.copyWith(color: tokens.textoAcento),
+          ),
+          const SizedBox(height: 12),
+          BarraDelJefe(hp: hp),
+          const SizedBox(height: 12),
+          Text(
+            Textos.tarjetaJefeTexto,
+            style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
           ),
         ],
       ),

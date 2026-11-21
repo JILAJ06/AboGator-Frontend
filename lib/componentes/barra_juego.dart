@@ -92,6 +92,7 @@ class BarraJuegoTablet extends StatelessWidget {
     required this.monedas,
     required this.alSalir,
     required this.alPausar,
+    this.paso,
     super.key,
   });
 
@@ -106,12 +107,19 @@ class BarraJuegoTablet extends StatelessWidget {
   final int racha;
   final int monedas;
   final VoidCallback? alSalir;
+
+  /// Sin valor, no hay botón de pausa (el Examen solo pausa con tiempo
+  /// extendido).
   final VoidCallback? alPausar;
+
+  /// Texto del paso en lugar de "Sprint N · Tarjeta k de n" (el Examen).
+  final String? paso;
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final textoPaso = Textos.juegoPaso(numeroSprint, actual, total);
+    final textoPaso = paso ?? Textos.juegoPaso(numeroSprint, actual, total);
+    final pausar = alPausar;
     return ConstrainedBox(
       key: const ValueKey('barra-juego-tablet'),
       constraints: const BoxConstraints(minHeight: alto),
@@ -146,13 +154,15 @@ class BarraJuegoTablet extends StatelessWidget {
             runSpacing: 8,
             children: [ChipHud.racha(racha), ChipHud.monedas(monedas), ChipHud.vidas(vidas)],
           ),
-          const SizedBox(width: separacion),
-          _BotonCircular(
-            key: const ValueKey('boton-pausa'),
-            icono: IconosApp.pause,
-            etiqueta: Textos.pausa,
-            alPresionar: alPausar,
-          ),
+          if (pausar != null) ...[
+            const SizedBox(width: separacion),
+            _BotonCircular(
+              key: const ValueKey('boton-pausa'),
+              icono: IconosApp.pause,
+              etiqueta: Textos.pausa,
+              alPresionar: pausar,
+            ),
+          ],
         ],
       ),
     );

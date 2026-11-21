@@ -44,6 +44,10 @@ abstract final class EfectosApp {
   /// blanco al 6 % (0x0F) sobre el verde bosque fijo.
   static const Color circuloPanelMarca = Color(0x0FFFFFFF);
 
+  /// Halo detrás de la ilustración de la crisis en tablet (T27, Figma
+  /// 101:5881): blanco al 6 % sobre el panel `#162030`.
+  static const Color haloCrisis = Color(0x0FFFFFFF);
+
   /// Ícono sobre el color de un módulo: blanco fijo (los colores de módulo son
   /// de marca y no cambian con el modo).
   static const Color iconoSobreModulo = Color(0xFFFFFFFF);

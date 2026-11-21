@@ -11,13 +11,17 @@ import '../../componentes/barra_progreso.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_cerrar.dart';
+import '../../componentes/composicion_juego_tablet.dart';
 import '../../componentes/corazon_vida.dart';
+import '../../componentes/disposicion_resultado_tablet.dart';
 import '../../componentes/ilustracion_sarko.dart';
 import '../../componentes/mensaje_pantalla.dart';
+import '../../componentes/panel_lateral_juego.dart';
 import '../../componentes/piezas_apelacion.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/tarjeta_caso.dart';
 import '../../componentes/tinte_veredicto.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/modelos/apelacion.dart';
@@ -295,72 +299,70 @@ class _JuicioState extends ConsumerState<_Juicio> {
     final colorModulo = datos.colorModulo ?? tokens.textoAcento;
     final soloBotones = ref.watch(ajustesProvider.select((a) => a.soloBotones));
 
+    final barra = BarraJuicio(
+      actual: widget.actual,
+      total: widget.total,
+      vidas: datos.vidas,
+      alSalir: widget.alSalir,
+    );
+    final altoMinimoZona =
+        TarjetaCaso.altoMinimoPara(MediaQuery.textScalerOf(context), conAviso: true) +
+        MazoSwipe.altoPila;
+    final zonaTarjeta = Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned.fill(
+          child: MazoSwipe(
+            key: _mazo,
+            claveTarjeta: '${datos.apelacion.id}-$_intento',
+            restantes: 0,
+            arrastre: _arrastre,
+            etiquetaSemantica:
+                '${Textos.tarjetaApelacionSemantica(widget.actual, widget.total, tarjeta.personaje, tarjeta.rol, tarjeta.texto)} '
+                '${Textos.falladaHace(datos.diasDesdeFallo)}.',
+            alConfirmar: _alConfirmar,
+            arrastreActivo: !soloBotones,
+            tarjeta: TarjetaCaso(
+              soloBotones: soloBotones,
+              etiquetaCaso: LogicaApelacion.etiqueta(datos.apelacion.tema),
+              colorModulo: colorModulo,
+              iniciales: tarjeta.iniciales ?? LogicaInicio.iniciales(tarjeta.personaje),
+              personaje: tarjeta.personaje,
+              rol: tarjeta.rol,
+              texto: tarjeta.texto,
+              aviso: AvisoFallo(dias: datos.diasDesdeFallo),
+            ),
+          ),
+        ),
+      ],
+    );
+    final acciones = AccionesVeredicto(
+      alElegir: _resolviendo ? null : (v) => _mazo.currentState?.confirmar(v),
+    );
+    final nota = Text(
+      Textos.notaJuicio,
+      key: const ValueKey('nota-juicio'),
+      textAlign: TextAlign.center,
+      style: estilos.leyenda.copyWith(color: tokens.textoSecundario),
+    );
+
     final contenido = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        BarraJuicio(
-          actual: widget.actual,
-          total: widget.total,
-          vidas: datos.vidas,
-          alSalir: widget.alSalir,
-        ),
+        barra,
         const SizedBox(height: 12),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight:
-                    TarjetaCaso.altoMinimoPara(MediaQuery.textScalerOf(context), conAviso: true) +
-                    MazoSwipe.altoPila,
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned.fill(
-                    child: MazoSwipe(
-                      key: _mazo,
-                      claveTarjeta: '${datos.apelacion.id}-$_intento',
-                      restantes: 0,
-                      arrastre: _arrastre,
-                      etiquetaSemantica:
-                          '${Textos.tarjetaApelacionSemantica(widget.actual, widget.total, tarjeta.personaje, tarjeta.rol, tarjeta.texto)} '
-                          '${Textos.falladaHace(datos.diasDesdeFallo)}.',
-                      alConfirmar: _alConfirmar,
-                      arrastreActivo: !soloBotones,
-                      tarjeta: TarjetaCaso(
-                        soloBotones: soloBotones,
-                        etiquetaCaso: LogicaApelacion.etiqueta(datos.apelacion.tema),
-                        colorModulo: colorModulo,
-                        iniciales: tarjeta.iniciales ?? LogicaInicio.iniciales(tarjeta.personaje),
-                        personaje: tarjeta.personaje,
-                        rol: tarjeta.rol,
-                        texto: tarjeta.texto,
-                        aviso: AvisoFallo(dias: datos.diasDesdeFallo),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              constraints: BoxConstraints(minHeight: altoMinimoZona),
+              child: zonaTarjeta,
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: AccionesVeredicto(
-            alElegir: _resolviendo ? null : (v) => _mazo.currentState?.confirmar(v),
-          ),
-        ),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: acciones),
         const SizedBox(height: 18),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            Textos.notaJuicio,
-            key: const ValueKey('nota-juicio'),
-            textAlign: TextAlign.center,
-            style: estilos.leyenda.copyWith(color: tokens.textoSecundario),
-          ),
-        ),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 24), child: nota),
         const SizedBox(height: 16),
       ],
     );
@@ -380,17 +382,36 @@ class _JuicioState extends ConsumerState<_Juicio> {
               ),
             ),
           ),
-          SafeArea(
-            child: LayoutBuilder(
-              builder: (context, restricciones) => SingleChildScrollView(
-                key: const ValueKey('juicio-desplazable'),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: restricciones.maxHeight),
-                  child: IntrinsicHeight(child: contenido),
+          // T22 (Figma 100:4212): la composición del juego en tablet, con el
+          // contexto de la apelación y los atajos en el panel lateral.
+          if (context.clasePantalla.esAncho)
+            ComposicionJuegoTablet(
+              barra: barra,
+              zonaTarjeta: zonaTarjeta,
+              altoMinimoZona: altoMinimoZona,
+              acciones: acciones,
+              comodines: nota,
+              panel: [
+                TarjetaContextoSprint(
+                  etiqueta: Textos.contextoApelacion(datos.apelacion.diaRepaso),
+                  titulo: datos.apelacion.titulo,
+                  objetivo: Textos.contextoApelacionTexto(datos.diasDesdeFallo),
+                ),
+                const TarjetaAtajos(),
+              ],
+            )
+          else
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, restricciones) => SingleChildScrollView(
+                  key: const ValueKey('juicio-desplazable'),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: restricciones.maxHeight),
+                    child: IntrinsicHeight(child: contenido),
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -519,7 +540,84 @@ class _ResultadoState extends State<_Resultado> {
         : Textos.noPierdesVidas;
     final titulo = ganada ? Textos.apelacionGanadaTitulo : Textos.apelacionPerdidaTitulo;
 
+    final textoResultado = ElementoOrdenado(
+      orden: 4,
+      child: Text(
+        LogicaApelacion.texto(sesion.tarjeta!, resultado),
+        key: const ValueKey('texto-resultado'),
+        textAlign: TextAlign.center,
+        style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
+      ),
+    );
+    final repaso = ElementoOrdenado(
+      orden: 5,
+      child: FilaRepaso(
+        hechos: LogicaApelacion.hechos(sesion.apelacion!.diaRepaso, ganada: ganada),
+      ),
+    );
+    final tituloResultado = ElementoOrdenado(
+      orden: 1,
+      child: BloqueLectura(
+        key: const ValueKey('titulo-resultado-apelacion'),
+        encabezado: true,
+        enVivo: true,
+        autofocus: true,
+        radio: 8,
+        etiqueta: Textos.anuncioApelacion(titulo, insignia, despues),
+        excluirHijos: true,
+        nodoFoco: _focoTitulo,
+        child: Text(
+          titulo,
+          textAlign: TextAlign.center,
+          style: estilos.h1.copyWith(color: tokens.textoPrimario),
+        ),
+      ),
+    );
     return ColumnaFinSprint(
+      // T22b (Figma 100:4281): Sarko, las vidas y la insignia × 1.6 a la
+      // izquierda; título, texto, días de repaso y botones a la derecha.
+      ilustracionTablet: IlustracionAmpliada(
+        anchoBase: 240,
+        escala: 1.6,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IlustracionSarko(
+              pose: ganada ? PoseSarko.alegre : PoseSarko.triste,
+              diametro: 230,
+              anchoSarko: 184,
+              colorFondo: tokens.fondoDestacado,
+            ),
+            const SizedBox(height: 16),
+            ElementoOrdenado(
+              orden: 2,
+              child: FilaVidas(
+                key: const ValueKey('vidas-resultado'),
+                cantidad: despues,
+                tamano: 31.2,
+                hueco: 10.4,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ElementoOrdenado(
+              orden: 3,
+              child: InsigniaVida(
+                key: const ValueKey('insignia-resultado'),
+                texto: insignia,
+                destacada: recuperada,
+                grande: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+      contenidoTablet: [
+        tituloResultado,
+        const SizedBox(height: 16),
+        textoResultado,
+        const SizedBox(height: 16),
+        Center(child: repaso),
+      ],
       contenido: [
         const SizedBox(height: 20),
         IlustracionSarko(
@@ -549,41 +647,11 @@ class _ResultadoState extends State<_Resultado> {
           ),
         ),
         const SizedBox(height: 16),
-        ElementoOrdenado(
-          orden: 1,
-          child: BloqueLectura(
-            key: const ValueKey('titulo-resultado-apelacion'),
-            encabezado: true,
-            enVivo: true,
-            autofocus: true,
-            radio: 8,
-            etiqueta: Textos.anuncioApelacion(titulo, insignia, despues),
-            excluirHijos: true,
-            nodoFoco: _focoTitulo,
-            child: Text(
-              titulo,
-              textAlign: TextAlign.center,
-              style: estilos.h1.copyWith(color: tokens.textoPrimario),
-            ),
-          ),
-        ),
+        tituloResultado,
         const SizedBox(height: 8),
-        ElementoOrdenado(
-          orden: 4,
-          child: Text(
-            LogicaApelacion.texto(sesion.tarjeta!, resultado),
-            key: const ValueKey('texto-resultado'),
-            textAlign: TextAlign.center,
-            style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
-          ),
-        ),
+        textoResultado,
         const SizedBox(height: 18),
-        ElementoOrdenado(
-          orden: 5,
-          child: FilaRepaso(
-            hechos: LogicaApelacion.hechos(sesion.apelacion!.diaRepaso, ganada: ganada),
-          ),
-        ),
+        repaso,
       ],
       botones: [
         if (sesion.esUltima)

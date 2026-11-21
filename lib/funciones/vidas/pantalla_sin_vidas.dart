@@ -10,6 +10,7 @@ import '../../componentes/boton_app.dart';
 import '../../componentes/boton_cerrar.dart';
 import '../../componentes/corazon_vida.dart';
 import '../../componentes/cuenta_regresiva_vida.dart';
+import '../../componentes/disposicion_resultado_tablet.dart';
 import '../../componentes/icono_app.dart';
 import '../../componentes/ilustracion_sarko.dart';
 import '../../componentes/sarko_imagen.dart';
@@ -80,6 +81,60 @@ class _PantallaSinVidasState extends ConsumerState<PantallaSinVidas> {
       }
     });
 
+    final cerrar = ElementoOrdenado(orden: 5, child: BotonCerrar(alPresionar: _volverAlMapa));
+    final textos = <Widget>[
+      const ElementoOrdenado(orden: 1, child: TituloFinSprint(Textos.sinVidasTitulo)),
+      const SizedBox(height: 8),
+      ElementoOrdenado(
+        orden: 2,
+        child: Column(
+          children: [
+            Semantics(
+              liveRegion: recuperada,
+              child: Text(
+                recuperada ? Textos.vidaRecuperada : Textos.proximaVidaEn,
+                key: const ValueKey('estado-proxima-vida'),
+                textAlign: TextAlign.center,
+                style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
+              ),
+            ),
+            const SizedBox(height: 2),
+            // Si faltan más vidas, se muestra la siguiente cuenta; con 5 no.
+            if (falta != null && (!recuperada || cantidad < Vidas.maximo))
+              CuentaRegresivaVida(
+                // Cada respuesta del servidor empieza una cuenta nueva (aunque
+                // traiga el mismo tiempo).
+                key: ObjectKey(vidas),
+                falta: falta,
+                crearCronometro: widget.crearCronometro,
+                alTerminar: () => ref.invalidate(vidasActualesProvider),
+              ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconoApp(IconosApp.clock, tamano: 16, color: tokens.textoSecundario),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    Textos.notaVidasServidor,
+                    textAlign: TextAlign.center,
+                    style: estilos.leyenda.copyWith(color: tokens.textoSecundario),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ];
+    final sugerencia = apelaciones > 0
+        ? ElementoOrdenado(
+            orden: 3,
+            child: SugerenciaBuzon(pendientes: apelaciones, alIr: () => context.go(Rutas.buzon)),
+          )
+        : null;
+
     final contenido = Column(
       children: [
         const SizedBox(height: 6),
@@ -88,10 +143,7 @@ class _PantallaSinVidasState extends ConsumerState<PantallaSinVidas> {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: ElementoOrdenado(orden: 5, child: BotonCerrar(alPresionar: _volverAlMapa)),
-              ),
+              Align(alignment: Alignment.centerLeft, child: cerrar),
               // Corazones: vacíos sin vidas; se llenan si el servidor
               // devuelve alguna.
               FilaVidas(
@@ -111,62 +163,42 @@ class _PantallaSinVidasState extends ConsumerState<PantallaSinVidas> {
           colorFondo: tokens.fondoSuperficieAlt,
         ),
         const SizedBox(height: 16),
-        const ElementoOrdenado(orden: 1, child: TituloFinSprint(Textos.sinVidasTitulo)),
-        const SizedBox(height: 8),
-        ElementoOrdenado(
-          orden: 2,
-          child: Column(
-            children: [
-              Semantics(
-                liveRegion: recuperada,
-                child: Text(
-                  recuperada ? Textos.vidaRecuperada : Textos.proximaVidaEn,
-                  key: const ValueKey('estado-proxima-vida'),
-                  textAlign: TextAlign.center,
-                  style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
-                ),
-              ),
-              const SizedBox(height: 2),
-              // Si faltan más vidas, se muestra la siguiente cuenta; con 5 no.
-              if (falta != null && (!recuperada || cantidad < Vidas.maximo))
-                CuentaRegresivaVida(
-                  // Cada respuesta del servidor empieza una cuenta nueva (aunque
-                  // traiga el mismo tiempo).
-                  key: ObjectKey(vidas),
-                  falta: falta,
-                  crearCronometro: widget.crearCronometro,
-                  alTerminar: () => ref.invalidate(vidasActualesProvider),
-                ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconoApp(IconosApp.clock, tamano: 16, color: tokens.textoSecundario),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      Textos.notaVidasServidor,
-                      textAlign: TextAlign.center,
-                      style: estilos.leyenda.copyWith(color: tokens.textoSecundario),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        if (apelaciones > 0) ...[
-          const SizedBox(height: 30),
-          ElementoOrdenado(
-            orden: 3,
-            child: SugerenciaBuzon(pendientes: apelaciones, alIr: () => context.go(Rutas.buzon)),
-          ),
-        ],
+        ...textos,
+        if (sugerencia != null) ...[const SizedBox(height: 30), sugerencia],
       ],
     );
 
     return ColumnaFinSprint(
       contenido: [contenido],
+      // T20 (Figma 100:3887): corazones y Sarko triste × 1.7 en el panel
+      // izquierdo, Cerrar arriba a la izquierda y los textos a la derecha.
+      encabezadoTablet: cerrar,
+      ilustracionTablet: IlustracionAmpliada(
+        anchoBase: 230,
+        escala: 1.7,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FilaVidas(
+              key: const ValueKey('vidas-sin-vidas'),
+              cantidad: cantidad,
+              tamano: 31.2,
+              hueco: 10.4,
+            ),
+            const SizedBox(height: 18),
+            IlustracionSarko(
+              pose: PoseSarko.triste,
+              diametro: 220,
+              anchoSarko: 176,
+              colorFondo: tokens.fondoSuperficieAlt,
+            ),
+          ],
+        ),
+      ),
+      contenidoTablet: [
+        ...textos,
+        if (sugerencia != null) ...[const SizedBox(height: 16), sugerencia],
+      ],
       botones: [
         ElementoOrdenado(
           orden: 4,

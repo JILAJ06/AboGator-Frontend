@@ -407,6 +407,25 @@ abstract final class Textos {
   static const String hojaEvidencia = 'Evidencia';
   static const String hojaJustificacion = 'Justificación';
   static const String hojaAbogado = 'Abogado Senior';
+  static const String hojaContraargumento = 'Contraargumento de la Inspectora';
+  static const String tarjetaJefeEtiqueta = 'INSPECTORA VEGA · AUDITORÍA';
+  static const String tarjetaJefeTexto =
+      'Cada acierto le quita HP al Jefe. Si fallas, contraataca con un argumento legal que '
+      'debes refutar.';
+  static const List<String> atajosLineasExamen = [
+    '←  Ilegal        →  Legal',
+    '↑  Condicional   ↓  Escalar',
+    'P pausa · Esc cierra el panel',
+  ];
+
+  // Juicio y Buzón en tablet (T-12d)
+  static String contextoApelacion(int dia) => 'APELACIÓN · DÍA $dia';
+  static const String iniciarJuicio = 'Iniciar juicio';
+  static String proximoJuicio(int dia) => 'PRÓXIMO JUICIO · DÍA $dia';
+  static String juicioSeleccionado(String titulo) => 'Seleccionada: $titulo';
+  static String contextoApelacionTexto(int dias) =>
+      '${dias == 1 ? 'Fallaste esta tarjeta hace 1 día' : 'Fallaste esta tarjeta hace $dias días'}. '
+      'Si aciertas ahora recuperas 1 vida.';
   static const String cargandoJuego = 'Cargando el sprint';
   static const String juegoErrorCarga = 'No pudimos cargar las tarjetas del sprint.';
   static const String sprintSinTarjetas = 'Este sprint todavía no tiene tarjetas.';
