@@ -40,6 +40,10 @@ abstract final class EfectosApp {
   /// en ambos modos, como en Figma 07 y 07b).
   static const Color elipseHeroe = Color(0x14FFFFFF);
 
+  /// Círculo decorativo del panel de marca de tablet (T05 y T06, Figma 94:469):
+  /// blanco al 6 % (0x0F) sobre el verde bosque fijo.
+  static const Color circuloPanelMarca = Color(0x0FFFFFFF);
+
   /// Ícono sobre el color de un módulo: blanco fijo (los colores de módulo son
   /// de marca y no cambian con el modo).
   static const Color iconoSobreModulo = Color(0xFFFFFFFF);

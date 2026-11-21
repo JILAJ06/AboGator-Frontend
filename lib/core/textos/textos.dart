@@ -159,6 +159,12 @@ abstract final class Textos {
   // ---------------------------------------------------------------------
   static const String registroTitulo = 'Crea tu cuenta';
   static const String registroSubtitulo = 'Elige tu perfil para ajustar el ritmo de los sprints.';
+
+  // Panel de marca de tablet (T05 y T06)
+  static const String lemaUnaLinea = 'Educación en Legislación y Derecho Informático';
+  static const String registroPanelFrase = '«Más vale prevenir que litigar.»';
+  static const String registroPanelTexto =
+      'Crea tu perfil y Sarko ajustará la dificultad de cada sprint a tu experiencia.';
   static const String perfilEstudiante = 'Estudiante';
   static const String perfilDesarrollador = 'Desarrollador';
   static const String perfilLegal = 'Legal';
@@ -892,6 +898,7 @@ abstract final class Textos {
   static const String galeriaCampos = 'Campos de texto';
   static const String galeriaAcceso = 'Componentes de acceso';
   static const String galeriaInicio = 'Componentes del Inicio';
+  static const String galeriaTablet = 'Componentes de tablet (riel e Inicio)';
   static const String galeriaMapa = 'Componentes del mapa y la intro del sprint';
   static const String galeriaJuego = 'Componentes del juego';
   static const String galeriaVeredicto = 'Paneles de veredicto';
