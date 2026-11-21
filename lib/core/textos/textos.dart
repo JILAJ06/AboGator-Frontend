@@ -385,6 +385,28 @@ abstract final class Textos {
   static const String salirTitulo = '¿Salir del sprint?';
   static const String salirTexto = 'Perderás el avance de este sprint.';
   static const String seguirJugando = 'Seguir jugando';
+
+  // Juego en tablet (T-12c)
+  static const String pausa = 'Pausa';
+  static const String pausaTitulo = 'Juego en pausa';
+  static const String pausaTexto =
+      'Tus respuestas están guardadas. Sigue cuando quieras: este sprint no tiene reloj.';
+  static const String salirDelSprint = 'Salir del sprint';
+  static const String tuStartup = 'Tu Startup';
+  static const String notaIndicadores =
+      'Cada veredicto mueve los indicadores. Si el Riesgo legal llega a 100 % o el Presupuesto '
+      'a 0, la Startup quiebra.';
+  static String contextoSprint(int modulo, int sprint) => 'MÓDULO $modulo · SPRINT $sprint';
+  static const String atajosTitulo = 'TECLADO / SWITCH CONTROL';
+  static const List<String> atajosLineas = [
+    '←  Ilegal        →  Legal',
+    '↑  Condicional   ↓  Escalar',
+    'Enter confirma · Esc cierra el panel',
+  ];
+  static const String hojaRetroalimentacion = 'Retroalimentación';
+  static const String hojaEvidencia = 'Evidencia';
+  static const String hojaJustificacion = 'Justificación';
+  static const String hojaAbogado = 'Abogado Senior';
   static const String cargandoJuego = 'Cargando el sprint';
   static const String juegoErrorCarga = 'No pudimos cargar las tarjetas del sprint.';
   static const String sprintSinTarjetas = 'Este sprint todavía no tiene tarjetas.';
