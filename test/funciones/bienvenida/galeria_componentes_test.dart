@@ -20,6 +20,7 @@ import 'package:abogator/componentes/etiqueta_quiebra.dart';
 import 'package:abogator/componentes/fila_apelacion.dart';
 import 'package:abogator/componentes/fila_detalle_sprint.dart';
 import 'package:abogator/componentes/globo_sprint_actual.dart';
+import 'package:abogator/componentes/hoja_lateral.dart';
 import 'package:abogator/componentes/impacto_startup.dart';
 import 'package:abogator/componentes/indicador_pendientes.dart';
 import 'package:abogator/componentes/indicadores_startup.dart';
@@ -32,6 +33,7 @@ import 'package:abogator/componentes/opcion_justificacion.dart';
 import 'package:abogator/componentes/paginador_puntos.dart';
 import 'package:abogator/componentes/panel_evidencia.dart';
 import 'package:abogator/componentes/panel_justificacion.dart';
+import 'package:abogator/componentes/panel_lateral_juego.dart';
 import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/piezas_ajustes.dart';
 import 'package:abogator/componentes/piezas_apelacion.dart';
@@ -97,7 +99,12 @@ void main() {
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
     expect(find.byType(ChipHud), findsNWidgets(8)); // 5 + 2 encabezados + barra de juego
     expect(find.byType(FilaVidas), findsNWidgets(3));
-    expect(find.byType(IndicadoresStartup), findsOneWidget);
+    // + la de "Tu Startup" del juego en tablet (T-12c).
+    expect(find.byType(IndicadoresStartup), findsNWidgets(2));
+    expect(find.byType(TarjetaTuStartup), findsOneWidget);
+    expect(find.byType(TarjetaContextoSprint), findsOneWidget);
+    expect(find.byType(TarjetaAtajos), findsOneWidget);
+    expect(find.byType(HojaLateral), findsOneWidget);
     expect(find.byType(ImpactoStartup), findsNWidgets(6)); // 1 + 5 paneles
     expect(find.byType(BarraProgreso), findsNWidgets(6)); // 4 + barras de juego y juicio
     expect(find.byType(InsigniaVida), findsNWidgets(5)); // 4 + barra del juicio

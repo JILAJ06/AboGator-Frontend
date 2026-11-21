@@ -236,3 +236,8 @@ Figma: páginas "Tablet · Vistas" (`94:23`), "Tablet · Navegación" (`103:23`)
 ## Mapa + detalle en tablet (se construye en T-12b)
 Figma: T08 = `96:582`; Tienda T24 = `101:4306`, Perfil T25 = `101:4553`, Ajustes T26 = `101:4759`. Medidas en `ai/siguiente.md` de la T-12b.
 - **Lista-detalle del mapa (ancho ≥ 960):** panel izquierdo de 596 (encabezado del módulo de 134 y camino de sprints × 1.12 centrado) y panel derecho de 494 (`fondoSuperficie`, borde izquierdo 1) con la ilustración, etiqueta, título, objetivo, tarjeta de detalles y "Comenzar sprint". El detalle es el mismo widget de la intro móvil.
+
+## Juego en tablet (se construye en T-12c)
+Figma: T10 = `97:772`; resto de vistas del juego en "Tablet · Vistas" (sección T3 y T3b). Medidas en `ai/siguiente.md` de la T-12c.
+- **Zona de juego + panel lateral (ancho ≥ 960):** barra de juego de 64 (salir, progreso de 12, HUD y pausa), tarjeta de 380 × 470 con pila de dos, botones de veredicto de 68 y comodines a la izquierda; a la derecha una columna de 376 con "Tu Startup", contexto del sprint y atajos de teclado.
+- **`HojaLateral`:** contenedor de 376 a la derecha (borde 1, radio 28, agarre de 40 × 5) que aloja los paneles de veredicto, evidencia, justificación, Abogado y bonus con el velo al 40 %.

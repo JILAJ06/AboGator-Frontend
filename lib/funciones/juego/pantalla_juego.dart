@@ -15,6 +15,7 @@ import '../../componentes/barra_juego.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/etiqueta_lupa.dart';
+import '../../componentes/hoja_lateral.dart';
 import '../../componentes/indicador_pendientes.dart';
 import '../../componentes/indicadores_startup.dart';
 import '../../componentes/interruptor_conexion_debug.dart';
@@ -22,9 +23,11 @@ import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/panel_abogado.dart';
 import '../../componentes/panel_evidencia.dart';
 import '../../componentes/panel_justificacion.dart';
+import '../../componentes/panel_lateral_juego.dart';
 import '../../componentes/panel_veredicto.dart';
 import '../../componentes/tarjeta_caso.dart';
 import '../../componentes/tinte_veredicto.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
@@ -33,6 +36,7 @@ import '../../datos/modelos/tarjeta.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
 import '../../datos/sincronizacion/estado_sincronizacion.dart';
 import '../../datos/sincronizacion/servicio_conexion.dart';
+import '../acceso/sesion.dart';
 import '../ajustes/estado_ajustes.dart';
 import '../inicio/logica_inicio.dart';
 import '../vidas/pantalla_sin_vidas.dart';
@@ -158,6 +162,7 @@ class _JuegoState extends ConsumerState<_Juego> {
     final alto = MediaQuery.sizeOf(context).height;
     await _mostrarPanel<void>(
       descartable: true,
+      etiqueta: Textos.hojaAbogado,
       constructor: (contexto) => ConstrainedBox(
         constraints: BoxConstraints(maxHeight: alto * 0.92),
         child: PanelAbogado(
@@ -186,11 +191,37 @@ class _JuegoState extends ConsumerState<_Juego> {
   /// atrás, Esc ni tocando fuera.
   Future<T?> _mostrarPanel<T>({
     required bool descartable,
+    required String etiqueta,
     required Widget Function(BuildContext contexto) constructor,
   }) async {
     final sinAnimaciones = MediaQuery.disableAnimationsOf(context);
+    final clase = context.clasePantalla;
     _panelAbierto.value = true;
     try {
+      // Tablet horizontal (T-12c): hoja lateral de 376 que entra desde la
+      // derecha, con el mismo velo y la misma duración.
+      if (clase.esAncho) {
+        return await showGeneralDialog<T>(
+          context: context,
+          barrierDismissible: descartable,
+          barrierLabel: Textos.cerrar,
+          barrierColor: EfectosApp.colorVelo,
+          transitionDuration: sinAnimaciones ? Duration.zero : EfectosApp.duracionPanel,
+          pageBuilder: (contexto, _, _) => HojaLateral(
+            etiqueta: etiqueta,
+            child: descartable
+                ? constructor(contexto)
+                : PopScope(canPop: false, child: constructor(contexto)),
+          ),
+          transitionBuilder: (contexto, animacion, _, hijo) => SlideTransition(
+            position: Tween(
+              begin: const Offset(1, 0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: animacion, curve: Curves.easeOut)),
+            child: hijo,
+          ),
+        );
+      }
       return await showModalBottomSheet<T>(
         context: context,
         isDismissible: descartable,
@@ -199,6 +230,10 @@ class _JuegoState extends ConsumerState<_Juego> {
         backgroundColor: const Color(0x00000000),
         elevation: 0,
         barrierColor: EfectosApp.colorVelo,
+        // Entre 600 y 959 la hoja inferior no pasa de 440 y va centrada.
+        constraints: clase.esTablet
+            ? const BoxConstraints(maxWidth: anchoHojaTabletVertical)
+            : null,
         sheetAnimationStyle: sinAnimaciones
             ? AnimationStyle.noAnimation
             : const AnimationStyle(
@@ -224,6 +259,7 @@ class _JuegoState extends ConsumerState<_Juego> {
     final alto = MediaQuery.sizeOf(context).height;
     await _mostrarPanel<void>(
       descartable: true,
+      etiqueta: Textos.hojaEvidencia,
       constructor: (contexto) => Consumer(
         builder: (contexto, ref, _) {
           final marcadas = ref.watch(
@@ -258,6 +294,7 @@ class _JuegoState extends ConsumerState<_Juego> {
       final alto = MediaQuery.sizeOf(context).height;
       justificacion = await _mostrarPanel<int>(
         descartable: false,
+        etiqueta: Textos.hojaJustificacion,
         constructor: (contexto) => ConstrainedBox(
           constraints: BoxConstraints(maxHeight: alto * 0.92),
           child: PanelJustificacion(
@@ -273,6 +310,7 @@ class _JuegoState extends ConsumerState<_Juego> {
     _vibrar(resultado.tipo);
     await _mostrarPanel<void>(
       descartable: false,
+      etiqueta: Textos.hojaRetroalimentacion,
       constructor: (contexto) =>
           _PanelDelJuego(sprintId: widget.sprintId, alCerrar: () => Navigator.of(contexto).pop()),
     );
@@ -314,6 +352,16 @@ class _JuegoState extends ConsumerState<_Juego> {
     if (salir == true && mounted) {
       PantallaJuego.volver(context, widget.datos.modulo?.id);
     }
+  }
+
+  /// Pausa (tablet): el sprint no tiene reloj, así que no detiene nada; deja
+  /// seguir o salir (con la misma confirmación de Salir).
+  Future<void> _pausar() async {
+    final salir = await showDialog<bool>(
+      context: context,
+      builder: (context) => const _DialogoPausa(),
+    );
+    if (salir == true && mounted) await _salir();
   }
 
   /// Flechas: previsualizan. Enter: confirma la previsualización. Esc: la
@@ -369,6 +417,165 @@ class _JuegoState extends ConsumerState<_Juego> {
         ? () => _abrirEvidencia(tarjeta)
         : null;
 
+    final clase = context.clasePantalla;
+    final cambios = progreso.panel == null
+        ? const <IndicadorStartup, int>{}
+        : cambiosDe(progreso.panel!.resultado.impacto);
+
+    final zonaTarjeta = Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned.fill(
+          child: MazoSwipe(
+            key: _mazo,
+            claveTarjeta: tarjeta.id,
+            restantes: total - indice - 1,
+            arrastre: _arrastre,
+            etiquetaSemantica: Textos.tarjetaConTipoSemantica(
+              Textos.tarjetaSemantica(
+                indice + 1,
+                total,
+                tarjeta.personaje,
+                tarjeta.rol,
+                lupaUsada
+                    ? '${tarjeta.texto} '
+                          '(${Textos.palabrasTrampaSemantica(tarjeta.palabrasTrampa)})'
+                    : tarjeta.texto,
+              ),
+              switch (tarjeta.tipo) {
+                TipoTarjeta.normal => null,
+                TipoTarjeta.evidencia =>
+                  progreso.evidenciaMarcada.containsKey(tarjeta.id)
+                      ? Textos.evidenciaInspeccionadaSemantica
+                      : Textos.conEvidenciaSemantica,
+                TipoTarjeta.justificacion => Textos.dilemaSemantica,
+              },
+            ),
+            alConfirmar: (v) => _alConfirmar(tarjeta, v),
+            alInspeccionar: inspeccionar,
+            arrastreActivo: !soloBotones,
+            tarjeta: TarjetaCaso(
+              soloBotones: soloBotones,
+              etiquetaCaso: tarjeta.etiquetaCaso,
+              colorModulo: colorModulo,
+              iniciales: tarjeta.iniciales ?? LogicaInicio.iniciales(tarjeta.personaje),
+              personaje: tarjeta.personaje,
+              rol: tarjeta.rol,
+              texto: tarjeta.texto,
+              tipo: tarjeta.tipo,
+              alInspeccionar: inspeccionar,
+              nodoFocoEvidencia: _focoEvidencia,
+              palabrasTrampa: lupaUsada ? tarjeta.palabrasTrampa : const [],
+            ),
+          ),
+        ),
+        // Etiqueta de la Lupa (10b): sobre el borde de la tarjeta, solo
+        // mientras dura la tarjeta en la que se usó.
+        if (lupaUsada)
+          Positioned(
+            left: EtiquetaLupa.posicion.dx,
+            top: EtiquetaLupa.posicion.dy,
+            right: 0,
+            child: const Align(alignment: Alignment.topLeft, child: EtiquetaLupa()),
+          ),
+        // Aviso de conexión (23): encima del borde superior de la tarjeta, sin
+        // empujarla ni bloquear el arrastre.
+        Positioned(
+          left: 0,
+          right: 0,
+          top: posicionAvisoConexion,
+          child: AnimatedSwitcher(
+            duration: sinAnimaciones ? Duration.zero : EfectosApp.duracionPanel,
+            child: verAviso
+                ? AvisoConexion(key: ValueKey(sinConexion), restablecida: !sinConexion)
+                : const SizedBox.shrink(),
+          ),
+        ),
+      ],
+    );
+    final altoMinimoZona =
+        TarjetaCaso.altoMinimoPara(MediaQuery.textScalerOf(context), tipo: tarjeta.tipo) +
+        MazoSwipe.altoPila;
+    final acciones = AccionesVeredicto(alElegir: (v) => _mazo.currentState?.confirmar(v));
+    final Widget comodines;
+    if (sinConexion || pendientes > 0) {
+      comodines = ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: BarraComodines.alto),
+        child: Center(child: IndicadorPendientes(cantidad: pendientes)),
+      );
+    } else {
+      comodines = Semantics(
+        container: true,
+        label: Textos.comodinesTitulo,
+        child: ValueListenableBuilder<bool>(
+          valueListenable: _panelAbierto,
+          builder: (context, panelAbierto, _) {
+            final abierto = panelAbierto || progreso.panel != null;
+            final lupa = LogicaComodines.estadoLupa(progreso, tarjeta, panelAbierto: abierto);
+            final abogado = LogicaComodines.estadoAbogado(progreso, tarjeta, panelAbierto: abierto);
+            final amparo = LogicaComodines.estadoAmparo(progreso, panelAbierto: abierto);
+            bool tocable(Comodin c, EstadoComodin e) =>
+                LogicaComodines.tocable(c, e, panelAbierto: abierto);
+            return BarraComodines(
+              lupa: progreso.cantidad(Comodin.lupaAuditor),
+              abogado: progreso.cantidad(Comodin.abogadoSenior),
+              amparo: progreso.cantidad(Comodin.amparo),
+              estadoLupa: lupa,
+              estadoAbogado: abogado,
+              estadoAmparo: amparo,
+              alUsarLupa: tocable(Comodin.lupaAuditor, lupa) ? () => _usarLupa(tarjeta) : null,
+              alUsarAbogado: tocable(Comodin.abogadoSenior, abogado)
+                  ? () => _usarAbogado(tarjeta)
+                  : null,
+              alUsarAmparo: tocable(Comodin.amparo, amparo) ? _usarAmparo : null,
+              nodoFocoAbogado: _focoAbogado,
+            );
+          },
+        ),
+      );
+    }
+    // Solo en depuración: la única forma de ver el estado 23 sin backend.
+    final interruptorDebug = kDebugMode && ref.read(servicioConexionProvider) is ConexionSimulada
+        ? InterruptorConexionDebug(
+            sinConexion: sinConexion,
+            alCambiar: (sin) => (ref.read(servicioConexionProvider) as ConexionSimulada).establecer(
+              sin ? EstadoConexion.sinConexion : EstadoConexion.enLinea,
+            ),
+          )
+        : null;
+
+    if (clase.esAncho) {
+      return _envolver(
+        _JuegoTablet(
+          barra: BarraJuegoTablet(
+            numeroSprint: datos.numeroSprint,
+            actual: indice + 1,
+            total: total,
+            vidas: progreso.vidas,
+            racha: ref.watch(sesionProvider)?.racha ?? 0,
+            // Saldo al empezar más lo ganado en el sprint.
+            monedas: (ref.watch(saldoJuegoProvider).value ?? 0) + progreso.monedas,
+            alSalir: _salir,
+            alPausar: _pausar,
+          ),
+          zonaTarjeta: zonaTarjeta,
+          altoMinimoZona: altoMinimoZona,
+          acciones: acciones,
+          comodines: comodines,
+          interruptorDebug: interruptorDebug,
+          panel: [
+            TarjetaTuStartup(estado: progreso.estadoStartup, cambios: cambios),
+            TarjetaContextoSprint(
+              etiqueta: Textos.contextoSprint(datos.modulo?.numero ?? 1, datos.numeroSprint),
+              titulo: datos.sprint?.tituloIntro ?? datos.sprint?.titulo ?? '',
+              objetivo: LogicaJuegoTablet.objetivo(datos.sprint?.objetivo ?? ''),
+            ),
+            const TarjetaAtajos(),
+          ],
+        ),
+      );
+    }
+
     final contenido = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -384,12 +591,7 @@ class _JuegoState extends ConsumerState<_Juego> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: BloqueLectura(
             etiqueta: Textos.indicadoresSemantica,
-            child: IndicadoresStartup(
-              estado: progreso.estadoStartup,
-              cambios: progreso.panel == null
-                  ? const {}
-                  : cambiosDe(progreso.panel!.resultado.impacto),
-            ),
+            child: IndicadoresStartup(estado: progreso.estadoStartup, cambios: cambios),
           ),
         ),
         const SizedBox(height: 12),
@@ -397,184 +599,312 @@ class _JuegoState extends ConsumerState<_Juego> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight:
-                    TarjetaCaso.altoMinimoPara(
-                      MediaQuery.textScalerOf(context),
-                      tipo: tarjeta.tipo,
-                    ) +
-                    MazoSwipe.altoPila,
-              ),
+              constraints: BoxConstraints(minHeight: altoMinimoZona),
               // Solo hijos posicionados: la zona no aporta alto intrínseco y
               // se estira o encoge con la pantalla.
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned.fill(
-                    child: MazoSwipe(
-                      key: _mazo,
-                      claveTarjeta: tarjeta.id,
-                      restantes: total - indice - 1,
-                      arrastre: _arrastre,
-                      etiquetaSemantica: Textos.tarjetaConTipoSemantica(
-                        Textos.tarjetaSemantica(
-                          indice + 1,
-                          total,
-                          tarjeta.personaje,
-                          tarjeta.rol,
-                          lupaUsada
-                              ? '${tarjeta.texto} '
-                                    '(${Textos.palabrasTrampaSemantica(tarjeta.palabrasTrampa)})'
-                              : tarjeta.texto,
+              child: zonaTarjeta,
+            ),
+          ),
+        ),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: acciones),
+        const SizedBox(height: 22),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: comodines),
+        if (interruptorDebug != null) ...[const SizedBox(height: 8), interruptorDebug],
+        const SizedBox(height: 16),
+      ],
+    );
+
+    return _envolver(
+      SafeArea(
+        child: LayoutBuilder(
+          builder: (context, restricciones) => SingleChildScrollView(
+            key: const ValueKey('juego-desplazable'),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: restricciones.maxHeight),
+              // Entre 600 y 959 el juego del móvil va centrado con ancho máximo.
+              child: IntrinsicHeight(
+                child: clase.esTablet
+                    ? Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: anchoJuegoTabletVertical),
+                          child: contenido,
                         ),
-                        switch (tarjeta.tipo) {
-                          TipoTarjeta.normal => null,
-                          TipoTarjeta.evidencia =>
-                            progreso.evidenciaMarcada.containsKey(tarjeta.id)
-                                ? Textos.evidenciaInspeccionadaSemantica
-                                : Textos.conEvidenciaSemantica,
-                          TipoTarjeta.justificacion => Textos.dilemaSemantica,
-                        },
+                      )
+                    : contenido,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Teclado y tinte de pantalla completa (detrás de la tarjeta y delante del
+  /// fondo), en móvil y en tablet.
+  Widget _envolver(Widget cuerpo) => Focus(
+    autofocus: true,
+    skipTraversal: true,
+    onKeyEvent: _alTeclear,
+    child: Stack(
+      children: [
+        Positioned.fill(
+          child: ValueListenableBuilder<ArrastreVisible>(
+            valueListenable: _arrastre,
+            builder: (context, arrastre, _) => TinteVeredicto(
+              veredicto: arrastre.veredicto,
+              opacidad: arrastre.progreso * LogicaSwipe.opacidadTinte,
+            ),
+          ),
+        ),
+        cuerpo,
+      ],
+    ),
+  );
+}
+
+/// Ancho máximo de la hoja inferior entre 600 y 959 (como los diálogos).
+const double anchoHojaTabletVertical = 440;
+
+/// Ancho máximo del juego del móvil entre 600 y 959.
+const double anchoJuegoTabletVertical = 440;
+
+/// Saldo de monedas al abrir el juego (HUD de tablet; T-12c).
+final saldoJuegoProvider = FutureProvider.autoDispose<int>(
+  (ref) => ref.watch(repositorioTiendaProvider).obtenerMonedas(),
+);
+
+/// Reglas de presentación del juego en tablet (sin estado).
+abstract final class LogicaJuegoTablet {
+  /// El objetivo del sprint con la primera letra en mayúscula (los objetivos
+  /// se guardan en minúscula porque la intro antepone "Objetivo: ").
+  static String objetivo(String texto) {
+    final t = texto.trim();
+    if (t.isEmpty) return t;
+    return t[0].toUpperCase() + t.substring(1);
+  }
+}
+
+/// Composición del juego en tablet horizontal (T10, Figma `97:772`), sin riel:
+/// barra de 64 arriba (x 24, y 8); a la izquierda (de 24 a ventana − 424) la
+/// tarjeta de 380 × 470 centrada con su pila, los botones de veredicto y los
+/// comodines; a la derecha el panel lateral de 376 (margen 24) con "Tu
+/// Startup", el contexto del sprint y los atajos. Con texto grande el panel
+/// pasa debajo y todo se desplaza en una columna.
+class _JuegoTablet extends StatelessWidget {
+  const _JuegoTablet({
+    required this.barra,
+    required this.zonaTarjeta,
+    required this.altoMinimoZona,
+    required this.acciones,
+    required this.comodines,
+    required this.panel,
+    this.interruptorDebug,
+  });
+
+  static const double anchoTarjeta = 380;
+
+  /// Tarjeta de 470 más los 20 de la pila.
+  static const double altoZona = 470 + MazoSwipe.altoPila;
+
+  static const double margen = 24;
+  static const double arribaBarra = 8;
+
+  /// De la barra a la tarjeta (Figma: 108 − 72).
+  static const double bajoBarra = 36;
+  static const double bajoAcciones = 16;
+  static const double separacionPanel = 16;
+  static const double abajo = 24;
+
+  final Widget barra;
+  final Widget zonaTarjeta;
+  final double altoMinimoZona;
+  final Widget acciones;
+  final Widget comodines;
+  final List<Widget> panel;
+  final Widget? interruptorDebug;
+
+  @override
+  Widget build(BuildContext context) {
+    final textoGrande = MediaQuery.textScalerOf(context).scale(1) > 1.5;
+    final columnaPanel = Column(
+      key: const ValueKey('panel-lateral-juego'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (i, p) in panel.indexed) ...[
+          if (i > 0) const SizedBox(height: separacionPanel),
+          p,
+        ],
+      ],
+    );
+    final debug = interruptorDebug;
+
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, restricciones) {
+          Widget zona(double alto) => Center(
+            child: SizedBox(
+              key: const ValueKey('zona-tarjeta-tablet'),
+              width: anchoTarjeta,
+              height: alto,
+              child: zonaTarjeta,
+            ),
+          );
+          final cabeza = Padding(
+            padding: const EdgeInsets.fromLTRB(margen, arribaBarra, margen, 0),
+            child: barra,
+          );
+          final bajo = <Widget>[
+            Center(child: acciones),
+            const SizedBox(height: bajoAcciones),
+            Center(child: comodines),
+            if (debug != null) ...[const SizedBox(height: 8), Center(child: debug)],
+          ];
+
+          if (textoGrande) {
+            // Una columna que se desplaza: la zona de juego y, debajo, el panel.
+            return SingleChildScrollView(
+              key: const ValueKey('juego-desplazable'),
+              padding: const EdgeInsets.only(bottom: abajo),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  cabeza,
+                  const SizedBox(height: bajoBarra),
+                  zona(altoZona > altoMinimoZona ? altoZona : altoMinimoZona),
+                  ...bajo,
+                  const SizedBox(height: abajo),
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: MedidasAdaptativas.contenidoUnaColumna,
                       ),
-                      alConfirmar: (v) => _alConfirmar(tarjeta, v),
-                      alInspeccionar: inspeccionar,
-                      arrastreActivo: !soloBotones,
-                      tarjeta: TarjetaCaso(
-                        soloBotones: soloBotones,
-                        etiquetaCaso: tarjeta.etiquetaCaso,
-                        colorModulo: colorModulo,
-                        iniciales: tarjeta.iniciales ?? LogicaInicio.iniciales(tarjeta.personaje),
-                        personaje: tarjeta.personaje,
-                        rol: tarjeta.rol,
-                        texto: tarjeta.texto,
-                        tipo: tarjeta.tipo,
-                        alInspeccionar: inspeccionar,
-                        nodoFocoEvidencia: _focoEvidencia,
-                        palabrasTrampa: lupaUsada ? tarjeta.palabrasTrampa : const [],
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: margen),
+                        child: columnaPanel,
                       ),
                     ),
                   ),
-                  // Etiqueta de la Lupa (10b): sobre el borde de la tarjeta,
-                  // solo mientras dura la tarjeta en la que se usó.
-                  if (lupaUsada)
-                    Positioned(
-                      left: EtiquetaLupa.posicion.dx,
-                      top: EtiquetaLupa.posicion.dy,
-                      right: 0,
-                      child: const Align(alignment: Alignment.topLeft, child: EtiquetaLupa()),
-                    ),
-                  // Aviso de conexión (23): encima del borde superior de la
-                  // tarjeta, sin empujarla ni bloquear el arrastre.
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    top: posicionAvisoConexion,
-                    child: AnimatedSwitcher(
-                      duration: sinAnimaciones ? Duration.zero : EfectosApp.duracionPanel,
-                      child: verAviso
-                          ? AvisoConexion(key: ValueKey(sinConexion), restablecida: !sinConexion)
-                          : const SizedBox.shrink(),
+                ],
+              ),
+            );
+          }
+
+          // Alto de la zona: el de Figma si cabe; si no, se encoge hasta el
+          // mínimo del móvil y la pantalla se desplaza si aun así no cabe.
+          const fijo =
+              arribaBarra +
+              BarraJuegoTablet.alto +
+              bajoBarra +
+              90 +
+              bajoAcciones +
+              BarraComodines.alto +
+              abajo;
+          final disponible = restricciones.maxHeight - fijo;
+          final altoTarjeta = disponible.clamp(altoMinimoZona, altoZona);
+          final altoTotal = fijo + altoTarjeta > restricciones.maxHeight
+              ? fijo + altoTarjeta
+              : restricciones.maxHeight;
+
+          return SingleChildScrollView(
+            key: const ValueKey('juego-desplazable'),
+            child: SizedBox(
+              height: altoTotal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  cabeza,
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(width: margen),
+                        Expanded(
+                          child: Column(
+                            key: const ValueKey('zona-juego-tablet'),
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: bajoBarra),
+                              zona(altoTarjeta),
+                              ...bajo,
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: margen),
+                        SizedBox(
+                          width: MedidasAdaptativas.hojaLateral,
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.only(top: margen, bottom: abajo),
+                            child: columnaPanel,
+                          ),
+                        ),
+                        const SizedBox(width: margen),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: AccionesVeredicto(alElegir: (v) => _mazo.currentState?.confirmar(v)),
-        ),
-        const SizedBox(height: 22),
-        if (sinConexion || pendientes > 0)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: BarraComodines.alto),
-              child: Center(child: IndicadorPendientes(cantidad: pendientes)),
-            ),
-          )
-        else
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Semantics(
-              container: true,
-              label: Textos.comodinesTitulo,
-              child: ValueListenableBuilder<bool>(
-                valueListenable: _panelAbierto,
-                builder: (context, panelAbierto, _) {
-                  final abierto = panelAbierto || progreso.panel != null;
-                  final lupa = LogicaComodines.estadoLupa(progreso, tarjeta, panelAbierto: abierto);
-                  final abogado = LogicaComodines.estadoAbogado(
-                    progreso,
-                    tarjeta,
-                    panelAbierto: abierto,
-                  );
-                  final amparo = LogicaComodines.estadoAmparo(progreso, panelAbierto: abierto);
-                  bool tocable(Comodin c, EstadoComodin e) =>
-                      LogicaComodines.tocable(c, e, panelAbierto: abierto);
-                  return BarraComodines(
-                    lupa: progreso.cantidad(Comodin.lupaAuditor),
-                    abogado: progreso.cantidad(Comodin.abogadoSenior),
-                    amparo: progreso.cantidad(Comodin.amparo),
-                    estadoLupa: lupa,
-                    estadoAbogado: abogado,
-                    estadoAmparo: amparo,
-                    alUsarLupa: tocable(Comodin.lupaAuditor, lupa)
-                        ? () => _usarLupa(tarjeta)
-                        : null,
-                    alUsarAbogado: tocable(Comodin.abogadoSenior, abogado)
-                        ? () => _usarAbogado(tarjeta)
-                        : null,
-                    alUsarAmparo: tocable(Comodin.amparo, amparo) ? _usarAmparo : null,
-                    nodoFocoAbogado: _focoAbogado,
-                  );
-                },
-              ),
-            ),
-          ),
-        // Solo en depuración: la única forma de ver el estado 23 sin backend.
-        if (kDebugMode && ref.read(servicioConexionProvider) is ConexionSimulada) ...[
-          const SizedBox(height: 8),
-          InterruptorConexionDebug(
-            sinConexion: sinConexion,
-            alCambiar: (sin) => (ref.read(servicioConexionProvider) as ConexionSimulada).establecer(
-              sin ? EstadoConexion.sinConexion : EstadoConexion.enLinea,
-            ),
-          ),
-        ],
-        const SizedBox(height: 16),
-      ],
+          );
+        },
+      ),
     );
+  }
+}
 
-    return Focus(
-      autofocus: true,
-      skipTraversal: true,
-      onKeyEvent: _alTeclear,
-      child: Stack(
-        children: [
-          // Tinte de pantalla completa: detrás de la tarjeta y delante del fondo.
-          Positioned.fill(
-            child: ValueListenableBuilder<ArrastreVisible>(
-              valueListenable: _arrastre,
-              builder: (context, arrastre, _) => TinteVeredicto(
-                veredicto: arrastre.veredicto,
-                opacidad: arrastre.progreso * LogicaSwipe.opacidadTinte,
-              ),
-            ),
-          ),
-          SafeArea(
-            child: LayoutBuilder(
-              builder: (context, restricciones) => SingleChildScrollView(
-                key: const ValueKey('juego-desplazable'),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: restricciones.maxHeight),
-                  child: IntrinsicHeight(child: contenido),
+/// "Juego en pausa" (tablet): centrado, hasta 440 de ancho. "Seguir jugando"
+/// cierra; "Salir del sprint" devuelve `true` y abre la confirmación de Salir.
+class _DialogoPausa extends StatelessWidget {
+  const _DialogoPausa();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final estilos = context.estilos;
+    return Dialog(
+      key: const ValueKey('dialogo-pausa'),
+      backgroundColor: tokens.fondoSuperficie,
+      surfaceTintColor: const Color(0x00000000),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: anchoHojaTabletVertical),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              BloqueLectura(
+                encabezado: true,
+                autofocus: true,
+                radio: 8,
+                child: Text(
+                  Textos.pausaTitulo,
+                  style: estilos.h2.copyWith(color: tokens.textoPrimario),
                 ),
               ),
-            ),
+              const SizedBox(height: 8),
+              Text(
+                Textos.pausaTexto,
+                style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
+              ),
+              const SizedBox(height: 20),
+              BotonApp(
+                key: const ValueKey('boton-seguir-jugando'),
+                texto: Textos.seguirJugando,
+                altoMinimo: 48,
+                alPresionar: () => Navigator.of(context).pop(false),
+              ),
+              const SizedBox(height: 8),
+              BotonApp(
+                key: const ValueKey('boton-salir-sprint'),
+                texto: Textos.salirDelSprint,
+                tipo: TipoBoton.fantasma,
+                altoMinimo: 48,
+                alPresionar: () => Navigator.of(context).pop(true),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

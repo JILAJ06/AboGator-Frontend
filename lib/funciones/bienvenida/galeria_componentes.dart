@@ -29,6 +29,7 @@ import '../../componentes/etiqueta_quiebra.dart';
 import '../../componentes/fila_apelacion.dart';
 import '../../componentes/fila_detalle_sprint.dart';
 import '../../componentes/globo_sprint_actual.dart';
+import '../../componentes/hoja_lateral.dart';
 import '../../componentes/icono_app.dart';
 import '../../componentes/impacto_startup.dart';
 import '../../componentes/indicador_pendientes.dart';
@@ -43,6 +44,7 @@ import '../../componentes/paginador_puntos.dart';
 import '../../componentes/panel_abogado.dart';
 import '../../componentes/panel_evidencia.dart';
 import '../../componentes/panel_justificacion.dart';
+import '../../componentes/panel_lateral_juego.dart';
 import '../../componentes/panel_veredicto.dart';
 import '../../componentes/piezas_ajustes.dart';
 import '../../componentes/piezas_apelacion.dart';
@@ -270,6 +272,29 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                   ],
                 ),
                 const VistaPreviaTexto(porcentaje: 120),
+                const TarjetaTuStartup(
+                  estado: EstadoStartup(
+                    presupuesto: 70,
+                    reputacion: 60,
+                    velocidad: 50,
+                    riesgoLegal: 25,
+                  ),
+                ),
+                const TarjetaContextoSprint(
+                  etiqueta: 'MÓDULO 1 · SPRINT 3',
+                  titulo: 'Aviso de privacidad en el MVP',
+                  objetivo: 'Revisa licencias, datos personales y avisos antes del lanzamiento.',
+                ),
+                const TarjetaAtajos(),
+                SizedBox(
+                  height: 220,
+                  child: HojaLateral(
+                    etiqueta: Textos.hojaRetroalimentacion,
+                    child: ContenedorPanelModal(
+                      hijos: [Text(Textos.hojaRetroalimentacion, style: context.estilos.h3)],
+                    ),
+                  ),
+                ),
                 NodoSprint(
                   tipo: TipoNodoSprint.completado,
                   estrellas: 3,

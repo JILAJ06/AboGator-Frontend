@@ -6,6 +6,7 @@ import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'bloque_lectura.dart';
 import 'boton_app.dart';
+import 'hoja_lateral.dart';
 import 'icono_app.dart';
 import 'snippet_codigo.dart';
 
@@ -29,12 +30,14 @@ class ContenedorPanelModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final abajo = 34 + MediaQuery.paddingOf(context).bottom;
+    final abajo = HojaLateral.rellenoInferior(context);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: tokens.fondoSuperficie,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(radio)),
+        // En tablet (hoja lateral): las cuatro esquinas y borde de 1.
+        borderRadius: HojaLateral.radioDe(context, radio),
+        border: HojaLateral.bordeDe(context, tokens.bordeDefault),
         boxShadow: EfectosApp.sombraGlobo,
       ),
       child: SingleChildScrollView(
