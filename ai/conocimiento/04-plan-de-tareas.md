@@ -24,8 +24,8 @@ Una rama por tarea, desde `develop`. El orden va de lo que todo necesita a lo qu
 | T-11b | `11b-resultado-examen` | 29 Auditoría superada (certificado), 30 La Inspectora ganó, registro del resultado y desbloqueo del módulo siguiente |
 | T-12 | `12-tablet` | Base de tablet: clases de pantalla, riel de navegación (en `MarcoPrincipal`), acceso y onboarding (T01–T06) e Inicio (T07, T07b) |
 | T-12b | `12b-tablet-mapa-y-cuenta` | Mapa de sprints + intro en lista-detalle (T08), Tienda (T24), Perfil (T25) y Ajustes (T26) |
-| T-12c | `12c-tablet-juego` | Zona de juego + panel lateral y hojas laterales: T10–T19b, T10b, T10c, T14b |
-| T-12d | `12d-tablet-buzon-y-examen` | Sin vidas (T20), Buzón + Juicio en lista-detalle (T21, T21b, T22, T22b), Sin conexión (T23) y Examen Final (T27–T30) |
+| T-12c | `12c-tablet-juego` | Zona de juego + panel lateral y hojas laterales: T10–T18, T10b, T10c, T14b (T19 y T19b pasan a T-12d) |
+| T-12d | `12d-tablet-buzon-y-examen` | Pantallas de resultado: Sprint completado y Startup en quiebra (T19, T19b), Sin vidas (T20), Buzón + Juicio en lista-detalle (T21, T21b, T22, T22b), Sin conexión (T23) y Examen Final (T27–T30) |
 | T-13 | `13-accesibilidad-y-pulido` | Revisión WCAG 2.1 AA, lector de pantalla, texto dinámico, reducir animaciones |
 | T-14 | `14-integracion-api` | Cuando el backend esté listo: reemplazar mocks por llamadas HTTP (contrato lo define el equipo de backend) |
 
