@@ -256,7 +256,7 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 TarjetaBuzonInicio(pendientes: 6, alAbrir: () {}),
                 const TarjetaBuzonInicio(pendientes: 0, alAbrir: null),
                 const TarjetaConsejoSarko(
-                  consejo: 'Termina el Sprint 3 hoy y desbloquea la Ronda Semilla.',
+                  consejo: 'Termina el Sprint 3 hoy y desbloquea Derechos ARCO.',
                 ),
               ],
             ),

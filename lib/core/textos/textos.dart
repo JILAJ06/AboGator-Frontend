@@ -263,15 +263,7 @@ abstract final class Textos {
       'Termina el Sprint $sprint hoy y desbloquea $desbloqueo.';
   static const String consejoGeneral = '¡Tu Startup va por buen camino! Sigue practicando.';
 
-  /// Tramo de la Startup con su artículo, para el consejo ("desbloquea la
-  /// Ronda Semilla").
-  static const List<String> tramosConArticulo = [
-    'Del Garage al MVP',
-    'la Ronda Semilla',
-    'Escalando el equipo',
-    'la Serie A',
-    'la Salida a bolsa',
-  ];
+  static const String consejoExamenFinal = 'el Examen final';
 
   static const String inicioErrorCarga = 'No pudimos cargar tu progreso.';
   static const String reintentar = 'Reintentar';

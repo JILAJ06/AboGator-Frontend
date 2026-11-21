@@ -149,7 +149,7 @@ void main() {
       expect(consejo.top, greaterThan(rect(tester, find.byType(TarjetaBuzonInicio)).bottom));
       expect(consejo.left, closeTo(780, 0.5));
       expect(consejo.width, closeTo(252, 0.5));
-      expect(find.text('Termina el Sprint 3 hoy y desbloquea la Ronda Semilla.'), findsOneWidget);
+      expect(find.text('Termina el Sprint 3 hoy y desbloquea S.'), findsOneWidget);
     });
 
     testWidgets('"Tu semana" con racha, precisión del Perfil y monedas', (tester) async {
@@ -284,16 +284,23 @@ void main() {
     }
   });
 
-  test('consejo: módulo siguiente, sprint siguiente en el último módulo o general', () {
+  test('consejo: sprint siguiente, Examen final en el último o general', () {
     expect(
-      LogicaInicio.consejo(modulosDePrueba),
-      'Termina el Sprint 3 hoy y desbloquea la Ronda Semilla.',
+      LogicaInicio.consejo([
+        moduloDe(1, [h, h, c, b, b]),
+        moduloDe(2, [b, b, b, b, b]),
+      ]),
+      'Termina el Sprint 3 hoy y desbloquea S.',
+    );
+    expect(
+      LogicaInicio.consejo(MockProgreso.modulos),
+      'Termina el Sprint 3 hoy y desbloquea Derechos ARCO.',
     );
     expect(
       LogicaInicio.consejo([
-        moduloDe(5, [h, c, b, b, b]),
+        moduloDe(1, [h, h, h, h, c]),
       ]),
-      'Termina el Sprint 2 hoy y desbloquea S.',
+      'Termina el Sprint 5 hoy y desbloquea el Examen final.',
     );
     expect(
       LogicaInicio.consejo([

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/marco_principal.dart';
 import '../../datos/modelos/articulo_tienda.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
 import '../inicio/estado_inicio.dart';
@@ -52,5 +53,7 @@ void refrescarTrasCompra(WidgetRef ref) {
     ..invalidate(datosTiendaProvider)
     ..invalidate(datosInicioProvider)
     ..invalidate(datosModuloProvider)
-    ..invalidate(datosJuegoProvider);
+    ..invalidate(datosJuegoProvider)
+    // La insignia del riel (tablet) se vuelve a pedir tras la compra.
+    ..invalidate(totalBuzonRielProvider);
 }

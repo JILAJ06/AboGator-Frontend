@@ -9,6 +9,7 @@ import '../core/adaptativo/clase_pantalla.dart';
 import '../datos/repositorios/proveedores_repositorios.dart';
 import '../funciones/acceso/sesion.dart';
 import '../funciones/inicio/logica_inicio.dart';
+import '../funciones/vidas/pantalla_sin_vidas.dart' show apelacionesPendientesProvider;
 import 'rutas.dart';
 
 /// Lleva a la pantalla de una pestaña de la barra inferior. "Mapa" vuelve al
@@ -27,7 +28,12 @@ void irAPestana(BuildContext context, PestanaApp pestana) {
 
 /// Total del Buzón para la insignia del riel (tablet), cuando la pantalla no lo
 /// trae en sus propios datos. Para refrescarlo: `ref.invalidate(totalBuzonRielProvider)`.
+///
+/// Depende de `apelacionesPendientesProvider`, que ya se invalida al resolver
+/// un juicio, al registrar fallos del juego y al terminar el Examen: así la
+/// insignia se actualiza sola en esos casos.
 final totalBuzonRielProvider = FutureProvider.autoDispose<int>((ref) async {
+  ref.watch(apelacionesPendientesProvider);
   final buzon = await ref.watch(repositorioApelacionesProvider).obtenerBuzon();
   return buzon.total;
 });
