@@ -1,121 +1,94 @@
 # Reporte
-- **Tarea:** T-11b · Resultado del Examen Final: Auditoría superada (29) y La Inspectora ganó (30)
-- **Rama:** `11b-resultado-examen`
+- **Tarea:** T-12 · Base de tablet: clases de pantalla, riel de navegación, acceso, onboarding e Inicio
+- **Rama:** `12-tablet`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
 
 ## Entorno
-- Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11. Sin dependencias nuevas; la fecha se formatea con una tabla propia de meses, sin `intl`.
-- **Comparé contra Figma** con el conector (solo lectura): 29 (`18:2916`) y 30 (`18:3036`).
-  - **Sarko de 29:** en Figma es la pose **alegre de cuerpo completo** en la caja de 176×220 (no recortada al torso como decía la tarea). Usé `SarkoImagen` alegre de 176 en (170, 90).
-  - **Fondo de la ilustración de 30:** gris claro (`fondoSuperficieAlt`), el mismo de la pantalla 20.
-  - **Confeti de 29:** las 8 piezas con sus posiciones, colores y giros de Figma (`18:2928` a `18:2935`).
-- **Prueba en el navegador** (web a 390×844, cuenta de prueba del mock en localhost):
-  - **30:** dejé que el tiempo agotara las vidas. Coincide con Figma: Sarko triste, título rojo, texto, resumen con los datos reales del intento (5/10, 1, 2), la próxima vida con cuenta regresiva y los dos botones.
-  - **29:** para ganar a mano compilé **una versión temporal** con tiempos largos (las acciones del navegador son más lentas que los 8 s de la réplica). La revertí antes de subir.
-  - En esa prueba encontré y corregí dos detalles: el **borde punteado quedaba tapado** por el fondo de la tarjeta (ahora es `foregroundPainter`) y **Sarko salía más chico** que en Figma.
-  - Después: confeti, trofeo, Sarko, título, "Desbloqueaste el Módulo 2: Licencias y Propiedad Intelectual", certificado con borde punteado, "Ana López · 6/10 aciertos · 21 nov 2026", "Folio AG-M1-0001" y los botones.
+- Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11. **Sin dependencias nuevas.**
+- **Comparé contra Figma** con el conector (solo lectura): riel `93:525`, T01 `94:26`, T02 `94:86`, T03 `94:132`, T03b `94:252`, T04 `94:390`, T05 `94:456`, T06 `94:539` y T07 `96:298` (con sus tarjetas `96:543`, `96:564` y `96:578`).
+- **Prueba en el navegador** (web compilada, 1194×834 y 834×1194, claro y oscuro, cuenta de prueba del mock en localhost): Splash, onboarding, inicio de sesión, registro e Inicio coinciden con Figma. Ahí encontré y corregí que la ilustración del onboarding no crecía (el `Stack` del `AnimatedSwitcher` daba restricciones sueltas al `FittedBox`).
 
 ## Qué se hizo
-1. **Modelos** (`resultado_examen.dart`):
-   - `Certificado`, con la fecha corta "28 oct 2026" y la larga "28 de octubre de 2026" (tabla propia de 12 meses);
-   - `ModuloDesbloqueado`;
-   - `ResultadoRegistrado`.
-2. **`RepositorioExamen` / `MockExamen`:**
-   - `registrarResultado(intentoId)`: idempotente por intento. Lanza `sinConexion` sin red o `intentoCerrado` si el intento no terminó.
-     - **Aprobado:** emite el certificado. El folio es `AG-M{número del módulo}-{0001…}`, uno por módulo aunque se apruebe dos veces. La fecha sale del reloj inyectado y el nombre, de la autenticación. Luego llama a `registrarExamenAprobado` y devuelve el módulo siguiente.
-     - **Reprobado:** solo vidas y `faltaParaProximaVida` de `RepositorioVidas`.
-   - `obtenerCertificados()`.
-   - El mock recibe `RepositorioProgreso` y `RepositorioAutenticacion` en el constructor, como las vidas.
-3. **`RepositorioProgreso.registrarExamenAprobado`:** completa el Examen final (3 estrellas) y pone en curso el primer sprint del módulo siguiente. El último módulo no desbloquea nada y repetirlo no cambia nada más.
-4. **`MockPerfil`:** `certificados` = los de `obtenerCertificados()`. El Perfil pasa a "1 / 5" tras aprobar.
-5. **Apelaciones del examen:**
-   - `LogicaResultado.apelaciones`: una por decisión fallada (veredicto, tiempo o fundamento), sin repetir decisión. Título "Hora 24 · CTO" (≤ 45, con "…"), tema "Brechas de seguridad", `tarjetaId` = `ran-NN`.
-   - Se registran al reprobar **y** al aprobar con fallos.
-   - `EscenarioRansomware.comoTarjeta(id)` arma la `Tarjeta` (el fundamento correcto como explicación) y `MockTarjetas.obtenerTarjeta` la usa, así que el juicio (22) abre estas apelaciones.
-6. **Estado (`ExamenNotifier`):**
-   - `registrarResultado()` registra una sola vez, manda las apelaciones y refresca Buzón, Inicio, mapa, vidas y Perfil. Si algo falla, guarda el error sin perder el resultado ni las falladas.
-   - `reiniciar()` limpia el examen al salir de 29 o 30.
-7. **Pantallas** (`pantalla_resultado.dart`):
-   - **29:** confeti (las 8 piezas; `ConfetiSprint` ahora recibe `piezas`), trofeo, Sarko, título con foco, texto con el módulo siguiente (o la variante del último módulo) y la tarjeta del certificado con borde punteado (`CustomPainter`: trazo 2, guion 6, hueco 4) y folio.
-     - "Ir al Módulo N" va al mapa del siguiente con `go` y reinicia el examen.
-     - "Compartir certificado" copia el texto al portapapeles, muestra "Certificado copiado" y lo anuncia.
-     - Mientras registra: esqueleto y botones apagados. Con error: el aviso con "Reintentar" y "Volver al mapa".
-   - **30:**
-     - Sarko triste y título rojo; el motivo (0 vidas o decisiones agotadas).
-     - Resumen de tres tarjetas en un solo bloque semántico; en columna desde 1.5× de texto.
-     - Próxima vida con cuenta regresiva monótona (`RelojCrisis` y el `Cronometro` inyectable), o las vidas que quedan.
-     - "Repasar en el Buzón" (se oculta sin apelaciones) y "Volver al mapa".
-     - Con error, un aviso con "Reintentar" encima de los botones, que siguen activos.
-   - En las dos, atrás va al mapa del módulo; al terminar el registro se anuncia y vibra (acierto o error, por `ServicioHaptico`).
-8. **Rutas:**
-   - `superada` y `derrota` muestran las pantallas reales.
-   - Sin un examen terminado de ese módulo redirigen al mapa; con el resultado cruzado, a la que corresponde.
-   - Quité los marcadores, sus textos y `alVolver` de `PantallaPendiente` (ya nadie lo usaba).
-9. **Galería:** tarjeta del certificado, esqueleto, trofeo, resumen y confeti de 8 piezas.
+1. **Infraestructura (`lib/core/adaptativo/clase_pantalla.dart`):**
+   - `ClasePantalla` por ancho: `movil` (< 600), `tablet` (600–959) y `ancho` (≥ 960), con `esTablet` y `esAncho`.
+   - `MedidasAdaptativas`: margen 32, medianil 24, riel 104, columna 470, hoja lateral 376 y una columna de máx. 640.
+   - `context.clasePantalla` (ancho de la ventana) y el widget `Adaptativo` (ancho **disponible**, para paneles).
+   - `AmbitoClasePantalla`: publica la clase del ancho real que recibe la app. Va en el `builder` de `app.dart` (ver D1).
+   - Ayudante de pruebas `test/ayudantes/tamano_pantalla.dart`: `tamanoPantalla(tester, Tamano.tabletHorizontal / tabletVertical / tabletMinima / movil)` (1194×834, 834×1194, 600×960 y 390×844).
+2. **Riel de navegación (`RielNavegacion`)** con las medidas de Figma: 104 de ancho, isotipo de 56, destinos de 80×72 con indicador de 56×32, insignia del Buzón de 20 en (50, 8) con "99+", Ajustes y avatar de 48 abajo. Activo: `fondoDestacado`, etiqueta Inter SemiBold 12 y `selected`; inactivo: Inter Medium 11 en `textoSecundario`. Si no cabe en alto, se desplaza.
+3. **`MarcoPrincipal`:** en tablet pinta `Row(riel, cuerpo)` sin barra inferior ni botón flotante; reutiliza `irAPestana`. La insignia usa el total que trae la pantalla (Inicio y Mapa) o `totalBuzonRielProvider` (Buzón, Tienda y Perfil). En móvil el código es el mismo de antes.
+4. **01 Splash:** logo y lema × 1.45 (469.4 y 435, lema 20.3/29), puntos de 12 con hueco de 9.6 y "Powered by" 68 bajo los puntos.
+5. **02 a 04 Onboarding:** panel de `fondoSuperficie` (mitad, hasta 597) con la ilustración del móvil × 1.55 (círculo de 465) y la columna de 470 a la derecha: título H1 y texto alineados a la izquierda, separación 20, 48 antes del paginador, botón a todo el ancho y "Omitir" arriba a la derecha.
+6. **05 Inicio de sesión:** `PanelMarca` (verde fijo, círculo de 520 al 6 % en (260, 388), logo de 400, Sarko alegre de 288 y lema) y el formulario en 470 con separación 16 y separador a todo el ancho. Los campos se comparten con el móvil.
+7. **06 Registro:** `PanelMarca` variante registro (círculo en (−180, −152), logo de 320 en (64, 64), frase en H2 blanca, texto en crema y Sarko sorprendido de 240 abajo a la derecha), botón atrás arriba (4 antes de la columna) y el mismo formulario, que también se comparte con el móvil.
+8. **07 Inicio (y 07b):**
+   - Dos columnas (620 y 382, proporcionales si la ventana es menor de 1194): héroe de 620×200 (`MedidasHeroe.tablet`), "Ruta de tu Startup" y los módulos en 2 × 300 con separación 20; a la derecha reto, **Tu semana**, **Buzón** y el **consejo de Sarko** con Sarko de 120×150 al fondo.
+   - Componentes nuevos: `TarjetaSemana`, `TarjetaBuzonInicio` y `TarjetaConsejoSarko`. `LogicaInicio.consejo` arma el consejo y `precisionInicioProvider` trae la precisión del Perfil.
+   - Carga, error con reintento y sin datos se mantienen.
+9. **Galería:** sección "Componentes de tablet" con el riel y las tres tarjetas en sus estados.
+
+## Medidas que tomé de Figma (no venían en la tarea)
+- **Riel:** activo con ícono `textoPrimario`; inactivo con ícono `textoSecundario`. Insignia en Leyenda.
+- **T01 Splash:** logo vertical de 469.4 (isotipo 158.7 + marca 469.4 × 95.2), lema Inter SemiBold 20.3/29 en `#E8D8A8`, ancho 435; puntos de 12 con hueco 9.6 en y 648; "Powered by LawSwipe" en y 728.
+- **T02 a T04:** panel `fondo/superficie` de 597; círculo `#E8D8A8` al 70 % de 465 (el mismo `fondoDestacado` del móvil); contenido en una columna de 470 en x 661 con separación 20, título Fredoka Bold 26/32, texto Inter 16/24 en `textoSecundario`, un espacio de 8 antes del paginador y botón primario a todo el ancho; "Omitir" Inter SemiBold 14 en `textoSecundario`, termina en x 1162.
+- **T05:** el círculo es blanco al 6 % sobre el verde (`#1F4E35`); lema Inter SemiBold 14/20 en una línea.
+- **T06:** círculo de 520 en (−180, −120 − 32); logo horizontal de 320; frase «Más vale prevenir que litigar.» Fredoka SemiBold 20/26 en blanco en (64, 198); texto "Crea tu perfil y Sarko ajustará la dificultad de cada sprint a tu experiencia." Inter 16/24 en `#E8D8A8` en (64, 240), ancho 469; Sarko **sorprendido** de 240×300 en (317, 472); botón atrás de 48 en (657, 16); columna en y 143 con separación 14.
+- **T07:** Tu semana con relleno 20 y separación 12; estadísticas de `fondoSuperficieAlt` con relleno 12, separación 4; íconos flame y coin en `accionAcento` y check en `accionPrimaria`. Consejo con relleno 16 y separación 4.
 
 ## Decisiones propias (no vienen de Figma)
-- **Folio** bajo el detalle del certificado (RF-41 lo exige).
-- **Variantes de texto:**
-  - 29 del último módulo: "¡Completaste todos los módulos!" y "Volver al mapa";
-  - 30 por decisiones agotadas;
-  - tarjeta "Aún tienes N vidas…" cuando la derrota no fue por vidas.
-- **Compartir copia al portapapeles**; la imagen y la hoja nativa quedan para la T-14.
-- **Enlaces:** el cruce de 29 y 30 lleva a la que corresponde, y sin examen terminado se va al mapa.
-- **Estados de carga y error:** con error, 29 usa un bloque propio con el mismo texto y "Reintentar", en lugar de `MensajePantalla`, porque `MensajePantalla` trae su propio desplazamiento y no cabe dentro de la columna.
-- **El certificado y el texto de 29 usan los datos reales:** "Protección de Datos" y "Módulo 2: Licencias y Propiedad Intelectual" (Figma muestra "Protección de Datos Personales" y "Ronda Semilla" de ejemplo).
-- **Título de la apelación:** "Hora 24 · CTO" (hora y personaje, como dice la regla); el ejemplo de la tarea decía "CTO fundador".
-- **Aciertos del certificado:** cuenta los veredictos correctos del intento, aunque después fallara el fundamento.
-- **Confeti:** con 8 piezas el escalonado se reduce para que la caída termine a tiempo; el de 19 sigue igual.
+- **Tablet vertical (600 a 959):** riel y una sola columna. El Inicio se centra con máximo 640; el acceso lleva arriba una **franja de marca de 240** (logo de 300 y Sarko de 168) y debajo el formulario de 470; el onboarding pone la ilustración × 1.2 arriba y la columna debajo.
+- **Ventanas entre 960 y 1194:** las columnas del Inicio se reparten en proporción 620:382; el panel de marca y el del onboarding miden la mitad de la ventana (hasta 597) y su contenido se reduce en la misma proporción (los textos no).
+- **Onboarding en tablet sin `PageView`:** las páginas cambian con un fundido de 250 ms (ninguno con "Reducir animaciones"); no hay deslizamiento lateral. Siguen "Omitir", el paginador y el botón.
+- **La ilustración del onboarding** es la del móvil escalada y centrada en el panel; en Figma cada página la centra según su propio contenido, así que el círculo queda hasta ~26 px más arriba o abajo que en Figma según la página.
+- **Formulario de 05 y 06:** los huecos de 06 son los del móvil (6, 16, 12, 14…); Figma usa 14 en casi todos.
+- **Buzón sin apelaciones:** "No tienes apelaciones pendientes." y **sin botón** (el riel sigue llevando al Buzón).
+- **Consejo de Sarko:** usa el tramo del **módulo siguiente** con su artículo ("la Ronda Semilla"), como Figma, aunque el sprint en curso no sea el último del módulo. En el último módulo usa el título del sprint siguiente; sin sprint en curso, "¡Tu Startup va por buen camino! Sigue practicando." (ver D2).
+- **Sin sprint en curso:** no hay tarjeta héroe (como en móvil) y "Ruta de tu Startup" sube.
+- **Consejo y Sarko al fondo:** la columna derecha llega al menos hasta el borde inferior (menos 24) para que el consejo quede abajo como en Figma; si no cabe, fluye al final.
+- **Héroe de tablet:** Sarko se oculta si la tarjeta mide menos de 596 de ancho (para que no quede cortado).
+- **Panel de registro:** Sarko se oculta si el panel mide menos de 600 de alto.
+- **Avatar del riel:** se anuncia "Perfil de Ana López" y lleva al Perfil.
+- **Rotar a mitad del onboarding:** si la ventana pasa de tablet a móvil, el `PageView` se crea en la página en la que iba.
 
 ## Accesibilidad
-- **Foco inicial** en el título (encabezado). Confeti, trofeo y Sarko son decorativos.
-- **Bloques:**
-  - la tarjeta del certificado se lee "Certificado de módulo. Protección de Datos. Ana López, 6 de 10 aciertos, 21 de noviembre de 2026. Folio AG-M1-0001.";
-  - el resumen se lee "Llegaste a la decisión 5 de 10. 1 acierto. 2 por tiempo agotado".
-- **Anuncios:** "Auditoría superada. Certificado emitido. Módulo 2 desbloqueado" o "La Inspectora ganó. N apelaciones en el Buzón".
-- **Contrastes AA verificados en pruebas, en claro y oscuro:**
-  - `estadoIlegal` sobre `fondoApp`;
-  - `textoAcento` sobre `fondoSuperficie`;
-  - `estadoLegal` y `estadoIlegal` sobre `fondoSuperficie`;
-  - `textoPrimario` y `textoSecundario` sobre `fondoDestacado`.
-- **Sin desbordes** en 390×844, 360×640 y 320×640 al 100 % y 200 % (29 y 30). Con "Reducir animaciones" el confeti queda quieto.
+- **Riel:** contenedor "Navegación principal"; cada destino es un botón con su nombre y `selected` en el activo; el Buzón se anuncia "Buzón, 6 apelaciones pendientes" (1: "1 apelación pendiente"); Ajustes "Ajustes de accesibilidad". Objetivos de 80×72 y 48×48.
+- **Orden de foco:** riel primero (destinos → Ajustes → avatar) y luego el contenido. En el Inicio: héroe → módulos → Buzón (orden explícito, igual en una columna).
+- **Tu semana:** cada estadística se lee como "Precisión: 82%" ("Precisión: sin datos" si falla).
+- **Contrastes AA verificados en pruebas:** etiquetas del riel (`textoPrimario` sobre `fondoDestacado`, `textoSecundario` y `textoPrimario` sobre `fondoSuperficie`), `textoEnPrimario` sobre `estadoIlegal` (insignia), y `#E8D8A8` y blanco sobre el verde del panel (también con el círculo encima), en claro y oscuro.
+- **Sin desbordes** en 1194×834, 834×1194 y 600×960 al 100 % y 200 %, en claro y oscuro (Inicio), y en las tres medidas al 100 % y 200 % para acceso, Splash y onboarding. Con texto grande, Tu semana apila sus estadísticas y la rejilla de módulos pasa a una columna.
+- "Reducir animaciones", háptica, "solo botones" y el tamaño de texto de la T-10b se respetan igual (el `builder` de la app los sigue aplicando antes del ámbito).
 
 ## Verificación
 - `dart format`: sin cambios pendientes.
 - `flutter analyze`: `No issues found!`
-- `flutter test` (1025 pruebas; antes de T-11b, 985):
+- `flutter test` (1116 pruebas; antes de T-12, 1025):
 ```
-+1025: All tests passed!
++1116: All tests passed!
 ```
-- **Pruebas nuevas en `resultado_test.dart` (40):**
-  - mock: certificado, idempotencia (también entre intentos), reprobado, `intentoCerrado`, `sinConexion`;
-  - progreso: completar y desbloquear, último módulo;
-  - apelaciones: una por fallo sin duplicar, título ≤ 45, `ran-03` como tarjeta;
-  - Perfil 0 → 1;
-  - 29: claro/oscuro, "Ir al Módulo 2" (mapa del módulo 2, examen reiniciado, progreso, Perfil 1 de 5), compartir con el texto exacto, error y reintento, atrás, redirecciones sin examen y sin sesión, fallos aprobados en el Buzón;
-  - 30: claro/oscuro, cuenta regresiva (baja y para en 00:00:00), sin decisiones (texto y vidas), **perder → Buzón → juicio de la apelación** de punta a punta, error que no bloquea y reintento sin duplicar, enlace cruzado y "Volver al mapa";
-  - desbordes y reducir animaciones.
-- **Ajustes en pruebas existentes:**
-  - los flujos de la T-11 llegan a las pantallas reales;
-  - `ConfetiSprint.piezasSprint`;
-  - galería;
-  - `abrirJuego` acepta `progreso` y cualquier `RepositorioVidas`;
-  - las tarjetas falsas resuelven `ran-NN`.
+- **Pruebas nuevas (91):**
+  - `clase_pantalla_test.dart`: 390/599/600/959/960/1194, medidas, `Adaptativo` con el ancho disponible y la extensión;
+  - `riel_navegacion_test.dart`: medidas, activo, insignia (0, 1, 6, 99, 100 → "99+", sin dato), posición de la insignia, toques, Tab y Enter, colores del tema y contraste en claro/oscuro, 200 %;
+  - `inicio_tablet_test.dart`: riel sin barra ni botón flotante, posiciones de Figma, consejo al fondo, Tu semana y "—", Buzón con 6 y 0, consejo general, navegación del riel (Buzón, Tienda, Perfil, Ajustes y Mapa), Mapa con riel, una columna en 834 y 600, sin desbordes (3 tamaños × 100/200 % × claro/oscuro), lógica del consejo y móvil sin cambios;
+  - `acceso_tablet_test.dart`: panel y columna de 470, logo, Sarko, lema y círculo, formulario (errores, Enter, sesión), consentimientos separados, botón atrás, franja vertical, sin desbordes y contraste del panel;
+  - `bienvenida_tablet_test.dart`: Splash de tablet y de móvil, panel con la ilustración × 1.55, columna, Omitir, las 4 páginas, reducir animaciones, vertical, sin desbordes y el paso de tablet a móvil a mitad del onboarding.
+- **Ajustes en pruebas existentes:** solo la galería (22 botones, 24 logos y tocar "Perfil" dentro de la navegación inferior, porque el riel de la galería también dice "Perfil"). **Ninguna prueba cambió de tamaño.**
 
 ## Grafo
-- **Actualizados (`en curso`):** ENRUTADOR, PANT-PENDIENTE, TEXTOS, MOD, REPO-PROG, MOCK-PROG, MOCK-TARJ, MOCK-PERFIL, PROV-REPO, REPO-EXAMEN, MOCK-EXAMEN, ESCENARIO-RANSOMWARE, EST-EXAMEN, COMP-CONFETI, PANT-GALERIA y las pruebas TEST-GALERIA, TEST-JEFE, TEST-COMP y TEST-AYUDA.
-- **Nuevos:** LOGICA-RESULTADO, CODIGO-PANT-29, COMP-PIEZAS-RESULTADO y TEST-RESULTADO.
-- PANT-29 y PANT-30 apuntan a su código.
+- **Actualizados (`en curso`):** APP, MARCO-PRINCIPAL, TEMA-EFECTOS, TEXTOS, PANT-GALERIA, CODIGO-PANT-01, CODIGO-PANT-02..04, CODIGO-PANT-05, CODIGO-PANT-06, LOGICA-INICIO, EST-INICIO, CODIGO-PANT-07, COMP-HEROE, TEST-GALERIA y TEST-AYUDA.
+- **Nuevos:** ADAPTATIVO, COMP-RIEL, COMP-SEMANA, COMP-BUZON-INICIO, COMP-CONSEJO, PANEL-MARCA, TEST-ADAPTATIVO, TEST-TABLET, DEC-CLASE-PANTALLA y DEC-TABLET-VERTICAL.
+- PANT-01 a PANT-07b anotan que su vista de tablet vive en el mismo archivo.
 - **Obsoletos:** ninguno. Agregué una línea en el registro de cambios.
 
-## Para la T-14
-- La **imagen del certificado** para compartir (RF-41) y la hoja nativa de compartir.
-- La **fecha y el folio reales** del servidor.
-- El **registro con la conexión caída a mitad del examen**: hoy se reintenta desde 29 o 30. Si la persona sale sin reintentar, el resultado no se registra hasta un nuevo intento.
-- Queda un `DateTime.now()` de la T-08 en `estado_juego.dart` (la hora de las respuestas en la cola). Esta tarea no permitía tocarlo.
+## Para T-12b, c y d
+- **Clase de pantalla:** `context.clasePantalla` (`esTablet`, `esAncho`) para decidir la composición de una pantalla completa; `Adaptativo` dentro de paneles o columnas. No uses `MediaQuery.size` (ver D1).
+- **Medidas:** `MedidasAdaptativas.margen`, `medianil`, `riel`, `columnaFormulario` (470), `hojaLateral` (376) y `contenidoUnaColumna` (640).
+- **`MarcoPrincipal`** ya pinta el riel en Inicio, Mapa, Buzón, Tienda y Perfil. En tablet no hay botón Buzón ni barra inferior, así que las pantallas pueden dejar de reservar `MarcoPrincipal.reservaBuzon` cuando `MarcoPrincipal.conRiel(context)` sea `true` (hoy Mapa, Buzón, Tienda y Perfil siguen reservando ese espacio al final; no se nota, pero sobra). Para refrescar la insignia después de un juicio: `ref.invalidate(totalBuzonRielProvider)`.
+- **Pruebas:** `tamanoPantalla(tester, Tamano.tabletHorizontal)` (y `tabletVertical`, `tabletMinima`, `movil`); los ayudantes existentes (`abrirInicio`, `abrirEn`, `montarApp`) ya aceptan `tamano`.
+- **Componentes reutilizables:** `PanelMarca`/`DisposicionAccesoTablet` (panel + columna de 470) y `MedidasHeroe` como ejemplo de parametrizar medidas sin duplicar un componente.
+- Ajustes (`/perfil/ajustes`) no usa `MarcoPrincipal`, así que en tablet se ve sin riel (le toca a T-12b).
 
 ## Dudas
-- **D1.** Si la persona sale de 30 con el error de registro sin reintentar, sus apelaciones no llegan al Buzón (el examen se reinicia al salir). ¿Guardamos el registro pendiente en la cola local, como las respuestas del juego, o se resuelve en la T-14?
-- **D2.** Aprobar otra vez un módulo ya aprobado devuelve el mismo certificado (uno por módulo). ¿Debería actualizarse con el nuevo intento (aciertos y fecha) o quedarse el primero?
-- **D3.** En 29, ¿"Compartir" debe quedar visible también en el último módulo? Lo dejé visible con "Volver al mapa" como primario.
-- **D4.** Figma muestra el certificado de "Protección de Datos Personales" y el módulo 2 como "Ronda Semilla". Los datos del proyecto son "Protección de Datos" y "Licencias y Propiedad Intelectual". ¿Se ajustan los nombres de los módulos o Figma?
+- **D1.** Para que las pruebas existentes siguieran en móvil sin cambiar su tamaño, la clase de pantalla sale del ancho real que recibe la app (un `LayoutBuilder` en el `builder` de `MaterialApp`), no de `MediaQuery`: en las pruebas, `setSurfaceSize` no cambia `MediaQuery` (sigue en 800×600). Esto tocó `lib/app/app.dart`, que no estaba en los archivos permitidos (una línea). ¿Está bien así?
+- **D2.** El consejo de Sarko: Figma dice "Termina el Sprint 3 hoy y desbloquea la Ronda Semilla", pero terminar el Sprint 3 desbloquea el Sprint 4, no el módulo 2. Lo dejé como Figma (tramo del módulo siguiente). ¿Prefieres que nombre el sprint siguiente ("Derechos ARCO") salvo en el último sprint del módulo?
+- **D3.** En tablet el onboarding no se puede deslizar (no hay `PageView`, solo los botones). ¿Agrego el gesto de deslizar?
+- **D4.** Con 0 apelaciones oculté el botón "Abrir Buzón" de la tarjeta del Inicio. ¿Lo prefieres deshabilitado y visible?
