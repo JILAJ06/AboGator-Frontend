@@ -39,6 +39,18 @@ abstract final class Textos {
   static String pestanaSemantica(String nombre, int posicion, int total) =>
       'Pestaña $nombre, $posicion de $total';
 
+  // Riel de navegación (tablet)
+  static const String rielNavegacion = 'Navegación principal';
+  static const String rielAjustes = 'Ajustes de accesibilidad';
+  static String rielAvatar(String? nombre) =>
+      nombre == null || nombre.isEmpty ? 'Tu perfil' : 'Perfil de $nombre';
+  static String rielInsignia(int cantidad) => cantidad > 99 ? '99+' : '$cantidad';
+  static String rielBuzonSemantica(int pendientes) => pendientes <= 0
+      ? pestanaBuzon
+      : pendientes == 1
+      ? '$pestanaBuzon, 1 apelación pendiente'
+      : '$pestanaBuzon, $pendientes apelaciones pendientes';
+
   // Paginador
   static String paginador(int actual, int total) => 'Página $actual de $total';
 
@@ -222,6 +234,38 @@ abstract final class Textos {
       : pendientes == 1
       ? '$buzonApelaciones, 1 pendiente'
       : '$buzonApelaciones, $pendientes pendientes';
+
+  // 07 Inicio en tablet (T07 y T07b)
+  static const String semanaTitulo = 'Tu semana';
+  static const String semanaRacha = 'Racha';
+  static const String semanaPrecision = 'Precisión';
+  static const String semanaMonedas = 'Monedas';
+  static const String semanaSinDato = '—';
+  static const String semanaSinDatoSemantica = 'sin datos';
+  static String semanaDias(int dias) => dias == 1 ? '1 día' : '$dias días';
+  static String semanaPorcentaje(int porcentaje) => '$porcentaje%';
+  static String semanaEstadistica(String etiqueta, String valor) => '$etiqueta: $valor';
+
+  static String buzonInicioTexto(int pendientes) => pendientes == 1
+      ? '1 tarjeta fallada espera juicio. Gánala para recuperar una vida.'
+      : '$pendientes tarjetas falladas esperan juicio. Gánalas para recuperar vidas.';
+  static const String buzonInicioVacio = 'No tienes apelaciones pendientes.';
+  static String abrirBuzon(int pendientes) => 'Abrir Buzón ($pendientes)';
+
+  static const String consejoEtiqueta = 'CONSEJO DE SARKO';
+  static String consejoSprint(int sprint, String desbloqueo) =>
+      'Termina el Sprint $sprint hoy y desbloquea $desbloqueo.';
+  static const String consejoGeneral = '¡Tu Startup va por buen camino! Sigue practicando.';
+
+  /// Tramo de la Startup con su artículo, para el consejo ("desbloquea la
+  /// Ronda Semilla").
+  static const List<String> tramosConArticulo = [
+    'Del Garage al MVP',
+    'la Ronda Semilla',
+    'Escalando el equipo',
+    'la Serie A',
+    'la Salida a bolsa',
+  ];
 
   static const String inicioErrorCarga = 'No pudimos cargar tu progreso.';
   static const String reintentar = 'Reintentar';
