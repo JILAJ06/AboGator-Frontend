@@ -241,3 +241,8 @@ Figma: T08 = `96:582`; Tienda T24 = `101:4306`, Perfil T25 = `101:4553`, Ajustes
 Figma: T10 = `97:772`; resto de vistas del juego en "Tablet · Vistas" (sección T3 y T3b). Medidas en `ai/siguiente.md` de la T-12c.
 - **Zona de juego + panel lateral (ancho ≥ 960):** barra de juego de 64 (salir, progreso de 12, HUD y pausa), tarjeta de 380 × 470 con pila de dos, botones de veredicto de 68 y comodines a la izquierda; a la derecha una columna de 376 con "Tu Startup", contexto del sprint y atajos de teclado.
 - **`HojaLateral`:** contenedor de 376 a la derecha (borde 1, radio 28, agarre de 40 × 5) que aloja los paneles de veredicto, evidencia, justificación, Abogado y bonus con el velo al 40 %.
+
+## Resultados, Buzón y Examen en tablet (se construye en T-12d)
+Figma: T19 = `98:5016`, T21 = `100:4028`; el resto en "Tablet · Vistas". Medidas en `ai/siguiente.md` de la T-12d.
+- **Pantallas de resultado (ancho ≥ 960):** Sarko en un panel `fondoSuperficie` de 597 a la izquierda y el contenido en una columna centrada de 470 (título, estadísticas en tres tarjetas iguales, indicadores de la Startup, aviso del buzón y botones).
+- **Buzón en lista-detalle:** lista de 500 (recompensa, tarjetas falladas con chip de plazo, botón de hoy) y panel de detalle de 526 con la vista previa del juicio de la tarjeta seleccionada.
