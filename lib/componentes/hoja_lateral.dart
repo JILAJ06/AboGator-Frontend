@@ -65,7 +65,12 @@ class HojaLateral extends StatelessWidget {
               scopesRoute: true,
               namesRoute: true,
               label: etiqueta,
-              child: _AmbitoHoja(child: child),
+              // Material transparente: el diálogo no trae uno y los textos y
+              // botones de los paneles lo necesitan.
+              child: Material(
+                type: MaterialType.transparency,
+                child: _AmbitoHoja(child: child),
+              ),
             ),
           ),
         ),
