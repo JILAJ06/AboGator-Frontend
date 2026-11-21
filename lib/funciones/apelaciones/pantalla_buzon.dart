@@ -284,6 +284,8 @@ class _BuzonTabletState extends ConsumerState<_BuzonTablet> {
 
   void _seleccionar(Apelacion a) {
     setState(() => _seleccionada = a.id);
+    // La fila elegida toma el foco, así las flechas siguen desde ella.
+    _foco(a.id).requestFocus();
     unawaited(
       SemanticsService.sendAnnouncement(
         View.of(context),
@@ -509,7 +511,8 @@ class _DetalleJuicio extends ConsumerWidget {
                     )
                   : TarjetaCaso(
                       key: const ValueKey('tarjeta-detalle-juicio'),
-                      soloBotones: true,
+                      // Vista previa con la pista de gestos, como en Figma
+                      // (aquí no se arrastra: el juicio se abre con el botón).
                       etiquetaCaso: LogicaApelacion.etiqueta(apelacion.tema),
                       colorModulo: colorModulo,
                       iniciales: tarjeta.iniciales ?? LogicaInicio.iniciales(tarjeta.personaje),

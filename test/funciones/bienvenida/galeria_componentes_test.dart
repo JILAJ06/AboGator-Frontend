@@ -61,7 +61,7 @@ import 'package:material_ui/material_ui.dart';
 /// Pantalla alta para que la galería entera quede construida.
 Future<void> montarGaleria(WidgetTester tester) async {
   await abrirGaleria(tester);
-  await agrandar(tester, const Size(390, 28000));
+  await agrandar(tester, const Size(390, 30000));
 }
 
 /// Agranda la superficie después de navegar (la transición de página no
@@ -114,7 +114,7 @@ void main() {
     expect(find.byType(PildoraSaldo), findsOneWidget);
     expect(find.byType(MedallaInsignia), findsNWidgets(2));
     expect(find.byType(FilaMenu), findsNWidgets(2));
-    expect(find.byType(BarraDelJefe), findsOneWidget);
+    expect(find.byType(BarraDelJefe), findsNWidgets(2)); // + la de TarjetaJefe (T-12d)
     expect(find.byType(TemporizadorCrisis), findsNWidgets(2));
     expect(find.byType(ChipGolpe), findsNWidgets(2));
     expect(find.byType(PanelContraargumento), findsOneWidget);
@@ -157,7 +157,8 @@ void main() {
     expect(find.byType(IndicadorPendientes), findsNWidgets(2));
     expect(find.byType(InterruptorConexionDebug), findsOneWidget);
     expect(find.byType(TarjetaRecompensaBuzon), findsNWidgets(3));
-    expect(find.byType(FilaApelacion), findsNWidgets(4));
+    expect(find.byType(FilaApelacion), findsNWidgets(5)); // + la seleccionada (T-12d)
+    expect(find.byType(TarjetaJefe), findsOneWidget);
     expect(find.byType(NotificacionApelacion), findsNWidgets(2));
     expect(
       tester.widgetList<PanelVeredicto>(find.byType(PanelVeredicto)).map((p) => p.tipo),

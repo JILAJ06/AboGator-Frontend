@@ -1052,12 +1052,23 @@ class _CrisisTablet extends StatelessWidget {
       colorPanel: EfectosApp.barraJefe,
       ilustracion: Stack(
         alignment: Alignment.center,
+        clipBehavior: Clip.none,
         children: [
-          Container(
-            key: const ValueKey('halo-crisis'),
-            width: halo,
-            height: halo,
-            decoration: const BoxDecoration(color: EfectosApp.haloCrisis, shape: BoxShape.circle),
+          // El halo no cuenta para el tamaño de la ilustración (sobresale).
+          Positioned.fill(
+            child: OverflowBox(
+              maxWidth: halo,
+              maxHeight: halo,
+              child: Container(
+                key: const ValueKey('halo-crisis'),
+                width: halo,
+                height: halo,
+                decoration: const BoxDecoration(
+                  color: EfectosApp.haloCrisis,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
           ),
           IlustracionAmpliada(
             anchoBase: anchoBase,

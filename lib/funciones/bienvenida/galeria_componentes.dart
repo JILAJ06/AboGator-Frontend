@@ -566,6 +566,16 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                     colorModulo: ColoresModulo.enOrden[0],
                     alPresionar: () {},
                   ),
+                // Fila seleccionada de la lista-detalle de tablet (T-12d).
+                FilaApelacion(
+                  titulo: 'Librería GPL en app cerrada',
+                  tema: 'Licencias OSS',
+                  dia: 3,
+                  dias: 0,
+                  colorModulo: ColoresModulo.enOrden[0],
+                  seleccionada: true,
+                  alPresionar: () {},
+                ),
                 const NotificacionApelacion(tituloCaso: 'Librería GPL en app cerrada', dias: 3),
                 const NotificacionApelacion(
                   tituloCaso: 'Casilla de consentimiento pre-marcada',
@@ -704,6 +714,7 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
               titulo: Textos.galeriaJefe,
               hijos: [
                 const SizedBox(width: 342, child: BarraDelJefe(hp: 60)),
+                const SizedBox(width: 376, child: TarjetaJefe(hp: 60)),
                 Container(
                   padding: const EdgeInsets.all(12),
                   color: EfectosApp.fondoCrisis,
