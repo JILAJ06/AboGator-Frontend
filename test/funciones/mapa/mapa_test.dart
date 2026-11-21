@@ -76,6 +76,9 @@ class ProgresoFalso implements RepositorioProgreso {
     required int estrellas,
     required EstadoStartup estadoFinal,
   }) async {}
+
+  @override
+  Future<void> registrarExamenAprobado({required String moduloId}) async {}
 }
 
 class ApelacionesFalsas implements RepositorioApelaciones {

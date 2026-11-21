@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 
 import '../core/tema/efectos.dart';
@@ -20,7 +22,7 @@ class PiezaConfeti {
 /// Mide [ancho]×[alto] y se centra en el ancho disponible (en pantallas
 /// angostas las piezas de los bordes quedan fuera, sin desbordes).
 class ConfetiSprint extends StatefulWidget {
-  const ConfetiSprint({super.key});
+  const ConfetiSprint({this.piezas = piezasSprint, super.key});
 
   static const double ancho = 390;
   static const double alto = 260;
@@ -29,7 +31,7 @@ class ConfetiSprint extends StatefulWidget {
   static const double radioPieza = 2;
 
   /// Posiciones de Figma 19 (38:5569 a 38:5575) menos la barra de estado (48).
-  static const List<PiezaConfeti> piezas = [
+  static const List<PiezaConfeti> piezasSprint = [
     PiezaConfeti(60, 72, EfectosApp.confetiAmbar, 0),
     PiezaConfeti(320, 96, EfectosApp.confetiVerde, -30),
     PiezaConfeti(90, 192, EfectosApp.confetiAzul, -60),
@@ -38,6 +40,21 @@ class ConfetiSprint extends StatefulWidget {
     PiezaConfeti(40, 248, EfectosApp.confetiVerde, -20),
     PiezaConfeti(340, 221, EfectosApp.confetiAmbar, -70),
   ];
+
+  /// Posiciones de Figma 29 (18:2928 a 18:2935) menos la barra de estado (48).
+  static const List<PiezaConfeti> piezasAuditoria = [
+    PiezaConfeti(50, 60, EfectosApp.confetiAmbar, -10),
+    PiezaConfeti(330, 74, EfectosApp.confetiVerde, -40),
+    PiezaConfeti(80, 242, EfectosApp.confetiAzul, -60),
+    PiezaConfeti(310, 29, EfectosApp.confetiRojo, -15),
+    PiezaConfeti(190, 14, EfectosApp.confetiAmbarClaro, -45),
+    PiezaConfeti(30, 188, EfectosApp.confetiVerde, -20),
+    PiezaConfeti(350, 221, EfectosApp.confetiAmbar, -70),
+    PiezaConfeti(260, 276, EfectosApp.confetiAzul, -30),
+  ];
+
+  /// Piezas a dibujar (por defecto, las de 19).
+  final List<PiezaConfeti> piezas;
 
   @override
   State<ConfetiSprint> createState() => _ConfetiSprintState();
@@ -70,7 +87,8 @@ class _ConfetiSprintState extends State<ConfetiSprint> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    const piezas = ConfetiSprint.piezas;
+    final piezas = widget.piezas;
+    final paso = piezas.length <= 1 ? 0.0 : math.min(0.05, 0.3 / (piezas.length - 1));
     return ExcludeSemantics(
       child: IgnorePointer(
         child: SizedBox(
@@ -87,9 +105,10 @@ class _ConfetiSprintState extends State<ConfetiSprint> with SingleTickerProvider
                     _Pieza(
                       key: ValueKey('confeti-$i'),
                       pieza: pieza,
-                      // Cada pieza empieza un poco después que la anterior.
+                      // Cada pieza empieza un poco después que la anterior
+                      // (0.05 con 7 piezas; menos si hay más, para acabar en 1).
                       avance: Curves.easeOut.transform(
-                        Interval(i * 0.05, 0.7 + i * 0.05).transform(_caida.value),
+                        Interval(i * paso, 0.7 + i * paso).transform(_caida.value),
                       ),
                     ),
                 ],

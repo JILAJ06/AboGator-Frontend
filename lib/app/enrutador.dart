@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/textos/textos.dart';
+import '../datos/modelos/examen.dart';
 import '../datos/sincronizacion/estado_sincronizacion.dart';
 import '../funciones/acceso/pantalla_inicio_sesion.dart';
 import '../funciones/acceso/pantalla_registro.dart';
@@ -14,7 +15,9 @@ import '../funciones/bienvenida/galeria_componentes.dart';
 import '../funciones/bienvenida/pantalla_onboarding.dart';
 import '../funciones/bienvenida/pantalla_splash.dart';
 import '../funciones/inicio/pantalla_inicio.dart';
+import '../funciones/jefe/estado_examen.dart';
 import '../funciones/jefe/pantalla_jefe.dart';
+import '../funciones/jefe/pantalla_resultado.dart';
 import '../funciones/juego/pantalla_juego.dart';
 import '../funciones/juego/pantalla_sprint_completado.dart';
 import '../funciones/juego/pantalla_startup_quiebra.dart';
@@ -82,7 +85,7 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             PantallaSinVidas(moduloId: state.uri.queryParameters['modulo']),
       ),
-      // 27 a 28c en la misma ruta; 29 y 30 son marcadores hasta la T-11b.
+      // 27 a 28c en la misma ruta; 29 y 30 son sus hijas.
       GoRoute(
         path: Rutas.crisisJefe,
         redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
@@ -90,17 +93,17 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: Rutas.segmentoAuditoriaSuperada,
-            builder: (context, state) => PantallaPendiente(
-              texto: Textos.pendienteAuditoriaSuperada,
-              alVolver: () => context.go(Rutas.mapaSprintsDe(state.pathParameters['moduloId']!)),
-            ),
+            redirect: (context, state) =>
+                _redirigirResultado(ref, state.pathParameters['moduloId']!, aprobado: true),
+            builder: (context, state) =>
+                PantallaAuditoriaSuperada(moduloId: state.pathParameters['moduloId']!),
           ),
           GoRoute(
             path: Rutas.segmentoInspectoraGano,
-            builder: (context, state) => PantallaPendiente(
-              texto: Textos.pendienteInspectoraGano,
-              alVolver: () => context.go(Rutas.mapaSprintsDe(state.pathParameters['moduloId']!)),
-            ),
+            redirect: (context, state) =>
+                _redirigirResultado(ref, state.pathParameters['moduloId']!, aprobado: false),
+            builder: (context, state) =>
+                PantallaInspectoraGano(moduloId: state.pathParameters['moduloId']!),
           ),
         ],
       ),
@@ -157,3 +160,15 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
   ref.read(respuestasPendientesProvider);
   return enrutador;
 });
+
+/// 29 y 30 solo se abren con el examen de [moduloId] terminado: sin él van al
+/// mapa del módulo y, si el resultado no coincide, a la pantalla que le toca.
+String? _redirigirResultado(Ref ref, String moduloId, {required bool aprobado}) {
+  final examen = ref.read(examenProvider);
+  if (examen == null || examen.moduloId != moduloId || examen.fase != FaseJefe.terminado) {
+    return Rutas.mapaSprintsDe(moduloId);
+  }
+  final fueAprobado = examen.resultado == EstadoExamen.aprobado;
+  if (fueAprobado == aprobado) return null;
+  return fueAprobado ? Rutas.auditoriaSuperadaDe(moduloId) : Rutas.inspectoraGanoDe(moduloId);
+}

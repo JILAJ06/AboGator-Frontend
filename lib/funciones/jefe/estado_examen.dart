@@ -2,14 +2,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/utilidades/cronometro.dart';
 import '../../datos/modelos/examen.dart';
+import '../../datos/modelos/resultado_examen.dart';
 import '../../datos/modelos/tarjeta.dart';
 import '../../datos/modelos/vidas.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
 import '../../datos/repositorios/repositorio_examen.dart';
 import '../ajustes/estado_ajustes.dart';
+import '../apelaciones/pantalla_buzon.dart';
 import '../inicio/estado_inicio.dart';
 import '../mapa/estado_mapa.dart';
+import '../perfil/estado_perfil.dart';
 import '../vidas/pantalla_sin_vidas.dart';
+import 'logica_resultado.dart';
 
 /// En qué parte del examen está la pantalla.
 enum FaseJefe { intro, decision, replica, feedback, pausa, terminado }
@@ -40,6 +44,10 @@ class EstadoExamenJefe {
     this.falladas = const [],
     this.veredictoElegido,
     this.ronda = 0,
+    this.registro,
+    this.registrando = false,
+    this.errorRegistro,
+    this.apelacionesEnviadas = false,
   });
 
   final String moduloId;
@@ -72,6 +80,16 @@ class EstadoExamenJefe {
   /// Cambia con cada decisión y cada réplica (reinicia los relojes).
   final int ronda;
 
+  /// El resultado ya registrado por el servidor (29 y 30).
+  final ResultadoRegistrado? registro;
+  final bool registrando;
+
+  /// El último error al registrar (se muestra con "Reintentar").
+  final Object? errorRegistro;
+
+  /// Las apelaciones de las falladas ya se mandaron al Buzón.
+  final bool apelacionesEnviadas;
+
   bool get terminado => resultado != EstadoExamen.enCurso;
 
   EstadoExamenJefe copyWith({
@@ -93,6 +111,11 @@ class EstadoExamenJefe {
     List<DecisionFallada>? falladas,
     Veredicto? veredictoElegido,
     int? ronda,
+    ResultadoRegistrado? registro,
+    bool? registrando,
+    Object? errorRegistro,
+    bool? apelacionesEnviadas,
+    bool limpiarError = false,
     bool limpiarReplica = false,
     bool limpiarFeedback = false,
     bool limpiarSiguiente = false,
@@ -117,6 +140,10 @@ class EstadoExamenJefe {
     falladas: falladas ?? this.falladas,
     veredictoElegido: limpiarVeredicto ? null : veredictoElegido ?? this.veredictoElegido,
     ronda: ronda ?? this.ronda,
+    registro: registro ?? this.registro,
+    registrando: registrando ?? this.registrando,
+    errorRegistro: limpiarError ? null : errorRegistro ?? this.errorRegistro,
+    apelacionesEnviadas: apelacionesEnviadas ?? this.apelacionesEnviadas,
   );
 }
 
@@ -320,6 +347,52 @@ class ExamenNotifier extends Notifier<EstadoExamenJefe?> {
     final actual = state;
     if (!ref.mounted || actual == null) return;
     state = actual.copyWith(fase: actual.faseAntesDePausa ?? FaseJefe.decision);
+  }
+
+  /// Registra el resultado del intento terminado (29 y 30) una sola vez y
+  /// manda al Buzón una apelación por cada decisión fallada. Si falla, deja
+  /// el error en el estado (sin perder el resultado ni las falladas).
+  Future<ResultadoRegistrado?> registrarResultado() async {
+    final s = state;
+    final intento = s?.intento;
+    if (s == null || intento == null || s.fase != FaseJefe.terminado) return null;
+    if (s.registro != null && s.apelacionesEnviadas) return s.registro;
+    if (s.registrando) return null;
+    state = s.copyWith(registrando: true, limpiarError: true);
+    try {
+      final registro = s.registro ?? await _repo.registrarResultado(intento.id);
+      final actual = state;
+      if (!ref.mounted || actual == null) return registro;
+      state = actual.copyWith(registro: registro);
+      if (!actual.apelacionesEnviadas) {
+        final fallos = LogicaResultado.apelaciones(actual.falladas, actual.moduloId);
+        if (fallos.isNotEmpty) {
+          await ref.read(repositorioApelacionesProvider).registrarFallos(fallos);
+        }
+      }
+      final listo = state;
+      if (!ref.mounted || listo == null) return registro;
+      state = listo.copyWith(registrando: false, apelacionesEnviadas: true);
+      _refrescarTrasRegistro();
+      return registro;
+    } on Object catch (e) {
+      final actual = state;
+      if (ref.mounted && actual != null) {
+        state = actual.copyWith(registrando: false, errorRegistro: e);
+      }
+      return null;
+    }
+  }
+
+  /// Al salir de 29 o 30: el siguiente examen empieza de cero.
+  void reiniciar() => state = null;
+
+  void _refrescarTrasRegistro() {
+    _refrescarVidas();
+    ref
+      ..invalidate(apelacionesPendientesProvider)
+      ..invalidate(datosBuzonProvider)
+      ..invalidate(datosPerfilProvider);
   }
 
   /// Salir: cierra el intento sin premio ni pérdida de vidas.

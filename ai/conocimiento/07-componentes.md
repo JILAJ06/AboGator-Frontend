@@ -218,3 +218,11 @@ Figma: 27 = `42:5885`, 28 = `42:6027`, 28b = `42:6140`, 28c = `42:6284`. Medidas
 - **Chips de hora, daño y fallo:** pastillas de radio 999; hora y daño en `#B52426`, fallo con borde `estadoIlegal`.
 - **`PanelContraargumento`:** panel inferior sin descarte con la réplica, dos `OpcionJustificacion` y la cuenta regresiva.
 - La pantalla 27 es siempre oscura: sus colores viven en `EfectosApp`.
+
+## Componentes del resultado del Examen (se construyen en T-11b)
+Figma: 29 = `18:2916`, 30 = `18:3036`. Medidas, textos y reglas completos en `ai/siguiente.md` de la T-11b.
+- **`TarjetaCertificado`:** 342 de ancho, `fondoSuperficie`, borde 2 punteado `accionAcento`, radio 20, padding 20; logo horizontal, "CERTIFICADO DE MÓDULO" (Etiqueta `textoAcento`), módulo (Fredoka SemiBold 20/26), persona · aciertos · fecha y folio (Leyenda `textoSecundario`).
+- **Confeti de 29:** `ConfetiSprint` con 8 piezas de 12×6 (parametrizable; el valor por defecto sigue siendo el de 19).
+- **Trofeo:** círculo de 96 `accionAcento`, borde 6 `fondoDestacado`, ícono `trophy` de 48.
+- **Resumen del examen (30):** tres tarjetas de 107 (`fondoSuperficie`, borde 1, radio 16): "Llegaste a", "Aciertos" (`estadoLegal`) y "Por tiempo" (`estadoIlegal`); en columna con texto grande.
+- **Próxima vida (30):** `fondoDestacado`, radio 16, ícono `clock` 20 y cuenta regresiva del servidor.

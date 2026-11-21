@@ -42,6 +42,46 @@ abstract final class EscenarioRansomware {
       'Inspectora Vega cierre la auditoría.';
   static const String etiqueta = 'CRISIS · BRECHA DE DATOS';
 
+  /// Tema de las apelaciones de este examen.
+  static const String tema = 'Brechas de seguridad';
+
+  /// Máximo de caracteres del título de una apelación.
+  static const int maximoTitulo = 45;
+
+  /// Id de la decisión [indice] (1 a 10): `ran-01`…`ran-10`.
+  static String idDe(int indice) => 'ran-${indice.toString().padLeft(2, '0')}';
+
+  /// "Hora 24 · CTO", recortado con "…" a [maximoTitulo].
+  static String tituloApelacion(int hora, String personaje) {
+    final t = 'Hora $hora · $personaje';
+    return t.length <= maximoTitulo ? t : '${t.substring(0, maximoTitulo - 1)}…';
+  }
+
+  static String tituloDe(DecisionEscenario d) => tituloApelacion(d.hora, d.personaje);
+
+  /// La decisión [id] como tarjeta (para abrir su apelación en el juicio,
+  /// 22); `null` si no es de este escenario. En T-14 la dará el servidor.
+  static Tarjeta? comoTarjeta(String id) {
+    final m = RegExp(r'^ran-(\d{2})$').firstMatch(id);
+    if (m == null) return null;
+    final i = int.parse(m.group(1)!) - 1;
+    if (i < 0 || i >= decisiones.length) return null;
+    final d = decisiones[i];
+    return Tarjeta(
+      id: id,
+      tipo: TipoTarjeta.normal,
+      etiquetaCaso: etiqueta,
+      personaje: d.personaje,
+      rol: d.rol,
+      texto: d.texto,
+      iniciales: d.iniciales,
+      respuestaCorrecta: d.respuestaCorrecta,
+      explicacion: d.fundamentos[d.fundamentoCorrecto],
+      titulo: tituloDe(d),
+      tema: tema,
+    );
+  }
+
   static const List<DecisionEscenario> decisiones = [
     DecisionEscenario(
       hora: 0,

@@ -1,6 +1,7 @@
 import '../../core/textos/textos.dart';
 import '../modelos/tarjeta.dart';
 import '../repositorios/repositorio_tarjetas.dart';
+import 'escenario_ransomware.dart';
 import 'espera_simulada.dart';
 
 /// Tarjetas simuladas con casos de ejemplo.
@@ -1420,6 +1421,9 @@ class MockTarjetas implements RepositorioTarjetas {
         if (t.id == id) return t;
       }
     }
+    // Decisiones del Examen Final (sus apelaciones se abren en el juicio).
+    final delExamen = EscenarioRansomware.comoTarjeta(id);
+    if (delExamen != null) return delExamen;
     throw StateError(Textos.errorTarjetaNoEncontrada);
   }
 }

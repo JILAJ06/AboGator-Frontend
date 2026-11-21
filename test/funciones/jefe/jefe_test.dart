@@ -24,6 +24,7 @@ import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/jefe/estado_examen.dart';
 import 'package:abogator/funciones/jefe/logica_jefe.dart';
 import 'package:abogator/funciones/jefe/pantalla_jefe.dart';
+import 'package:abogator/funciones/jefe/pantalla_resultado.dart';
 import 'package:abogator/funciones/jefe/reloj_crisis.dart';
 import 'package:abogator/funciones/mapa/pantalla_mapa_sprints.dart';
 import 'package:abogator/funciones/vidas/pantalla_sin_vidas.dart';
@@ -694,12 +695,14 @@ void main() {
         await golpear(tester);
       }
       expect(rutaActual(tester), Rutas.auditoriaSuperadaDe('mod-1'));
-      expect(find.text(Textos.pendienteAuditoriaSuperada), findsOneWidget);
+      expect(find.byType(PantallaAuditoriaSuperada), findsOneWidget);
       final e = contenedorDe(tester).read(examenProvider)!;
       expect(e.resultado, EstadoExamen.aprobado);
       expect(e.resumen.golpes, 5);
-      await tocar(tester, find.bySemanticsLabel(Textos.atras));
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
       expect(rutaActual(tester), Rutas.mapaSprintsDe('mod-1'));
+      expect(contenedorDe(tester).read(examenProvider), isNull);
     });
 
     testWidgets('perder todas las vidas: reprobado → 30', (tester) async {
@@ -709,7 +712,7 @@ void main() {
       await elegir(tester, incorrecto(escenario[1].respuestaCorrecta));
       await pasarChip(tester);
       expect(rutaActual(tester), Rutas.inspectoraGanoDe('mod-1'));
-      expect(find.text(Textos.pendienteInspectoraGano), findsOneWidget);
+      expect(find.byType(PantallaInspectoraGano), findsOneWidget);
       expect(contenedorDe(tester).read(examenProvider)!.falladas, hasLength(2));
     });
   });

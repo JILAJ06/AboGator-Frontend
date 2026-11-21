@@ -1,4 +1,5 @@
 import '../modelos/examen.dart';
+import '../modelos/resultado_examen.dart';
 import '../modelos/tarjeta.dart';
 
 /// Examen Final de un módulo (pantallas 27 a 28c). El servidor manda: el
@@ -27,6 +28,15 @@ abstract interface class RepositorioExamen {
 
   /// Cierra el intento sin premio ni pérdida de vidas.
   Future<void> abandonar(String intentoId);
+
+  /// Registra el resultado de un intento terminado (29 y 30). Aprobado:
+  /// emite el certificado y desbloquea el módulo siguiente. Idempotente por
+  /// [intentoId]. Lanza `sinConexion` sin red o `intentoCerrado` si el intento
+  /// no terminó.
+  Future<ResultadoRegistrado> registrarResultado(String intentoId);
+
+  /// Certificados emitidos a la persona (GET /me/certificados, RF-41).
+  Future<List<Certificado>> obtenerCertificados();
 }
 
 /// Por qué el servidor rechazó una operación del examen.

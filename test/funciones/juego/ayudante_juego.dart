@@ -8,6 +8,7 @@ import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
 import 'package:abogator/core/servicios/servicio_haptico.dart';
 import 'package:abogator/core/utilidades/cronometro.dart';
+import 'package:abogator/datos/mocks/escenario_ransomware.dart';
 import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_perfil.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
@@ -26,6 +27,7 @@ import 'package:abogator/datos/repositorios/repositorio_autenticacion.dart';
 import 'package:abogator/datos/repositorios/repositorio_examen.dart';
 import 'package:abogator/datos/repositorios/repositorio_perfil.dart';
 import 'package:abogator/datos/repositorios/repositorio_tarjetas.dart';
+import 'package:abogator/datos/repositorios/repositorio_vidas.dart';
 import 'package:abogator/datos/sincronizacion/servicio_conexion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/ajustes/estado_ajustes.dart';
@@ -73,6 +75,8 @@ class TarjetasFalsas implements RepositorioTarjetas {
         if (t.id == id) return t;
       }
     }
+    final delExamen = EscenarioRansomware.comoTarjeta(id);
+    if (delExamen != null) return delExamen;
     throw StateError('no existe');
   }
 }
@@ -91,7 +95,7 @@ Future<TarjetasFalsas> abrirJuego(
   bool conSesion = true,
   void Function(TarjetasFalsas)? antes,
   MockTienda? tienda,
-  MockVidas? vidasRepo,
+  RepositorioVidas? vidasRepo,
   RepositorioApelaciones? apelaciones,
   MockRespuestas? servidorRespuestas,
   ServicioConexion? conexion,
@@ -102,6 +106,7 @@ Future<TarjetasFalsas> abrirJuego(
   ServicioHaptico? haptica,
   RepositorioExamen? examen,
   Cronometro Function()? crearCronometro,
+  MockProgreso? progreso,
 }) async {
   await tester.binding.setSurfaceSize(tamano);
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -110,7 +115,9 @@ Future<TarjetasFalsas> abrirJuego(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        repositorioProgresoProvider.overrideWithValue(MockProgreso(espera: Duration.zero)),
+        repositorioProgresoProvider.overrideWithValue(
+          progreso ?? MockProgreso(espera: Duration.zero),
+        ),
         repositorioPerfilProvider.overrideWithValue(perfil ?? MockPerfil(espera: Duration.zero)),
         if (autenticacion != null)
           repositorioAutenticacionProvider.overrideWithValue(autenticacion),

@@ -244,9 +244,9 @@ void main() {
       }
       expect(
         [for (final p in piezas) (p.decoration! as BoxDecoration).color],
-        [for (final p in ConfetiSprint.piezas) p.color],
+        [for (final p in ConfetiSprint.piezasSprint) p.color],
       );
-      expect(ConfetiSprint.piezas.map((p) => p.color).toSet(), {
+      expect(ConfetiSprint.piezasSprint.map((p) => p.color).toSet(), {
         EfectosApp.confetiAmbar,
         EfectosApp.confetiVerde,
         EfectosApp.confetiAzul,
