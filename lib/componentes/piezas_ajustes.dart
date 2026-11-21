@@ -11,14 +11,21 @@ import 'icono_app.dart';
 /// Encendido: pista accion/primaria con el pulgar a la derecha; apagado:
 /// borde/control con el pulgar a la izquierda. El pulgar es
 /// fondo/superficie. Es decorativo: lo maneja y lo anuncia la fila.
+///
+/// Con [grande] mide 52×32 con pulgar de 26 (Figma 34, Notificaciones; T-13b).
 class InterruptorApp extends StatelessWidget {
-  const InterruptorApp({required this.valor, super.key});
+  const InterruptorApp({required this.valor, this.grande = false, super.key});
 
   static const double ancho = 48;
   static const double alto = 28;
   static const double pulgar = 22;
 
+  static const double anchoGrande = 52;
+  static const double altoGrande = 32;
+  static const double pulgarGrande = 26;
+
   final bool valor;
+  final bool grande;
 
   /// Color de la pista según [valor].
   static Color colorPista(bool valor, BuildContext context) =>
@@ -28,29 +35,71 @@ class InterruptorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final sinAnimaciones = MediaQuery.disableAnimationsOf(context);
     final duracion = sinAnimaciones ? Duration.zero : const Duration(milliseconds: 150);
+    final anchoPista = grande ? anchoGrande : ancho;
+    final altoPista = grande ? altoGrande : alto;
+    final ladoPulgar = grande ? pulgarGrande : pulgar;
     return ExcludeSemantics(
       child: AnimatedContainer(
         key: const ValueKey('interruptor'),
         duration: duracion,
-        width: ancho,
-        height: alto,
-        padding: const EdgeInsets.all((alto - pulgar) / 2),
+        width: anchoPista,
+        height: altoPista,
+        padding: EdgeInsets.all((altoPista - ladoPulgar) / 2),
         decoration: BoxDecoration(
           color: colorPista(valor, context),
-          borderRadius: BorderRadius.circular(alto / 2),
+          borderRadius: BorderRadius.circular(altoPista / 2),
         ),
         child: AnimatedAlign(
           duration: duracion,
           alignment: valor ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-            width: pulgar,
-            height: pulgar,
+            width: ladoPulgar,
+            height: ladoPulgar,
             decoration: BoxDecoration(
               color: context.tokens.fondoSuperficie,
               shape: BoxShape.circle,
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Interruptor que se toca por sí solo (T-13b): el [InterruptorApp] grande en
+/// una zona de 48 de alto, con anillo de foco y semántica de interruptor
+/// ("Recordatorio diario, activado"). Para filas en las que tocar la fila hace
+/// otra cosa (el recordatorio abre el selector de hora).
+class InterruptorTocable extends StatelessWidget {
+  const InterruptorTocable({
+    required this.valor,
+    required this.etiqueta,
+    required this.alCambiar,
+    super.key,
+  });
+
+  final bool valor;
+  final String etiqueta;
+  final ValueChanged<bool>? alCambiar;
+
+  @override
+  Widget build(BuildContext context) {
+    final cambiar = alCambiar;
+    final accion = cambiar == null ? null : () => cambiar(!valor);
+    return AccionEnfocable(
+      alPresionar: accion,
+      radio: 16,
+      semantica: (hijo) => Semantics(
+        toggled: valor,
+        label: etiqueta,
+        onTap: accion,
+        excludeSemantics: true,
+        child: hijo,
+      ),
+      child: SizedBox(
+        width: 64,
+        height: 48,
+        child: Center(child: InterruptorApp(valor: valor, grande: true)),
       ),
     );
   }
