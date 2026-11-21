@@ -60,12 +60,17 @@ final repositorioTiendaProvider = Provider<RepositorioTienda>((ref) => MockTiend
 final repositorioExamenProvider = Provider<RepositorioExamen>(
   (ref) => MockExamen(
     vidas: ref.watch(repositorioVidasProvider),
+    progreso: ref.watch(repositorioProgresoProvider),
+    autenticacion: ref.watch(repositorioAutenticacionProvider),
     enLinea: () => ref.read(servicioConexionProvider).estado == EstadoConexion.enLinea,
   ),
 );
 
 final repositorioPerfilProvider = Provider<RepositorioPerfil>(
-  (ref) => MockPerfil(autenticacion: ref.watch(repositorioAutenticacionProvider)),
+  (ref) => MockPerfil(
+    autenticacion: ref.watch(repositorioAutenticacionProvider),
+    examen: ref.watch(repositorioExamenProvider),
+  ),
 );
 
 /// Lado del servidor de las respuestas del juego (mock hasta T-14).

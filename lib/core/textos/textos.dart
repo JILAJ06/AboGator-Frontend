@@ -508,8 +508,6 @@ abstract final class Textos {
   // ---------------------------------------------------------------------
   // Pantallas pendientes (marcadores temporales)
   // ---------------------------------------------------------------------
-  static const String pendienteAuditoriaSuperada = 'Auditoría superada · llega en T-11b';
-  static const String pendienteInspectoraGano = 'La Inspectora ganó · llega en T-11b';
 
   // ---------------------------------------------------------------------
   // 22 Juicio de apelación, 22b Apelación ganada y apelación perdida
@@ -703,6 +701,58 @@ abstract final class Textos {
   static String replicaCita(String texto) => '“$texto”';
   static String replicaAnuncio(String texto, int s) =>
       'La Inspectora contraargumenta: $texto Tienes $s segundos';
+  // 29 Auditoría superada y 30 La Inspectora ganó
+  static const String auditoriaSuperada = '¡Auditoría superada!';
+  static String aprobadoDesbloqueo(int numero, String nombre) =>
+      'Contuviste la crisis y la Inspectora Vega aprobó tu MVP. '
+      'Desbloqueaste el Módulo $numero: $nombre.';
+  static const String aprobadoUltimo =
+      'Contuviste la crisis y la Inspectora Vega aprobó tu MVP. ¡Completaste todos los módulos!';
+  static const String certificadoDeModulo = 'CERTIFICADO DE MÓDULO';
+  static String detalleCertificado(String persona, int aciertos, int total, String fecha) =>
+      '$persona · $aciertos/$total aciertos · $fecha';
+  static String folio(String folio) => 'Folio $folio';
+  static String certificadoSemantica(
+    String modulo,
+    String persona,
+    int aciertos,
+    int total,
+    String fecha,
+    String folio,
+  ) =>
+      'Certificado de módulo. $modulo. $persona, $aciertos de $total aciertos, $fecha. Folio $folio.';
+  static String irAlModulo(int numero) => 'Ir al Módulo $numero';
+  static const String compartirCertificadoBoton = 'Compartir certificado';
+  static String compartirCertificado(String modulo, String folio, String fecha) =>
+      'Obtuve el certificado «$modulo» en AboGator · Folio $folio · $fecha';
+  static const String certificadoCopiado = 'Certificado copiado';
+  static const String errorGuardarResultado = 'No pudimos guardar tu resultado';
+  static const String errorGuardarApelaciones = 'No pudimos guardar tus apelaciones';
+  static String anuncioAprobado(int? numero) => numero == null
+      ? 'Auditoría superada. Certificado emitido. Completaste todos los módulos'
+      : 'Auditoría superada. Certificado emitido. Módulo $numero desbloqueado';
+  static String anuncioReprobado(int apelaciones) =>
+      'La Inspectora ganó. ${apelaciones == 1 ? '1 apelación' : '$apelaciones apelaciones'} en el Buzón';
+  static const String inspectoraGano = 'La Inspectora ganó';
+  static const String reprobadoSinVidas =
+      'Te quedaste sin vidas durante la crisis. La auditoría se reiniciará desde la hora 0.';
+  static const String reprobadoSinDecisiones =
+      'Se acabaron las decisiones y la Inspectora Vega sigue en pie. '
+      'La auditoría se reiniciará desde la hora 0.';
+  static String llegasteValor(int jugadas, int total) => '$jugadas/$total';
+  static const String llegasteA = 'Llegaste a';
+  static const String aciertos = 'Aciertos';
+  static const String porTiempo = 'Por tiempo';
+  static String resumenExamenSemantica(int jugadas, int total, int aciertos, int porTiempo) =>
+      'Llegaste a la decisión $jugadas de $total. '
+      '${aciertos == 1 ? '1 acierto' : '$aciertos aciertos'}. '
+      '$porTiempo por tiempo agotado';
+  static String proximaVidaExamen(String tiempo) =>
+      'Próxima vida en $tiempo. Repasa los temas del módulo mientras tanto.';
+  static String vidasRestantesExamen(int vidas) =>
+      'Aún tienes ${vidas == 1 ? '1 vida' : '$vidas vidas'}. '
+      'Repasa los temas del módulo antes de volver a intentarlo.';
+  static const String repasarEnBuzon = 'Repasar en el Buzón';
   static const String errorRespuestaExamen = 'No se pudo enviar tu respuesta. Inténtalo de nuevo.';
   static const String pendienteNotificacionesRacha =
       'Notificaciones de racha · pantalla pendiente de diseño';

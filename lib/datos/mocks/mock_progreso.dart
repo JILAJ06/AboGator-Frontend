@@ -231,6 +231,36 @@ class MockProgreso implements RepositorioProgreso {
     _estado = estadoFinal;
   }
 
+  @override
+  Future<void> registrarExamenAprobado({required String moduloId}) async {
+    await esperar(espera);
+    final i = _modulos.indexWhere((m) => m.id == moduloId);
+    if (i < 0) return;
+    _modulos = [
+      for (final (j, modulo) in _modulos.indexed)
+        if (j == i)
+          modulo.copiar(
+            sprints: [
+              for (final s in modulo.sprints)
+                s.esExamenFinal
+                    ? s.copiar(estado: EstadoSprint.completado, estrellas: Sprint.maximoEstrellas)
+                    : s,
+            ],
+          )
+        else if (j == i + 1)
+          modulo.copiar(
+            sprints: [
+              for (final (k, s) in modulo.sprints.indexed)
+                k == 0 && s.estado == EstadoSprint.bloqueado
+                    ? s.copiar(estado: EstadoSprint.enCurso)
+                    : s,
+            ],
+          )
+        else
+          modulo,
+    ];
+  }
+
   /// Marca [sprintId] completado (con el máximo de estrellas) y pone en curso
   /// el siguiente sprint si estaba bloqueado. El Examen final no cambia: se
   /// habilita solo cuando todos los sprints están completados.

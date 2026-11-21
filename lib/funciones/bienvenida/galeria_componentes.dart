@@ -48,6 +48,7 @@ import '../../componentes/piezas_ajustes.dart';
 import '../../componentes/piezas_apelacion.dart';
 import '../../componentes/piezas_jefe.dart';
 import '../../componentes/piezas_perfil.dart';
+import '../../componentes/piezas_resultado.dart';
 import '../../componentes/piezas_tienda.dart';
 import '../../componentes/pila_tarjetas.dart';
 import '../../componentes/sarko_imagen.dart';
@@ -647,6 +648,26 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                   danio: false,
                 ),
                 const PildoraComodinesBloqueados(),
+                const TrofeoCertificado(),
+                const SizedBox(
+                  width: 342,
+                  child: TarjetaCertificado(
+                    modulo: 'Protección de Datos',
+                    detalle: 'Ana López · 9/10 aciertos · 28 oct 2026',
+                    folio: 'AG-M1-0001',
+                    etiquetaSemantica: 'Certificado de módulo',
+                  ),
+                ),
+                const SizedBox(width: 342, child: EsqueletoCertificado()),
+                const SizedBox(
+                  width: 342,
+                  child: FilaResumenExamen(jugadas: 7, total: 10, aciertos: 5, porTiempo: 2),
+                ),
+                const SizedBox(
+                  width: 342,
+                  height: 300,
+                  child: ConfetiSprint(piezas: ConfetiSprint.piezasAuditoria),
+                ),
                 PanelContraargumento(
                   replica: const Replica(
                     texto: '¿Seguro que no debes avisar? Si borras el log nadie se va a enterar.',

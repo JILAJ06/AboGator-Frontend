@@ -18,4 +18,10 @@ abstract interface class RepositorioProgreso {
     required int estrellas,
     required EstadoStartup estadoFinal,
   });
+
+  /// Registra el Examen final de [moduloId] aprobado (29): marca completado
+  /// su nodo (3 estrellas) y pone en curso el primer sprint del módulo
+  /// siguiente si estaba bloqueado. El último módulo no desbloquea nada.
+  /// Repetirlo no cambia nada más.
+  Future<void> registrarExamenAprobado({required String moduloId});
 }

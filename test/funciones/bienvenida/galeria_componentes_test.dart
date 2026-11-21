@@ -36,6 +36,7 @@ import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/piezas_apelacion.dart';
 import 'package:abogator/componentes/piezas_jefe.dart';
 import 'package:abogator/componentes/piezas_perfil.dart';
+import 'package:abogator/componentes/piezas_resultado.dart';
 import 'package:abogator/componentes/piezas_tienda.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
 import 'package:abogator/componentes/sello_veredicto.dart';
@@ -102,13 +103,17 @@ void main() {
     expect(find.byType(TemporizadorCrisis), findsNWidgets(2));
     expect(find.byType(ChipGolpe), findsNWidgets(2));
     expect(find.byType(PanelContraargumento), findsOneWidget);
+    expect(find.byType(TarjetaCertificado), findsOneWidget);
+    expect(find.byType(EsqueletoCertificado), findsOneWidget);
+    expect(find.byType(FilaResumenExamen), findsOneWidget);
+    expect(find.byType(TrofeoCertificado), findsOneWidget);
     expect(find.byType(PaginadorPuntos), findsOneWidget);
     expect(find.byType(SarkoImagen), findsNWidgets(10)); // 5 + 5 paneles
-    expect(find.byType(LogoApp), findsNWidgets(22));
+    expect(find.byType(LogoApp), findsNWidgets(23));
     expect(find.byType(NavegacionInferiorApp), findsOneWidget);
     expect(find.byType(EncabezadoModulo), findsNWidgets(2));
     // Fin de sprint (19 y 19b).
-    expect(find.byType(ConfetiSprint), findsOneWidget);
+    expect(find.byType(ConfetiSprint), findsNWidgets(2));
     expect(find.byType(EstrellasSprint), findsNWidgets(3));
     expect(find.byType(EstadisticasSprint), findsOneWidget);
     expect(find.byType(AvisoInformativo), findsNWidgets(2));

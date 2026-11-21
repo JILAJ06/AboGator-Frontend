@@ -1,9 +1,14 @@
 import '../modelos/examen.dart';
+import '../modelos/modulo.dart';
+import '../modelos/resultado_examen.dart';
 import '../modelos/tarjeta.dart';
+import '../repositorios/repositorio_autenticacion.dart';
 import '../repositorios/repositorio_examen.dart';
+import '../repositorios/repositorio_progreso.dart';
 import '../repositorios/repositorio_vidas.dart';
 import 'escenario_ransomware.dart';
 import 'espera_simulada.dart';
+import 'mock_autenticacion.dart';
 
 /// Fase del intento en el servidor simulado.
 enum _Turno { decision, replica, cerrado }
@@ -28,6 +33,15 @@ class _Intento {
   /// Cuándo vence la respuesta actual (hora del servidor).
   DateTime vence;
   DateTime? pausadoDesde;
+
+  /// Veredictos acertados (para el certificado).
+  int aciertos = 0;
+
+  /// Cómo terminó (`null` mientras sigue).
+  EstadoExamen? resultado;
+
+  /// El registro ya hecho (idempotente).
+  ResultadoRegistrado? registro;
 }
 
 /// Examen Final simulado que hace de servidor (§6.3, RF-34 a RF-38): un solo
@@ -37,6 +51,8 @@ class _Intento {
 class MockExamen implements RepositorioExamen {
   MockExamen({
     required this.vidas,
+    this.progreso,
+    this.autenticacion,
     this.espera = esperaSimuladaPorDefecto,
     DateTime Function()? ahora,
     bool Function()? enLinea,
@@ -44,6 +60,16 @@ class MockExamen implements RepositorioExamen {
        _enLinea = enLinea ?? (() => true);
 
   final RepositorioVidas vidas;
+
+  /// Para completar el Examen final y desbloquear el módulo siguiente.
+  final RepositorioProgreso? progreso;
+
+  /// Para el nombre del certificado (Ana si no hay).
+  final RepositorioAutenticacion? autenticacion;
+
+  /// Certificados emitidos, uno por módulo.
+  final Map<String, Certificado> _certificados = {};
+  int _siguienteFolio = 1;
   final Duration espera;
   final DateTime Function() _ahora;
   final bool Function() _enLinea;
@@ -149,7 +175,9 @@ class MockExamen implements RepositorioExamen {
 
   DecisionCrisis? _avanzar(_Intento i, EstadoExamen estado) {
     if (estado != EstadoExamen.enCurso) {
-      i.turno = _Turno.cerrado;
+      i
+        ..turno = _Turno.cerrado
+        ..resultado = estado;
       return null;
     }
     i
@@ -168,6 +196,7 @@ class MockExamen implements RepositorioExamen {
     final correcta = !agotado && veredicto == d.respuestaCorrecta;
     if (correcta) {
       i
+        ..aciertos += 1
         ..turno = _Turno.replica
         ..vence = _ahora().add(_limiteReplica(i.extendido));
       return ResultadoDecision(
@@ -240,6 +269,61 @@ class MockExamen implements RepositorioExamen {
     i
       ..vence = i.vence.add(_ahora().difference(desde))
       ..pausadoDesde = null;
+  }
+
+  @override
+  Future<ResultadoRegistrado> registrarResultado(String intentoId) async {
+    await esperar(espera);
+    if (!_enLinea()) throw const ExcepcionExamen(MotivoExcepcionExamen.sinConexion);
+    final i = _intentos[intentoId];
+    final resultado = i?.resultado;
+    if (i == null || resultado == null) {
+      throw const ExcepcionExamen(MotivoExcepcionExamen.intentoCerrado);
+    }
+    final previo = i.registro;
+    if (previo != null) return previo;
+    final actuales = await vidas.obtenerVidas();
+    if (resultado != EstadoExamen.aprobado) {
+      return i.registro = ResultadoRegistrado(
+        aprobado: false,
+        vidas: actuales.cantidad,
+        faltaParaProximaVida: actuales.faltaParaProxima,
+      );
+    }
+    final modulos = await progreso?.obtenerModulos() ?? const <Modulo>[];
+    final indice = modulos.indexWhere((m) => m.id == i.moduloId);
+    final modulo = indice < 0 ? null : modulos[indice];
+    final siguiente = indice >= 0 && indice + 1 < modulos.length ? modulos[indice + 1] : null;
+    final certificado = _certificados[i.moduloId] ??= Certificado(
+      folio: 'AG-M${modulo?.numero ?? 1}-${(_siguienteFolio++).toString().padLeft(4, '0')}',
+      moduloId: i.moduloId,
+      nombreModulo: modulo?.nombre ?? i.moduloId,
+      nombrePersona:
+          (await autenticacion?.usuarioActual())?.nombre ?? MockAutenticacion.usuarioDemo.nombre,
+      aciertos: i.aciertos,
+      totalDecisiones: _escenario.length,
+      fecha: _ahora().toUtc(),
+    );
+    await progreso?.registrarExamenAprobado(moduloId: i.moduloId);
+    return i.registro = ResultadoRegistrado(
+      aprobado: true,
+      certificado: certificado,
+      siguienteModulo: siguiente == null
+          ? null
+          : ModuloDesbloqueado(
+              id: siguiente.id,
+              numero: siguiente.numero,
+              nombre: siguiente.nombre,
+            ),
+      vidas: actuales.cantidad,
+      faltaParaProximaVida: actuales.faltaParaProxima,
+    );
+  }
+
+  @override
+  Future<List<Certificado>> obtenerCertificados() async {
+    await esperar(espera);
+    return List.unmodifiable(_certificados.values);
   }
 
   @override

@@ -1,6 +1,7 @@
 import '../modelos/insignia.dart';
 import '../modelos/resumen_perfil.dart';
 import '../repositorios/repositorio_autenticacion.dart';
+import '../repositorios/repositorio_examen.dart';
 import '../repositorios/repositorio_perfil.dart';
 import 'espera_simulada.dart';
 import 'mock_autenticacion.dart';
@@ -9,10 +10,13 @@ import 'mock_autenticacion.dart';
 /// usuario de la sesión del servidor (Ana si no hay [autenticacion] o no
 /// tiene a nadie).
 class MockPerfil implements RepositorioPerfil {
-  MockPerfil({this.espera = esperaSimuladaPorDefecto, this.autenticacion});
+  MockPerfil({this.espera = esperaSimuladaPorDefecto, this.autenticacion, this.examen});
 
   final Duration espera;
   final RepositorioAutenticacion? autenticacion;
+
+  /// Para contar los certificados emitidos (0 sin él).
+  final RepositorioExamen? examen;
 
   static const List<Insignia> insignias = [
     Insignia(
@@ -51,7 +55,7 @@ class MockPerfil implements RepositorioPerfil {
     return ResumenPerfil(
       usuario: usuario,
       precision: 82,
-      certificados: 0,
+      certificados: (await examen?.obtenerCertificados())?.length ?? 0,
       certificadosTotales: 5,
       sprintsPerfectos: 12,
       insignias: insignias,
