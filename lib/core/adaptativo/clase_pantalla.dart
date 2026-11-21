@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart' show DeviceOrientation;
 import 'package:material_ui/material_ui.dart';
 
 /// Clase de pantalla según el **ancho** (no según el tipo de dispositivo), así
@@ -119,3 +120,12 @@ class Adaptativo extends StatelessWidget {
     );
   }
 }
+
+/// Orientaciones que permite la app según el **lado corto** del dispositivo
+/// (en dp; no cambia al rotar). En el teléfono, solo vertical (el diseño
+/// móvil es vertical); en la tablet (lado corto ≥ 600), todas: WCAG 1.3.4
+/// pide no bloquear la orientación (T-13).
+List<DeviceOrientation> orientacionesPermitidas(Size tamanoDispositivo) =>
+    tamanoDispositivo.shortestSide >= MedidasAdaptativas.minimoTablet
+    ? DeviceOrientation.values
+    : const [DeviceOrientation.portraitUp];

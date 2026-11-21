@@ -29,6 +29,7 @@ class BotonApp extends StatefulWidget {
     this.cargando = false,
     this.textoCargando,
     this.altoMinimo = BotonApp.alto,
+    this.autofocus = false,
     super.key,
   });
 
@@ -57,6 +58,10 @@ class BotonApp extends StatefulWidget {
 
   /// Alto mínimo (crece con el texto dinámico). Nunca menos de 48.
   final double altoMinimo;
+
+  /// Recibe el foco al aparecer (el fantasma de un diálogo que no debe
+  /// confirmarse por accidente, como "Seguir en el examen"; T-13).
+  final bool autofocus;
 
   @override
   State<BotonApp> createState() => _BotonAppState();
@@ -137,6 +142,7 @@ class _BotonAppState extends State<BotonApp> {
       excludeSemantics: true,
       child: FocusableActionDetector(
         enabled: _habilitado,
+        autofocus: widget.autofocus,
         mouseCursor: _habilitado ? SystemMouseCursors.click : SystemMouseCursors.basic,
         onShowFocusHighlight: (valor) => setState(() => _foco = valor),
         actions: {

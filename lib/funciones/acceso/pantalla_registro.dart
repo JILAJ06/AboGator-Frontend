@@ -64,8 +64,19 @@ class _PantallaRegistroState extends ConsumerState<PantallaRegistro> {
     final campo = resultado.campoConError;
     if (campo != null) {
       _focos[campo]!.requestFocus();
+      if (campo == CampoRegistro.perfil) {
+        // El foco va al primer chip; además se muestra el grupo completo,
+        // para que ningún chip quede cortado bajo el borde (T-13).
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final grupo = _clavePerfiles.currentContext;
+          if (grupo != null && grupo.mounted) Scrollable.ensureVisible(grupo);
+        });
+      }
     }
   }
+
+  /// Grupo de chips de perfil (para mostrarlo completo al marcar su error).
+  final _clavePerfiles = GlobalKey(debugLabel: 'perfiles');
 
   void _limpiarAlEscribir(EstadoRegistro estado, CampoRegistro campo) {
     if (estado.errorDe(campo) != null || estado.errorGeneral != null) {
@@ -94,6 +105,7 @@ class _PantallaRegistroState extends ConsumerState<PantallaRegistro> {
       const SizedBox(height: 16),
       // Grupo de selección única, sin selección inicial.
       Wrap(
+        key: _clavePerfiles,
         spacing: 8,
         children: [
           for (final (i, (perfil, visible, nombre)) in opcionesPerfil.indexed)

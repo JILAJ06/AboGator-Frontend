@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
+import 'accion_enfocable.dart';
 import 'anillo_foco.dart';
 import 'icono_app.dart';
 
@@ -130,8 +131,11 @@ class _CampoTextoAppState extends State<CampoTextoApp> {
       textInputAction: widget.accionTeclado,
       style: estilos.cuerpoGrande.copyWith(color: tokens.textoPrimario),
       cursorColor: tokens.accionPrimaria,
+      // El relleno vertical va dentro del campo (no por fuera): así la zona
+      // táctil y el nodo del lector abarcan toda la caja de 52 (T-13).
       decoration: InputDecoration(
-        isCollapsed: true,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 14),
         border: InputBorder.none,
         hintText: widget.textoAyuda,
         hintStyle: estilos.cuerpoGrande.copyWith(color: tokens.textoSecundario),
@@ -159,10 +163,7 @@ class _CampoTextoAppState extends State<CampoTextoApp> {
             const SizedBox(width: 10),
           ],
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Semantics(label: widget.etiqueta, child: campo),
-            ),
+            child: Semantics(label: widget.etiqueta, child: campo),
           ),
           if (esContrasena) _botonMostrar(context),
         ],
@@ -194,22 +195,25 @@ class _CampoTextoAppState extends State<CampoTextoApp> {
 
   Widget _botonMostrar(BuildContext context) {
     final etiqueta = _ocultarTexto ? Textos.mostrarContrasena : Textos.ocultarContrasena;
-    return Semantics(
-      button: true,
-      label: etiqueta,
-      excludeSemantics: true,
-      onTap: _alternarOcultar,
-      child: InkResponse(
+    // Con anillo de foco al llegar con teclado, como los demás controles
+    // (T-13; antes usaba el resaltado de Material, que no se veía).
+    return AccionEnfocable(
+      alPresionar: _alternarOcultar,
+      radio: 24,
+      semantica: (hijo) => Semantics(
+        button: true,
+        label: etiqueta,
+        excludeSemantics: true,
         onTap: _alternarOcultar,
-        radius: 24,
-        child: SizedBox.square(
-          dimension: 48,
-          child: Center(
-            child: IconoApp(
-              _ocultarTexto ? IconosApp.eye : IconosApp.eyeOff,
-              tamano: 20,
-              color: context.tokens.textoSecundario,
-            ),
+        child: hijo,
+      ),
+      child: SizedBox.square(
+        dimension: 48,
+        child: Center(
+          child: IconoApp(
+            _ocultarTexto ? IconosApp.eye : IconosApp.eyeOff,
+            tamano: 20,
+            color: context.tokens.textoSecundario,
           ),
         ),
       ),

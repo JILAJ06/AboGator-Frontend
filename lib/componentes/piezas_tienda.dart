@@ -6,6 +6,7 @@ import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
 import 'chip_hud.dart';
+import 'foco_retorno.dart';
 import 'icono_app.dart';
 
 /// Saldo de la Tienda (Figma 24): píldora fondo/destacado, relleno 12/16/8,
@@ -197,6 +198,7 @@ class TarjetaArticulo extends StatelessWidget {
     required this.alComprar,
     this.faltan = 0,
     this.cargando = false,
+    this.nodoFoco,
     super.key,
   });
 
@@ -213,8 +215,18 @@ class TarjetaArticulo extends StatelessWidget {
   final int faltan;
   final bool cargando;
 
+  /// Nodo al que vuelve el foco al cerrar el diálogo de compra (T-13); no es
+  /// parada de Tab (ver [FocoRetorno]).
+  final FocusNode? nodoFoco;
+
   @override
   Widget build(BuildContext context) {
+    final nodo = nodoFoco;
+    final tarjeta = _tarjeta(context);
+    return nodo == null ? tarjeta : FocoRetorno(nodoFoco: nodo, radio: 22, child: tarjeta);
+  }
+
+  Widget _tarjeta(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
     final etiqueta = switch (bloqueo) {
