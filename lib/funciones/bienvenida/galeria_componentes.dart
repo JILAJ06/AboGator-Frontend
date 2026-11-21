@@ -46,6 +46,7 @@ import '../../componentes/panel_justificacion.dart';
 import '../../componentes/panel_veredicto.dart';
 import '../../componentes/piezas_ajustes.dart';
 import '../../componentes/piezas_apelacion.dart';
+import '../../componentes/piezas_jefe.dart';
 import '../../componentes/piezas_perfil.dart';
 import '../../componentes/piezas_tienda.dart';
 import '../../componentes/pila_tarjetas.dart';
@@ -58,6 +59,7 @@ import '../../componentes/tarjeta_modulo.dart';
 import '../../componentes/tarjeta_reto_diario.dart';
 import '../../core/recursos/imagenes_app.dart';
 import '../../core/tema/colores_marca.dart';
+import '../../core/tema/efectos.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/tema/modo_tema.dart';
 import '../../core/tema/tipografia.dart';
@@ -66,6 +68,7 @@ import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/mocks/mock_tarjetas.dart';
 import '../../datos/modelos/estado_startup.dart';
+import '../../datos/modelos/examen.dart';
 import '../../datos/modelos/tarjeta.dart';
 import '../apelaciones/pantalla_juicio.dart';
 import '../inicio/logica_inicio.dart';
@@ -617,6 +620,44 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                   ],
                 ),
                 OpcionTamano(porcentaje: 120, elegida: true, alElegir: () {}),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaJefe,
+              hijos: [
+                const SizedBox(width: 342, child: BarraDelJefe(hp: 60)),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  color: EfectosApp.fondoCrisis,
+                  child: const LineaDeCrisis(activa: FaseCrisis.aviso),
+                ),
+                const ChipHoraCrisis(hora: 24),
+                const TemporizadorCrisis(
+                  restante: Duration(seconds: 12),
+                  limite: Duration(seconds: 15),
+                ),
+                const TemporizadorCrisis(
+                  restante: Duration(seconds: 4),
+                  limite: Duration(seconds: 15),
+                ),
+                const ChipGolpe(texto: '−20 HP · ¡Argumento sólido!', etiquetaSemantica: 'Daño'),
+                const ChipGolpe(
+                  texto: Textos.falloVeredicto,
+                  etiquetaSemantica: 'Fallo',
+                  danio: false,
+                ),
+                const PildoraComodinesBloqueados(),
+                PanelContraargumento(
+                  replica: const Replica(
+                    texto: '¿Seguro que no debes avisar? Si borras el log nadie se va a enterar.',
+                    fundamentos: [
+                      'Ocultar evidencia de una brecha agrava la infracción.',
+                      'Solo hay que avisar si eran contraseñas.',
+                    ],
+                  ),
+                  segundosRestantes: 8,
+                  alElegir: (_) {},
+                ),
               ],
             ),
             _Seccion(

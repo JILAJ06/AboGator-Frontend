@@ -7,6 +7,7 @@ import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
 import 'package:abogator/core/servicios/servicio_haptico.dart';
+import 'package:abogator/core/utilidades/cronometro.dart';
 import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_perfil.dart';
 import 'package:abogator/datos/mocks/mock_progreso.dart';
@@ -22,11 +23,13 @@ import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
 import 'package:abogator/datos/repositorios/repositorio_ajustes.dart';
 import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
 import 'package:abogator/datos/repositorios/repositorio_autenticacion.dart';
+import 'package:abogator/datos/repositorios/repositorio_examen.dart';
 import 'package:abogator/datos/repositorios/repositorio_perfil.dart';
 import 'package:abogator/datos/repositorios/repositorio_tarjetas.dart';
 import 'package:abogator/datos/sincronizacion/servicio_conexion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/ajustes/estado_ajustes.dart';
+import 'package:abogator/funciones/jefe/estado_examen.dart';
 import 'package:abogator/funciones/juego/estado_juego.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -97,6 +100,8 @@ Future<TarjetasFalsas> abrirJuego(
   Ajustes? ajustes,
   RepositorioAjustes? repoAjustes,
   ServicioHaptico? haptica,
+  RepositorioExamen? examen,
+  Cronometro Function()? crearCronometro,
 }) async {
   await tester.binding.setSurfaceSize(tamano);
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -124,6 +129,8 @@ Future<TarjetasFalsas> abrirJuego(
         repositorioOnboardingProvider.overrideWithValue(OnboardingEnMemoria(vistoAlInicio: true)),
         if (repoAjustes != null) repositorioAjustesProvider.overrideWithValue(repoAjustes),
         if (haptica != null) servicioHapticoProvider.overrideWithValue(haptica),
+        if (examen != null) repositorioExamenProvider.overrideWithValue(examen),
+        if (crearCronometro != null) crearCronometroJefeProvider.overrideWithValue(crearCronometro),
       ],
       child: const AppAbogator(),
     ),

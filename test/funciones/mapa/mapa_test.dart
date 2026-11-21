@@ -29,6 +29,7 @@ import 'package:abogator/datos/repositorios/repositorio_progreso.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/inicio/pantalla_inicio.dart';
+import 'package:abogator/funciones/jefe/pantalla_jefe.dart';
 import 'package:abogator/funciones/juego/pantalla_juego.dart';
 import 'package:abogator/funciones/mapa/pantalla_intro_sprint.dart';
 import 'package:abogator/funciones/mapa/pantalla_mapa_sprints.dart';
@@ -290,7 +291,7 @@ void main() {
       await abrir(tester, modulos: [moduloCompleto]);
       expect(find.byType(GloboSprintActual), findsNothing);
       await tocar(tester, nodo(5));
-      expect(find.text(Textos.pendienteJefe), findsOneWidget);
+      expect(find.byType(PantallaJefe), findsOneWidget);
       expect(rutaActual(tester), Rutas.crisisJefeDe('mod-1'));
     });
 

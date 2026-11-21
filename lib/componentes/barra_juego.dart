@@ -16,6 +16,7 @@ class BarraJuego extends StatelessWidget {
     required this.total,
     required this.vidas,
     required this.alSalir,
+    this.paso,
     super.key,
   });
 
@@ -29,9 +30,14 @@ class BarraJuego extends StatelessWidget {
   final int vidas;
   final VoidCallback? alSalir;
 
+  /// Texto del paso en lugar de "Sprint N · Tarjeta k de n" (el Examen
+  /// Final: "Crisis · Decisión k de 10").
+  final String? paso;
+
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
+    final textoPaso = paso ?? Textos.juegoPaso(numeroSprint, actual, total);
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: alto),
       child: Padding(
@@ -47,14 +53,14 @@ class BarraJuego extends StatelessWidget {
                 children: [
                   ExcludeSemantics(
                     child: Text(
-                      Textos.juegoPaso(numeroSprint, actual, total),
+                      textoPaso,
                       style: context.estilos.leyenda.copyWith(color: tokens.textoSecundario),
                     ),
                   ),
                   const SizedBox(height: 6),
                   BarraProgreso(
                     valor: total == 0 ? 0 : actual / total,
-                    etiquetaSemantica: Textos.juegoPaso(numeroSprint, actual, total),
+                    etiquetaSemantica: textoPaso,
                   ),
                 ],
               ),
