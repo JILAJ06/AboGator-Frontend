@@ -22,7 +22,12 @@ class PiezaConfeti {
 /// Mide [ancho]×[alto] y se centra en el ancho disponible (en pantallas
 /// angostas las piezas de los bordes quedan fuera, sin desbordes).
 class ConfetiSprint extends StatefulWidget {
-  const ConfetiSprint({this.piezas = piezasSprint, super.key});
+  const ConfetiSprint({
+    this.piezas = piezasSprint,
+    this.anchoLienzo = ancho,
+    this.altoLienzo = alto,
+    super.key,
+  });
 
   static const double ancho = 390;
   static const double alto = 260;
@@ -55,6 +60,34 @@ class ConfetiSprint extends StatefulWidget {
 
   /// Piezas a dibujar (por defecto, las de 19).
   final List<PiezaConfeti> piezas;
+
+  /// Lienzo sobre el que se miden las piezas (390 × 260 en móvil; el panel de
+  /// 597 en tablet).
+  final double anchoLienzo;
+  final double altoLienzo;
+
+  /// Figma T19 (98:5164 a 98:5170) sobre el panel de 597, sin la barra de 32.
+  static const List<PiezaConfeti> piezasSprintTablet = [
+    PiezaConfeti(90, 76, EfectosApp.confetiAmbar, 0),
+    PiezaConfeti(480, 103, EfectosApp.confetiVerde, -30),
+    PiezaConfeti(135, 193, EfectosApp.confetiAzul, -60),
+    PiezaConfeti(450, 49, EfectosApp.confetiRojo, -15),
+    PiezaConfeti(300, 31, EfectosApp.confetiAmbarClaro, -45),
+    PiezaConfeti(60, 238, EfectosApp.confetiVerde, -20),
+    PiezaConfeti(510, 220, EfectosApp.confetiAmbar, -70),
+  ];
+
+  /// Figma T29 (101:5657 a 101:5664) sobre el panel de 597, sin la barra de 32.
+  static const List<PiezaConfeti> piezasAuditoriaTablet = [
+    PiezaConfeti(75, 67, EfectosApp.confetiAmbar, -10),
+    PiezaConfeti(495, 85, EfectosApp.confetiVerde, -40),
+    PiezaConfeti(120, 238, EfectosApp.confetiAzul, -60),
+    PiezaConfeti(465, 40, EfectosApp.confetiRojo, -15),
+    PiezaConfeti(285, 31, EfectosApp.confetiAmbarClaro, -45),
+    PiezaConfeti(45, 184, EfectosApp.confetiVerde, -20),
+    PiezaConfeti(525, 220, EfectosApp.confetiAmbar, -70),
+    PiezaConfeti(390, 265, EfectosApp.confetiAzul, -30),
+  ];
 
   @override
   State<ConfetiSprint> createState() => _ConfetiSprintState();
@@ -92,10 +125,10 @@ class _ConfetiSprintState extends State<ConfetiSprint> with SingleTickerProvider
     return ExcludeSemantics(
       child: IgnorePointer(
         child: SizedBox(
-          height: ConfetiSprint.alto,
+          height: widget.altoLienzo,
           child: OverflowBox(
-            minWidth: ConfetiSprint.ancho,
-            maxWidth: ConfetiSprint.ancho,
+            minWidth: widget.anchoLienzo,
+            maxWidth: widget.anchoLienzo,
             child: AnimatedBuilder(
               animation: _caida,
               builder: (context, _) => Stack(

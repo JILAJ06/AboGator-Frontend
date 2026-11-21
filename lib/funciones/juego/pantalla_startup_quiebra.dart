@@ -6,6 +6,7 @@ import '../../app/rutas.dart';
 import '../../componentes/aviso_informativo.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/disposicion_resultado_tablet.dart';
 import '../../componentes/etiqueta_quiebra.dart';
 import '../../componentes/ilustracion_sarko.dart';
 import '../../componentes/indicadores_startup.dart';
@@ -63,22 +64,71 @@ class _PantallaStartupQuiebraState extends ConsumerState<PantallaStartupQuiebra>
 
     final tokens = context.tokens;
     final causa = LogicaFinSprint.causaQuiebra(juego.estadoStartup) ?? CausaQuiebra.riesgoLegal;
+    final indicadores = ElementoOrdenado(
+      orden: 4,
+      child: BloqueLectura(
+        key: const ValueKey('indicadores-quiebra'),
+        etiqueta: Textos.indicadoresSemantica,
+        child: IndicadoresStartup(
+          estado: juego.estadoStartup,
+          cambios: LogicaFinSprint.cambios(juego.estadoInicial, juego.estadoStartup),
+        ),
+      ),
+    );
+    final descripcion = ElementoOrdenado(
+      orden: 3,
+      child: Text(
+        LogicaFinSprint.descripcionQuiebra(_datos?.sprint, causa),
+        key: const ValueKey('descripcion-quiebra'),
+        style: context.estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
+        textAlign: TextAlign.center,
+      ),
+    );
+    final avisoReinicio = ElementoOrdenado(
+      orden: 5,
+      child: AvisoInformativo(
+        key: const ValueKey('aviso-reinicio'),
+        icono: IconosApp.info,
+        colorIcono: tokens.textoAcento,
+        rellenoVertical: 12,
+        texto: Textos.avisoReinicio,
+      ),
+    );
     return ColumnaFinSprint(
+      // T19b (Figma 98:2433): Sarko triste y la etiqueta de la causa × 1.7 en
+      // el panel izquierdo; indicadores, título, descripción y aviso a la
+      // derecha, con separación 16.
+      ilustracionTablet: IlustracionAmpliada(
+        anchoBase: 230,
+        escala: 1.7,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IlustracionSarko(
+              pose: PoseSarko.triste,
+              diametro: 220,
+              anchoSarko: 176,
+              colorFondo: tokens.fondoSuperficieAlt,
+            ),
+            const SizedBox(height: 16),
+            ElementoOrdenado(orden: 2, child: EtiquetaQuiebra(causa: causa)),
+          ],
+        ),
+      ),
+      contenidoTablet: [
+        indicadores,
+        const SizedBox(height: 16),
+        const ElementoOrdenado(orden: 1, child: TituloFinSprint(Textos.quiebraTitulo)),
+        const SizedBox(height: 16),
+        descripcion,
+        const SizedBox(height: 16),
+        avisoReinicio,
+      ],
       // Orden de lectura y foco: título → causa → descripción → indicadores →
       // aviso → botones.
       contenido: [
         const SizedBox(height: 16),
-        ElementoOrdenado(
-          orden: 4,
-          child: BloqueLectura(
-            key: const ValueKey('indicadores-quiebra'),
-            etiqueta: Textos.indicadoresSemantica,
-            child: IndicadoresStartup(
-              estado: juego.estadoStartup,
-              cambios: LogicaFinSprint.cambios(juego.estadoInicial, juego.estadoStartup),
-            ),
-          ),
-        ),
+        indicadores,
         const SizedBox(height: 10),
         IlustracionSarko(
           pose: PoseSarko.triste,
@@ -91,26 +141,9 @@ class _PantallaStartupQuiebraState extends ConsumerState<PantallaStartupQuiebra>
         const SizedBox(height: 8),
         const ElementoOrdenado(orden: 1, child: TituloFinSprint(Textos.quiebraTitulo)),
         const SizedBox(height: 8),
-        ElementoOrdenado(
-          orden: 3,
-          child: Text(
-            LogicaFinSprint.descripcionQuiebra(_datos?.sprint, causa),
-            key: const ValueKey('descripcion-quiebra'),
-            style: context.estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
-            textAlign: TextAlign.center,
-          ),
-        ),
+        descripcion,
         const SizedBox(height: 30),
-        ElementoOrdenado(
-          orden: 5,
-          child: AvisoInformativo(
-            key: const ValueKey('aviso-reinicio'),
-            icono: IconosApp.info,
-            colorIcono: tokens.textoAcento,
-            rellenoVertical: 12,
-            texto: Textos.avisoReinicio,
-          ),
-        ),
+        avisoReinicio,
       ],
       botones: [
         ElementoOrdenado(
