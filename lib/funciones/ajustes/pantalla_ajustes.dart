@@ -8,6 +8,7 @@ import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/foco_retorno.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/piezas_ajustes.dart';
 import '../../componentes/piezas_perfil.dart';
@@ -26,7 +27,7 @@ import 'logica_ajustes.dart';
 /// Atrás y "Accesibilidad", el subtítulo y tres secciones (Visual, Motor y
 /// auditiva, Cognitiva). Cada cambio se aplica al instante y se guarda en el
 /// dispositivo; si no se puede guardar, se revierte y se avisa.
-class PantallaAjustes extends ConsumerWidget {
+class PantallaAjustes extends ConsumerStatefulWidget {
   const PantallaAjustes({super.key});
 
   /// Vuelve al Perfil (o a la pantalla anterior si la hay).
@@ -36,6 +37,21 @@ class PantallaAjustes extends ConsumerWidget {
     } else {
       context.go(Rutas.perfil);
     }
+  }
+
+  @override
+  ConsumerState<PantallaAjustes> createState() => _PantallaAjustesState();
+}
+
+class _PantallaAjustesState extends ConsumerState<PantallaAjustes> {
+  /// Fila "Tamaño de texto": el foco vuelve a ella al cerrar el selector
+  /// (con o sin elección; T-13).
+  final _focoTamano = FocusNode(debugLabel: 'ajuste tamaño de texto');
+
+  @override
+  void dispose() {
+    _focoTamano.dispose();
+    super.dispose();
   }
 
   Future<void> _cambiar(BuildContext context, WidgetRef ref, Ajustes nuevos) async {
@@ -78,12 +94,16 @@ class PantallaAjustes extends ConsumerWidget {
             isScrollControlled: true,
             builder: (contexto) => SelectorTamano(actual: actual),
           );
-    if (elegido == null || !context.mounted) return;
+    if (!context.mounted) return;
+    devolverFoco(_focoTamano);
+    if (elegido == null) return;
     await _cambiar(context, ref, ref.read(ajustesProvider).copyWith(escalaTexto: elegido));
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) => _construir(context, ref);
+
+  Widget _construir(BuildContext context, WidgetRef ref) {
     final ajustes = ref.watch(ajustesProvider);
     final tokens = context.tokens;
     final estilos = context.estilos;
@@ -114,6 +134,7 @@ class PantallaAjustes extends ConsumerWidget {
           detalle: Textos.tamanoTextoDetalle,
           valorSemantico: Textos.porcentajeSemantica(ajustes.escalaTexto),
           control: ChipValor(texto: Textos.tamanoValor(ajustes.escalaTexto)),
+          nodoFoco: _focoTamano,
           alPresionar: () => _elegirTamano(context, ref),
         ),
         FilaAjuste(
@@ -188,7 +209,7 @@ class PantallaAjustes extends ConsumerWidget {
             key: const ValueKey('boton-atras-ajustes'),
             icono: IconosApp.back,
             etiqueta: Textos.atras,
-            alPresionar: () => volver(context),
+            alPresionar: () => PantallaAjustes.volver(context),
           ),
         ),
         const SizedBox(width: 4),

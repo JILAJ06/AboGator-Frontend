@@ -98,6 +98,7 @@ class FilaAjuste extends StatelessWidget {
     this.interruptor,
     this.valorSemantico,
     this.etiquetaSemantica,
+    this.nodoFoco,
     super.key,
   });
 
@@ -115,6 +116,9 @@ class FilaAjuste extends StatelessWidget {
 
   /// Lo que lee el lector (por defecto, "Título, detalle").
   final String? etiquetaSemantica;
+
+  /// Nodo de foco propio (el foco vuelve aquí al cerrar el selector; T-13).
+  final FocusNode? nodoFoco;
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +163,7 @@ class FilaAjuste extends StatelessWidget {
     return AccionEnfocable(
       alPresionar: accion,
       radio: 12,
+      nodoFoco: nodoFoco,
       semantica: (hijo) => Semantics(
         container: true,
         button: interruptor == null,
