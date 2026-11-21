@@ -38,10 +38,14 @@ import 'package:abogator/componentes/piezas_jefe.dart';
 import 'package:abogator/componentes/piezas_perfil.dart';
 import 'package:abogator/componentes/piezas_resultado.dart';
 import 'package:abogator/componentes/piezas_tienda.dart';
+import 'package:abogator/componentes/riel_navegacion.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
 import 'package:abogator/componentes/sello_veredicto.dart';
 import 'package:abogator/componentes/snippet_codigo.dart';
+import 'package:abogator/componentes/tarjeta_buzon_inicio.dart';
 import 'package:abogator/componentes/tarjeta_caso.dart';
+import 'package:abogator/componentes/tarjeta_consejo_sarko.dart';
+import 'package:abogator/componentes/tarjeta_semana.dart';
 import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
@@ -81,10 +85,11 @@ void main() {
   testWidgets('la app abre en la galería con todos los componentes', (tester) async {
     await montarGaleria(tester);
     expect(find.text(Textos.galeriaTitulo), findsOneWidget);
-    expect(
-      find.byType(BotonApp),
-      findsNWidgets(21),
-    ); // 8 + globo + 5 paneles + 3 visores + panel 18 + Abogado + 2 del Buzón (20)
+    expect(find.byType(BotonApp), findsNWidgets(22)); // 8 + globo + 5 paneles + 3 visores + panel 18 + Abogado + 2 del Buzón (20) + Buzón del Inicio de tablet
+    expect(find.byType(RielNavegacion), findsOneWidget);
+    expect(find.byType(TarjetaSemana), findsNWidgets(2));
+    expect(find.byType(TarjetaBuzonInicio), findsNWidgets(2));
+    expect(find.byType(TarjetaConsejoSarko), findsOneWidget);
     expect(find.byType(BotonVeredicto), findsNWidgets(12)); // 8 + los de las acciones
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
     expect(find.byType(ChipHud), findsNWidgets(8)); // 5 + 2 encabezados + barra de juego
@@ -109,7 +114,7 @@ void main() {
     expect(find.byType(TrofeoCertificado), findsOneWidget);
     expect(find.byType(PaginadorPuntos), findsOneWidget);
     expect(find.byType(SarkoImagen), findsNWidgets(10)); // 5 + 5 paneles
-    expect(find.byType(LogoApp), findsNWidgets(23));
+    expect(find.byType(LogoApp), findsNWidgets(24)); // + isotipo del riel
     expect(find.byType(NavegacionInferiorApp), findsOneWidget);
     expect(find.byType(EncabezadoModulo), findsNWidgets(2));
     // Fin de sprint (19 y 19b).
@@ -164,7 +169,9 @@ void main() {
 
   testWidgets('la navegación inferior cambia de pestaña', (tester) async {
     await montarGaleria(tester);
-    await tester.tap(find.text('Perfil'));
+    await tester.tap(
+      find.descendant(of: find.byType(NavegacionInferiorApp), matching: find.text('Perfil')),
+    );
     await tester.pump();
     expect(
       tester.widget<NavegacionInferiorApp>(find.byType(NavegacionInferiorApp)).actual,
