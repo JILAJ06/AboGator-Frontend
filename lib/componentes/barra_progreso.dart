@@ -6,9 +6,15 @@ import '../core/utilidades/extensiones_contexto.dart';
 /// Barra de progreso: alto 12, radio 6, relleno accion/primaria con brillo
 /// (franja de 3 de alto, blanco al 35 %, a 6 del borde izquierdo y 2.5 de
 /// arriba, ancho = relleno − 12). El cambio se anima salvo con
-/// "reducir animaciones".
+/// "reducir animaciones". [colorRelleno] cambia el relleno (el Examen usa
+/// accion/secundaria, T-13).
 class BarraProgreso extends StatelessWidget {
-  const BarraProgreso({required this.valor, required this.etiquetaSemantica, super.key});
+  const BarraProgreso({
+    required this.valor,
+    required this.etiquetaSemantica,
+    this.colorRelleno,
+    super.key,
+  });
 
   static const double alto = 12;
 
@@ -17,6 +23,9 @@ class BarraProgreso extends StatelessWidget {
 
   /// Por ejemplo "Tarjeta 5 de 10".
   final String etiquetaSemantica;
+
+  /// Sin valor, accion/primaria.
+  final Color? colorRelleno;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +60,7 @@ class BarraProgreso extends StatelessWidget {
                     width: relleno,
                     height: alto,
                     decoration: BoxDecoration(
-                      color: tokens.accionPrimaria,
+                      color: colorRelleno ?? tokens.accionPrimaria,
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),

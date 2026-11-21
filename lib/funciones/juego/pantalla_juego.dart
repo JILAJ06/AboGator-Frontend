@@ -46,6 +46,7 @@ import 'logica_comodines.dart';
 import 'logica_swipe.dart';
 import 'logica_veredicto.dart';
 import 'mazo_swipe.dart';
+import 'saldo_juego.dart';
 
 /// Pantalla 10 · Juego: tarjeta de caso que se arrastra en 4 direcciones.
 ///
@@ -455,6 +456,9 @@ class _JuegoState extends ConsumerState<_Juego> {
             alConfirmar: (v) => _alConfirmar(tarjeta, v),
             alInspeccionar: inspeccionar,
             arrastreActivo: !soloBotones,
+            // Tablet ancha: la tarjeta se queda con su sello mientras la hoja
+            // lateral está abierta (Figma T12, T14; T-13).
+            retenerAlConfirmar: context.clasePantalla.esAncho,
             tarjeta: TarjetaCaso(
               soloBotones: soloBotones,
               etiquetaCaso: tarjeta.etiquetaCaso,
@@ -668,11 +672,6 @@ const double anchoHojaTabletVertical = 440;
 
 /// Ancho máximo del juego del móvil entre 600 y 959.
 const double anchoJuegoTabletVertical = 440;
-
-/// Saldo de monedas al abrir el juego (HUD de tablet; T-12c).
-final saldoJuegoProvider = FutureProvider.autoDispose<int>(
-  (ref) => ref.watch(repositorioTiendaProvider).obtenerMonedas(),
-);
 
 /// Reglas de presentación del juego en tablet (sin estado).
 abstract final class LogicaJuegoTablet {

@@ -42,7 +42,7 @@ import '../ajustes/estado_ajustes.dart';
 import '../inicio/logica_inicio.dart';
 import '../juego/logica_swipe.dart';
 import '../juego/mazo_swipe.dart';
-import '../juego/pantalla_juego.dart' show saldoJuegoProvider;
+import '../juego/saldo_juego.dart';
 import 'estado_examen.dart';
 import 'logica_jefe.dart';
 import 'reloj_crisis.dart';
@@ -577,6 +577,10 @@ class _DecisionState extends ConsumerState<_Decision> {
       titulo: Textos.salirExamenTitulo,
       texto: Textos.salirExamenTexto,
       textoConfirmar: Textos.salirExamen,
+      // El reloj no se detiene con el diálogo abierto: el foco inicial va al
+      // botón que sigue en el examen (T-13).
+      textoCancelar: Textos.seguirEnExamen,
+      focoEnCancelar: true,
     );
     if (!salir || !mounted) return;
     final moduloId = widget.moduloId;
@@ -698,6 +702,9 @@ class _DecisionState extends ConsumerState<_Decision> {
           decision.texto,
         ),
         alConfirmar: _responder,
+        // Tablet ancha: la tarjeta se queda con su sello hasta la siguiente
+        // decisión (T-13).
+        retenerAlConfirmar: context.clasePantalla.esAncho,
         tarjeta: tarjeta,
       );
     }
@@ -715,6 +722,19 @@ class _DecisionState extends ConsumerState<_Decision> {
     );
 
     final tablet = context.clasePantalla.esAncho;
+    final feedback = examen.feedback;
+    final chipGolpe = faseVisible == FaseJefe.feedback && feedback != null
+        ? ChipGolpe(
+            danio: feedback == TipoFeedback.golpe,
+            texto: LogicaJefe.textoFeedback(feedback, examen.danio),
+            etiquetaSemantica: LogicaJefe.anuncioFeedback(
+              feedback,
+              danio: examen.danio,
+              hp: examen.hp,
+              vidas: examen.vidas,
+            ),
+          )
+        : null;
     final altoMinimoZona =
         TarjetaCaso.altoMinimoPara(MediaQuery.textScalerOf(context)) + MazoSwipe.altoPila;
     final zona = Stack(
@@ -747,6 +767,7 @@ class _DecisionState extends ConsumerState<_Decision> {
           total: examen.total,
           vidas: examen.vidas,
           paso: Textos.pasoCrisis(decision.indice, examen.total),
+          colorProgreso: context.tokens.accionSecundaria,
           alSalir: _salir,
         ),
         const SizedBox(height: 4),
@@ -788,7 +809,6 @@ class _DecisionState extends ConsumerState<_Decision> {
       ],
     );
 
-    final feedback = examen.feedback;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (hecho, _) {
@@ -832,6 +852,7 @@ class _DecisionState extends ConsumerState<_Decision> {
                     racha: ref.watch(sesionProvider)?.racha ?? 0,
                     monedas: ref.watch(saldoJuegoProvider).value ?? 0,
                     paso: Textos.pasoCrisis(decision.indice, examen.total),
+                    colorProgreso: context.tokens.accionSecundaria,
                     alSalir: _salir,
                     alPausar: ajustes.tiempoExtendido ? _examen.pausar : null,
                   ),
@@ -840,7 +861,7 @@ class _DecisionState extends ConsumerState<_Decision> {
                   acciones: acciones,
                   comodines: const PildoraComodinesBloqueados(),
                   panel: [
-                    TarjetaJefe(hp: examen.hp),
+                    TarjetaJefe(hp: examen.hp, chip: chipGolpe),
                     const TarjetaAtajos(lineas: Textos.atajosLineasExamen),
                   ],
                 )
@@ -856,25 +877,14 @@ class _DecisionState extends ConsumerState<_Decision> {
                     ),
                   ),
                 ),
-              // Chip de daño o de fallo, sobre la barra del Jefe.
-              if (faseVisible == FaseJefe.feedback && feedback != null)
+              // Chip de daño o de fallo, sobre la barra del Jefe (en tablet,
+              // dentro de la tarjeta "El Jefe" del panel lateral).
+              if (chipGolpe != null && !tablet)
                 Positioned(
                   top: MediaQuery.paddingOf(context).top + BarraJuego.alto - 12,
                   right: 24,
                   left: 24,
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: ChipGolpe(
-                      danio: feedback == TipoFeedback.golpe,
-                      texto: LogicaJefe.textoFeedback(feedback, examen.danio),
-                      etiquetaSemantica: LogicaJefe.anuncioFeedback(
-                        feedback,
-                        danio: examen.danio,
-                        hp: examen.hp,
-                        vidas: examen.vidas,
-                      ),
-                    ),
-                  ),
+                  child: Align(alignment: Alignment.centerRight, child: chipGolpe),
                 ),
               // 28b: velo y panel de contraargumento.
               if (faseVisible == FaseJefe.replica && examen.replica != null) ...[

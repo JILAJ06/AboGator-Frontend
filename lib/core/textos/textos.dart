@@ -781,8 +781,10 @@ abstract final class Textos {
   static const String salirDelExamen = 'Salir del examen';
   static const String salirExamenTitulo = '¿Salir del examen?';
   static const String salirExamenTexto =
-      'La crisis se reinicia desde la hora 0. No ganas premio ni pierdes vidas.';
+      'La crisis se reinicia desde la hora 0. No ganas premio ni pierdes vidas. '
+      'El tiempo sigue corriendo.';
   static const String salirExamen = 'Salir';
+  static const String seguirEnExamen = 'Seguir en el examen';
   static String quedanSegundos(int s) => s == 1 ? 'Queda 1 segundo' : 'Quedan $s segundos';
   static String limiteDecision(int s) => 'Tienes $s segundos para decidir';
   static const String tiempoAgotado = 'Tiempo agotado';
