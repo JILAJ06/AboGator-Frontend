@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../core/adaptativo/clase_pantalla.dart';
 import '../core/tema/modo_tema.dart';
 import '../core/tema/tema_app.dart';
 import '../core/textos/textos.dart';
@@ -32,9 +33,10 @@ class AppAbogator extends ConsumerWidget {
       routerConfig: enrutador,
       // Tamaño de texto y "reducir animaciones" de los ajustes (pantalla 26):
       // aquí llegan también a diálogos y paneles.
+      // El ámbito publica la clase de pantalla (móvil o tablet) del ancho real.
       builder: (context, hijo) => MediaQuery(
         data: LogicaAjustes.aplicar(MediaQuery.of(context), ajustes),
-        child: hijo ?? const SizedBox.shrink(),
+        child: AmbitoClasePantalla(child: hijo ?? const SizedBox.shrink()),
       ),
     );
   }

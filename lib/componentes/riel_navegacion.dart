@@ -57,7 +57,7 @@ class RielNavegacion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final contenido = Column(
+    final arriba = Column(
       children: [
         const LogoApp(
           key: ValueKey('isotipo-riel'),
@@ -76,7 +76,10 @@ class RielNavegacion extends StatelessWidget {
             alPresionar: () => alSeleccionar(pestana),
           ),
         ],
-        const Spacer(),
+      ],
+    );
+    final abajo = Column(
+      children: [
         const SizedBox(height: 8),
         _BotonCircular(
           key: const ValueKey('riel-ajustes'),
@@ -120,10 +123,13 @@ class RielNavegacion extends StatelessWidget {
                 constraints: BoxConstraints(
                   minHeight: restricciones.hasBoundedHeight ? restricciones.maxHeight : 0,
                 ),
-                child: IntrinsicHeight(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: contenido,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  // Sin flex: con alto mínimo, "spaceBetween" deja Ajustes y
+                  // el avatar abajo; si no cabe, todo se desplaza.
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [arriba, abajo],
                   ),
                 ),
               ),
