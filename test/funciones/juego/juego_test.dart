@@ -17,6 +17,7 @@ import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/juego/estado_juego.dart';
 import 'package:abogator/funciones/juego/logica_swipe.dart';
+import 'package:abogator/funciones/juego/mazo_swipe.dart';
 import 'package:abogator/funciones/juego/pantalla_juego.dart';
 import 'package:abogator/funciones/mapa/pantalla_intro_sprint.dart';
 import 'package:abogator/funciones/mapa/pantalla_mapa_sprints.dart';
@@ -237,8 +238,9 @@ void main() {
 
     testWidgets('con el foco en un botón, Enter y Espacio lo confirman', (tester) async {
       await abrirJuego(tester);
-      // Salir → Indicadores → Ilegal.
-      for (var i = 0; i < 3; i++) {
+      // Salir → Indicadores → tarjeta → Ilegal (la tarjeta es parada de Tab
+      // desde T-13).
+      for (var i = 0; i < 4; i++) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pump();
       }
@@ -256,10 +258,15 @@ void main() {
     testWidgets('orden de foco de Figma 26b', (tester) async {
       await abrirJuego(tester);
       final orden = <String>[];
-      for (var i = 0; i < 9; i++) {
+      for (var i = 0; i < 10; i++) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pump();
         final contexto = FocusManager.instance.primaryFocus?.context;
+        if (contexto?.findAncestorWidgetOfExactType<MazoSwipe>() != null &&
+            contexto?.findAncestorWidgetOfExactType<BotonVeredicto>() == null) {
+          orden.add('tarjeta');
+          continue;
+        }
         final boton = contexto?.findAncestorWidgetOfExactType<BotonVeredicto>();
         String? dentro<T extends Widget>(String nombre) =>
             contexto?.findAncestorWidgetOfExactType<T>() != null ? nombre : null;
@@ -276,6 +283,7 @@ void main() {
       expect(orden, [
         'salir',
         'indicadores',
+        'tarjeta',
         'ilegal',
         'escalar',
         'condicional',
