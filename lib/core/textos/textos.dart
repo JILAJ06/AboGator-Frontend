@@ -290,6 +290,16 @@ abstract final class Textos {
   static const String estadoSprintDisponible = 'disponible';
   static const String estadoSprintBloqueado = 'bloqueado';
   static String estrellasSemantica(int estrellas, int maximo) => '$estrellas de $maximo estrellas';
+  static String seleccionSprint(String nombre, String titulo, String estado, {int? estrellas}) {
+    final estadoMayuscula = estado.isEmpty ? estado : estado[0].toUpperCase() + estado.substring(1);
+    final conEstrellas = estrellas == null
+        ? ''
+        : estrellas == 1
+        ? ', 1 estrella'
+        : ', $estrellas estrellas';
+    return '$nombre, $titulo. $estadoMayuscula$conEstrellas.';
+  }
+
   static String nodoSemantica(String nombre, String titulo, String estado) =>
       '$nombre, $titulo, $estado';
   static String globoTitulo(int numero, String titulo) => 'Sprint $numero · $titulo';

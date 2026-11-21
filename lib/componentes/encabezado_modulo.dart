@@ -30,8 +30,15 @@ class EncabezadoModulo extends StatelessWidget {
     required this.completados,
     required this.total,
     required this.alAtras,
+    this.arribaMinimo = altoBarraEstado,
+    this.abajoExtra = 0,
     super.key,
   });
+
+  /// Medidas de tablet (T08, Figma 96:717): sin barra de estado propia, el
+  /// contenido empieza 16 abajo y el encabezado mide 16 + 102 + 16 = 134.
+  static const double arribaTablet = 16;
+  static const double abajoTablet = 16;
 
   /// Alto de la barra de estado del marco de Figma.
   static const double altoBarraEstado = 48;
@@ -52,20 +59,26 @@ class EncabezadoModulo extends StatelessWidget {
   final int total;
   final VoidCallback? alAtras;
 
+  /// Espacio mínimo arriba del contenido (la zona segura, si es mayor, manda).
+  final double arribaMinimo;
+
+  /// Alto que se suma abajo (tablet).
+  final double abajoExtra;
+
   @override
   Widget build(BuildContext context) {
     final estilos = context.estilos;
     const blanco = EfectosApp.textoEncabezado;
     final fondo = EfectosApp.fondoEncabezado(color);
     final etiqueta = Textos.moduloEtiqueta(numero, nombreCorto);
-    final arriba = math.max(MediaQuery.paddingOf(context).top, altoBarraEstado);
+    final arriba = math.max(MediaQuery.paddingOf(context).top, arribaMinimo);
     final avance = total == 0 ? 0.0 : (completados / total).clamp(0.0, 1.0);
 
     return Container(
       key: const ValueKey('encabezado-modulo'),
       color: fondo,
-      constraints: BoxConstraints(minHeight: arriba + altoContenido),
-      padding: EdgeInsets.only(top: arriba, bottom: 21),
+      constraints: BoxConstraints(minHeight: arriba + altoContenido + abajoExtra),
+      padding: EdgeInsets.only(top: arriba, bottom: 21 + abajoExtra),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,

@@ -6,16 +6,15 @@ import '../../app/rutas.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_cerrar.dart';
 import '../../componentes/chip_hud.dart';
-import '../../componentes/fila_detalle_sprint.dart';
 import '../../componentes/mensaje_pantalla.dart';
-import '../../componentes/sarko_imagen.dart';
-import '../../core/tema/iconos_app.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/modelos/modulo.dart';
-import '../juego/estado_juego.dart';
+import 'detalle_sprint.dart';
 import 'estado_mapa.dart';
 import 'logica_mapa.dart';
+import 'pantalla_mapa_sprints.dart';
 
 /// Pantalla 09 · Intro del sprint (Figma 13:776). Sin navegación inferior.
 ///
@@ -38,6 +37,11 @@ class PantallaIntroSprint extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // En tablet horizontal la intro es el panel de detalle del mapa (T08): la
+    // misma ruta muestra la vista combinada con este sprint seleccionado.
+    if (context.clasePantalla.esAncho) {
+      return PantallaMapaSprints(moduloId: moduloId, sprintId: sprintId);
+    }
     final datos = ref.watch(datosModuloProvider(moduloId));
     return Scaffold(
       body: switch (datos) {
@@ -85,21 +89,9 @@ class _Intro extends ConsumerWidget {
   final int vidas;
   final VoidCallback alCerrar;
 
-  /// Empieza el sprint desde la tarjeta 1 (descarta un avance anterior).
-  void _comenzar(BuildContext context, WidgetRef ref) {
-    if (!sprint.esExamenFinal) reiniciarJuego(ref, sprint.id);
-    context.push(sprint.esExamenFinal ? Rutas.crisisJefeDe(modulo.id) : Rutas.juegoDe(sprint.id));
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tokens = context.tokens;
-    final estilos = context.estilos;
     final abierto = LogicaMapa.puedeAbrir(modulo, sprint);
-    final numero = LogicaMapa.numeroDe(modulo, sprint);
-    final etiqueta = numero == null
-        ? Textos.introEtiquetaExamen(modulo.numero)
-        : Textos.introEtiqueta(numero, modulo.numero);
 
     return SafeArea(
       child: Column(
@@ -127,68 +119,7 @@ class _Intro extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Center(child: _SarkoConElipse()),
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          etiqueta,
-                          textAlign: TextAlign.center,
-                          style: estilos.etiqueta.copyWith(color: tokens.textoAcento),
-                        ),
-                        const SizedBox(height: 6),
-                        Semantics(
-                          header: true,
-                          child: Text(
-                            sprint.tituloIntro ?? sprint.titulo,
-                            textAlign: TextAlign.center,
-                            style: estilos.h1.copyWith(color: tokens.textoPrimario),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          Textos.introObjetivo(sprint.objetivo),
-                          textAlign: TextAlign.center,
-                          style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
-                        ),
-                        const SizedBox(height: 14),
-                        TarjetaDetallesSprint(
-                          filas: [
-                            FilaDetalleSprint(
-                              icono: IconosApp.doc,
-                              titulo: Textos.tarjetasCantidad(sprint.numeroTarjetas),
-                              texto: LogicaMapa.desglose(sprint),
-                            ),
-                            FilaDetalleSprint(
-                              icono: IconosApp.coin,
-                              titulo: Textos.monedasHasta(sprint.monedasMaximas),
-                              texto: Textos.monedasDilema,
-                            ),
-                            const FilaDetalleSprint(
-                              icono: IconosApp.zap,
-                              titulo: Textos.indicadoresTitulo,
-                              texto: Textos.indicadoresLista,
-                            ),
-                          ],
-                        ),
-                        if (!abierto) ...[
-                          const SizedBox(height: 16),
-                          Semantics(
-                            liveRegion: true,
-                            child: Text(
-                              Textos.sprintBloqueado,
-                              key: const ValueKey('aviso-bloqueado'),
-                              textAlign: TextAlign.center,
-                              style: estilos.cuerpoEnfasis.copyWith(color: tokens.textoPrimario),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                  DetalleSprint(modulo: modulo, sprint: sprint),
                 ],
               ),
             ),
@@ -197,47 +128,10 @@ class _Intro extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
             child: BotonApp(
               texto: Textos.comenzarSprint,
-              alPresionar: abierto ? () => _comenzar(context, ref) : null,
+              alPresionar: abierto ? () => comenzarSprint(context, ref, modulo, sprint) : null,
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Elipse de 230 en fondo/destacado con Sarko alegre de 184×230 encima
-/// (en Figma: elipse en (80, 110) y Sarko en (103, 112)). Decorativo.
-class _SarkoConElipse extends StatelessWidget {
-  const _SarkoConElipse();
-
-  static const double elipse = 230;
-  static const double anchoSarko = 184;
-
-  @override
-  Widget build(BuildContext context) {
-    return ExcludeSemantics(
-      child: SizedBox(
-        width: elipse,
-        height: elipse + 2,
-        child: Stack(
-          children: [
-            Container(
-              key: const ValueKey('elipse-intro'),
-              width: elipse,
-              height: elipse,
-              decoration: BoxDecoration(
-                color: context.tokens.fondoDestacado,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const Positioned(
-              left: (elipse - anchoSarko) / 2,
-              top: 2,
-              child: SarkoImagen(pose: PoseSarko.alegre, ancho: anchoSarko, decorativa: true),
-            ),
-          ],
-        ),
       ),
     );
   }

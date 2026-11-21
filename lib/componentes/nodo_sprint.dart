@@ -48,6 +48,7 @@ class NodoSprint extends StatelessWidget {
     required this.alPresionar,
     this.estrellas = 0,
     this.nodoFoco,
+    this.seleccionado,
     super.key,
   });
 
@@ -60,6 +61,16 @@ class NodoSprint extends StatelessWidget {
   final VoidCallback? alPresionar;
   final int estrellas;
   final FocusNode? nodoFoco;
+
+  /// Solo en el mapa de tablet (T08). `true` lo anuncia como seleccionado y,
+  /// si no es el sprint actual (que ya tiene su aro de pulso), le pone un
+  /// borde de 3 en accion/primaria alrededor de la cara. `null`: sin selección
+  /// (móvil).
+  final bool? seleccionado;
+
+  /// Grosor y separación del borde de selección.
+  static const double grosorSeleccion = 3;
+  static const double separacionSeleccion = 4;
 
   /// Color de la cara según el estado.
   static Color colorCara(TipoNodoSprint tipo, TokensColor t) => switch (tipo) {
@@ -127,6 +138,20 @@ class NodoSprint extends StatelessWidget {
               ),
             ),
           ),
+          if (seleccionado == true && tipo != TipoNodoSprint.actual)
+            Positioned(
+              left: 12 - separacionSeleccion - grosorSeleccion,
+              top: 10 - separacionSeleccion - grosorSeleccion,
+              child: Container(
+                key: const ValueKey('marca-seleccion'),
+                width: tipo.cara + 2 * (separacionSeleccion + grosorSeleccion),
+                height: tipo.cara + 2 * (separacionSeleccion + grosorSeleccion),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: tokens.accionPrimaria, width: grosorSeleccion),
+                ),
+              ),
+            ),
           if (tipo == TipoNodoSprint.completado)
             Positioned(
               left: 0,
@@ -142,6 +167,7 @@ class NodoSprint extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: alPresionar != null,
+      selected: seleccionado,
       label: etiquetaSemantica,
       onTap: alPresionar,
       excludeSemantics: true,
