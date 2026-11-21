@@ -226,3 +226,9 @@ Figma: 29 = `18:2916`, 30 = `18:3036`. Medidas, textos y reglas completos en `ai
 - **Trofeo:** círculo de 96 `accionAcento`, borde 6 `fondoDestacado`, ícono `trophy` de 48.
 - **Resumen del examen (30):** tres tarjetas de 107 (`fondoSuperficie`, borde 1, radio 16): "Llegaste a", "Aciertos" (`estadoLegal`) y "Por tiempo" (`estadoIlegal`); en columna con texto grande.
 - **Próxima vida (30):** `fondoDestacado`, radio 16, ícono `clock` 20 y cuenta regresiva del servidor.
+
+## Componentes de tablet (se construyen en T-12; el resto, en T-12b, c y d)
+Figma: páginas "Tablet · Vistas" (`94:23`), "Tablet · Navegación" (`103:23`); reglas de adaptación `106:10163`. Medidas completas en `ai/siguiente.md` de la T-12.
+- **Clases de pantalla:** móvil (< 600), tablet (≥ 600) y ancho (≥ 960); se decide por el ancho disponible.
+- **`RielNavegacion`:** 104 de ancho, `fondoSuperficie`, borde derecho 1; destinos de 80×72 con indicador 56×32 (activo `fondoDestacado`), insignia del Buzón de 20 `estadoIlegal`, Ajustes (48) y Avatar (48) abajo. Sustituye a la navegación inferior y al botón flotante del Buzón.
+- **Inicio en tablet:** dos columnas (620 y 382) con "Tu semana", tarjeta del Buzón y "Consejo de Sarko".

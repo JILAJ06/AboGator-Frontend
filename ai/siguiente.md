@@ -1,113 +1,91 @@
-# T-11b · Resultado del Examen Final: Auditoría superada (29) y La Inspectora ganó (30)
+# T-12 · Base de tablet: clases de pantalla, riel de navegación, acceso, onboarding e Inicio
 
-**Rama:** `11b-resultado-examen` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-11b**).
-**Pantallas:** 29 Auditoría superada (certificado) y 30 La Inspectora ganó. Figma (archivo `SYNAyUal3xVk4k8SEBEb7f`): 29 = `18:2916`, 30 = `18:3036`. Compara en Chrome con el conector (poses de Sarko, íconos y colores).
+**Rama:** `12-tablet` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-12**).
+**Figma** (archivo `SYNAyUal3xVk4k8SEBEb7f`, páginas "Tablet · Vistas" `94:23` y "Tablet · Navegación" `103:23`). La tablet son **41 vistas**, así que se divide en cuatro tareas: **T-12** (esta: base, acceso, onboarding e Inicio), **T-12b** (mapa + intro, Tienda, Perfil, Ajustes), **T-12c** (juego y hojas laterales) y **T-12d** (Sin vidas, Buzón + Juicio, offline y Examen).
 
 ## Objetivo
-Cerrar el Examen Final que dejó la T-11: al terminar, la app **registra el resultado** y muestra 29 (aprobado) o 30 (reprobado). Aprobar emite el **certificado del módulo** y **desbloquea el módulo siguiente**; reprobar manda **una apelación por cada decisión fallada** al Buzón y deja la auditoría lista para reiniciarse desde la hora 0.
+Que la app se adapte a tablet **sin duplicar pantallas**: los mismos componentes, tokens (claro y oscuro), Sarko y logos; solo cambia la distribución. Esta tarea deja la **infraestructura** que usarán T-12b, c y d y las vistas más sencillas: acceso, onboarding e Inicio.
 
-Los números de los ejemplos de Figma (por ejemplo "9/10 aciertos" y "7/10 Llegaste a") **no son reales ni coherentes con las reglas**: son de relleno. Siempre se muestran los datos del intento.
+## Reglas de adaptación (Figma `106:10163`)
+- **Lienzo:** iPad 11" horizontal, **1194 × 834 dp**. Rejilla de 12 columnas, **margen 32, medianil 24**. La barra de estado de 32 dp que se ve en Figma es del sistema: **no se dibuja**; todas las posiciones de abajo ya la restan (`y` relativa al contenido de la app) salvo que se diga lo contrario.
+- **Navegación:** la barra inferior se convierte en un **riel lateral de 104 dp** (componente "Riel de navegación"). El Buzón siempre muestra su contador, así que **el botón flotante del Buzón desaparece** en tablet.
+- **Listas-detalle** (08+09 y 21+22), **zona de juego + panel lateral**, **hojas laterales de 376** y **pantallas de resultado con Sarko a la izquierda y columna de 470**: las hacen T-12b, c y d. **Esta tarea solo deja los ayudantes para ellas** (ver "Infraestructura").
+- Mismos criterios de accesibilidad WCAG 2.1 AA, objetivos ≥ 48 y alternativa de un toque al swipe.
 
-## Reglas (del diseño del backend, §6.3, RF-34 a RF-41)
-- **HP 0 → aprobado:** el servidor emite el certificado (folio único e imagen para compartir, RF-41) y se desbloquea el módulo siguiente. **0 vidas o se acaban las 10 decisiones con HP > 0 → reprobado.** No se otorga nada y la próxima vez la crisis arranca desde la hora 0 (intento nuevo).
-- El examen **no se puede iniciar sin conexión**, pero puede terminar con la conexión caída: el resultado se registra con el servidor, así que **registrar necesita conexión** y, si falla, se reintenta (ver "Registro").
-- Registrar el resultado **es idempotente**: abrir 29 o 30 dos veces (atrás, recarga, enlace profundo) no duplica certificado, desbloqueo ni apelaciones.
-- Las vidas ya las descontó el servidor durante el examen; aquí no se descuentan de nuevo.
+## Infraestructura (`lib/core/adaptativo/`)
+- **`ClasePantalla`** por **ancho de la ventana** (no por tipo de dispositivo; sirve en web, split-view y rotación): `movil` (< 600), `tablet` (≥ 600) y, dentro de tablet, `ancho` (≥ 960) para las composiciones de dos columnas de Figma. Entre 600 y 959 (tablet en vertical, ventana angosta) se usa el **riel con una sola columna** de contenido, centrado con ancho máximo (Figma solo dibuja horizontal; esto lo decides tú y lo reportas).
+- Un `BuildContext.clasePantalla` (extensión) y un widget **`Adaptativo`** (o `LayoutBuilder` envuelto) que decide con el ancho **disponible**, no con `MediaQuery.size`, para que funcione dentro de paneles.
+- Constantes: margen 32, medianil 24, riel 104, columna de formulario 470, hoja lateral 376. Sin números sueltos en las pantallas.
+- **Móvil no cambia nada:** a < 600 las pantallas se ven exactamente como hoy. Las 1025 pruebas actuales siguen verdes sin tocar su tamaño.
+- Una prueba ayudante `tamanoPantalla(tester, Tamano.tabletHorizontal / tabletVertical / movil)` para T-12b, c y d (1194×834, 834×1194, 390×844).
 
-## Datos
-### Modelos (`lib/datos/modelos/`)
-- `Certificado{folio, moduloId, nombreModulo, nombrePersona, aciertos, totalDecisiones, fecha}`. `fecha` la manda el servidor (no `DateTime.now()`); en el mock, el reloj inyectable. Texto "28 oct 2026": usa `intl` (ya es dependencia) con el idioma `es`, mes abreviado en minúscula y sin punto; si `es` no está inicializado en la app, usa una tabla propia de 12 abreviaturas.
-- `ResultadoRegistrado{aprobado, certificado (solo si aprobó), siguienteModulo (id y número y nombre; null si era el último módulo), vidas, faltaParaProximaVida (Duration?, lo da el servidor; null con 5 vidas)}`.
+## Riel de navegación (en `MarcoPrincipal`)
+`MarcoPrincipal` es el único lugar que cambia: con `tablet` pinta `Row(riel, cuerpo)` y **sin** la navegación inferior ni `BotonBuzon`; con `movil`, igual que hoy. Todas las pantallas que lo usan (Inicio, Mapa, Buzón, Tienda y Perfil) heredan el riel sin cambios propios.
+- **`RielNavegacion`** (Figma `93:525`, instancia `93:331`): ancho **104**, alto todo el espacio, `fondoSuperficie`, borde derecho 1 `bordeDefault`, columna centrada, separación 8, relleno vertical 24.
+  1. **Isotipo** 56 (logo, decorativo).
+  2. Separador de 24.
+  3. **Destinos** Mapa, Buzón, Tienda, Perfil, cada uno de **80 × 72**: indicador de **56 × 32** radio 16 con ícono 24 y etiqueta debajo (separación 4). **Activo:** indicador `fondoDestacado`, etiqueta Inter SemiBold 12 `textoPrimario`; **inactivo:** sin fondo, etiqueta Inter Medium 11 `textoSecundario`. El activo no depende solo del color: etiqueta en negrita y `Semantics(selected: true)`.
+  4. **Insignia del Buzón:** círculo 20 `estadoIlegal` con el número en `textoEnPrimario` (Leyenda), a 50 px del borde izquierdo del destino y 8 del superior. Cantidad = `total` del Buzón (la misma que usa el botón flotante); se oculta con 0; con más de 99 muestra "99+".
+  5. Espacio flexible.
+  6. **Ajustes:** círculo 48, borde 1 `bordeDefault`, ícono `settings` 22 → `/perfil/ajustes`.
+  7. **Avatar:** círculo 48 `fondoDestacado`, iniciales Inter SemiBold 14 `textoPrimario` → Perfil.
+- Destinos y rutas: los mismos que la navegación inferior (`PestanaApp`); reutiliza su lógica de navegación, no la dupliques.
+- **Accesibilidad:** `Semantics` de contenedor "Navegación principal"; cada destino con etiqueta, "seleccionado" y, el Buzón, "N apelaciones pendientes". Orden de foco: **riel primero** (izquierda a derecha, arriba abajo) y luego el contenido; Tab recorre destinos → Ajustes → Avatar. Objetivos ≥ 48 (el destino mide 80×72). Sin animaciones nuevas.
+- Se ve igual en claro y oscuro por tokens.
 
-### Repositorios y mocks
-- **`RepositorioExamen`** agrega:
-  - `registrarResultado(String intentoId)` → `ResultadoRegistrado`. Idempotente por `intentoId`. Lanza `ExcepcionExamen(sinConexion)` sin red o `intentoCerrado` si el intento no terminó. En `MockExamen`: si el intento está aprobado, emite el certificado (folio determinista del tipo `AG-M1-0001`, el número crece con cada certificado), marca el Examen final del módulo como **completado** y pone el **primer sprint del módulo siguiente en curso** llamando a `RepositorioProgreso` (ver abajo); si reprobó, solo devuelve vidas y `faltaParaProximaVida` leyendo `RepositorioVidas`. Para que el repositorio de progreso llegue al mock, recíbelo en el constructor igual que `RepositorioVidas`; las pruebas lo inyectan.
-  - `obtenerCertificados()` → `List<Certificado>` (GET /me/certificados, RF-41). En el mock, los emitidos por la instancia.
-- **`RepositorioProgreso`** agrega `registrarExamenAprobado({required String moduloId})`: marca completado el nodo del Examen final (con 3 estrellas, es el máximo; no cambia sus reglas de apertura) y pone `enCurso` el primer sprint del módulo siguiente si estaba bloqueado. `MockProgreso` lo implementa (a continuación de `_completar`). El último módulo no desbloquea nada.
-- **`MockPerfil`** (T-10): `certificados` pasa a ser la cantidad que da `RepositorioExamen.obtenerCertificados()` (recíbelo opcional en el constructor; sin él, 0 como hoy). Así el Perfil muestra "1 de 5" después de aprobar. Refresca el Perfil al registrar.
-- **Apelaciones de las decisiones falladas** (las manda el cliente, como en el juego):
-  - Una `NuevaApelacion` por cada `DecisionFallada` (veredicto equivocado, tiempo agotado **o** fundamento equivocado en el contraargumento), sin duplicar por decisión (`registrarFallos` ya evita duplicados por `tarjetaId`).
-  - `tarjetaId` = `decision.id` (`ran-01`…`ran-10`), `moduloId` del examen, `titulo` ≤ 45 con el formato "Hora 24 · CTO fundador" (hora y personaje de la decisión; recorta con "…" si pasa de 45) y `tema` = "Brechas de seguridad".
-  - **El juicio (22) tiene que poder abrir esas apelaciones.** Hoy `MockTarjetas.obtenerTarjeta(id)` solo busca tarjetas de sprints. Haz que también resuelva los ids `ran-NN` construyendo una `Tarjeta` a partir de `DecisionEscenario` (tipo normal, `etiquetaCaso` = la etiqueta de la crisis, personaje, rol, texto, `respuestaCorrecta`, `explicacion` = el fundamento correcto, `titulo` y `tema` como arriba). Hazlo en una función pura del escenario (`EscenarioRansomware.comoTarjeta(id)`) para que T-14 solo cambie el origen.
-  - Se registran **solo si el examen se reprobó y también si se aprobó con decisiones falladas** (un examen aprobado puede tener fallos; cada uno va al Buzón igual).
-  - Tras registrar, invalida `datosInicioProvider`, `datosModuloProvider`, `apelacionesPendientesProvider`, el Perfil y los datos de vidas, igual que lo hace el juego.
-- El proveedor sigue eligiéndose solo en `proveedores_repositorios.dart`.
+## Acceso y onboarding (T01 a T06)
+Misma lógica, estado y validaciones que 01 a 06; solo cambia la composición. Compáralas con el conector: las mediciones de las que no se detallan aquí las tomas tú de Figma y **las dejas en el reporte**.
+- **T05 Inicio de sesión (`94:456`) — medidas completas:**
+  - **Panel de marca** a la izquierda: **597** de ancho, alto completo, fondo verde bosque (`marca/verde-bosque-gator`, el mismo `#1F4E35` de `accionPrimaria` en claro; **fijo en oscuro también**, como Figma), recortado.
+    - Círculo decorativo de 520 en (260, 420) con el color del fondo del panel más claro (toma el color de `94:469`).
+    - **Logo horizontal** sobre verde: isotipo 96.97 + marca nominativa 286.87 × 58.18 (separación 16.16) en (98.5, 140 − 32).
+    - **Sarko** (pose alegre, recortado como en el resto de la app) de 288 × 360 en (154.5, 290 − 32).
+    - Lema "Educación en Legislación y Derecho Informático": Inter SemiBold 14, `#E8D8A8`, centrado, ancho 477, en y = 680 − 32.
+  - **Contenido** a la derecha: columna de **470** centrada en la mitad derecha (x ≈ 661), alineada al centro vertical (en Figma queda a y = 168); separación 16. Es el mismo formulario del móvil (título "Bienvenido de vuelta", subtítulo "Continúa tu racha de 7 días", campos, "¿Olvidaste tu contraseña?", botón primario, separador "o", "Crear una cuenta" secundario y la nota de conexión cifrada) con **todos los controles a ancho completo de la columna**.
+  - Sin panel de marca en `movil`. En tablet **vertical** (600–959) el panel pasa **arriba** como una franja de 240 con el logo y Sarko y el formulario debajo, centrado en 470.
+- **T06 Registro (`94:539`), T01 Splash (`94:26`), T02 (`94:86`), T03 (`94:132`), T03b (`94:252`) y T04 (`94:390`):** léelas con el conector. Lo habitual: el mismo panel de marca o la ilustración a la izquierda y la columna de 470 a la derecha; el Splash centrado. Si alguna no usa ese patrón, impleméntala como Figma y repórtalo. Onboarding conserva "Omitir", el paginador de puntos y el comportamiento de la T-02; Registro conserva los **dos consentimientos separados** y el orden de foco por error de la T-03.
+- Teclado en tablet: Tab y Enter envían el formulario como hoy; la columna se desplaza si el teclado o el texto al 200 % no caben.
 
-### Estado (`lib/funciones/jefe/`)
-- `ExamenNotifier` agrega `registrarResultado()`: pide el registro al repositorio **una sola vez** (guarda el `ResultadoRegistrado` en el estado; si ya está, lo devuelve), manda las apelaciones y refresca los proveedores. Errores: se guarda el error en el estado para que 29 y 30 muestren el aviso con "Reintentar" (no pierden el resultado ni la lista de falladas).
-- `examenProvider` se **reinicia** (`state = null`) cuando la persona sale de 29 o 30 hacia otro destino, y al empezar un examen nuevo ya lo hace `preparar`. Abrir 29 o 30 sin un examen terminado de ese módulo (enlace profundo, recarga) redirige al mapa del módulo (`Rutas.mapaSprintsDe(moduloId)`); nunca muestra un certificado vacío.
-- Los datos de 29 y 30 salen de `examenProvider` (resumen, falladas, intento, vidas) y de `ResultadoRegistrado`. No hay carga propia más allá del registro.
-
-## 29 · Auditoría superada (marco 390×844; fondo `fondoApp`, con los tokens del tema)
-Todo centrado en una columna desplazable (la pantalla se desplaza si el texto o el tamaño no caben); los botones van **fijos abajo** sobre `fondoApp` con 24 de margen lateral.
-- **Confeti (decorativo, sin semántica):** 8 piezas rectangulares de 12×6, radio 2, rotadas, con los colores `#B86B23`, `#68B678`, `#2B5FA8`, `#B52426` y `#E0A060` en posiciones fijas del marco (las toma de Figma `18:2916`). Reutiliza `ConfetiSprint` (T-06b): hoy tiene 7 piezas de Figma 19; **parametriza la lista de piezas** (`piezas:`) sin cambiar el valor por defecto y pásale las 8 de esta pantalla. La caída dura 1.2 s y se apaga con "Reducir animaciones" (queda quieto como en Figma); no se repite al reconstruir.
-- **Trofeo** (x 60, y 110): círculo de 96, fondo `accionAcento`, borde 6 `fondoDestacado`, ícono `trophy` de 48 (color del texto sobre `accionAcento`).
-- **Sarko** (x 170, y 90): 176×220, pose `alegre` **recortada al torso** (cabeza y hombros, alineada arriba). Usa `SarkoImagen` con recorte; si Figma usa otra pose, repórtalo en el reporte.
-- **Título** "¡Auditoría superada!": Fredoka Bold 26/32 `textoPrimario`, centrado, y = 330. Es el encabezado semántico de la pantalla y recibe el foco inicial.
-- **Texto** (y = 366): "Contuviste la crisis y la Inspectora Vega aprobó tu MVP. Desbloqueaste el Módulo 2: Ronda Semilla." Cuerpo/Base `textoSecundario`, centrado. El número y el nombre del módulo salen de `ResultadoRegistrado.siguienteModulo`. **Último módulo (sin siguiente):** "Contuviste la crisis y la Inspectora Vega aprobó tu MVP. ¡Completaste todos los módulos!" (sin la frase de desbloqueo) y el botón primario pasa a "Volver al mapa" (sin el ghost duplicado de arriba, ver abajo).
-- **Tarjeta del certificado** (x 24, y 430, ancho 342): `fondoSuperficie`, borde **2 punteado** (guion) `accionAcento`, radio 20, padding 20, separación 8, todo centrado:
-  1. Logo horizontal (isotipo 43.2 + wordmark 127.8×25.9; usa `LogoApp`, la variante que ya existe para fondo claro u oscuro según el tema).
-  2. "CERTIFICADO DE MÓDULO": Etiqueta `textoAcento`.
-  3. Nombre del módulo ("Protección de Datos Personales"): Fredoka SemiBold 20/26 `textoPrimario`.
-  4. "Ana López · 9/10 aciertos · 28 oct 2026": Leyenda `textoSecundario`. Nombre de `Certificado.nombrePersona`; `aciertos/totalDecisiones` es el real del intento; fecha formateada del certificado. Si el texto no cabe en una línea, parte en dos líneas centradas por el separador "·".
-  5. El **folio** (`AG-M1-0001`) como segunda Leyenda `textoSecundario` debajo ("Folio AG-M1-0001"). No está en Figma: se añade porque RF-41 lo exige; repórtalo.
-  El borde punteado se dibuja con un `CustomPainter` (rect redondeado, trazo 2, guion 6 y hueco 4) **sin dependencias nuevas**.
-- **Botones** (fijos abajo): primario `accionPrimaria` "Ir al Módulo 2" (x 24, y 690, 342×52, ícono flecha derecha opcional como en los otros primarios) y fantasma "Compartir certificado" (x 24, y 750, 342×48, texto `textoAcento`). "Ir al Módulo 2" → `Rutas.mapaSprintsDe(moduloSiguiente)` reemplazando la ruta (no deja el examen en la pila). Con el estado `terminado` y el registro hecho se reinicia `examenProvider`.
-- **Compartir certificado:** sin dependencias nuevas, **copia al portapapeles** un texto como "Obtuve el certificado «Protección de Datos Personales» en AboGator · Folio AG-M1-0001 · 28 oct 2026" (`Clipboard.setData`) y muestra el mismo tipo de aviso breve que usa la Tienda tras comprar (reutiliza ese mecanismo; anúncialo con `SemanticsService`): "Certificado copiado". La imagen para compartir (RF-41) y la hoja de compartir nativa llegan en T-14; anótalo en el reporte.
-- **Cargando el registro:** esqueleto de la tarjeta del certificado (mismas medidas) y botones deshabilitados; Sarko, trofeo y título ya se ven. **Error:** el texto y el certificado se sustituyen por `MensajePantalla` ("No pudimos guardar tu resultado" con "Reintentar") y el botón "Volver al mapa"; no se muestra un certificado sin folio.
-- **Android atrás** y cualquier salida: va al mapa del módulo actual (`Rutas.mapaSprintsDe(moduloId)`), nunca de vuelta al examen.
-
-## 30 · La Inspectora ganó (marco 390×844; fondo `fondoApp`)
-- **Ilustración:** fondo circular 230×230 en (80, 90) y Sarko `triste` de 184×230 en (103, 92). Reutiliza `IlustracionSarko` (pose `triste`, `diametro` 230, `anchoSarko` 184, `colorFondo` el de la pantalla 20).
-- **Título** "La Inspectora ganó": Fredoka Bold 26/32 `estadoIlegal`, centrado, y = 340. Encabezado semántico con el foco inicial.
-- **Texto** (y = 376), `textoSecundario`, centrado, según cómo terminó:
-  - **0 vidas:** "Te quedaste sin vidas durante la crisis. La auditoría se reiniciará desde la hora 0."
-  - **Sin decisiones con HP > 0:** "Se acabaron las decisiones y la Inspectora Vega sigue en pie. La auditoría se reiniciará desde la hora 0."
-  (La variante "sin decisiones" no está en Figma; repórtala.)
-- **Resumen** (x 24, y 440): fila de **tres tarjetas** de 107 de ancho, separación 10: `fondoSuperficie`, borde 1 `bordeDefault`, radio 16, padding vertical 12, centradas. Valor Fredoka SemiBold 20 y etiqueta Leyenda `textoSecundario`:
-  1. **"N/10" · "Llegaste a"** (valor `textoPrimario`): `decisionesJugadas` y `totalDecisiones`.
-  2. **"N" · "Aciertos"** (valor `estadoLegal`): `aciertos`.
-  3. **"N" · "Por tiempo"** (valor `estadoIlegal`): `porTiempo`.
-  La fila no puede desbordar con texto al 200 %: las tarjetas crecen en alto y, si hace falta, la fila pasa a **columna** a partir de 1.5× de escala. Las tres se leen como un solo bloque semántico ("Llegaste a la decisión 7 de 10. 5 aciertos. 2 por tiempo agotado").
-- **Próxima vida** (x 24, y 540, ancho 342): `fondoDestacado`, radio 16, padding 14×12, ícono `clock` de 20 y Leyenda "Próxima vida en 01:59:40. Repasa los temas del módulo mientras tanto." con la hora en `CuentaRegresivaVida`/el mismo formato de 20 (el tiempo viene de `faltaParaProximaVida`; **cuenta regresiva monótona** con el `Cronometro` inyectable y se detiene en 0). **Se oculta** si `faltaParaProximaVida` es null (ya hay 5 vidas) o si quedan vidas por la derrota de decisiones agotadas: entonces la tarjeta dice "Aún tienes N vidas. Repasa los temas del módulo antes de volver a intentarlo." (Leyenda, mismo estilo, sin ícono de reloj; repórtalo, no está en Figma).
-- **Botones** (fijos abajo): primario "Repasar en el Buzón" (x 24, y 690, 342×52) → `Rutas.buzon`; fantasma "Volver al mapa" (x 24, y 750, 342×48) → `Rutas.mapaSprintsDe(moduloId)`. Si se registraron 0 apelaciones (no debería pasar al reprobar, pero cubre el caso) "Repasar en el Buzón" se oculta y "Volver al mapa" pasa a primario.
-- **Cargando y error del registro:** como en 29 (el texto y el resumen se ven de inmediato porque salen del estado local; solo la "Próxima vida" espera al servidor). Con error, aviso breve "No pudimos guardar tus apelaciones" con "Reintentar" encima de los botones; los botones **siguen activos** (la persona puede irse; reintentar registra de nuevo de forma idempotente al volver a entrar).
-- **Atrás:** al mapa del módulo, nunca al examen.
-- Si la persona llega a 30 con el examen **aprobado** o a 29 con el **reprobado** (enlace profundo cruzado): redirige a la pantalla que corresponde al estado del examen.
+## Inicio (T07 `96:298`; T07b `96:885` es el mismo en modo oscuro)
+Dentro de `MarcoPrincipal` (riel). `ClasePantalla.ancho`: **dos columnas**; entre 600 y 959: **una columna** (la derecha debajo de la izquierda). Posiciones de Figma, con `x` 136 = riel 104 + margen 32 y `y` menos 32:
+- **Encabezado** (y 52 − 32): avatar 44 `fondoDestacado` con iniciales Fredoka SemiBold 17 `accionSecundaria` en x 136; "Hola, Ana" (Fredoka SemiBold 17 `textoPrimario`) y "Dev · Nivel 4" (Leyenda `textoSecundario`) a su derecha; a la derecha del todo, **HUD** con tres chips (racha, monedas, vidas) separados 6, terminando en x = 1162 (margen 32).
+- **Columna izquierda** (x 136, ancho **620**):
+  - **Tarjeta héroe** 620 × 200 (y 120 − 32), radio 24, `accionPrimaria`, sombra de tarjeta; elipse decorativa de 286; "TU STARTUP ESTÁ EN" (Leyenda `textoEnPrimario`), nombre del módulo (Fredoka Bold 26/32, ancho 200), "Sprint 3 de 5 · Protección de datos", botón "Continuar sprint" (`accionAcento`, alto 48, radio 12) y Sarko 150 × 187.5 en (446, 16.5). Es la tarjeta héroe de 04 con ancho 620 (parametriza el ancho, no la dupliques).
+  - Título "Ruta de tu Startup" (Fredoka SemiBold 20/26) en y 346 − 32.
+  - **Módulos** en **2 columnas** de **300** con separación 20 (ancho total 620), desde y 386 − 32. Es la `TarjetaModulo` de 04 con ancho 300. Los 5 módulos se muestran (Figma dibuja 4; el 5.º sigue la misma regla) y la columna se desplaza con la página.
+- **Columna derecha** (x 780, ancho **382**, termina en el margen 32):
+  - **Reto diario** (y 120 − 32): `TarjetaRetoDiario` de 04 con ancho 382 ("Reto diario: 3 tarjetas sin fallar", "Mantén tu racha de 7 días · +15 monedas", "1/3").
+  - **Tu semana** (nuevo, y 200 − 32): tarjeta `fondoSuperficie`, borde 1 `bordeDefault`, radio 20, padding 20, separación 12; título "Tu semana" (Fredoka SemiBold 17) y **tres estadísticas** iguales (`fondoSuperficieAlt`, radio 14, padding 12, ícono 20, valor Fredoka SemiBold 17, etiqueta Leyenda `textoSecundario`): Racha "7 días" (ícono `flame`), Precisión "82%" (`check`) y Monedas "240" (`coin`). Datos: racha del usuario, precisión de `RepositorioPerfil.obtenerPerfil()` y monedas de la tienda; si el Perfil falla o carga, "—" en Precisión sin romper la pantalla.
+  - **Buzón de Apelaciones** (y 380 − 32): `fondoDestacado`, radio 20, padding 20, separación 12; ícono `inbox` 24 + "Buzón de Apelaciones" (Fredoka SemiBold 17), texto "N tarjetas falladas esperan juicio. Gánalas para recuperar vidas." (Cuerpo `textoSecundario`) y botón secundario "Abrir Buzón (N)" a ancho completo → Buzón. Con 0 apelaciones: texto "No tienes apelaciones pendientes." y botón deshabilitado/oculto (decide y reporta). Aquí **sí** se queda el botón porque es una tarjeta, no el botón flotante.
+  - **Consejo de Sarko** (y 700 − 32, ancho 252): tarjeta `fondoSuperficie`, borde 1, radio 20, padding 16; "CONSEJO DE SARKO" (Leyenda `textoAcento`) y el consejo (Cuerpo `textoPrimario`): "Termina el Sprint N hoy y desbloquea <nombre del módulo siguiente o del sprint siguiente>." (se arma con el sprint en curso; sin sprint en curso, "¡Tu Startup va por buen camino! Sigue practicando."). A su derecha, **Sarko** 120 × 150 en (1041, 660 − 32) como adorno (decorativo). Si no cabe en alto, el consejo y Sarko fluyen al final de la columna.
+- Estados de **carga**, **error con reintento** y **sin datos** del Inicio actual se mantienen (en tablet, a ancho de contenido). Los textos nuevos van a `Textos`.
+- **Orden de foco:** riel → encabezado → héroe → módulos → reto → semana → Buzón → consejo. En una columna (600–959) el mismo orden.
 
 ## Accesibilidad
-- Foco inicial en el título de cada pantalla; orden de lectura: título → texto → certificado o resumen → próxima vida → botones. Confeti, trofeo y Sarko decorativos (excluidos de la semántica).
-- Al terminar de registrar, anunciar con `SemanticsService`: "Auditoría superada. Certificado emitido. Módulo 2 desbloqueado" (o "La Inspectora ganó. N apelaciones en el Buzón").
-- Objetivos ≥ 48; los botones fijos no tapan el contenido desplazable (relleno inferior igual al alto de los botones).
-- La tarjeta del certificado se lee como un solo bloque: "Certificado de módulo. Protección de datos personales. Ana López, 9 de 10 aciertos, 28 de octubre de 2026. Folio AG-M1-0001."
-- Contrastes AA verificados en pruebas: `estadoIlegal` sobre `fondoApp` (título 30), `textoAcento` sobre `fondoSuperficie`, `estadoLegal` y `estadoIlegal` sobre `fondoSuperficie` (valores del resumen), `textoSecundario` sobre `fondoDestacado`.
-- Texto al 200 % sin desbordes en 390×844, 360×640 y 320×640, claro y oscuro; "Reducir animaciones" detiene la caída del confeti; la vibración usa `ServicioHaptico` (acierto al aprobar con el aviso del certificado, error suave al reprobar) y respeta el ajuste.
-
-## Rutas
-`Rutas.auditoriaSuperadaDe(moduloId)` y `Rutas.inspectoraGanoDe(moduloId)` pasan de `PantallaPendiente` a `PantallaAuditoriaSuperada` y `PantallaInspectoraGano` (hijas de `/jefe/:moduloId`, exigen sesión, sin navegación inferior). Desde 28c: HP 0 → 29 (`go`, reemplaza el examen en la pila); 0 vidas o fin de decisiones → 30. Quita los marcadores de 29 y 30 y sus textos propios en `Textos`, y en `PantallaPendiente` el parámetro `alVolver` **si ya nadie lo usa** (si otro destino lo usa, déjalo).
+- Texto al 200 % sin desbordes en **1194×834, 834×1194 y 600×960**, claro y oscuro: las filas se parten en columna y la pantalla se desplaza; el riel no se desborda (con texto grande las etiquetas pueden ocupar dos líneas, el destino crece en alto).
+- Contrastes AA verificados en pruebas: `textoPrimario` y `textoSecundario` sobre `fondoDestacado`, `#E8D8A8` sobre el verde del panel de marca, `textoEnPrimario` sobre `estadoIlegal` (insignia), etiqueta activa e inactiva del riel.
+- "Solo botones", "Reducir animaciones", háptica y los demás ajustes de la T-10b se respetan igual.
+- Navegación solo con teclado: se puede llegar a todo con Tab, el destino activo se identifica sin color.
 
 ## Archivos permitidos
-`lib/datos/` (modelos de `Certificado` y `ResultadoRegistrado`, `RepositorioExamen`, `RepositorioProgreso`, `MockExamen`, `MockProgreso`, `MockPerfil`, `MockTarjetas`, el escenario y `proveedores_repositorios.dart`), `lib/app/enrutador.dart` y `rutas.dart` y `pantalla_pendiente.dart`, `lib/funciones/jefe/` (pantallas 29 y 30, estado y lógica del registro), `lib/componentes/` (`TarjetaCertificado`, borde punteado, `TarjetaResumenExamen`, fila de resumen; ajuste de `ConfetiSprint` para recibir piezas; `IlustracionSarko` o `SarkoImagen` solo si necesitan un recorte), `lib/core/tema/efectos.dart` (las 8 piezas del confeti si usan colores nuevos), `iconos_app.dart` si falta algo, `lib/core/textos/textos.dart`, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). Lee `ServicioHaptico` y `ajustesProvider` sin cambiarlos. **Sin dependencias nuevas.** No toques `estado_juego.dart` ni las pantallas del juego.
+`lib/core/adaptativo/` (nuevo), `lib/app/marco_principal.dart`, `lib/componentes/` (`RielNavegacion`, `TarjetaSemana`, `TarjetaConsejoSarko`, `TarjetaBuzonInicio`, ajustes de ancho en `TarjetaHeroeStartup`, `TarjetaModulo`, `TarjetaRetoDiario`, `LogoApp` y `ChipHud` si hace falta), `lib/funciones/bienvenida/` (Splash y onboarding), `lib/funciones/acceso/` (05 y 06), `lib/funciones/inicio/`, `lib/core/tema/efectos.dart` (verde del panel y círculo si no son tokens), `iconos_app.dart`, `lib/core/textos/textos.dart`, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). **No toques** juego, mapa, Tienda, Perfil, Buzón ni examen más allá de lo que hereden de `MarcoPrincipal` (el riel); si algo de eso se rompe con el riel, lo arreglas aquí y lo reportas. **Sin dependencias nuevas.**
 
 ## Pruebas
-- **Mock del examen:** `registrarResultado` aprobado emite un certificado con folio, módulo, aciertos y fecha del reloj inyectado; llamarlo dos veces devuelve el **mismo** certificado y no duplica nada; reprobado no emite; con el intento sin terminar lanza `intentoCerrado`; sin red lanza `sinConexion`; `obtenerCertificados` cuenta uno por módulo aprobado.
-- **Progreso:** `registrarExamenAprobado` completa el nodo del examen y pone en curso el primer sprint del módulo siguiente; el último módulo no desbloquea nada; aprobar dos veces no cambia nada más.
-- **Apelaciones del examen:** una por decisión fallada (veredicto, tiempo y fundamento), sin duplicados al reintentar; título ≤ 45; `MockTarjetas.obtenerTarjeta('ran-03')` devuelve la tarjeta de la decisión y el juicio (22) abre una apelación de examen de punta a punta (con repositorios reales de memoria).
-- **Perfil:** el contador de certificados pasa de 0 a 1 tras aprobar.
-- **29:** medidas y estructura de Figma en claro y oscuro (trofeo, Sarko recortado, título, texto con el módulo siguiente y variante del último módulo, tarjeta de certificado con borde punteado y folio, botones), confeti de 8 piezas y sin movimiento con "Reducir animaciones", "Ir al Módulo 2" navega al mapa del siguiente y reinicia `examenProvider`, "Compartir certificado" copia el texto exacto y avisa, cargando (esqueleto, botones apagados), error con reintento, atrás va al mapa del módulo, sin examen terminado redirige al mapa, sin sesión redirige.
-- **30:** medidas y estructura de Figma, variantes del texto (0 vidas y sin decisiones), tarjetas del resumen con los datos reales, cuenta regresiva con cronómetro falso (inicia, baja, se detiene en 0, se oculta con 5 vidas), "Repasar en el Buzón" (con y sin apelaciones) y "Volver al mapa", error con reintento sin bloquear los botones, enlace cruzado redirige.
-- **Flujo completo:** examen ganado → 29 → módulo 2 desbloqueado en el mapa y Perfil con "1 de 5"; examen perdido por vidas → 30 → las apelaciones aparecen en el Buzón → se abre el juicio de una de ellas; examen perdido por decisiones → 30 con su texto.
-- Accesibilidad: semántica de la tarjeta y del resumen, anuncios, contrastes, desbordes (390×844, 360×640 y 320×640 al 100 % y 200 %), ajustes de la T-10b (háptica con servicio falso, reducir animaciones).
-- La galería (sección "Examen Final") suma las piezas nuevas (tarjeta del certificado, borde punteado, tarjeta de resumen, confeti de 8 piezas); `TEST-GALERIA` actualiza su cuenta.
-- Las 985 pruebas previas siguen verdes.
+- **ClasePantalla:** 390 → móvil, 599 → móvil, 600 → tablet, 959 → tablet no ancho, 960 → ancho; usa el ancho disponible, no el de la ventana.
+- **Riel:** estructura y medidas de Figma, destino activo y semántica, insignia (0, 6, 100 → "99+"), navegación a cada destino, Ajustes y Avatar, no hay botón flotante en tablet y sí en móvil, claro y oscuro, texto al 200 %.
+- **MarcoPrincipal:** móvil idéntico al actual (las pruebas existentes siguen verdes sin cambios de tamaño); tablet con riel en Inicio, Mapa, Buzón, Tienda y Perfil.
+- **05, 06, 01 a 04 en tablet:** panel de marca y columna de 470 (medidas de T05), formulario funcional (validaciones, errores por campo, consentimientos), Splash y onboarding con "Omitir" y paginador, vertical 834×1194 con franja superior, sin desbordes (1194×834, 834×1194, 600×960 al 100 % y 200 %).
+- **Inicio:** 2 columnas a 1194 y 1 columna a 834; posiciones y tamaños de la tabla de arriba; módulos de 300 en 2 columnas; "Tu semana" con datos reales y "—" cuando el Perfil falla; Buzón con N y con 0; consejo con y sin sprint en curso; carga, error y reintento; claro y oscuro (T07b).
+- La galería suma el riel y las tarjetas nuevas; `TEST-GALERIA` actualiza su cuenta.
+- Las 1025 pruebas previas siguen verdes.
 
 ## Criterios de aceptación
-- [ ] 29 y 30 coinciden con Figma; lo que no viene de Figma (folio, variantes del texto, tarjeta de próxima vida con vidas restantes, estados de carga y error, copiar el certificado) queda en el reporte.
-- [ ] Aprobar emite **un solo** certificado, completa el Examen final, desbloquea el módulo siguiente y se ve en el Perfil; reprobar registra **una apelación por decisión fallada** que se puede abrir en el juicio; todo es idempotente.
-- [ ] Nunca se usa `DateTime.now()` fuera de los mocks (fecha del certificado y cuenta regresiva vienen del servidor o del reloj inyectado).
-- [ ] Abrir 29 o 30 sin el estado correcto no muestra datos vacíos: redirige.
+- [ ] En móvil la app se ve idéntica a hoy; a ≥ 600 aparece el riel en lugar de la barra inferior y desaparece el botón flotante del Buzón.
+- [ ] 01 a 06 e Inicio (claro y oscuro) coinciden con Figma en 1194×834; en 834×1194 y 600×960 se ven bien en una columna sin desbordes.
+- [ ] Lo que no viene de Figma (tablet vertical, estados de carga y error, Buzón sin apelaciones, consejo sin sprint, "99+") queda en el reporte, igual que las medidas que tomaste tú del conector.
+- [ ] `ClasePantalla` y la prueba ayudante quedan listas para T-12b, c y d.
 - [ ] Sin dependencias nuevas; análisis, formato y pruebas en verde; commits sin prefijo y sin menciones a Claude.
 
 ## Para el reporte
-Las dudas numeradas (D1, D2…), la lista de decisiones propias (folio, variantes, copiar certificado, cruce de enlaces) y una nota para T-14: la imagen de certificado para compartir (RF-41), la fecha y el folio reales del servidor, y el registro con la conexión caída a mitad del examen.
+Dudas numeradas (D1, D2…), decisiones propias, las medidas que tomaste de Figma para T01–T04 y T06, y una nota para T-12b, c y d con lo que `MarcoPrincipal` y los ayudantes ya ofrecen.
