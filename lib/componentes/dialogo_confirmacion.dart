@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../core/adaptativo/clase_pantalla.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'bloque_lectura.dart';
@@ -17,8 +18,9 @@ class DialogoConfirmacion extends StatelessWidget {
     super.key,
   });
 
-  /// Ancho máximo del diálogo.
+  /// Ancho máximo del diálogo (en tablet, [anchoMaximoTablet]).
   static const double anchoMaximo = 400;
+  static const double anchoMaximoTablet = 440;
 
   final String titulo;
   final String texto;
@@ -51,7 +53,9 @@ class DialogoConfirmacion extends StatelessWidget {
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       // En pantallas anchas no pasa de 400 (en 390 ocupa 342, como el resto).
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: anchoMaximo),
+        constraints: BoxConstraints(
+          maxWidth: context.clasePantalla.esTablet ? anchoMaximoTablet : anchoMaximo,
+        ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(

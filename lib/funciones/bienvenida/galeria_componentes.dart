@@ -256,7 +256,26 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 TarjetaBuzonInicio(pendientes: 6, alAbrir: () {}),
                 const TarjetaBuzonInicio(pendientes: 0, alAbrir: null),
                 const TarjetaConsejoSarko(
-                  consejo: 'Termina el Sprint 3 hoy y desbloquea la Ronda Semilla.',
+                  consejo: 'Termina el Sprint 3 hoy y desbloquea Derechos ARCO.',
+                ),
+                const TarjetaConsejoSarko(consejo: Textos.tiendaConsejo, destacada: true),
+                TarjetaProgresoModulos(
+                  modulos: [
+                    for (final (i, nombre) in Textos.modulosCortos.indexed)
+                      AvanceModulo(
+                        nombre: Textos.moduloProgresoNombre(i + 1, nombre),
+                        porcentaje: i == 0 ? 60 : 0,
+                        color: ColoresModulo.enOrden[i],
+                      ),
+                  ],
+                ),
+                const VistaPreviaTexto(porcentaje: 120),
+                NodoSprint(
+                  tipo: TipoNodoSprint.completado,
+                  estrellas: 3,
+                  etiquetaSemantica: 'Sprint 2, seleccionado',
+                  seleccionado: true,
+                  alPresionar: () {},
                 ),
               ],
             ),

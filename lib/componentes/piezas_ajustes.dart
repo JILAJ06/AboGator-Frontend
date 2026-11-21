@@ -273,3 +273,43 @@ class OpcionTamano extends StatelessWidget {
     );
   }
 }
+
+/// "Vista previa" de los ajustes en tablet (Figma 101:4888): fondo/superficie-alt,
+/// radio 20, relleno 20 y separación 10. "VISTA PREVIA · TEXTO AL N %" (Leyenda
+/// en texto/secundario), la pregunta de ejemplo (Título/H2) y el texto (Cuerpo/Base
+/// en texto/secundario). Se ve con el tamaño de texto elegido.
+class VistaPreviaTexto extends StatelessWidget {
+  const VistaPreviaTexto({required this.porcentaje, super.key});
+
+  final int porcentaje;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final estilos = context.estilos;
+    return Container(
+      key: const ValueKey('vista-previa'),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: tokens.fondoSuperficieAlt,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            Textos.vistaPreviaEtiqueta(porcentaje),
+            style: estilos.leyenda.copyWith(color: tokens.textoSecundario),
+          ),
+          const SizedBox(height: 10),
+          Text(Textos.vistaPreviaPregunta, style: estilos.h2.copyWith(color: tokens.textoPrimario)),
+          const SizedBox(height: 10),
+          Text(
+            Textos.vistaPreviaTexto,
+            style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
+          ),
+        ],
+      ),
+    );
+  }
+}

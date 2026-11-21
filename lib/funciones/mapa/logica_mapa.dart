@@ -92,6 +92,34 @@ abstract final class LogicaMapa {
     return base;
   }
 
+  /// Sprint seleccionado al abrir el mapa en tablet (T08): el de [sprintId]
+  /// si existe y no es el Examen final; si no, el sprint actual (en curso o
+  /// disponible), luego el último completado y, si no hay, el primero.
+  static Sprint? seleccionInicial(Modulo modulo, {String? sprintId}) {
+    if (sprintId != null) {
+      final pedido = sprintPorId(modulo, sprintId);
+      if (pedido != null && !pedido.esExamenFinal) return pedido;
+    }
+    final actual = sprintActual(modulo);
+    if (actual != null) return actual.sprint;
+    final normales = LogicaInicio.sprintsNormales(modulo);
+    final completados = normales.where((s) => s.estado == EstadoSprint.completado);
+    if (completados.isNotEmpty) return completados.last;
+    return normales.isEmpty ? null : normales.first;
+  }
+
+  /// Lo que se anuncia al seleccionar un sprint en tablet: "Sprint 2,
+  /// Consentimiento. Completado, 3 estrellas."
+  static String anuncioSeleccion(Modulo modulo, Sprint sprint) {
+    final completado = !sprint.esExamenFinal && sprint.estado == EstadoSprint.completado;
+    return Textos.seleccionSprint(
+      nombreNodo(modulo, sprint),
+      sprint.titulo,
+      estadoLegible(modulo, sprint),
+      estrellas: completado ? sprint.estrellas : null,
+    );
+  }
+
   /// Busca un módulo por id.
   static Modulo? moduloPorId(List<Modulo> modulos, String id) {
     for (final modulo in modulos) {

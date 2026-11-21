@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show ProviderOrFamily;
 import 'package:material_ui/material_ui.dart';
 
+import '../../datos/modelos/modulo.dart';
 import '../../datos/modelos/resumen_perfil.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
 import '../acceso/sesion.dart';
@@ -17,10 +18,17 @@ import '../vidas/pantalla_sin_vidas.dart';
 /// Lo que muestra el Perfil: el resumen del servidor y el color de cada
 /// módulo (para las medallas).
 class DatosPerfil {
-  const DatosPerfil({required this.resumen, this.coloresModulo = const {}});
+  const DatosPerfil({
+    required this.resumen,
+    this.coloresModulo = const {},
+    this.modulos = const [],
+  });
 
   final ResumenPerfil resumen;
   final Map<String, Color> coloresModulo;
+
+  /// Módulos con sus sprints (para "Progreso por módulo" en tablet).
+  final List<Modulo> modulos;
 }
 
 /// Carga el Perfil. Para reintentar: `ref.invalidate(datosPerfilProvider)`.
@@ -29,7 +37,11 @@ final datosPerfilProvider = FutureProvider.autoDispose<DatosPerfil>((ref) async 
     ref.watch(repositorioPerfilProvider).obtenerPerfil(),
     ref.watch(repositorioProgresoProvider).obtenerModulos(),
   ).wait;
-  return DatosPerfil(resumen: resumen, coloresModulo: {for (final m in modulos) m.id: m.color});
+  return DatosPerfil(
+    resumen: resumen,
+    coloresModulo: {for (final m in modulos) m.id: m.color},
+    modulos: modulos,
+  );
 });
 
 /// Proveedores que guardan datos de la persona; se descartan al cerrar

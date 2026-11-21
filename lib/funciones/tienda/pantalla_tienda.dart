@@ -9,6 +9,9 @@ import '../../componentes/dialogo_confirmacion.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/piezas_tienda.dart';
+import '../../componentes/sarko_imagen.dart';
+import '../../componentes/tarjeta_consejo_sarko.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
@@ -187,80 +190,149 @@ class _TiendaState extends ConsumerState<_Tienda> {
       );
     }
 
+    final clase = context.clasePantalla;
+    // Móvil: 2 columnas con separación 12. Tablet horizontal (T24): las 4 en
+    // una fila con el medianil de 24; entre 600 y 959, 2 columnas de 24.
+    final columnas = clase.esAncho ? 4 : 2;
+    final separacion = clase.esTablet ? MedidasAdaptativas.medianil : 12.0;
     final filas = <Widget>[
-      for (var i = 0; i < datos.articulos.length; i += 2) ...[
-        if (i > 0) const SizedBox(height: 12),
+      for (var i = 0; i < datos.articulos.length; i += columnas) ...[
+        if (i > 0) SizedBox(height: separacion),
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: tarjeta(datos.articulos[i])),
-              const SizedBox(width: 12),
-              Expanded(
-                child: i + 1 < datos.articulos.length
-                    ? tarjeta(datos.articulos[i + 1])
-                    : const SizedBox.shrink(),
-              ),
+              for (var j = 0; j < columnas; j++) ...[
+                if (j > 0) SizedBox(width: separacion),
+                Expanded(
+                  child: i + j < datos.articulos.length
+                      ? tarjeta(datos.articulos[i + j])
+                      : const SizedBox.shrink(),
+                ),
+              ],
             ],
           ),
         ),
       ],
     ];
 
+    final tablet = clase.esTablet;
     return SingleChildScrollView(
       key: const ValueKey('tienda-desplazable'),
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              const TituloPestana(Textos.tiendaTitulo),
-              PildoraSaldo(monedas: datos.monedas),
-            ],
-          ),
-          const SizedBox(height: 14),
-          const TituloSeccion(Textos.tuInventario),
-          const SizedBox(height: 8),
-          Semantics(
-            container: true,
-            label: Textos.inventarioLista(inventario.length),
-            child: Wrap(
-              key: const ValueKey('inventario'),
-              spacing: 8,
+      padding: tablet
+          ? const EdgeInsets.fromLTRB(
+              MedidasAdaptativas.margen,
+              20,
+              MedidasAdaptativas.margen,
+              MedidasAdaptativas.medianil,
+            )
+          : const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      child: _AnchoTablet(
+        activo: tablet && !clase.esAncho,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
               runSpacing: 8,
               children: [
-                for (final a in inventario)
-                  PildoraInventario(
-                    key: ValueKey('inventario-${a.id}'),
-                    icono: iconoArticulo(a),
-                    nombreCorto: nombreCortoArticulo(a),
-                    nombre: a.nombre,
-                    cantidad: datos.cantidad(a),
-                  ),
+                const TituloPestana(Textos.tiendaTitulo),
+                PildoraSaldo(monedas: datos.monedas),
               ],
             ),
-          ),
-          const SizedBox(height: 18),
-          const TituloSeccion(Textos.comodinesSeccion),
-          const SizedBox(height: 10),
-          if (!enLinea) ...[
-            const NotaTienda(
-              key: ValueKey('nota-sin-conexion'),
-              texto: Textos.necesitasConexionComprar,
-              icono: IconosApp.alert,
+            SizedBox(height: tablet ? 28 : 14),
+            const TituloSeccion(Textos.tuInventario),
+            SizedBox(height: tablet ? 10 : 8),
+            Semantics(
+              container: true,
+              label: Textos.inventarioLista(inventario.length),
+              child: Wrap(
+                key: const ValueKey('inventario'),
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final a in inventario)
+                    PildoraInventario(
+                      key: ValueKey('inventario-${a.id}'),
+                      icono: iconoArticulo(a),
+                      nombreCorto: nombreCortoArticulo(a),
+                      nombre: a.nombre,
+                      cantidad: datos.cantidad(a),
+                    ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: tablet ? 26 : 18),
+            const TituloSeccion(Textos.comodinesSeccion),
+            const SizedBox(height: 10),
+            if (!enLinea) ...[
+              const NotaTienda(
+                key: ValueKey('nota-sin-conexion'),
+                texto: Textos.necesitasConexionComprar,
+                icono: IconosApp.alert,
+              ),
+              const SizedBox(height: 12),
+            ],
+            ...filas,
+            SizedBox(height: tablet ? MedidasAdaptativas.medianil : 16),
+            const NotaTienda(key: ValueKey('nota-rn03'), texto: Textos.notaRn03),
+            if (tablet) ...[
+              const SizedBox(height: MedidasAdaptativas.medianil),
+              const _ConsejoTienda(),
+            ],
           ],
-          ...filas,
-          const SizedBox(height: 16),
-          const NotaTienda(key: ValueKey('nota-rn03'), texto: Textos.notaRn03),
-        ],
+        ),
       ),
+    );
+  }
+}
+
+/// Entre 600 y 959 el contenido se centra con el ancho máximo de una columna.
+class _AnchoTablet extends StatelessWidget {
+  const _AnchoTablet({required this.activo, required this.child});
+
+  final bool activo;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => activo
+      ? Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: MedidasAdaptativas.contenidoUnaColumna),
+            child: child,
+          ),
+        )
+      : child;
+}
+
+/// Consejo de Sarko de la Tienda en tablet (Figma 101:4545 y 101:4548): la
+/// tarjeta destacada y Sarko de 136 × 170 a la derecha, 44 aparte; la tarjeta
+/// termina 30 arriba del pie de Sarko.
+class _ConsejoTienda extends StatelessWidget {
+  const _ConsejoTienda();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      key: ValueKey('consejo-tienda'),
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 30),
+            child: TarjetaConsejoSarko(consejo: Textos.tiendaConsejo, destacada: true),
+          ),
+        ),
+        SizedBox(width: 44),
+        SarkoImagen(
+          key: ValueKey('sarko-tienda'),
+          pose: PoseSarko.alegre,
+          ancho: 136,
+          decorativa: true,
+        ),
+      ],
     );
   }
 }

@@ -8,10 +8,12 @@ import '../../componentes/dialogo_confirmacion.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/piezas_perfil.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/sincronizacion/estado_sincronizacion.dart';
+import '../inicio/logica_inicio.dart';
 import '../tienda/pantalla_tienda.dart';
 import 'estado_perfil.dart';
 import 'logica_perfil.dart';
@@ -170,30 +172,84 @@ class _PerfilState extends ConsumerState<_Perfil> {
       ),
     );
 
+    final encabezado = Row(
+      children: [
+        const Expanded(child: TituloPestana(Textos.perfilTitulo)),
+        const SizedBox(width: 12),
+        BotonIconoCuadrado(
+          key: const ValueKey('boton-ajustes'),
+          icono: IconosApp.settings,
+          etiqueta: Textos.accesibilidadYAjustes,
+          alPresionar: () => context.go(Rutas.ajustes),
+        ),
+      ],
+    );
+    final tarjeta = TarjetaPerfil(
+      iniciales: LogicaPerfil.iniciales(usuario.nombre),
+      nombre: usuario.nombre,
+      detalle: LogicaPerfil.detalle(usuario),
+    );
+    final menu = MenuAgrupado(
+      filas: [
+        FilaMenu(
+          key: const ValueKey('menu-accesibilidad'),
+          icono: IconosApp.accessibility,
+          texto: Textos.menuAccesibilidad,
+          alPresionar: () => context.go(Rutas.ajustes),
+        ),
+        FilaMenu(
+          key: const ValueKey('menu-notificaciones'),
+          icono: IconosApp.bell,
+          texto: Textos.menuNotificacionesRacha,
+          alPresionar: () => context.go(Rutas.notificacionesRacha),
+        ),
+        FilaMenu(
+          key: const ValueKey('menu-aviso'),
+          icono: IconosApp.doc,
+          texto: Textos.menuAvisoPrivacidad,
+          alPresionar: () => context.go(Rutas.avisoPrivacidad),
+        ),
+        FilaMenu(
+          key: const ValueKey('menu-cerrar-sesion'),
+          icono: IconosApp.logout,
+          texto: Textos.cerrarSesion,
+          peligro: true,
+          alPresionar: _cerrarSesion,
+        ),
+      ],
+    );
+
+    final clase = context.clasePantalla;
+    if (clase.esTablet) {
+      return _PerfilTablet(
+        dosColumnas: clase.esAncho,
+        encabezado: encabezado,
+        tarjeta: tarjeta,
+        estadisticas: estadisticas,
+        insignias: _InsigniasTablet(datos: widget.datos, desplazables: insignias),
+        menu: menu,
+        progreso: TarjetaProgresoModulos(
+          modulos: [
+            for (final m in widget.datos.modulos)
+              AvanceModulo(
+                nombre: Textos.moduloProgresoNombre(m.numero, LogicaInicio.nombreCorto(m)),
+                porcentaje: LogicaPerfil.porcentajeModulo(m),
+                color: m.color,
+              ),
+          ],
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       key: const ValueKey('perfil-desplazable'),
       padding: const EdgeInsets.fromLTRB(24, 6, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              const Expanded(child: TituloPestana(Textos.perfilTitulo)),
-              const SizedBox(width: 12),
-              BotonIconoCuadrado(
-                key: const ValueKey('boton-ajustes'),
-                icono: IconosApp.settings,
-                etiqueta: Textos.accesibilidadYAjustes,
-                alPresionar: () => context.go(Rutas.ajustes),
-              ),
-            ],
-          ),
+          encabezado,
           const SizedBox(height: 10),
-          TarjetaPerfil(
-            iniciales: LogicaPerfil.iniciales(usuario.nombre),
-            nombre: usuario.nombre,
-            detalle: LogicaPerfil.detalle(usuario),
-          ),
+          tarjeta,
           const SizedBox(height: 10),
           estadisticas,
           const SizedBox(height: 16),
@@ -201,37 +257,156 @@ class _PerfilState extends ConsumerState<_Perfil> {
           const SizedBox(height: 10),
           insignias,
           const SizedBox(height: 24),
-          MenuAgrupado(
-            filas: [
-              FilaMenu(
-                key: const ValueKey('menu-accesibilidad'),
-                icono: IconosApp.accessibility,
-                texto: Textos.menuAccesibilidad,
-                alPresionar: () => context.go(Rutas.ajustes),
-              ),
-              FilaMenu(
-                key: const ValueKey('menu-notificaciones'),
-                icono: IconosApp.bell,
-                texto: Textos.menuNotificacionesRacha,
-                alPresionar: () => context.go(Rutas.notificacionesRacha),
-              ),
-              FilaMenu(
-                key: const ValueKey('menu-aviso'),
-                icono: IconosApp.doc,
-                texto: Textos.menuAvisoPrivacidad,
-                alPresionar: () => context.go(Rutas.avisoPrivacidad),
-              ),
-              FilaMenu(
-                key: const ValueKey('menu-cerrar-sesion'),
-                icono: IconosApp.logout,
-                texto: Textos.cerrarSesion,
-                peligro: true,
-                alPresionar: _cerrarSesion,
-              ),
-            ],
-          ),
+          menu,
         ],
       ),
+    );
+  }
+}
+
+/// Perfil en tablet (T25, Figma 101:4553). Con [dosColumnas] (≥ 960): "Mi
+/// perfil" y el botón de ajustes arriba a todo el ancho; a la izquierda (500)
+/// la tarjeta, las estadísticas de 2 × 2 y las insignias; a la derecha (502)
+/// "Cuenta y preferencias" con el menú y "Progreso por módulo". Entre 600 y
+/// 959, todo en una columna centrada de hasta 640.
+class _PerfilTablet extends StatelessWidget {
+  const _PerfilTablet({
+    required this.dosColumnas,
+    required this.encabezado,
+    required this.tarjeta,
+    required this.estadisticas,
+    required this.insignias,
+    required this.menu,
+    required this.progreso,
+  });
+
+  /// Proporciones de las columnas de Figma (500 y 502).
+  static const int flexIzquierda = 500;
+  static const int flexDerecha = 502;
+
+  final bool dosColumnas;
+  final Widget encabezado;
+  final Widget tarjeta;
+  final Widget estadisticas;
+  final Widget insignias;
+  final Widget menu;
+  final Widget progreso;
+
+  @override
+  Widget build(BuildContext context) {
+    final izquierda = <Widget>[
+      tarjeta,
+      const SizedBox(height: 16),
+      estadisticas,
+      const SizedBox(height: 28),
+      const TituloSeccion(Textos.insigniasTitulo),
+      const SizedBox(height: 14),
+      insignias,
+    ];
+    final derecha = <Widget>[
+      Semantics(
+        header: true,
+        child: Text(
+          Textos.cuentaYPreferencias,
+          style: context.estilos.h3.copyWith(color: context.tokens.textoPrimario),
+        ),
+      ),
+      const SizedBox(height: 14),
+      menu,
+      const SizedBox(height: MedidasAdaptativas.medianil),
+      progreso,
+    ];
+    final Widget cuerpo = dosColumnas
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: flexIzquierda,
+                child: Column(
+                  key: const ValueKey('perfil-columna-izquierda'),
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: izquierda,
+                ),
+              ),
+              const SizedBox(width: MedidasAdaptativas.medianil),
+              Expanded(
+                flex: flexDerecha,
+                child: Padding(
+                  // Figma: el título de la derecha queda 4 abajo de la tarjeta.
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Column(
+                    key: const ValueKey('perfil-columna-derecha'),
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: derecha,
+                  ),
+                ),
+              ),
+            ],
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [...izquierda, const SizedBox(height: 28), ...derecha],
+          );
+
+    return SingleChildScrollView(
+      key: const ValueKey('perfil-desplazable'),
+      padding: const EdgeInsets.fromLTRB(
+        MedidasAdaptativas.margen,
+        12,
+        MedidasAdaptativas.margen,
+        MedidasAdaptativas.medianil,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: dosColumnas ? double.infinity : MedidasAdaptativas.contenidoUnaColumna,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [encabezado, const SizedBox(height: 16), cuerpo],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Insignias en tablet: repartidas a todo el ancho (Figma: 4 medallas de 79
+/// en 500); si no caben, se desplazan en horizontal como en móvil.
+class _InsigniasTablet extends StatelessWidget {
+  const _InsigniasTablet({required this.datos, required this.desplazables});
+
+  /// Ancho de cada medalla y separación mínima entre ellas.
+  static const double anchoMedalla = 79;
+  static const double separacionMinima = 8;
+
+  final DatosPerfil datos;
+  final Widget desplazables;
+
+  @override
+  Widget build(BuildContext context) {
+    final insignias = datos.resumen.insignias;
+    return LayoutBuilder(
+      builder: (context, restricciones) {
+        final necesario =
+            insignias.length * anchoMedalla + (insignias.length - 1) * separacionMinima;
+        if (insignias.length < 2 || necesario > restricciones.maxWidth) return desplazables;
+        return Row(
+          key: const ValueKey('insignias'),
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final ins in insignias)
+              MedallaInsignia(
+                key: ValueKey('insignia-${ins.id}'),
+                nombre: ins.nombre,
+                icono: IconosApp.porNombre[ins.icono] ?? IconosApp.star,
+                desbloqueada: ins.desbloqueada,
+                colorModulo: datos.coloresModulo[ins.moduloId],
+              ),
+          ],
+        );
+      },
     );
   }
 }

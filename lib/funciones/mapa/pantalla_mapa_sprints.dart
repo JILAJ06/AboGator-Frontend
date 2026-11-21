@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
+import '../../componentes/boton_app.dart';
 import '../../componentes/camino_sprints.dart';
 import '../../componentes/encabezado_modulo.dart';
 import '../../componentes/globo_sprint_actual.dart';
@@ -15,10 +16,12 @@ import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/nodo_sprint.dart';
 import '../../componentes/sarko_imagen.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/modelos/modulo.dart';
 import '../inicio/logica_inicio.dart';
+import 'detalle_sprint.dart';
 import 'estado_mapa.dart';
 import 'logica_mapa.dart';
 
@@ -29,15 +32,26 @@ import 'logica_mapa.dart';
 /// "Comenzar" y Sarko junto al nodo actual. Navegación inferior con "Mapa"
 /// activo y el Buzón fijo, como en el Inicio.
 class PantallaMapaSprints extends ConsumerWidget {
-  const PantallaMapaSprints({required this.moduloId, super.key});
+  const PantallaMapaSprints({required this.moduloId, this.sprintId, super.key});
 
   final String moduloId;
 
+  /// Sprint que queda seleccionado en tablet horizontal (la ruta de la intro
+  /// muestra esta vista con ese sprint, T08). `null` en la ruta del mapa.
+  final String? sprintId;
+
   /// Orden de foco: atrás (0), nodos (1 a 6), "Comenzar" y luego el Buzón.
+  /// En tablet, el botón del detalle va al final.
   static const double ordenAtras = 0;
   static const double ordenComenzar = 100;
+  static const double ordenDetalle = 200;
 
   void _volverAlInicio(BuildContext context) {
+    // Desde la ruta de la intro (tablet) "atrás" va al Inicio, no al mapa.
+    if (sprintId != null) {
+      context.go(Rutas.inicio);
+      return;
+    }
     if (context.canPop()) {
       context.pop();
     } else {
@@ -56,6 +70,14 @@ class PantallaMapaSprints extends ConsumerWidget {
       apelacionesPendientes: modulo == null ? null : valor?.apelacionesPendientes,
       focoOrdenado: true,
       cuerpo: switch (datos) {
+        AsyncData(value: DatosModulo(modulo: final Modulo modulo, :final vidas))
+            when context.clasePantalla.esAncho =>
+          _MapaConDetalle(
+            modulo: modulo,
+            vidas: vidas.cantidad,
+            sprintInicial: sprintId,
+            alAtras: () => _volverAlInicio(context),
+          ),
         AsyncData(value: DatosModulo(modulo: final Modulo modulo, :final vidas)) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -96,9 +118,38 @@ class PantallaMapaSprints extends ConsumerWidget {
 /// después de cada diseño para que el camino siempre pase por ellos, con
 /// cualquier ancho o tamaño de texto.
 class MapaSprints extends StatefulWidget {
-  const MapaSprints({required this.modulo, super.key});
+  const MapaSprints({
+    required this.modulo,
+    this.escala = 1,
+    this.conGlobo = true,
+    this.seleccionado,
+    this.alSeleccionar,
+    super.key,
+  });
 
   final Modulo modulo;
+
+  /// Escala del mapa (tablet: 1.12). Se dibuja a [anchoBase] y se amplía
+  /// centrado; los centros del camino se miden en el mapa sin escalar.
+  final double escala;
+
+  /// Sin globo (tablet), su lugar queda vacío como en Figma T08.
+  final bool conGlobo;
+
+  /// Id del sprint seleccionado (tablet); `null` en móvil.
+  final String? seleccionado;
+
+  /// Con valor, tocar un sprint completado o en curso lo selecciona en lugar
+  /// de abrir la intro (tablet). El Examen final sigue abriendo la crisis.
+  final ValueChanged<Sprint>? alSeleccionar;
+
+  /// Ancho del marco móvil de Figma.
+  static const double anchoBase = 390;
+
+  /// Arriba del mapa escalado (Figma T08: el camino empieza en y 10 y el primer
+  /// nodo 22.4 más abajo).
+  static const double margenSuperiorEscalado = 10;
+  static const double margenInternoEscalado = 20;
 
   /// Medidas de Figma (marco 390, el encabezado termina en 150).
   static const double margenSuperior = 50;
@@ -213,6 +264,8 @@ class _MapaSprintsState extends State<MapaSprints> {
           fraccion: fraccion,
           orden: i + 1,
           esActual: esActual,
+          seleccionado: widget.alSeleccionar == null ? null : sprint.id == widget.seleccionado,
+          alSeleccionar: widget.alSeleccionar,
         ),
       );
       if (esActual) {
@@ -223,6 +276,7 @@ class _MapaSprintsState extends State<MapaSprints> {
               bottom: MapaSprints.separacionAntesDelActual,
             ),
             child: _FilaGlobo(
+              visible: widget.conGlobo,
               fraccion: fraccion,
               globo: FocusTraversalOrder(
                 order: const NumericFocusOrder(PantallaMapaSprints.ordenComenzar),
@@ -242,19 +296,49 @@ class _MapaSprintsState extends State<MapaSprints> {
       }
     }
 
+    // Con el riel (tablet) no hay botón Buzón flotante: no se reserva su lugar.
+    final reserva = MarcoPrincipal.conRiel(context) ? 0.0 : MarcoPrincipal.reservaBuzon;
+    final contenido = Stack(
+      key: _claveContenido,
+      children: [
+        Positioned.fill(child: CaminoSprints(puntos: _puntos)),
+        Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: filas),
+      ],
+    );
+    if (widget.escala == 1) {
+      return SingleChildScrollView(
+        key: const ValueKey('mapa-sprints'),
+        controller: _controlador,
+        padding: EdgeInsets.only(
+          top: MapaSprints.margenSuperior,
+          bottom: MapaSprints.margenInferior + reserva,
+        ),
+        child: contenido,
+      );
+    }
     return SingleChildScrollView(
       key: const ValueKey('mapa-sprints'),
       controller: _controlador,
-      padding: const EdgeInsets.only(
-        top: MapaSprints.margenSuperior,
-        bottom: MapaSprints.margenInferior + MarcoPrincipal.reservaBuzon,
-      ),
-      child: Stack(
-        key: _claveContenido,
-        children: [
-          Positioned.fill(child: CaminoSprints(puntos: _puntos)),
-          Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: filas),
-        ],
+      padding: const EdgeInsets.only(top: MapaSprints.margenSuperiorEscalado),
+      child: Center(
+        child: SizedBox(
+          key: const ValueKey('mapa-escalado'),
+          width: MapaSprints.anchoBase * widget.escala,
+          child: FittedBox(
+            fit: BoxFit.fitWidth,
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: MapaSprints.anchoBase,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: MapaSprints.margenInternoEscalado,
+                  bottom: MapaSprints.margenInferior + reserva,
+                ),
+                child: contenido,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -271,9 +355,13 @@ class _FilaNodo extends StatelessWidget {
     required this.fraccion,
     required this.orden,
     required this.esActual,
+    this.seleccionado,
+    this.alSeleccionar,
   });
 
   final GlobalKey clave;
+  final bool? seleccionado;
+  final ValueChanged<Sprint>? alSeleccionar;
   final Modulo modulo;
   final Sprint sprint;
   final double fraccion;
@@ -281,6 +369,11 @@ class _FilaNodo extends StatelessWidget {
   final bool esActual;
 
   void _abrir(BuildContext context) {
+    final seleccionar = alSeleccionar;
+    if (seleccionar != null && !sprint.esExamenFinal) {
+      seleccionar(sprint);
+      return;
+    }
     if (sprint.esExamenFinal) {
       context.push(Rutas.crisisJefeDe(modulo.id));
     } else {
@@ -310,6 +403,7 @@ class _FilaNodo extends StatelessWidget {
                 tipo: tipo,
                 estrellas: sprint.estrellas,
                 etiquetaSemantica: LogicaMapa.semanticaNodo(modulo, sprint),
+                seleccionado: seleccionado,
                 alPresionar: abre ? () => _abrir(context) : null,
               ),
             ),
@@ -409,10 +503,13 @@ class _FilaNodo extends StatelessWidget {
 
 /// Fila del globo, centrado bajo el nodo actual (sin salirse de los márgenes).
 class _FilaGlobo extends StatelessWidget {
-  const _FilaGlobo({required this.fraccion, required this.globo});
+  const _FilaGlobo({required this.fraccion, required this.globo, this.visible = true});
 
   final double fraccion;
   final Widget globo;
+
+  /// Oculto (tablet) conserva su lugar, como en Figma T08.
+  final bool visible;
 
   /// Si el espacio centrado bajo el nodo es menor, el globo se centra en la pantalla.
   static const double anchoMinimo = 260;
@@ -435,10 +532,192 @@ class _FilaGlobo extends StatelessWidget {
             padding: usaCentroDelNodo
                 ? const EdgeInsets.symmetric(horizontal: MapaSprints.margenLateral)
                 : EdgeInsets.zero,
-            child: Center(child: globo),
+            child: Center(
+              child: Visibility(
+                visible: visible,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: globo,
+              ),
+            ),
           ),
         );
       },
+    );
+  }
+}
+
+/// Mapa de sprints con el detalle del sprint en tablet horizontal (T08, Figma
+/// 96:582): a la izquierda (596 de 1090) el encabezado del módulo y el mapa
+/// × 1.12 centrado; a la derecha (494) el panel "Detalle del sprint".
+///
+/// Tocar un sprint completado o en curso lo **selecciona** y cambia el detalle
+/// sin navegar; los bloqueados no hacen nada y el Examen final habilitado abre
+/// la crisis, como en móvil.
+class _MapaConDetalle extends ConsumerStatefulWidget {
+  const _MapaConDetalle({
+    required this.modulo,
+    required this.vidas,
+    required this.sprintInicial,
+    required this.alAtras,
+  });
+
+  final Modulo modulo;
+  final int vidas;
+  final String? sprintInicial;
+  final VoidCallback alAtras;
+
+  /// Proporción de los paneles en Figma (596 y 494).
+  static const int flexMapa = 596;
+  static const int flexDetalle = 494;
+
+  /// Escala del mapa del móvil en tablet (nodos de 72 → 80.64).
+  static const double escalaMapa = 1.12;
+
+  @override
+  ConsumerState<_MapaConDetalle> createState() => _MapaConDetalleState();
+}
+
+class _MapaConDetalleState extends ConsumerState<_MapaConDetalle> {
+  late String? _seleccionado = LogicaMapa.seleccionInicial(
+    widget.modulo,
+    sprintId: widget.sprintInicial,
+  )?.id;
+
+  @override
+  void didUpdateWidget(_MapaConDetalle anterior) {
+    super.didUpdateWidget(anterior);
+    if (anterior.sprintInicial != widget.sprintInicial) {
+      _seleccionado = LogicaMapa.seleccionInicial(
+        widget.modulo,
+        sprintId: widget.sprintInicial,
+      )?.id;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final modulo = widget.modulo;
+    final id = _seleccionado;
+    final sprint = id == null ? null : LogicaMapa.sprintPorId(modulo, id);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          flex: _MapaConDetalle.flexMapa,
+          child: Column(
+            key: const ValueKey('panel-mapa'),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FocusTraversalOrder(
+                order: const NumericFocusOrder(PantallaMapaSprints.ordenAtras),
+                child: EncabezadoModulo(
+                  numero: modulo.numero,
+                  nombreCorto: LogicaInicio.nombreCorto(modulo),
+                  titulo: LogicaInicio.tramo(modulo),
+                  color: modulo.color,
+                  vidas: widget.vidas,
+                  completados: LogicaInicio.completados(modulo),
+                  total: LogicaInicio.totalSprints(modulo),
+                  alAtras: widget.alAtras,
+                  arribaMinimo: EncabezadoModulo.arribaTablet,
+                  abajoExtra: EncabezadoModulo.abajoTablet,
+                ),
+              ),
+              Expanded(
+                child: MapaSprints(
+                  modulo: modulo,
+                  escala: _MapaConDetalle.escalaMapa,
+                  conGlobo: false,
+                  seleccionado: id,
+                  alSeleccionar: (s) => setState(() => _seleccionado = s.id),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: _MapaConDetalle.flexDetalle,
+          child: _PanelDetalle(modulo: modulo, sprint: sprint),
+        ),
+      ],
+    );
+  }
+}
+
+/// Panel derecho "Detalle del sprint" (Figma 96:844): fondo/superficie, borde
+/// izquierdo de 1 y una columna de 430 centrada (también en alto) con el
+/// detalle compartido con la intro y "Comenzar sprint". Se desplaza si no cabe.
+class _PanelDetalle extends ConsumerWidget {
+  const _PanelDetalle({required this.modulo, required this.sprint});
+
+  static const double anchoColumna = 430;
+  static const double relleno = 24;
+
+  final Modulo modulo;
+  final Sprint? sprint;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tokens = context.tokens;
+    final elegido = sprint;
+    return DecoratedBox(
+      key: const ValueKey('panel-detalle'),
+      decoration: BoxDecoration(
+        color: tokens.fondoSuperficie,
+        border: Border(left: BorderSide(color: tokens.bordeDefault)),
+      ),
+      child: SafeArea(
+        left: false,
+        child: LayoutBuilder(
+          builder: (context, restricciones) => SingleChildScrollView(
+            key: const ValueKey('detalle-desplazable'),
+            padding: const EdgeInsets.symmetric(horizontal: relleno, vertical: relleno),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: math.max(0, restricciones.maxHeight - 2 * relleno),
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: anchoColumna),
+                  child: elegido == null
+                      ? const SizedBox.shrink()
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Anuncia la selección cada vez que cambia.
+                            Semantics(
+                              key: ValueKey('anuncio-${elegido.id}'),
+                              liveRegion: true,
+                              label: LogicaMapa.anuncioSeleccion(modulo, elegido),
+                              child: const SizedBox.shrink(),
+                            ),
+                            DetalleSprint(
+                              key: ValueKey('detalle-${elegido.id}'),
+                              modulo: modulo,
+                              sprint: elegido,
+                              disposicion: DisposicionDetalle.panel,
+                            ),
+                            const SizedBox(height: 14),
+                            FocusTraversalOrder(
+                              order: const NumericFocusOrder(PantallaMapaSprints.ordenDetalle),
+                              child: BotonApp(
+                                key: const ValueKey('comenzar-detalle'),
+                                texto: Textos.comenzarSprint,
+                                alPresionar: LogicaMapa.puedeAbrir(modulo, elegido)
+                                    ? () => comenzarSprint(context, ref, modulo, elegido)
+                                    : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -263,15 +263,7 @@ abstract final class Textos {
       'Termina el Sprint $sprint hoy y desbloquea $desbloqueo.';
   static const String consejoGeneral = '¡Tu Startup va por buen camino! Sigue practicando.';
 
-  /// Tramo de la Startup con su artículo, para el consejo ("desbloquea la
-  /// Ronda Semilla").
-  static const List<String> tramosConArticulo = [
-    'Del Garage al MVP',
-    'la Ronda Semilla',
-    'Escalando el equipo',
-    'la Serie A',
-    'la Salida a bolsa',
-  ];
+  static const String consejoExamenFinal = 'el Examen final';
 
   static const String inicioErrorCarga = 'No pudimos cargar tu progreso.';
   static const String reintentar = 'Reintentar';
@@ -290,6 +282,16 @@ abstract final class Textos {
   static const String estadoSprintDisponible = 'disponible';
   static const String estadoSprintBloqueado = 'bloqueado';
   static String estrellasSemantica(int estrellas, int maximo) => '$estrellas de $maximo estrellas';
+  static String seleccionSprint(String nombre, String titulo, String estado, {int? estrellas}) {
+    final estadoMayuscula = estado.isEmpty ? estado : estado[0].toUpperCase() + estado.substring(1);
+    final conEstrellas = estrellas == null
+        ? ''
+        : estrellas == 1
+        ? ', 1 estrella'
+        : ', $estrellas estrellas';
+    return '$nombre, $titulo. $estadoMayuscula$conEstrellas.';
+  }
+
   static String nodoSemantica(String nombre, String titulo, String estado) =>
       '$nombre, $titulo, $estado';
   static String globoTitulo(int numero, String titulo) => 'Sprint $numero · $titulo';
@@ -654,6 +656,11 @@ abstract final class Textos {
   // ---------------------------------------------------------------------
   static const String ajustesTitulo = 'Accesibilidad';
   static const String ajustesSubtitulo = 'WCAG 2.1 AA · Ajusta la app a tu forma de aprender.';
+  static String vistaPreviaEtiqueta(int porcentaje) => 'VISTA PREVIA · TEXTO AL $porcentaje %';
+  static const String vistaPreviaPregunta = '¿La copio tal cual en nuestra app de código cerrado?';
+  static const String vistaPreviaTexto =
+      'Así se verán las tarjetas con el tamaño de texto elegido. El diseño se reacomoda sin '
+      'cortar palabras (WCAG 1.4.4 y 1.4.10).';
   static const String seccionVisual = 'VISUAL';
   static const String seccionMotora = 'MOTOR Y AUDITIVA';
   static const String seccionCognitiva = 'COGNITIVA (WCAG 2.2.1)';
@@ -813,6 +820,10 @@ abstract final class Textos {
   // 24 Tienda
   // ---------------------------------------------------------------------
   static const String tiendaTitulo = 'Tienda';
+  static const String tiendaConsejo =
+      'La Lupa de Auditor rinde más en tarjetas con evidencia: resalta las palabras trampa antes '
+      'de que deslices. El Amparo te salva de un error en lecciones normales, pero no en el '
+      'Examen Final (RN03).';
   static String saldoSemantica(int monedas) =>
       monedas == 1 ? 'Tienes 1 moneda' : 'Tienes $monedas monedas';
   static const String tuInventario = 'Tu inventario';
@@ -868,6 +879,10 @@ abstract final class Textos {
   static const String sprintsPerfectos = 'Sprints perfectos';
   static String estadisticaSemantica(String etiqueta, String valor) => '$etiqueta: $valor';
   static const String insigniasTitulo = 'Insignias';
+  static const String cuentaYPreferencias = 'Cuenta y preferencias';
+  static const String progresoPorModulo = 'Progreso por módulo';
+  static String moduloProgresoNombre(int numero, String nombre) => '$numero · $nombre';
+  static String avanceModuloPerfil(String nombre, int porcentaje) => '$nombre, $porcentaje %';
   static String insigniaSemantica(String nombre, {required bool obtenida}) =>
       '$nombre, ${obtenida ? 'obtenida' : 'bloqueada'}';
   static const String menuAccesibilidad = 'Accesibilidad';
