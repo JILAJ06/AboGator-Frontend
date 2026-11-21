@@ -1,8 +1,14 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../componentes/boton_buzon.dart';
 import '../componentes/navegacion_inferior_app.dart';
+import '../componentes/riel_navegacion.dart';
+import '../core/adaptativo/clase_pantalla.dart';
+import '../datos/repositorios/proveedores_repositorios.dart';
+import '../funciones/acceso/sesion.dart';
+import '../funciones/inicio/logica_inicio.dart';
 import 'rutas.dart';
 
 /// Lleva a la pantalla de una pestaña de la barra inferior. "Mapa" vuelve al
@@ -19,13 +25,27 @@ void irAPestana(BuildContext context, PestanaApp pestana) {
   enrutador.go(destino);
 }
 
-/// Marco de las pantallas con barra inferior (07 Inicio y 08 Mapa de sprints):
-/// el [cuerpo], la navegación inferior con [pestana] activa y, si se conoce
-/// [apelacionesPendientes], el botón Buzón fijo a [separacionBuzon] de la barra.
+/// Total del Buzón para la insignia del riel (tablet), cuando la pantalla no lo
+/// trae en sus propios datos. Para refrescarlo: `ref.invalidate(totalBuzonRielProvider)`.
+final totalBuzonRielProvider = FutureProvider.autoDispose<int>((ref) async {
+  final buzon = await ref.watch(repositorioApelacionesProvider).obtenerBuzon();
+  return buzon.total;
+});
+
+/// Marco de las pantallas con navegación principal (Inicio, Mapa, Buzón,
+/// Tienda y Perfil).
+///
+/// - **Móvil** (< 600): el [cuerpo], la navegación inferior con [pestana]
+///   activa y, si se conoce [apelacionesPendientes], el botón Buzón fijo a
+///   [separacionBuzon] de la barra.
+/// - **Tablet** (≥ 600): el riel de navegación a la izquierda y el [cuerpo] a
+///   la derecha, sin barra inferior ni botón Buzón (el riel ya muestra el
+///   contador del Buzón).
 ///
 /// Con [focoOrdenado] el cuerpo usa `OrderedTraversalPolicy`: quien lo usa
-/// marca el orden con `FocusTraversalOrder`; el Buzón va después de todo.
-class MarcoPrincipal extends StatelessWidget {
+/// marca el orden con `FocusTraversalOrder`; el Buzón va después de todo. En
+/// tablet el riel va antes que el cuerpo.
+class MarcoPrincipal extends ConsumerWidget {
   const MarcoPrincipal({
     required this.pestana,
     required this.cuerpo,
@@ -48,8 +68,25 @@ class MarcoPrincipal extends StatelessWidget {
   final int? apelacionesPendientes;
   final bool focoOrdenado;
 
+  /// `true` si la pantalla actual se muestra con el riel (tablet). Las
+  /// pantallas lo usan para no reservar el espacio del botón Buzón.
+  static bool conRiel(BuildContext context) => context.clasePantalla.esTablet;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    return LayoutBuilder(
+      builder: (context, restricciones) {
+        final clase = ClasePantalla.deAncho(restricciones.maxWidth);
+        return clase.esTablet ? _tablet(context, ref) : _movil(context);
+      },
+    );
+  }
+
+  Widget _cuerpoConFoco(Widget contenido) => focoOrdenado
+      ? FocusTraversalGroup(policy: OrderedTraversalPolicy(), child: contenido)
+      : contenido;
+
+  Widget _movil(BuildContext context) {
     final pendientes = apelacionesPendientes;
     final contenido = Stack(
       children: [
@@ -73,9 +110,32 @@ class MarcoPrincipal extends StatelessWidget {
         actual: pestana,
         alSeleccionar: (destino) => irAPestana(context, destino),
       ),
-      body: focoOrdenado
-          ? FocusTraversalGroup(policy: OrderedTraversalPolicy(), child: contenido)
-          : contenido,
+      body: _cuerpoConFoco(contenido),
+    );
+  }
+
+  Widget _tablet(BuildContext context, WidgetRef ref) {
+    final usuario = ref.watch(sesionProvider);
+    final pendientes = apelacionesPendientes ?? ref.watch(totalBuzonRielProvider).value;
+    return Scaffold(
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SafeArea(
+            right: false,
+            child: RielNavegacion(
+              actual: pestana,
+              pendientes: pendientes,
+              iniciales: usuario == null ? '' : LogicaInicio.iniciales(usuario.nombre),
+              nombreUsuario: usuario?.nombre,
+              alSeleccionar: (destino) => irAPestana(context, destino),
+              alAjustes: () => context.go(Rutas.ajustes),
+              alPerfil: () => irAPestana(context, PestanaApp.perfil),
+            ),
+          ),
+          Expanded(child: _cuerpoConFoco(cuerpo)),
+        ],
+      ),
     );
   }
 }

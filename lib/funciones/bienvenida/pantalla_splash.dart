@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../componentes/logo_app.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/recursos/imagenes_app.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/tema/tokens_color.dart';
@@ -27,6 +28,9 @@ class PantallaSplash extends ConsumerStatefulWidget {
 }
 
 class _PantallaSplashState extends ConsumerState<PantallaSplash> {
+  /// Factor del logo y el lema en tablet (469.4 / 323.7).
+  static const double escalaTablet = 1.45;
+
   Timer? _temporizador;
 
   @override
@@ -53,6 +57,11 @@ class _PantallaSplashState extends ConsumerState<PantallaSplash> {
     // Colores de marca fijos (ver la nota de la clase).
     const marca = TokensColor.claro;
     final estilos = context.estilos;
+    // Tablet (Figma T01, 94:26): el mismo Splash con el logo y el lema 1.45
+    // veces más grandes (logo de 469.4, lema de 435 en 20.3/29), puntos de 12
+    // y "Powered by LawSwipe" 68 debajo de los puntos.
+    final tablet = context.clasePantalla.esTablet;
+    final e = tablet ? escalaTablet : 1.0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -75,18 +84,21 @@ class _PantallaSplashState extends ConsumerState<PantallaSplash> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const LogoApp(
-                              key: ValueKey('logo-splash'),
+                            LogoApp(
+                              key: const ValueKey('logo-splash'),
                               tono: TonoLogo.sobreVerde,
-                              ancho: 323.7,
+                              ancho: 323.7 * e,
                               decorativo: true,
                             ),
-                            const SizedBox(height: 6),
+                            SizedBox(height: 6 * e),
                             SizedBox(
-                              width: 300,
+                              width: 300 * e,
                               child: Text(
                                 Textos.splashLema,
-                                style: estilos.cuerpoEnfasis.copyWith(color: marca.fondoDestacado),
+                                style: estilos.cuerpoEnfasis.copyWith(
+                                  color: marca.fondoDestacado,
+                                  fontSize: estilos.cuerpoEnfasis.fontSize! * e,
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -96,8 +108,8 @@ class _PantallaSplashState extends ConsumerState<PantallaSplash> {
                     ),
                   ),
                 ),
-                const _PuntosCarga(),
-                const SizedBox(height: 20),
+                _PuntosCarga(lado: tablet ? 12 : 10, hueco: tablet ? 9.6 : 8),
+                SizedBox(height: tablet ? 68 : 20),
                 Text(
                   Textos.splashPoweredBy,
                   style: estilos.leyenda.copyWith(color: marca.fondoDestacado),
@@ -116,7 +128,10 @@ class _PantallaSplashState extends ConsumerState<PantallaSplash> {
 /// Tres puntos de 10 (hueco 8): el activo en blanco (texto/en-primario del
 /// modo claro, fijo) y los demás al 40 %. El activo avanza cada 400 ms; con "reducir animaciones" quedan fijos.
 class _PuntosCarga extends StatefulWidget {
-  const _PuntosCarga();
+  const _PuntosCarga({required this.lado, required this.hueco});
+
+  final double lado;
+  final double hueco;
 
   @override
   State<_PuntosCarga> createState() => _PuntosCargaState();
@@ -154,10 +169,10 @@ class _PuntosCargaState extends State<_PuntosCarga> {
       mainAxisSize: MainAxisSize.min,
       children: [
         for (var i = 0; i < 3; i++) ...[
-          if (i > 0) const SizedBox(width: 8),
+          if (i > 0) SizedBox(width: widget.hueco),
           Container(
-            width: 10,
-            height: 10,
+            width: widget.lado,
+            height: widget.lado,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: i == _activo

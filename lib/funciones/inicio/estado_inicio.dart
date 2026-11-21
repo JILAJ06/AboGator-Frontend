@@ -41,3 +41,11 @@ final datosInicioProvider = FutureProvider.autoDispose<DatosInicio>((ref) async 
     apelacionesPendientes: buzon.total,
   );
 });
+
+/// Precisión del usuario para "Tu semana" (Inicio en tablet), del Perfil. Va
+/// aparte de [datosInicioProvider] para que, si el Perfil falla o tarda, el
+/// Inicio se muestre igual (con "—").
+final precisionInicioProvider = FutureProvider.autoDispose<int>((ref) async {
+  final perfil = await ref.watch(repositorioPerfilProvider).obtenerPerfil();
+  return perfil.precision;
+});

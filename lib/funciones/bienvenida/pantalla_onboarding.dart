@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -5,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/paginador_puntos.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
@@ -62,7 +65,7 @@ class PantallaOnboarding extends ConsumerStatefulWidget {
 }
 
 class _PantallaOnboardingState extends ConsumerState<PantallaOnboarding> {
-  final _controlador = PageController();
+  var _controlador = PageController();
   int _pagina = 0;
 
   static const _paginas = PaginaOnboarding.todas;
@@ -87,6 +90,11 @@ class _PantallaOnboardingState extends ConsumerState<PantallaOnboarding> {
       _terminar();
       return;
     }
+    // En tablet no hay PageView: se cambia de página directamente.
+    if (!_controlador.hasClients) {
+      setState(() => _pagina++);
+      return;
+    }
     final duracion = EfectosApp.duracion(context, milisegundos: 250);
     if (duracion == Duration.zero) {
       _controlador.jumpToPage(_pagina + 1);
@@ -97,6 +105,22 @@ class _PantallaOnboardingState extends ConsumerState<PantallaOnboarding> {
 
   @override
   Widget build(BuildContext context) {
+    if (context.clasePantalla.esTablet) {
+      return Scaffold(
+        body: _OnboardingTablet(
+          indice: _pagina,
+          pagina: _paginas[_pagina],
+          total: _paginas.length,
+          alSiguiente: _siguiente,
+          alOmitir: _terminar,
+        ),
+      );
+    }
+    // Al pasar de tablet a móvil (rotar) el PageView empieza en la página actual.
+    if (!_controlador.hasClients && _controlador.initialPage != _pagina) {
+      _controlador.dispose();
+      _controlador = PageController(initialPage: _pagina);
+    }
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -128,6 +152,204 @@ class _PantallaOnboardingState extends ConsumerState<PantallaOnboarding> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 02 a 04 en tablet (Figma T02 94:86, T03 94:132, T03b 94:252 y T04 94:390).
+///
+/// En horizontal (≥ 960): a la izquierda un panel de fondo/superficie (la mitad,
+/// hasta 597) con la misma ilustración del móvil 1.55 veces más grande (el
+/// círculo de 300 pasa a 465) y centrada; a la derecha, en una columna de 470
+/// centrada, el título (H1), el texto (Cuerpo/Grande), el paginador y el botón,
+/// alineados a la izquierda y con separación 20 (48 antes del paginador).
+/// "Omitir" arriba a la derecha.
+///
+/// Entre 600 y 959, la ilustración arriba y la columna de 470 debajo. Las
+/// páginas cambian con un fundido corto (sin animación con "reducir
+/// animaciones").
+class _OnboardingTablet extends StatelessWidget {
+  const _OnboardingTablet({
+    required this.indice,
+    required this.pagina,
+    required this.total,
+    required this.alSiguiente,
+    required this.alOmitir,
+  });
+
+  /// La ilustración del móvil escalada (Figma: círculo de 465 en lugar de 300).
+  static const double escalaIlustracion = 1.55;
+
+  /// Escala de la ilustración en tablet vertical (decisión propia).
+  static const double escalaVertical = 1.2;
+
+  /// Ancho del lienzo que debe caber en el panel: en Figma el lienzo escalado
+  /// (604.5) pasa 7.5 del panel de 597, así que cabe con 597 / 1.55.
+  static const double anchoUtilIlustracion = anchoPanel / escalaIlustracion;
+
+  /// Ancho máximo del panel de la ilustración (la mitad del lienzo de Figma).
+  static const double anchoPanel = 597;
+
+  final int indice;
+  final PaginaOnboarding pagina;
+  final int total;
+  final VoidCallback alSiguiente;
+  final VoidCallback alOmitir;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final estilos = context.estilos;
+    final duracion = EfectosApp.duracion(context, milisegundos: 250);
+
+    // La ilustración del móvil a una escala exacta. El lienzo de 390 tiene
+    // márgenes vacíos a los lados, así que puede pasar un poco del panel (se
+    // recorta), como en Figma.
+    Widget ilustracion(double escala) => SizedBox(
+      width: LienzoOnboarding.ancho * escala,
+      height: LienzoOnboarding.alto * escala,
+      child: AnimatedSwitcher(
+        duration: duracion,
+        // SizedBox.expand: el Stack del AnimatedSwitcher da restricciones
+        // sueltas y el FittedBox no crecería.
+        child: SizedBox.expand(
+          key: ValueKey('ilustracion-tablet-$indice'),
+          child: FittedBox(child: LienzoOnboarding(pagina: indice)),
+        ),
+      ),
+    );
+
+    /// Escala que cabe en [restricciones] sin pasar de [maxima].
+    double escalaQueCabe(BoxConstraints restricciones, double maxima) => math.min(
+      maxima,
+      math.min(
+        restricciones.maxWidth / anchoUtilIlustracion,
+        restricciones.maxHeight / LienzoOnboarding.alto,
+      ),
+    );
+
+    final contenido = AnimatedSwitcher(
+      duration: duracion,
+      layoutBuilder: (actual, anteriores) =>
+          Stack(alignment: Alignment.topLeft, children: [...anteriores, ?actual]),
+      child: Column(
+        key: ValueKey('contenido-tablet-$indice'),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(pagina.titulo, style: estilos.h1.copyWith(color: tokens.textoPrimario)),
+          ),
+          const SizedBox(height: 20),
+          Text(pagina.texto, style: estilos.cuerpoGrande.copyWith(color: tokens.textoSecundario)),
+        ],
+      ),
+    );
+
+    final columna = ConstrainedBox(
+      key: const ValueKey('columna-onboarding'),
+      constraints: const BoxConstraints(maxWidth: MedidasAdaptativas.columnaFormulario),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          contenido,
+          // Figma: 20 + espacio de 8 + 20 antes del paginador.
+          const SizedBox(height: 48),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: PaginadorPuntos(total: total, actual: indice),
+          ),
+          const SizedBox(height: 20),
+          BotonApp(texto: pagina.boton, alPresionar: alSiguiente),
+        ],
+      ),
+    );
+
+    Widget desplazable(Widget hijo) => LayoutBuilder(
+      builder: (context, restricciones) => SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: MedidasAdaptativas.margen, vertical: 24),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: math.max(0, restricciones.maxHeight - 48)),
+          child: Center(child: hijo),
+        ),
+      ),
+    );
+
+    final omitir = Align(
+      alignment: Alignment.topRight,
+      child: Padding(
+        // Figma: el texto termina en el margen de 32 (12 de relleno propio).
+        padding: const EdgeInsets.only(right: MedidasAdaptativas.margen - 12, top: 8),
+        child: _BotonOmitir(alPresionar: alOmitir),
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, restricciones) {
+        if (ClasePantalla.deAncho(restricciones.maxWidth).esAncho) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: math.min(anchoPanel, restricciones.maxWidth / 2),
+                child: ColoredBox(
+                  key: const ValueKey('panel-ilustracion'),
+                  color: tokens.fondoSuperficie,
+                  child: SafeArea(
+                    right: false,
+                    child: LayoutBuilder(
+                      builder: (context, panel) => ClipRect(
+                        child: OverflowBox(
+                          maxWidth: double.infinity,
+                          maxHeight: double.infinity,
+                          child: ilustracion(escalaQueCabe(panel, escalaIlustracion)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: SafeArea(
+                  left: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      omitir,
+                      Expanded(child: desplazable(columna)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+        return SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              omitir,
+              Expanded(
+                child: desplazable(
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      LayoutBuilder(
+                        builder: (context, caja) => ilustracion(
+                          math.min(escalaVertical, caja.maxWidth / LienzoOnboarding.ancho),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      columna,
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

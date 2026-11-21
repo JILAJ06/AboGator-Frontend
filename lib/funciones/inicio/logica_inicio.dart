@@ -80,6 +80,25 @@ abstract final class LogicaInicio {
   static String tramo(Modulo modulo) =>
       _porNumero(Textos.tramosStartup, modulo.numero, modulo.nombre);
 
+  /// Consejo de Sarko del Inicio en tablet: "Termina el Sprint N hoy y
+  /// desbloquea …" con el tramo del módulo siguiente (como Figma) o, en el
+  /// último módulo, el sprint siguiente. Sin sprint en curso, el consejo general.
+  static String consejo(List<Modulo> modulos) {
+    final enCurso = actual(modulos);
+    if (enCurso == null) return Textos.consejoGeneral;
+    final i = modulos.indexOf(enCurso.modulo);
+    if (i >= 0 && i + 1 < modulos.length) {
+      final siguiente = modulos[i + 1];
+      final tramo = _porNumero(Textos.tramosConArticulo, siguiente.numero, siguiente.nombre);
+      return Textos.consejoSprint(enCurso.numeroSprint, tramo);
+    }
+    final normales = sprintsNormales(enCurso.modulo);
+    if (enCurso.numeroSprint < normales.length) {
+      return Textos.consejoSprint(enCurso.numeroSprint, normales[enCurso.numeroSprint].titulo);
+    }
+    return Textos.consejoGeneral;
+  }
+
   static IconData iconoDe(Modulo modulo) => switch (modulo.numero) {
     1 => IconosApp.shield,
     2 => IconosApp.code,

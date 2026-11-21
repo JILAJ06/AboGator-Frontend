@@ -15,11 +15,15 @@ import 'sarko_imagen.dart';
 ///
 /// Crece en alto con el texto dinámico. Con menos de [anchoMinimoSarko] de
 /// ancho, Sarko se oculta para no quedar cortado (D4 de T-04).
+///
+/// En tablet se usa con [MedidasHeroe.tablet] (T07: 620×200, elipse de 286 en
+/// (394, −40) y Sarko de 150 en (446, 16.5)); el ancho lo da el contenedor.
 class TarjetaHeroeStartup extends StatelessWidget {
   const TarjetaHeroeStartup({
     required this.titulo,
     required this.subtitulo,
     required this.alContinuar,
+    this.medidas = MedidasHeroe.movil,
     super.key,
   });
 
@@ -33,12 +37,13 @@ class TarjetaHeroeStartup extends StatelessWidget {
   final String titulo;
   final String subtitulo;
   final VoidCallback? alContinuar;
+  final MedidasHeroe medidas;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, restricciones) =>
-          _construir(context, conSarko: restricciones.maxWidth >= anchoMinimoSarko),
+          _construir(context, conSarko: restricciones.maxWidth >= medidas.anchoMinimoSarko),
     );
   }
 
@@ -49,7 +54,7 @@ class TarjetaHeroeStartup extends StatelessWidget {
 
     return Container(
       key: const ValueKey('tarjeta-heroe'),
-      constraints: const BoxConstraints(minHeight: alto),
+      constraints: BoxConstraints(minHeight: medidas.alto),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: tokens.accionPrimaria,
@@ -59,11 +64,11 @@ class TarjetaHeroeStartup extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            left: 190,
-            top: -30,
+            left: medidas.elipse.dx,
+            top: medidas.elipse.dy,
             child: Container(
-              width: 220,
-              height: 220,
+              width: medidas.diametroElipse,
+              height: medidas.diametroElipse,
               decoration: const BoxDecoration(
                 color: EfectosApp.elipseHeroe,
                 shape: BoxShape.circle,
@@ -71,10 +76,14 @@ class TarjetaHeroeStartup extends StatelessWidget {
             ),
           ),
           if (conSarko)
-            const Positioned(
-              left: 226,
-              top: 22,
-              child: SarkoImagen(pose: PoseSarko.alegre, ancho: 120, decorativa: true),
+            Positioned(
+              left: medidas.sarko.dx,
+              top: medidas.sarko.dy,
+              child: SarkoImagen(
+                pose: PoseSarko.alegre,
+                ancho: medidas.anchoSarko,
+                decorativa: true,
+              ),
             ),
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 20),
@@ -108,6 +117,47 @@ class TarjetaHeroeStartup extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Medidas de la tarjeta héroe en móvil (07) y en tablet (T07).
+class MedidasHeroe {
+  const MedidasHeroe({
+    required this.alto,
+    required this.diametroElipse,
+    required this.elipse,
+    required this.anchoSarko,
+    required this.sarko,
+    required this.anchoMinimoSarko,
+  });
+
+  /// 342×168: elipse de 220 en (190, −30) y Sarko de 120 en (226, 22).
+  static const MedidasHeroe movil = MedidasHeroe(
+    alto: TarjetaHeroeStartup.alto,
+    diametroElipse: 220,
+    elipse: Offset(190, -30),
+    anchoSarko: 120,
+    sarko: Offset(226, 22),
+    anchoMinimoSarko: TarjetaHeroeStartup.anchoMinimoSarko,
+  );
+
+  /// 620×200: elipse de 286 en (394, −40) y Sarko de 150 en (446, 16.5).
+  static const MedidasHeroe tablet = MedidasHeroe(
+    alto: 200,
+    diametroElipse: 286,
+    elipse: Offset(394, -40),
+    anchoSarko: 150,
+    sarko: Offset(446, 16.5),
+    anchoMinimoSarko: 446 + 150,
+  );
+
+  final double alto;
+  final double diametroElipse;
+  final Offset elipse;
+  final double anchoSarko;
+  final Offset sarko;
+
+  /// Con menos ancho, Sarko se oculta para no quedar cortado.
+  final double anchoMinimoSarko;
 }
 
 class _BotonContinuar extends StatelessWidget {

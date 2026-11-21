@@ -51,13 +51,17 @@ import '../../componentes/piezas_perfil.dart';
 import '../../componentes/piezas_resultado.dart';
 import '../../componentes/piezas_tienda.dart';
 import '../../componentes/pila_tarjetas.dart';
+import '../../componentes/riel_navegacion.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/sello_veredicto.dart';
 import '../../componentes/snippet_codigo.dart';
+import '../../componentes/tarjeta_buzon_inicio.dart';
 import '../../componentes/tarjeta_caso.dart';
+import '../../componentes/tarjeta_consejo_sarko.dart';
 import '../../componentes/tarjeta_heroe_startup.dart';
 import '../../componentes/tarjeta_modulo.dart';
 import '../../componentes/tarjeta_reto_diario.dart';
+import '../../componentes/tarjeta_semana.dart';
 import '../../core/recursos/imagenes_app.dart';
 import '../../core/tema/colores_marca.dart';
 import '../../core/tema/efectos.dart';
@@ -224,6 +228,35 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                     BotonBuzon(pendientes: 6, alPresionar: () {}),
                     BotonBuzon(pendientes: 0, alPresionar: () {}),
                   ],
+                ),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaTablet,
+              hijos: [
+                SizedBox(
+                  height: 640,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      RielNavegacion(
+                        actual: PestanaApp.mapa,
+                        pendientes: 6,
+                        iniciales: 'AL',
+                        nombreUsuario: 'Ana López',
+                        alSeleccionar: (_) {},
+                        alAjustes: () {},
+                        alPerfil: () {},
+                      ),
+                    ],
+                  ),
+                ),
+                const TarjetaSemana(racha: 7, precision: 82, monedas: 240),
+                const TarjetaSemana(racha: 1, precision: null, monedas: 0),
+                TarjetaBuzonInicio(pendientes: 6, alAbrir: () {}),
+                const TarjetaBuzonInicio(pendientes: 0, alAbrir: null),
+                const TarjetaConsejoSarko(
+                  consejo: 'Termina el Sprint 3 hoy y desbloquea la Ronda Semilla.',
                 ),
               ],
             ),
