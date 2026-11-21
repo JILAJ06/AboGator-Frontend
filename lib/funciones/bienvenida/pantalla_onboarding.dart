@@ -65,7 +65,7 @@ class PantallaOnboarding extends ConsumerStatefulWidget {
 }
 
 class _PantallaOnboardingState extends ConsumerState<PantallaOnboarding> {
-  final _controlador = PageController();
+  var _controlador = PageController();
   int _pagina = 0;
 
   static const _paginas = PaginaOnboarding.todas;
@@ -115,6 +115,11 @@ class _PantallaOnboardingState extends ConsumerState<PantallaOnboarding> {
           alOmitir: _terminar,
         ),
       );
+    }
+    // Al pasar de tablet a móvil (rotar) el PageView empieza en la página actual.
+    if (!_controlador.hasClients && _controlador.initialPage != _pagina) {
+      _controlador.dispose();
+      _controlador = PageController(initialPage: _pagina);
     }
     return Scaffold(
       body: SafeArea(

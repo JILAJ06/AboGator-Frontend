@@ -144,4 +144,18 @@ void main() {
       }
     }
   });
+
+  testWidgets('al pasar de tablet a móvil el onboarding sigue en la misma página', (tester) async {
+    await montarApp(tester, tamano: Tamano.tabletHorizontal.medida);
+    await abrirOnboarding(tester);
+    await tester.tap(find.text(Textos.onboardingSiguiente));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(Textos.onboardingSiguiente));
+    await tester.pumpAndSettle();
+    await tamanoPantalla(tester, Tamano.movil);
+    await tester.pumpAndSettle();
+    expect(find.byType(PageView), findsOneWidget);
+    expect(find.text(Textos.onboarding3Titulo), findsOneWidget);
+    expect(find.bySemanticsLabel(Textos.paginador(3, 4)), findsOneWidget);
+  });
 }
