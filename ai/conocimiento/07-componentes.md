@@ -232,3 +232,7 @@ Figma: páginas "Tablet · Vistas" (`94:23`), "Tablet · Navegación" (`103:23`)
 - **Clases de pantalla:** móvil (< 600), tablet (≥ 600) y ancho (≥ 960); se decide por el ancho disponible.
 - **`RielNavegacion`:** 104 de ancho, `fondoSuperficie`, borde derecho 1; destinos de 80×72 con indicador 56×32 (activo `fondoDestacado`), insignia del Buzón de 20 `estadoIlegal`, Ajustes (48) y Avatar (48) abajo. Sustituye a la navegación inferior y al botón flotante del Buzón.
 - **Inicio en tablet:** dos columnas (620 y 382) con "Tu semana", tarjeta del Buzón y "Consejo de Sarko".
+
+## Mapa + detalle en tablet (se construye en T-12b)
+Figma: T08 = `96:582`; Tienda T24 = `101:4306`, Perfil T25 = `101:4553`, Ajustes T26 = `101:4759`. Medidas en `ai/siguiente.md` de la T-12b.
+- **Lista-detalle del mapa (ancho ≥ 960):** panel izquierdo de 596 (encabezado del módulo de 134 y camino de sprints × 1.12 centrado) y panel derecho de 494 (`fondoSuperficie`, borde izquierdo 1) con la ilustración, etiqueta, título, objetivo, tarjeta de detalles y "Comenzar sprint". El detalle es el mismo widget de la intro móvil.
