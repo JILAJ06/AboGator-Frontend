@@ -6,6 +6,7 @@ import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/inicio/pantalla_inicio.dart';
+import 'package:abogator/funciones/notificaciones/pantalla_notificaciones.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -149,8 +150,14 @@ void main() {
     expect(llamada.perfil, PerfilUsuario.legal);
     expect(llamada.aceptaAvisoPrivacidad, isTrue);
     expect(llamada.aceptaTerminos, isTrue);
-    expect(find.byType(PantallaInicio), findsOneWidget);
     expect(contenedor(tester).read(sesionProvider), isNotNull);
+    // T-13b: tras el primer registro se ofrecen las notificaciones de racha;
+    // "Ahora no" lleva al Inicio.
+    expect(find.byType(PantallaNotificaciones), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const ValueKey('boton-ahora-no')));
+    await tester.tap(find.byKey(const ValueKey('boton-ahora-no')));
+    await tester.pumpAndSettle();
+    expect(find.byType(PantallaInicio), findsOneWidget);
   });
 
   testWidgets('el botón atrás y el enlace regresan al inicio de sesión', (tester) async {

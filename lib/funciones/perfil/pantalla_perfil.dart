@@ -201,13 +201,19 @@ class _PerfilState extends ConsumerState<_Perfil> {
           key: const ValueKey('menu-notificaciones'),
           icono: IconosApp.bell,
           texto: Textos.menuNotificacionesRacha,
-          alPresionar: () => context.go(Rutas.notificacionesRacha),
+          alPresionar: () => context.push(Rutas.notificacionesRacha),
         ),
         FilaMenu(
           key: const ValueKey('menu-aviso'),
           icono: IconosApp.doc,
           texto: Textos.menuAvisoPrivacidad,
-          alPresionar: () => context.go(Rutas.avisoPrivacidad),
+          alPresionar: () => context.push(Rutas.legalAviso),
+        ),
+        FilaMenu(
+          key: const ValueKey('menu-terminos'),
+          icono: IconosApp.doc,
+          texto: Textos.menuTerminos,
+          alPresionar: () => context.push(Rutas.legalTerminos),
         ),
         FilaMenu(
           key: const ValueKey('menu-cerrar-sesion'),
