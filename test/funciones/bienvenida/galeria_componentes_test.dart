@@ -34,6 +34,7 @@ import 'package:abogator/componentes/panel_evidencia.dart';
 import 'package:abogator/componentes/panel_justificacion.dart';
 import 'package:abogator/componentes/panel_veredicto.dart';
 import 'package:abogator/componentes/piezas_apelacion.dart';
+import 'package:abogator/componentes/piezas_jefe.dart';
 import 'package:abogator/componentes/piezas_perfil.dart';
 import 'package:abogator/componentes/piezas_tienda.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
@@ -52,7 +53,7 @@ import 'package:material_ui/material_ui.dart';
 /// Pantalla alta para que la galería entera quede construida.
 Future<void> montarGaleria(WidgetTester tester) async {
   await abrirGaleria(tester);
-  await agrandar(tester, const Size(390, 23000));
+  await agrandar(tester, const Size(390, 26000));
 }
 
 /// Agranda la superficie después de navegar (la transición de página no
@@ -97,6 +98,10 @@ void main() {
     expect(find.byType(PildoraSaldo), findsOneWidget);
     expect(find.byType(MedallaInsignia), findsNWidgets(2));
     expect(find.byType(FilaMenu), findsNWidgets(2));
+    expect(find.byType(BarraDelJefe), findsOneWidget);
+    expect(find.byType(TemporizadorCrisis), findsNWidgets(2));
+    expect(find.byType(ChipGolpe), findsNWidgets(2));
+    expect(find.byType(PanelContraargumento), findsOneWidget);
     expect(find.byType(PaginadorPuntos), findsOneWidget);
     expect(find.byType(SarkoImagen), findsNWidgets(10)); // 5 + 5 paneles
     expect(find.byType(LogoApp), findsNWidgets(22));
@@ -139,7 +144,7 @@ void main() {
       TipoPanelVeredicto.values,
     );
     // 2 de la micro-pregunta, 3 sueltas en modo selección y 3 del panel 18.
-    expect(find.byType(OpcionJustificacion), findsNWidgets(8));
+    expect(find.byType(OpcionJustificacion), findsNWidgets(10));
     expect(tester.takeException(), isNull);
   });
 

@@ -14,6 +14,7 @@ import '../funciones/bienvenida/galeria_componentes.dart';
 import '../funciones/bienvenida/pantalla_onboarding.dart';
 import '../funciones/bienvenida/pantalla_splash.dart';
 import '../funciones/inicio/pantalla_inicio.dart';
+import '../funciones/jefe/pantalla_jefe.dart';
 import '../funciones/juego/pantalla_juego.dart';
 import '../funciones/juego/pantalla_sprint_completado.dart';
 import '../funciones/juego/pantalla_startup_quiebra.dart';
@@ -81,10 +82,27 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             PantallaSinVidas(moduloId: state.uri.queryParameters['modulo']),
       ),
-      // Marcadores hasta T-10 y T-11.
+      // 27 a 28c en la misma ruta; 29 y 30 son marcadores hasta la T-11b.
       GoRoute(
         path: Rutas.crisisJefe,
-        builder: (context, state) => const PantallaPendiente(texto: Textos.pendienteJefe),
+        redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
+        builder: (context, state) => PantallaJefe(moduloId: state.pathParameters['moduloId']!),
+        routes: [
+          GoRoute(
+            path: Rutas.segmentoAuditoriaSuperada,
+            builder: (context, state) => PantallaPendiente(
+              texto: Textos.pendienteAuditoriaSuperada,
+              alVolver: () => context.go(Rutas.mapaSprintsDe(state.pathParameters['moduloId']!)),
+            ),
+          ),
+          GoRoute(
+            path: Rutas.segmentoInspectoraGano,
+            builder: (context, state) => PantallaPendiente(
+              texto: Textos.pendienteInspectoraGano,
+              alVolver: () => context.go(Rutas.mapaSprintsDe(state.pathParameters['moduloId']!)),
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: Rutas.buzon,

@@ -1,98 +1,185 @@
 # Reporte
-- **Tarea:** T-10b · Ajustes de accesibilidad y modo oscuro (pantalla 26)
-- **Rama:** `10b-ajustes-accesibilidad`
-- **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
+- **Tarea:** T-11 · Examen Final (Nivel Jefe): crisis, decisión, contraargumento y golpe (pantallas 27, 28, 28b y 28c)
+- **Rama:** `11-nivel-jefe`
+- **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge. 29 y 30 quedan con marcador para la T-11b.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11. Sin dependencias nuevas.
-- **Comparé contra Figma** con el conector (solo lectura): 26 (`18:2634`).
-- **Colores del interruptor (leídos de la imagen de Figma):** encendido verde #1F4E35, que es `accionPrimaria`; apagado gris pizarra, que coincide con `bordeControl` (#64748B). El pulgar es blanco, y uso `fondoSuperficie` (blanco en claro).
+- **Comparé contra Figma** con el conector (solo lectura): 27 (`42:5885`), 28 (`42:6027`), 28b (`42:6140`) y 28c (`42:6284`).
+  - **Sarko de 27:** pose **enojado** (mazo en alto, ceño), la que coincide con Figma.
+  - **Anillo del temporizador** (SVG de `10:188`): trazo **6**, pista `#F1F5F9` (= `fondoSuperficieAlt`), arco desde arriba en sentido horario con punta redonda. El fondo de 80 lleva la sombra de tarjeta (0, 8, 24, 14 %).
+  - **Íconos de las reglas de 27:** `#E0A060` (leído de los SVG); lo guardé como `EfectosApp.iconoReglaCrisis`.
 - **Prueba en el navegador** (web a 390×844, cuenta de prueba del mock en localhost):
-  - La pantalla 26 coincide con Figma: encabezado, secciones, filas, interruptores y chips.
-  - El modo oscuro cambia la app al instante y aparece "Usar el modo del sistema".
-  - El selector de tamaño se abre, elegí 140 % y todo el texto crece.
-  - **Error encontrado y corregido:** en oscuro la hoja del selector salía con fondo claro y texto claro. Ahora el selector pinta su propio fondo con los tokens del tema vigente, y una prueba lo cubre.
+  - **27** coincide con Figma: alerta, título con Sarko, texto, barra del Jefe, línea de crisis, reglas y botones.
+  - **28** coincide: barra "Crisis · Decisión 1 de 10", barra del Jefe, chip "Hora 0 de 72", temporizador, tarjeta, veredictos y la pastilla de comodines. Con tiempo extendido aparece la pausa.
+  - **28b:** para verlo compilé **una versión temporal** con tiempos largos, porque las capturas del panel tardan más de 8 s (la revertí antes de subir; las pruebas usan los tiempos reales). La tarjeta queda girada con el sello, con velo, réplica, dos fundamentos y "Tienes N s para responder".
+  - **28c:** con el fundamento correcto, HP 100 → 80 y ya se ve la decisión 2.
+  - Probé también que el tiempo agotado resta vidas y que al quedarse sin vidas lleva a la ruta de 30.
 
 ## Qué se hizo
 1. **Datos:**
-   - Modelo `Ajustes` con `copyWith` y estos valores por defecto: sistema, 100 %, sin solo botones, **háptica encendida**, sin tiempo extendido y sin reducir animaciones.
-   - `RepositorioAjustes` con `CodecAjustes`: claves `modo_tema`, `escala_texto`, `solo_botones`, `haptica`, `tiempo_extendido` y `reducir_animaciones`. Un valor inválido o ausente toma el por defecto, y el tamaño solo acepta 100/120/140/160.
-   - `AjustesSqlite` usa la tabla `ajustes` de `BaseLocal`; `AjustesEnMemoria` es para web y pruebas.
-   - `repositorioAjustesProvider` elige con `usarBaseLocal`, como el onboarding.
-   - Cerrar sesión no los toca.
-2. **Estado (`estado_ajustes.dart`):**
-   - `ajustesProvider` aplica el cambio al instante y lo guarda. Si guardar falla, revierte y la pantalla muestra un SnackBar en región en vivo.
-   - `main` crea el contenedor con `crearContenedor()`, que hace `await` de `cargar()` antes de `runApp` y usa `UncontrolledProviderScope`. Así el tema y el tamaño salen bien **desde el primer cuadro**; si cargar falla, se usan los por defecto.
-   - `modoTemaProvider` conserva su API: lee de los ajustes y `establecer` guarda.
-3. **Efectos reales:**
-   - **Modo oscuro:** el interruptor muestra el modo efectivo (incluye "sistema" con el sistema en oscuro) y al tocarlo guarda `dark` o `light` explícito. Con un modo explícito aparece "Usar el modo del sistema" (alto 48), que vuelve a `system`.
-   - **Tamaño de texto:** escala efectiva = sistema × porcentaje, con tope de 2.0. Se aplica en `MaterialApp.builder`, así llega a diálogos y paneles. Con 100 % se deja la escala del sistema tal cual, y el ajuste nunca la reduce.
-   - **Reducir animaciones:** en el mismo `builder`, `disableAnimations` = sistema o ajuste.
-   - **Vibración:** `ServicioHaptico` con `acierto`, `parcial`, `error` (dos `mediumImpact` separados 90 ms) y `suave`. No vibra en web ni con el ajuste apagado.
-     - Reemplaza todas las llamadas directas: juego (correcto, parcial, error/Amparo), juicio (ganada suave, perdida error) y compra (suave).
-     - Al encender el ajuste da una muestra suave.
-   - **Solo botones:** `MazoSwipe(arrastreActivo: false)` quita el reconocedor de arrastre. En tarjetas con evidencia queda un reconocedor de toque que abre el visor. Botones, teclado y acciones del lector califican igual. La pista dice "Elige con los botones". Aplica en el juego y en el juicio.
-   - **Tiempo extendido:** solo se guarda en `ajustesProvider`; lo usará el Examen Final en la T-11. No agregué temporizadores.
-4. **Pantalla 26 (`pantalla_ajustes.dart`):**
-   - Atrás (48, flecha, en x 20) y título con el foco al abrir; el subtítulo.
-   - Tres secciones (Visual, Motor y auditiva, Cognitiva) con encabezados semánticos y tarjetas de radio 18 con divisores.
-   - Filas ≥ 56, tocables en toda su superficie.
-   - Selector de tamaño en una hoja: 4 opciones de radio ≥ 48, "Aa" a cada tamaño, foco en la actual, y se cierra al elegir.
-5. **Componentes nuevos** (`piezas_ajustes.dart`): `InterruptorApp` (propio, porque el `Switch` del tema no llega a 48×28), `ChipValor`, `FilaAjuste`, `EncabezadoSeccionAjustes` y `OpcionTamano`. Todos están en la galería.
-6. **Rutas:** `/perfil/ajustes` es `PantallaAjustes`, hija del Perfil (la cubre su redirección sin sesión) y sin barra inferior. Borré `Textos.pendienteAjustes`.
+   - Modelos en `examen.dart`: `FaseCrisis`, `EstadoExamen`, `DecisionCrisis`, `Replica`, `ResultadoDecision`, `ResultadoContraargumento`, `InfoExamen`, `IntentoExamen`, `ResumenExamen` y `DecisionFallada`.
+   - `RepositorioExamen` con `consultar` (lo que muestra 27) además de lo pedido, y `ExcepcionExamen`.
+   - `repositorioExamenProvider` en `proveedores_repositorios.dart`.
+2. **`MockExamen`** (hace de servidor, con reloj inyectable y las vidas en `RepositorioVidas`):
+   - HP 100 y 10 decisiones; 15 s por decisión (22 s con tiempo extendido) y 8 s por réplica (12 s).
+   - Correcto → réplica; fundamento correcto −20 HP; incorrecto, tiempo agotado o veredicto incorrecto −1 vida (con `guardarVidas`).
+   - **Aprobado** con HP 0, aunque queden decisiones. **Reprobado** con 0 vidas o al acabarse las decisiones con HP > 0.
+   - `intentoCerrado` si se responde dos veces, fuera de turno, en pausa o tras cerrar.
+   - Una respuesta que llega más de **2 s** después del límite cuenta como tiempo agotado.
+   - La pausa corre el límite lo que duró. Abandonar cierra sin tocar vidas.
+   - Sin red o sin vidas no inicia. Solo el módulo 1 tiene escenario; los demás lanzan `examenNoDisponible`.
+3. **Estado (`examenProvider`, vivo hasta la T-11b):**
+   - Fase (intro, decisión, réplica, chip, pausa, terminado), decisión, vidas, HP, réplica, resumen y **falladas** (con el veredicto elegido y la respuesta correcta).
+   - Cada respuesta se envía una sola vez: se ignora si ya hay una en camino o si no es su turno.
+4. **Reloj (`RelojCrisis`):** usa `Cronometro` monótono inyectable (`crearCronometroJefeProvider`; falso en pruebas). Se detiene en pausa, mientras se envía y durante el chip, y sigue donde iba. Llama a "agotado" una sola vez y avisa cada segundo para los anuncios.
+5. **Pantallas** (`pantalla_jefe.dart`; 27 → 28 → 28b → 28c en la misma ruta):
+   - **27:** siempre oscura (colores fijos de `EfectosApp`; usa el tema claro para el botón y los mensajes). Con tiempo extendido, "22 s" y la línea verde.
+     - Sin conexión: el botón queda deshabilitado y aparece el aviso.
+     - Sin vidas: lleva a "Sin vidas" del módulo.
+     - Módulo sin examen: "Este examen aún no está disponible" con "Volver al mapa".
+     - Esqueleto oscuro mientras carga y error con "Reintentar".
+   - **28:**
+     - tinte de urgencia al 6 %; `BarraJuego` con paso propio y vidas; barra del Jefe; chip de hora; temporizador (verde, rojo a ≤ 5 s);
+     - `TarjetaCaso` + `MazoSwipe` (arrastre, botones y teclado; respeta "solo botones");
+     - la pastilla de comodines y la pausa (solo con tiempo extendido);
+     - `AvisoConexion` sin conexión;
+     - Salir y atrás piden confirmación.
+   - **28b:** la tarjeta queda en su pose de vuelo, girada 14° hacia el lado del veredicto, con el sello. Encima, el velo (`ModalBarrier` sin descarte) y el panel con la réplica, los dos fundamentos y la cuenta regresiva real.
+   - **28c:**
+     - el chip de daño sobre la barra del Jefe;
+     - la vida baja en 300 ms (sin animación con "reducir animaciones");
+     - ya se ve la siguiente decisión con el tiempo lleno y **detenido hasta que el chip desaparece** (1.5 s).
+   - Con HP 0 va a la ruta de 29; con 0 vidas o sin decisiones, a la de 30.
+6. **Componentes nuevos** (`piezas_jefe.dart`): `AvatarJefe`, `BarraDelJefe`, `LineaDeCrisis`, `ChipHoraCrisis`, `TemporizadorCrisis` con su pintor del anillo, `ChipGolpe` (daño y fallo), `PildoraComodinesBloqueados` y `PanelContraargumento`. Todos están en la galería.
+7. **Rutas:**
+   - `/jefe/:moduloId` → `PantallaJefe` (exige sesión, sin barra inferior).
+   - Ayudantes `auditoriaSuperadaDe` e `inspectoraGanoDe`.
+   - 29 y 30 son marcadores (`PantallaPendiente`) con texto propio y "Atrás" al mapa. Para eso `PantallaPendiente` suma `alVolver`.
+   - Quité `Textos.pendienteJefe`.
+   - Verifiqué que el nodo del Examen final del mapa y "Comenzar" de la intro llegan a 27.
+8. **Ajustes de la T-10b:**
+   - **tiempo extendido:** 22 s, 12 s y la pausa;
+   - **solo botones;**
+   - **vibración:** acierto y golpe = `acierto`; fallos = `error`;
+   - **reducir animaciones:** barra del Jefe y vuelo de la tarjeta.
 
 ## Decisiones que no vienen de Figma
-- **Valores por defecto reales:** los de la tarea, no los de Figma (Figma tiene todos encendidos salvo "Reducir animaciones").
-- **"Disponible":** el chip dice "Activo" solo si el lector está activo (`accessibleNavigation`); si no, "Disponible". Es informativo: no se toca ni recibe foco.
-- **Selector de tamaño**, botón "Usar el modo del sistema" y **vibración doble de error**.
-- **Botón de atrás:** uso el cuadrado de 48 con flecha de Figma (`BotonIconoCuadrado`, el mismo del botón de ajustes del Perfil). La tarea mencionaba `BotonCerrar`, pero ese lleva una X.
-- **Chip de tamaño:** "Aa 120 %", con espacio antes del %, como pide la tarea (Figma: "Aa  120%").
-- **Reducir animaciones con el sistema ya en "reducir":** el interruptor muestra lo que guardó la persona, pero el efecto es el del sistema (sigue reducido aunque lo apague).
-- **Texto grande:** con 200 % en 320/360 de ancho, el control de cada fila usa como máximo el 40 % del ancho y el chip parte su texto en lugar de desbordarse.
+- **Chip de fallo:** fondo/superficie con borde `estadoIlegal`, corazón y "−1 vida · Fallaste" / "· Se acabó el tiempo" / "· Ese fundamento no sirve". Se anuncia con las vidas que quedan.
+- **Pausa:** capa opaca `fondoApp` con "Examen en pausa", "El tiempo está detenido.", "Continuar" y "Salir del examen".
+- **Tocar un fundamento responde** al instante, sin botón de confirmar, por la prisa.
+- **Escenario:** las otras 8 decisiones y la réplica y fundamentos de la 9 son míos (lista abajo).
+- **Módulos sin examen:** mensaje con "Volver al mapa".
+- **Sin conexión a mitad del examen:** `AvisoConexion` sobre la tarjeta, sin pausar; el tiempo lo manda el servidor (asunto de la T-14).
+- **Pastilla y pausa en la misma fila:** en Figma la pausa está debajo, a la derecha, y se encima con la pastilla. Las puse en una sola fila (pastilla centrada y pausa a la derecha), sin cambiar medidas.
+- **`DecisionCrisis` no es una `Tarjeta`:** guarda solo etiqueta, personaje, rol, texto e iniciales. Así la app nunca recibe la respuesta correcta.
+- **Avatar de la tarjeta:** la decisión 8 usa "CT" y la 9 "AE", como en Figma; las demás, las iniciales del personaje.
+- **Lucide en contorno:** el corazón de las reglas va en contorno; en Figma está relleno.
+
+## Contenido legal para verificar contra el curso
+Escenario "¡Ransomware! Se filtró la base de usuarios" (módulo 1). ✓ = respuesta o fundamento correcto. Ninguno cita números de artículo.
+
+1. **H0 · Analista de seguridad (Equipo de TI):** "Aparecieron archivos cifrados y una nota de rescate en el servidor de clientes. ¿Desconecto ese servidor de la red ahora mismo?"
+   - ✓ **Legal.**
+   - Réplica: "¿Desconectar sin pedirle permiso a nadie? Vas a tumbar el servicio."
+   - ✓ "Aislar el equipo afectado es la primera medida de contención para que el ataque no se propague."
+   - ✗ "Primero hay que averiguar quién fue el atacante y después decidir."
+2. **H1 · Director de operaciones (Operaciones):** "Los atacantes piden un pago en criptomonedas a cambio de no publicar la base. ¿Les pago ya para cerrar el asunto?"
+   - ✓ **Escalar.**
+   - Réplica: "Pagar es lo más rápido. ¿Para qué complicarlo?"
+   - ✗ "Pagar garantiza que borren los datos y que nadie se entere."
+   - ✓ "Pagar no garantiza nada ni libera de responder por la brecha; lo decide la dirección con asesoría jurídica."
+3. **H3 · Administradora de sistemas (Infraestructura):** "Para volver a operar rápido, ¿formateo los servidores comprometidos antes de sacar una copia de la evidencia?"
+   - ✓ **Condicional.**
+   - Réplica: "Formatear de una vez es lo más limpio, ¿o no?"
+   - ✓ "Se puede restaurar, pero solo después de preservar la evidencia y documentar el incidente."
+   - ✗ "La evidencia no importa si ya sabemos que fue ransomware."
+4. **H6 · Líder de soporte (Atención a clientes):** "Varios usuarios preguntan en redes sociales si se filtraron sus datos. ¿Les respondo que todo está bien mientras investigamos?"
+   - ✓ **Ilegal.**
+   - Réplica: "Decir que todo está bien calma a la gente. ¿Qué tiene de malo?"
+   - ✗ "Mientras no esté confirmado se puede negar."
+   - ✓ "Dar información falsa a los titulares sobre una vulneración les impide proteger sus datos."
+5. **H9 · Responsable de datos (Privacidad):** "Confirmamos que se filtraron nombres, correos y teléfonos. ¿Abro una bitácora con lo que pasó, los datos afectados y las medidas que tomamos?"
+   - ✓ **Legal.**
+   - Réplica: "¿Documentarlo todo? Eso solo deja pruebas en tu contra."
+   - ✓ "Documentar la vulneración y las medidas es parte del deber de seguridad y sirve ante la autoridad."
+   - ✗ "La bitácora solo hace falta si la autoridad la pide."
+6. **H12 · Gerente de producto (Producto):** "El proveedor de la nube que guarda los respaldos también pudo verse afectado. ¿Le pido un reporte de lo que ocurrió de su lado?"
+   - ✓ **Legal.**
+   - Réplica: "Es su infraestructura, no tu problema. ¿Para qué preguntar?"
+   - ✗ "El proveedor responde por su cuenta; no hace falta coordinarse."
+   - ✓ "Quien trata datos por encargo también debe protegerlos; el responsable debe coordinarse con él y saber qué pasó."
+7. **H18 · Directora de marketing (Marketing):** "Propongo regalar un mes gratis a los afectados a cambio de que firmen que no van a reclamar nada. ¿Lo lanzo?"
+   - ✓ **Ilegal.**
+   - Réplica: "Es un regalo. Si firman, es porque quieren."
+   - ✓ "Condicionar un beneficio a que renuncien a sus derechos sobre sus datos no es válido: los conservan."
+   - ✗ "Es válido si el regalo vale más que el daño."
+8. **H24 · CTO (Fundador técnico), de Figma:** "Ya contuvimos el ataque. Propongo borrar los logs del incidente y no avisar a los usuarios para cuidar la reputación. ¿Lo hacemos?"
+   - ✓ **Ilegal.**
+   - Réplica: "¿Seguro que no debes avisar? Si borras el log nadie se va a enterar."
+   - ✓ "Ocultar evidencia de una brecha agrava la infracción; hay que notificar a los titulares y a la autoridad."
+   - ✗ "Solo hay que avisar si los datos filtrados eran contraseñas."
+9. **H48 · Abogada externa (Despacho jurídico), de Figma:** "Ya pasaron 48 horas. ¿Notificamos ahora a la autoridad de protección de datos y a los usuarios afectados?"
+   - ✓ **Legal.**
+   - Réplica (mía): "¿Ahora? Mejor espera a tenerlo todo resuelto para no quedar mal."
+   - ✗ "Si ya pasó tiempo, conviene esperar a cerrar la investigación para avisar."
+   - ✓ "Hay que avisar sin demora a los titulares y a la autoridad para que puedan protegerse; esperar agrava la falta."
+10. **H72 · Directora general (Dirección):** "La autoridad nos pide un informe del incidente. Yo puedo redactarlo hoy mismo sin consultar a nadie. ¿Lo envío?"
+    - ✓ **Escalar.**
+    - Réplica: "Tú conoces el incidente mejor que nadie. ¿Para qué meter a jurídico?"
+    - ✓ "La respuesta a la autoridad tiene consecuencias legales: jurídico debe revisarla para que sea completa y veraz."
+    - ✗ "Basta con que lo firme quien atendió el incidente."
+
+Reparto de veredictos: Legal 4, Ilegal 3, Escalar 2, Condicional 1. El fundamento correcto va primero en 6 decisiones y segundo en 4.
 
 ## Accesibilidad
-- **Filas con interruptor:** una sola etiqueta ("Modo oscuro, contraste alto en fondos oscuros") con `toggled`. El interruptor interno se excluye para que no se lea dos veces.
-- La fila de tamaño es un botón con valor ("100 por ciento").
-- El lector lee "Etiquetas para lector: activo/disponible".
-- El título recibe el foco al abrir; secciones como encabezados; objetivos ≥ 48 (filas ≥ 56).
-- **Contraste verificado con pruebas en claro y oscuro:**
-  - pista contra la tarjeta y pulgar contra la pista, encendido y apagado: ≥ 3:1 (WCAG 1.4.11);
-  - texto del chip sobre `fondoSuperficieAlt` y subtítulo sobre `fondoApp`: ≥ 4.5:1.
-- **Sin desbordes** en 390×844, 360×640 y 320×640 al 100 % y 200 %, en oscuro y con el botón "Usar el modo del sistema" visible.
+- **27:** el título es encabezado y tiene el foco al abrir. La barra del Jefe se lee "Inspectora Vega, auditora de protección de datos. HP 100 por ciento". La línea de crisis se lee como un bloque.
+- **28:**
+  - la tarjeta se lee "Decisión k de 10. personaje, rol: texto";
+  - la hora y el HP en sus bloques;
+  - el temporizador se lee "Quedan N segundos" pero no se anuncia continuamente: se anuncia el límite al empezar, a los 10 s, a los 5 s y "Tiempo agotado";
+  - la urgencia lleva número, anillo y texto, no solo color.
+- **28b:** al abrir, el foco va a la réplica y se anuncia "La Inspectora contraargumenta: … Tienes 8 segundos"; se anuncia de nuevo con 3 s. Orden: réplica → fundamento 1 → fundamento 2.
+- **Chips:** son región en vivo ("Daño a la Inspectora: menos 20 HP. Le quedan 40.").
+- **Contraste verificado con pruebas** (todos ≥ 4.5:1):
+  - blanco sobre `#B52426`;
+  - `#94A3B8` y `#CBD5E1` sobre `#0F294A` y `#162030`;
+  - `#F07070` sobre `#162030`;
+  - `#68B678` sobre `#0F294A`;
+  - `#B7A0E6` sobre `#162030`;
+  - `estadoIlegal` sobre `fondoSuperficie` y `textoSecundario` sobre `fondoSuperficieAlt`, en claro y oscuro.
+- **Sin desbordes** en 390×844, 360×640 y 320×640 al 100 % y 200 %, recorriendo 27 → 28 → 28b → 28c con tiempo extendido.
+- El número del temporizador no escala con el texto (`TextScaler.noScaling`) para caber en el anillo de 64; el valor se lee completo en la semántica.
 
 ## Verificación
 - `dart format`: sin cambios pendientes.
 - `flutter analyze`: `No issues found!`
-- `flutter test` (938 pruebas; antes de T-10b, 893):
+- `flutter test` (985 pruebas; antes de T-11, 938):
 ```
-+938: All tests passed!
++985: All tests passed!
 ```
-- **Pruebas nuevas en `ajustes_test.dart` (47):**
-  - repositorio: valores por defecto; memoria; SQLite con `sqflite_common_ffi`, incluido reabrir la base; inválidos;
-  - lógica: tope de 200 % con el sistema en 150 %; modo efectivo; animaciones;
-  - servicio háptico: patrones, error doble, apagado y web;
-  - estado: cambio al instante, revertir, `modoTemaProvider` que guarda, `crearContenedor` con y sin error;
-  - efectos:
-    - arranque con dark y 140 % aplicados en el primer cuadro;
-    - tema al instante con el interruptor del modo efectivo, y "Usar el modo del sistema";
-    - selector y tamaños 120/140/160;
-    - animaciones en el juego y el Splash;
-    - háptica: muestra al encender, juego sin vibrar con el ajuste apagado, compra y juicio por el servicio;
-  - solo botones: arrastrar no mueve, botones y teclado califican, pista, toque que abre el visor y el juicio;
-  - pantalla: claro/oscuro con medidas y valores por defecto, "Activo"/"Disponible", interruptores que se guardan, error que revierte, semántica y foco, atrás (botón y sistema) al Perfil, ajustes que sobreviven al cierre de sesión, selector en oscuro, contrastes y desbordes.
-- **Ajustes en pruebas existentes:**
-  - el error vibra dos veces;
-  - los destinos pendientes del Perfil ya no incluyen los ajustes;
-  - `abrirJuego` acepta `ajustes`, `repoAjustes` y `haptica`.
+- **Pruebas nuevas en `jefe_test.dart` (47):**
+  - mock: escenario, inicio con 15/22 s, sin vidas, red o escenario, golpe, fundamento incorrecto, fallo y tiempo, réplica sin tiempo y 12 s, aprobado con 5 golpes, reprobado por vidas, reprobado al acabarse las decisiones (con un repositorio de 9 vidas), intento cerrado, tolerancia de 2 s, pausa y abandono;
+  - lógica;
+  - 27: claro/oscuro, tiempo extendido, sin conexión, sin vidas, no disponible, ahora no, sin sesión;
+  - 28: piezas en claro/oscuro, urgencia, tiempo agotado una sola vez, veredicto incorrecto, arrastre = botón, solo botones, pausa, salir;
+  - 28b: panel, velo que no cierra, cuenta regresiva, tiempo agotado, fundamento incorrecto, 12 s, foco;
+  - 28c: HP y reloj detenido hasta el chip, con vibraciones de servicio falso;
+  - flujos: 5 golpes → 29; perder las vidas → 30;
+  - contrastes y desbordes.
+
+  Todo con reloj y cronómetro falsos compartidos.
+- **Ajustes en pruebas existentes:** el mapa abre `PantallaJefe`; galería; ayudantes.
 
 ## Grafo
-- **Actualizados (`en curso`):** MAIN, APP, ENRUTADOR, PANT-PENDIENTE, MODO-TEMA, TEXTOS, MOD, PROV-REPO, PANT-GALERIA, MAZO-SWIPE, CODIGO-PANT-10, COMP-TARJETA-CASO, CODIGO-PANT-22, CODIGO-PANT-24, TEST-VEREDICTO y TEST-PERFIL.
-- **Nuevos:** REPO-AJUSTES, LOCAL-AJUSTES, MOCK-AJUSTES, SERV-HAPTICO, EST-AJUSTES, LOGICA-AJUSTES, CODIGO-PANT-26, COMP-PIEZAS-AJUSTES y TEST-AJUSTES.
-- PANT-26 apunta a su código.
+- **Actualizados (`en curso`):** ENRUTADOR, RUTAS, PANT-PENDIENTE, TEXTOS, TEMA-EFECTOS, MOD, PROV-REPO, COMP-BARRA-JUEGO, PANT-GALERIA, TEST-AYUDA, TEST-GALERIA y TEST-MAPA.
+- **Nuevos:** REPO-EXAMEN, MOCK-EXAMEN, ESCENARIO-RANSOMWARE, EST-EXAMEN, LOGICA-JEFE, RELOJ-CRISIS, CODIGO-PANT-27, COMP-PIEZAS-JEFE y TEST-JEFE.
+- PANT-27 a PANT-28c apuntan a su código.
 - **Obsoletos:** ninguno. Agregué una línea en el registro de cambios.
 
 ## Dudas
-1. **Tope de 200 % con el sistema ya por encima:** si el sistema ya está en 250 % y la persona elige 120 %, dejo 250 % (el ajuste nunca reduce la escala del sistema). ¿Prefieren limitar siempre a 200 %?
-2. **En web los ajustes viven en memoria**, como la cola de respuestas y el onboarding: se pierden al recargar la página. ¿Hace falta guardarlos en web (por ejemplo, en el almacenamiento del navegador) o basta con móvil?
-3. **Foco tras el selector:** al cerrarlo, el foco vuelve al título y en web con ratón se ve su anillo, igual que pasaba en la Tienda. ¿Debe volver a la fila "Tamaño de texto"?
-4. **Amparo y vibración:** cuando el Amparo absorbe un error, el juego usa la vibración de error (doble), como antes usaba la media. ¿Debería ser otra?
+1. **El tiempo corre con el diálogo de "Salir" abierto:** el servidor manda el tiempo, así que confirmar tarde puede costar una vida. ¿Pausamos el reloj mientras el diálogo está abierto (como pausa implícita) o lo dejamos así?
+2. **`DateTime.now()` fuera de los mocks:** sigue uno de la T-08 en `estado_juego.dart` (sello de hora de las respuestas en la cola). No es de esta tarea; ¿lo cambiamos en la T-14 por la hora del servidor?
+3. **Contenido legal:** las 8 decisiones nuevas y la réplica y fundamentos de la 9 son míos; están arriba para revisarlos contra el curso.
+4. **Apelaciones del examen:** guardo las falladas con la respuesta correcta. ¿La T-11b registra una apelación también cuando falló solo el fundamento (el veredicto era correcto)?
+5. **Barra de progreso:** en Figma el relleno del examen es azul marino (`accionSecundaria`); `BarraProgreso` usa su color de siempre. ¿Se cambia solo para el examen?

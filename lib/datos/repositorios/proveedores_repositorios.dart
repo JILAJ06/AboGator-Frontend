@@ -11,6 +11,7 @@ import '../mocks/ajustes_en_memoria.dart';
 import '../mocks/cola_respuestas_en_memoria.dart';
 import '../mocks/mock_apelaciones.dart';
 import '../mocks/mock_autenticacion.dart';
+import '../mocks/mock_examen.dart';
 import '../mocks/mock_perfil.dart';
 import '../mocks/mock_progreso.dart';
 import '../mocks/mock_respuestas.dart';
@@ -23,6 +24,7 @@ import 'cola_respuestas.dart';
 import 'repositorio_ajustes.dart';
 import 'repositorio_apelaciones.dart';
 import 'repositorio_autenticacion.dart';
+import 'repositorio_examen.dart';
 import 'repositorio_onboarding.dart';
 import 'repositorio_perfil.dart';
 import 'repositorio_progreso.dart';
@@ -52,6 +54,15 @@ final repositorioVidasProvider = Provider<RepositorioVidas>((ref) => MockVidas()
 final repositorioApelacionesProvider = Provider<RepositorioApelaciones>((ref) => MockApelaciones());
 
 final repositorioTiendaProvider = Provider<RepositorioTienda>((ref) => MockTienda());
+
+/// Examen Final (mock hasta T-14): resta vidas en el repositorio de vidas y
+/// necesita conexión para empezar.
+final repositorioExamenProvider = Provider<RepositorioExamen>(
+  (ref) => MockExamen(
+    vidas: ref.watch(repositorioVidasProvider),
+    enLinea: () => ref.read(servicioConexionProvider).estado == EstadoConexion.enLinea,
+  ),
+);
 
 final repositorioPerfilProvider = Provider<RepositorioPerfil>(
   (ref) => MockPerfil(autenticacion: ref.watch(repositorioAutenticacionProvider)),

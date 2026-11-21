@@ -122,6 +122,26 @@ Set<int> coloresPermitidos(Brightness brillo) {
       EfectosApp.trampaClaro,
     ])
       _rgb(c),
+    // Nivel Jefe (27 a 28c): colores fijos, iguales en ambos modos.
+    for (final c in [
+      EfectosApp.fondoCrisis,
+      EfectosApp.barraJefe,
+      EfectosApp.avatarJefe,
+      EfectosApp.vidaJefe,
+      EfectosApp.pistaVidaJefe,
+      EfectosApp.textoCrisis,
+      EfectosApp.textoCrisisSecundario,
+      EfectosApp.inactivoCrisis,
+      EfectosApp.verdeCrisis,
+      EfectosApp.textoReplica,
+      EfectosApp.alertaCrisis,
+      EfectosApp.iconoReglaCrisis,
+      EfectosApp.fondoReglasCrisis,
+      EfectosApp.blancoCrisis,
+      EfectosApp.etiquetaCrisis,
+      EfectosApp.colorVelo,
+    ])
+      _rgb(c),
     for (final cara in [t.accionPrimaria, t.accionAcento, t.fondoSuperficieAlt, t.accionSecundaria])
       _rgb(EfectosApp.baseNodo(cara)),
   };

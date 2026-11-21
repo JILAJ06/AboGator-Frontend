@@ -116,4 +116,14 @@ abstract final class Rutas {
 
   /// 30 La Inspectora ganó
   static const String inspectoraGano = '/jefe/:moduloId/derrota';
+
+  /// Tramos hijos del Examen Final (29 y 30).
+  static const String segmentoAuditoriaSuperada = 'superada';
+  static const String segmentoInspectoraGano = 'derrota';
+
+  /// 29 de un módulo.
+  static String auditoriaSuperadaDe(String moduloId) => '/jefe/$moduloId/superada';
+
+  /// 30 de un módulo.
+  static String inspectoraGanoDe(String moduloId) => '/jefe/$moduloId/derrota';
 }

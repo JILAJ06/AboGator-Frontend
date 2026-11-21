@@ -209,3 +209,12 @@ Figma: 26 = `18:2634`. Medidas, textos y reglas completos en `ai/siguiente.md` d
 - **Tarjeta de sección:** `fondoSuperficie`, borde 1, radio 18, filas de relleno 16×12 con ícono 22, texto (Cuerpo/Énfasis + Leyenda) y control; el toque abarca toda la fila (≥ 56).
 - **Interruptor** 48×28 (radio 14, pulgar 22) con contraste ≥ 3:1; **chip de valor** (`fondoSuperficieAlt`, radio 10); **selector de tamaño** (hoja modal con 100/120/140/160 %).
 - **Servicio háptico:** acierto ligero, parcial de selección, error doble, suave; apagable desde Ajustes.
+
+## Componentes del Examen Final (se construyen en T-11)
+Figma: 27 = `42:5885`, 28 = `42:6027`, 28b = `42:6140`, 28c = `42:6284`. Medidas, textos y reglas completos en `ai/siguiente.md` de la T-11.
+- **`BarraDelJefe`:** `#162030`, radio 18, avatar 44 `#6B4BA1` con `gavel`, nombre, "HP N%" y vida `#F07070` proporcional al HP.
+- **`LineaDeCrisis`:** cuatro puntos (H0, H6, H24, H72) con conectores; el activo en `#B52426`.
+- **`TemporizadorCrisis`:** anillo de 64 sobre un círculo de 80; normal `accionPrimaria`, urgente (≤ 5 s) `estadoIlegal`.
+- **Chips de hora, daño y fallo:** pastillas de radio 999; hora y daño en `#B52426`, fallo con borde `estadoIlegal`.
+- **`PanelContraargumento`:** panel inferior sin descarte con la réplica, dos `OpcionJustificacion` y la cuenta regresiva.
+- La pantalla 27 es siempre oscura: sus colores viven en `EfectosApp`.

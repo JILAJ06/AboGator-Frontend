@@ -508,7 +508,8 @@ abstract final class Textos {
   // ---------------------------------------------------------------------
   // Pantallas pendientes (marcadores temporales)
   // ---------------------------------------------------------------------
-  static const String pendienteJefe = 'Examen final · llega en T-11';
+  static const String pendienteAuditoriaSuperada = 'Auditoría superada · llega en T-11b';
+  static const String pendienteInspectoraGano = 'La Inspectora ganó · llega en T-11b';
 
   // ---------------------------------------------------------------------
   // 22 Juicio de apelación, 22b Apelación ganada y apelación perdida
@@ -634,6 +635,75 @@ abstract final class Textos {
   static String filaAjusteSemantica(String titulo, String detalle) =>
       '$titulo, ${detalle[0].toLowerCase()}${detalle.substring(1)}';
   static const String errorGuardarAjuste = 'No se pudo guardar el ajuste. Inténtalo de nuevo.';
+
+  // ---------------------------------------------------------------------
+  // 27, 28, 28b y 28c Examen Final (Nivel Jefe)
+  // ---------------------------------------------------------------------
+  static const String alertaJefe = 'NIVEL JEFE · CRISIS EN CURSO';
+  static const String inspectoraVega = 'Inspectora Vega';
+  static const String inspectoraVegaMayusculas = 'INSPECTORA VEGA';
+  static const String auditoraDatos = 'Auditora de protección de datos';
+  static String hpJefe(int hp) => 'HP $hp%';
+  static String barraJefeSemantica(int hp) =>
+      'Inspectora Vega, auditora de protección de datos. HP $hp por ciento';
+  static const String faseDeteccion = 'Detección';
+  static const String faseContencion = 'Contención';
+  static const String faseAviso = 'Aviso';
+  static const String faseAutoridad = 'Autoridad';
+  static String horaCorta(int hora) => 'H$hora';
+  static const String lineaCrisisSemantica =
+      'Línea de crisis: detección, contención, aviso y autoridad';
+  static String reglaDecisiones(int total, int segundos) =>
+      '$total decisiones en secuencia rápida: $segundos s cada una';
+  static const String reglaContraargumento =
+      'La Inspectora te contraargumenta: defiende tu veredicto';
+  static const String reglaComodines = 'Comodines desactivados (RN03)';
+  static const String reglaVidas = 'Si pierdes todas tus vidas, la crisis se reinicia';
+  static String tiempoExtendidoActivo(int segundos) =>
+      'Tiempo extendido activo: $segundos s por decisión';
+  static const String enfrentarAuditoria = 'Enfrentar la auditoría';
+  static const String iniciandoExamen = 'Iniciando el examen';
+  static const String ahoraNo = 'Ahora no';
+  static const String necesitasConexionExamen = 'Necesitas conexión para iniciar el examen.';
+  static const String examenNoDisponible = 'Este examen aún no está disponible';
+  static const String examenErrorCarga = 'No se pudo cargar el examen.';
+  static const String examenErrorIniciar = 'No se pudo iniciar el examen. Inténtalo de nuevo.';
+  static const String cargandoExamen = 'Cargando el examen';
+  static String pasoCrisis(int actual, int total) => 'Crisis · Decisión $actual de $total';
+  static String horaCrisis(int hora) => 'Hora $hora de 72';
+  static String decisionSemantica(
+    int actual,
+    int total,
+    String personaje,
+    String rol,
+    String texto,
+  ) => 'Decisión $actual de $total. $personaje, $rol: $texto';
+  static const String comodinesDesactivados = 'Comodines desactivados en el examen';
+  static const String pausar = 'Pausar el examen';
+  static const String examenEnPausa = 'Examen en pausa';
+  static const String tiempoDetenido = 'El tiempo está detenido.';
+  static const String salirDelExamen = 'Salir del examen';
+  static const String salirExamenTitulo = '¿Salir del examen?';
+  static const String salirExamenTexto =
+      'La crisis se reinicia desde la hora 0. No ganas premio ni pierdes vidas.';
+  static const String salirExamen = 'Salir';
+  static String quedanSegundos(int s) => s == 1 ? 'Queda 1 segundo' : 'Quedan $s segundos';
+  static String limiteDecision(int s) => 'Tienes $s segundos para decidir';
+  static const String tiempoAgotado = 'Tiempo agotado';
+  static const String falloVeredicto = '−1 vida · Fallaste';
+  static const String falloTiempo = '−1 vida · Se acabó el tiempo';
+  static const String falloFundamento = '−1 vida · Ese fundamento no sirve';
+  static String falloSemantica(String motivo, int vidas) =>
+      '$motivo. Te ${vidas == 1 ? 'queda 1 vida' : 'quedan $vidas vidas'}.';
+  static String golpe(int danio) => '−$danio HP · ¡Argumento sólido!';
+  static String golpeSemantica(int danio, int hp) =>
+      'Daño a la Inspectora: menos $danio HP. Le quedan $hp.';
+  static const String defiendeVeredicto = 'Defiende tu veredicto · elige el fundamento';
+  static String tienesParaResponder(int s) => 'Tienes $s s para responder';
+  static String replicaCita(String texto) => '“$texto”';
+  static String replicaAnuncio(String texto, int s) =>
+      'La Inspectora contraargumenta: $texto Tienes $s segundos';
+  static const String errorRespuestaExamen = 'No se pudo enviar tu respuesta. Inténtalo de nuevo.';
   static const String pendienteNotificacionesRacha =
       'Notificaciones de racha · pantalla pendiente de diseño';
   static const String pendienteAvisoPrivacidad =
@@ -751,6 +821,7 @@ abstract final class Textos {
   static const String galeriaTienda = 'Piezas de la Tienda';
   static const String galeriaPerfil = 'Piezas del Perfil';
   static const String galeriaAjustes = 'Piezas de los Ajustes';
+  static const String galeriaJefe = 'Piezas del Examen Final';
   static const String galeriaLogos = 'Logos (4 formas × 5 tonos)';
   static String galeriaLogo(String forma, String tono) => '$forma · $tono';
   static const String galeriaIconos = 'Íconos';

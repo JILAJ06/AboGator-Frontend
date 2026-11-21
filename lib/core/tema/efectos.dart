@@ -233,6 +233,66 @@ abstract final class EfectosApp {
   /// El confeti cae una vez al abrir la pantalla.
   static const Duration duracionConfeti = Duration(milliseconds: 1200);
 
+  // ---------------------------------------------------------------------
+  // 27, 28, 28b y 28c Examen Final (Figma 42:5885, 42:6027, 42:6140, 42:6284)
+  // Colores fijos del Nivel Jefe: iguales en claro y oscuro.
+  // ---------------------------------------------------------------------
+
+  /// Fondo de la crisis (27).
+  static const Color fondoCrisis = Color(0xFF0F294A);
+
+  /// Barra del Jefe y globo de la réplica.
+  static const Color barraJefe = Color(0xFF162030);
+
+  /// Avatar de la Inspectora Vega.
+  static const Color avatarJefe = Color(0xFF6B4BA1);
+
+  /// Vida del Jefe y su "HP".
+  static const Color vidaJefe = Color(0xFFF07070);
+
+  /// Pista de la vida del Jefe: blanco al 15 %.
+  static const Color pistaVidaJefe = Color(0x26FFFFFF);
+
+  /// Textos sobre el fondo de la crisis.
+  static const Color textoCrisis = Color(0xFFCBD5E1);
+  static const Color textoCrisisSecundario = Color(0xFF94A3B8);
+
+  /// Punto inactivo y conectores de la línea de crisis.
+  static const Color inactivoCrisis = Color(0xFF2A3850);
+
+  /// Línea "Tiempo extendido activo".
+  static const Color verdeCrisis = Color(0xFF68B678);
+
+  /// "INSPECTORA VEGA" en el globo de la réplica.
+  static const Color textoReplica = Color(0xFFB7A0E6);
+
+  /// Rojo de alerta, hora de crisis y daño (igual que estado/ilegal claro).
+  static const Color alertaCrisis = Color(0xFFB52426);
+
+  /// Íconos de las reglas de 27 (ámbar, leído de los SVG de Figma).
+  static const Color iconoReglaCrisis = Color(0xFFE0A060);
+
+  /// Fondo de las reglas: blanco al 8 %.
+  static const Color fondoReglasCrisis = Color(0x14FFFFFF);
+
+  /// Texto blanco de la crisis (alerta, título, reglas, chip de daño).
+  static const Color blancoCrisis = Color(0xFFFFFFFF);
+
+  /// Chip de la etiqueta "CRISIS · BRECHA DE DATOS": ámbar del mazo.
+  static const Color etiquetaCrisis = Color(0xFFB86B23);
+
+  /// Tinte de urgencia de 28, 28b y 28c (estado/ilegal al 6 %).
+  static const double opacidadUrgencia = 0.06;
+
+  /// Sombra del chip de daño: (0, 16), desenfoque 40, #0F294A al 22 %.
+  static const List<BoxShadow> sombraChipDanio = sombraBuzon;
+
+  /// Cuánto se ve el chip de daño o de fallo.
+  static const Duration duracionChipJefe = Duration(milliseconds: 1500);
+
+  /// La barra de vida del Jefe baja en 300 ms.
+  static const Duration duracionVidaJefe = Duration(milliseconds: 300);
+
   /// Sombra sólida inferior, sin desenfoque.
   static List<BoxShadow> sombraSolida(double desplazamiento) => [
     BoxShadow(color: colorSombraSolida, offset: Offset(0, desplazamiento)),
