@@ -147,7 +147,6 @@ abstract final class Textos {
   static const String campoCorreoInicio = 'Correo electrónico';
   static const String campoContrasenaInicio = 'Contraseña';
   static const String olvidasteContrasena = '¿Olvidaste tu contraseña?';
-  static const String recuperacionPronto = 'La recuperación de contraseña estará disponible pronto';
   static const String botonIniciarSesion = 'Iniciar sesión';
   static const String iniciandoSesion = 'Iniciando sesión';
   static const String separadorO = 'o';
@@ -854,10 +853,6 @@ abstract final class Textos {
       'Repasa los temas del módulo antes de volver a intentarlo.';
   static const String repasarEnBuzon = 'Repasar en el Buzón';
   static const String errorRespuestaExamen = 'No se pudo enviar tu respuesta. Inténtalo de nuevo.';
-  static const String pendienteNotificacionesRacha =
-      'Notificaciones de racha · pantalla pendiente de diseño';
-  static const String pendienteAvisoPrivacidad =
-      'Aviso de privacidad · pantalla pendiente de diseño';
 
   // ---------------------------------------------------------------------
   // 24 Tienda
@@ -930,7 +925,7 @@ abstract final class Textos {
       '$nombre, ${obtenida ? 'obtenida' : 'bloqueada'}';
   static const String menuAccesibilidad = 'Accesibilidad';
   static const String menuNotificacionesRacha = 'Notificaciones de racha';
-  static const String menuAvisoPrivacidad = 'Aviso de privacidad';
+  static const String menuAvisoPrivacidad = 'Aviso de Privacidad';
   static const String cerrarSesion = 'Cerrar sesión';
   static const String confirmarCerrarSesionTitulo = '¿Cerrar sesión?';
   static const String confirmarCerrarSesionTexto =
@@ -941,6 +936,106 @@ abstract final class Textos {
   static const String errorCerrarSesion = 'No se pudo cerrar la sesión. Inténtalo de nuevo.';
   static const String perfilErrorCarga = 'No se pudo cargar tu perfil.';
   static const String cargandoPerfil = 'Cargando tu perfil';
+
+  // ---------------------------------------------------------------------
+  // 31 a 31e Recuperar contraseña (T-13b)
+  // ---------------------------------------------------------------------
+  static const String recuperarTitulo = '¿Olvidaste tu contraseña?';
+  static const String recuperarDescripcion =
+      'Escribe el correo de tu cuenta y te enviaremos un enlace para crear una nueva contraseña.';
+  static const String recuperarNota =
+      'Por seguridad, te respondemos igual aunque el correo no esté registrado.';
+  static const String enviarEnlace = 'Enviar enlace';
+  static const String enviandoEnlace = 'Enviando el enlace';
+  static const String volverAIniciarSesion = 'Volver a iniciar sesión';
+  static const String enlaceCaducaEn = 'El enlace caduca en 30 minutos';
+  static const String revisaTuCorreo = 'Revisa tu correo';
+  static String enlaceEnviadoA(String correo) =>
+      'Enviamos un enlace a $correo. Ábrelo en este dispositivo para crear tu nueva contraseña.';
+  static const String abrirCorreo = 'Abrir correo';
+  static String reenviarEnlaceEn(int segundos) =>
+      'Reenviar enlace en ${segundos ~/ 60}:${(segundos % 60).toString().padLeft(2, '0')}';
+  static const String reenviarEnlace = 'Reenviar enlace';
+  static const String reenvioDisponible = 'Ya puedes reenviar el enlace';
+  static const String enlaceReenviado = 'Te enviamos otro enlace';
+  static const String revisaSpam = '¿No lo ves? Revisa la carpeta de spam.';
+  static const String nuevaContrasenaTitulo = 'Crea tu nueva contraseña';
+  static const String nuevaContrasenaDescripcion =
+      'Elige una contraseña que no uses en otros sitios.';
+  static const String campoNuevaContrasena = 'Nueva contraseña';
+  static const String campoConfirmarContrasena = 'Confirmar contraseña';
+  static const String ayudaNuevaContrasena = 'Mínimo 8 caracteres, incluye un número';
+  static const String errorContrasenasNoCoinciden = 'Las contraseñas no coinciden';
+  static const String guardarContrasena = 'Guardar contraseña';
+  static const String guardandoContrasena = 'Guardando la contraseña';
+  static const String contrasenaActualizadaTitulo = 'Contraseña actualizada';
+  static const String contrasenaActualizadaTexto =
+      'Ya puedes iniciar sesión con tu nueva contraseña. Por seguridad, cerramos tus sesiones '
+      'en otros dispositivos.';
+  static const String enlaceCaducadoTitulo = 'Este enlace ya no es válido';
+  static const String enlaceCaducadoTexto =
+      'Caducó o ya se usó. Pide uno nuevo y te lo enviamos de inmediato.';
+  static const String pedirEnlaceNuevo = 'Pedir un enlace nuevo';
+  static const String errorRecuperacion = 'No se pudo enviar el enlace. Inténtalo de nuevo.';
+  static const String errorRestablecer = 'No se pudo guardar la contraseña. Inténtalo de nuevo.';
+  static const String insigniaCorreo = 'Correo enviado';
+  static const String insigniaListo = 'Listo';
+  static const String insigniaAlerta = 'Alerta';
+
+  // ---------------------------------------------------------------------
+  // 32 y 33 Aviso de Privacidad y Términos de uso (T-13b)
+  // ---------------------------------------------------------------------
+  // BORRADOR legal: revisar antes de publicar (el contenido está en
+  // `textos_legales.dart`).
+  static const String avisoPrivacidadTitulo = 'Aviso de Privacidad';
+  static const String terminosTitulo = 'Términos de uso';
+  static const String versionLegal = 'Versión 1.0 · Vigente desde el 21 de noviembre de 2026';
+  static String seccionLegalSemantica(String titulo, int posicion, int total) =>
+      '$titulo, sección $posicion de $total';
+  static const String leerAvisoPrivacidad = 'Leer el Aviso de Privacidad';
+  static const String leerTerminos = 'Leer los Términos de uso';
+  static const String seccionLegal = 'Legal';
+  static const String menuTerminos = 'Términos de uso';
+
+  // ---------------------------------------------------------------------
+  // 34 y 34c Notificaciones de racha (T-13b)
+  // ---------------------------------------------------------------------
+  static const String protegeTuRacha = 'Protege tu racha';
+  static const String notificacionesDescripcion =
+      'Te avisamos cuando tu racha esté en riesgo y cuando te toque un juicio de apelación.';
+  static const String rachaEnRiesgo = 'Racha en riesgo';
+  static const String rachaEnRiesgoDetalle = 'Si aún no completas el reto del día';
+  static const String juiciosApelacion = 'Juicios de apelación';
+  static const String juiciosApelacionDetalle = 'Cuando toca el día 3, 7 o 14';
+  static const String recordatorioDiario = 'Recordatorio diario';
+  static String recordatorioDiarioDetalle(String hora) => 'Todos los días a las $hora';
+  static String cambiarHoraSemantica(String hora) =>
+      'Recordatorio diario a las $hora. Cambiar la hora';
+  static const String notificacionesNota =
+      'Máximo 2 avisos al día. Puedes cambiarlo cuando quieras en Ajustes.';
+  static const String activarNotificaciones = 'Activar notificaciones';
+  static const String horaRecordatorio = 'Hora del recordatorio';
+  static const String horaRecordatorioDetalle = 'Te avisaremos todos los días a esta hora.';
+  static const String guardar = 'Guardar';
+  static const String ruedaHora = 'Hora';
+  static const String ruedaMinutos = 'Minutos';
+  static const String ruedaPeriodo = 'a. m. o p. m.';
+  static const String am = 'a. m.';
+  static const String pm = 'p. m.';
+  static String disminuir(String rueda) => 'Disminuir $rueda';
+  static String aumentar(String rueda) => 'Aumentar $rueda';
+  static String recordatorioGuardado(String hora) => 'Recordatorio a las $hora';
+  static const String menuNotificaciones = 'Notificaciones';
+  static const String menuNotificacionesDetalle = 'Racha, juicios y recordatorio diario';
+  static const String errorGuardarNotificaciones =
+      'No se pudieron guardar las notificaciones. Inténtalo de nuevo.';
+  // 34b (maqueta de la notificación del sistema, solo en la galería).
+  static String notificacionRachaRiesgoTitulo(int dias) => 'Tu racha de $dias días está en riesgo';
+  static const String notificacionRachaRiesgoCuerpo =
+      'Completa el reto del día antes de medianoche para no perderla.';
+  static String notificacionRachaPerdidaTitulo(int dias) => 'Perdiste tu racha de $dias días';
+  static const String notificacionRachaPerdidaCuerpo =
+      'Hoy es buen día para empezar otra. Sarko te espera con un caso nuevo.';
 
   // ---------------------------------------------------------------------
   // Galería de componentes (temporal, se elimina con las pantallas reales)

@@ -1,4 +1,5 @@
 import '../modelos/ajustes.dart';
+import '../modelos/ajustes_notificaciones.dart';
 import '../repositorios/repositorio_ajustes.dart';
 
 /// Ajustes en memoria (web y pruebas): guarda el mismo mapa clave/valor que
@@ -14,4 +15,11 @@ class AjustesEnMemoria implements RepositorioAjustes {
 
   @override
   Future<void> guardar(Ajustes ajustes) async => valores.addAll(CodecAjustes.aMapa(ajustes));
+
+  @override
+  Future<AjustesNotificaciones> cargarNotificaciones() async => CodecNotificaciones.deMapa(valores);
+
+  @override
+  Future<void> guardarNotificaciones(AjustesNotificaciones notificaciones) async =>
+      valores.addAll(CodecNotificaciones.aMapa(notificaciones));
 }
