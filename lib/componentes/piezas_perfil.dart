@@ -311,3 +311,108 @@ class BotonIconoCuadrado extends StatelessWidget {
     );
   }
 }
+
+/// Avance de un módulo para [TarjetaProgresoModulos].
+class AvanceModulo {
+  const AvanceModulo({required this.nombre, required this.porcentaje, required this.color});
+
+  /// "1 · Protección de datos".
+  final String nombre;
+
+  /// De 0 a 100.
+  final int porcentaje;
+
+  /// Color del módulo (relleno de la barra).
+  final Color color;
+}
+
+/// "Progreso por módulo" del Perfil en tablet (Figma 101:4732): fondo/superficie,
+/// borde 1, radio 20, relleno 20 y separación 12. Título en Título/H3 y, por
+/// módulo, el nombre (Cuerpo/Base), el porcentaje (Etiqueta en texto/secundario)
+/// y una barra de 8 (pista fondo/superficie-alt, relleno del color del módulo,
+/// radio 4) 6 debajo. Cada fila se lee "Protección de datos, 60 %".
+class TarjetaProgresoModulos extends StatelessWidget {
+  const TarjetaProgresoModulos({required this.modulos, super.key});
+
+  static const double altoBarra = 8;
+
+  final List<AvanceModulo> modulos;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final estilos = context.estilos;
+    return Container(
+      key: const ValueKey('progreso-modulos'),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: tokens.fondoSuperficie,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: tokens.bordeDefault),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              Textos.progresoPorModulo,
+              style: estilos.h3.copyWith(color: tokens.textoPrimario),
+            ),
+          ),
+          for (final m in modulos) ...[
+            const SizedBox(height: 12),
+            Semantics(
+              container: true,
+              label: Textos.avanceModuloPerfil(m.nombre, m.porcentaje),
+              excludeSemantics: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          m.nombre,
+                          style: estilos.cuerpoBase.copyWith(color: tokens.textoPrimario),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        Textos.porcentaje(m.porcentaje),
+                        style: estilos.etiqueta.copyWith(color: tokens.textoSecundario),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(altoBarra / 2),
+                    child: SizedBox(
+                      height: altoBarra,
+                      child: LayoutBuilder(
+                        builder: (context, r) => DecoratedBox(
+                          decoration: BoxDecoration(color: tokens.fondoSuperficieAlt),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              width: r.maxWidth * (m.porcentaje.clamp(0, 100) / 100),
+                              decoration: BoxDecoration(
+                                color: m.color,
+                                borderRadius: BorderRadius.circular(altoBarra / 2),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

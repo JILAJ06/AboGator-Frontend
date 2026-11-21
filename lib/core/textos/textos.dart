@@ -815,6 +815,10 @@ abstract final class Textos {
   // 24 Tienda
   // ---------------------------------------------------------------------
   static const String tiendaTitulo = 'Tienda';
+  static const String tiendaConsejo =
+      'La Lupa de Auditor rinde más en tarjetas con evidencia: resalta las palabras trampa antes '
+      'de que deslices. El Amparo te salva de un error en lecciones normales, pero no en el '
+      'Examen Final (RN03).';
   static String saldoSemantica(int monedas) =>
       monedas == 1 ? 'Tienes 1 moneda' : 'Tienes $monedas monedas';
   static const String tuInventario = 'Tu inventario';
@@ -870,6 +874,10 @@ abstract final class Textos {
   static const String sprintsPerfectos = 'Sprints perfectos';
   static String estadisticaSemantica(String etiqueta, String valor) => '$etiqueta: $valor';
   static const String insigniasTitulo = 'Insignias';
+  static const String cuentaYPreferencias = 'Cuenta y preferencias';
+  static const String progresoPorModulo = 'Progreso por módulo';
+  static String moduloProgresoNombre(int numero, String nombre) => '$numero · $nombre';
+  static String avanceModuloPerfil(String nombre, int porcentaje) => '$nombre, $porcentaje %';
   static String insigniaSemantica(String nombre, {required bool obtenida}) =>
       '$nombre, ${obtenida ? 'obtenida' : 'bloqueada'}';
   static const String menuAccesibilidad = 'Accesibilidad';
