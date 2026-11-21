@@ -18,6 +18,7 @@ class DisposicionResultadoTablet extends StatelessWidget {
     required this.contenido,
     this.fondo,
     this.encabezado,
+    this.colorPanel,
     super.key,
   });
 
@@ -30,6 +31,10 @@ class DisposicionResultadoTablet extends StatelessWidget {
   final Widget contenido;
   final Widget? fondo;
   final Widget? encabezado;
+
+  /// Color del panel izquierdo; por defecto fondo/superficie (la crisis de T27
+  /// usa el suyo).
+  final Color? colorPanel;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +50,7 @@ class DisposicionResultadoTablet extends StatelessWidget {
               width: anchoIzquierda,
               child: ColoredBox(
                 key: const ValueKey('panel-ilustracion-resultado'),
-                color: context.tokens.fondoSuperficie,
+                color: colorPanel ?? context.tokens.fondoSuperficie,
                 child: SafeArea(
                   right: false,
                   child: Stack(
