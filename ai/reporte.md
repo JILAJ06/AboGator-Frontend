@@ -1,94 +1,82 @@
 # Reporte
-- **Tarea:** T-12 · Base de tablet: clases de pantalla, riel de navegación, acceso, onboarding e Inicio
-- **Rama:** `12-tablet`
+- **Tarea:** T-12b · Tablet: Mapa de sprints + detalle (lista-detalle), Tienda, Perfil y Ajustes
+- **Rama:** `12b-tablet-mapa-y-cuenta`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11. **Sin dependencias nuevas.**
-- **Comparé contra Figma** con el conector (solo lectura): riel `93:525`, T01 `94:26`, T02 `94:86`, T03 `94:132`, T03b `94:252`, T04 `94:390`, T05 `94:456`, T06 `94:539` y T07 `96:298` (con sus tarjetas `96:543`, `96:564` y `96:578`).
-- **Prueba en el navegador** (web compilada, 1194×834 y 834×1194, claro y oscuro, cuenta de prueba del mock en localhost): Splash, onboarding, inicio de sesión, registro e Inicio coinciden con Figma. Ahí encontré y corregí que la ilustración del onboarding no crecía (el `Stack` del `AnimatedSwitcher` daba restricciones sueltas al `FittedBox`).
+- **Comparé contra Figma** con el conector (solo lectura): T08 `96:582`, T24 `101:4306`, T25 `101:4553` y T26 `101:4759` (con `101:4545`, `101:4734` y `101:4888` en detalle).
+- **Prueba en el navegador** (web compilada a 1194×834, cuenta de prueba del mock en localhost): mapa con detalle, Tienda, Perfil, Ajustes y el diálogo de tamaño de texto coinciden con Figma (los revisé en modo oscuro, que es el que tenía el navegador).
 
 ## Qué se hizo
-1. **Infraestructura (`lib/core/adaptativo/clase_pantalla.dart`):**
-   - `ClasePantalla` por ancho: `movil` (< 600), `tablet` (600–959) y `ancho` (≥ 960), con `esTablet` y `esAncho`.
-   - `MedidasAdaptativas`: margen 32, medianil 24, riel 104, columna 470, hoja lateral 376 y una columna de máx. 640.
-   - `context.clasePantalla` (ancho de la ventana) y el widget `Adaptativo` (ancho **disponible**, para paneles).
-   - `AmbitoClasePantalla`: publica la clase del ancho real que recibe la app. Va en el `builder` de `app.dart` (ver D1).
-   - Ayudante de pruebas `test/ayudantes/tamano_pantalla.dart`: `tamanoPantalla(tester, Tamano.tabletHorizontal / tabletVertical / tabletMinima / movil)` (1194×834, 834×1194, 600×960 y 390×844).
-2. **Riel de navegación (`RielNavegacion`)** con las medidas de Figma: 104 de ancho, isotipo de 56, destinos de 80×72 con indicador de 56×32, insignia del Buzón de 20 en (50, 8) con "99+", Ajustes y avatar de 48 abajo. Activo: `fondoDestacado`, etiqueta Inter SemiBold 12 y `selected`; inactivo: Inter Medium 11 en `textoSecundario`. Si no cabe en alto, se desplaza.
-3. **`MarcoPrincipal`:** en tablet pinta `Row(riel, cuerpo)` sin barra inferior ni botón flotante; reutiliza `irAPestana`. La insignia usa el total que trae la pantalla (Inicio y Mapa) o `totalBuzonRielProvider` (Buzón, Tienda y Perfil). En móvil el código es el mismo de antes.
-4. **01 Splash:** logo y lema × 1.45 (469.4 y 435, lema 20.3/29), puntos de 12 con hueco de 9.6 y "Powered by" 68 bajo los puntos.
-5. **02 a 04 Onboarding:** panel de `fondoSuperficie` (mitad, hasta 597) con la ilustración del móvil × 1.55 (círculo de 465) y la columna de 470 a la derecha: título H1 y texto alineados a la izquierda, separación 20, 48 antes del paginador, botón a todo el ancho y "Omitir" arriba a la derecha.
-6. **05 Inicio de sesión:** `PanelMarca` (verde fijo, círculo de 520 al 6 % en (260, 388), logo de 400, Sarko alegre de 288 y lema) y el formulario en 470 con separación 16 y separador a todo el ancho. Los campos se comparten con el móvil.
-7. **06 Registro:** `PanelMarca` variante registro (círculo en (−180, −152), logo de 320 en (64, 64), frase en H2 blanca, texto en crema y Sarko sorprendido de 240 abajo a la derecha), botón atrás arriba (4 antes de la columna) y el mismo formulario, que también se comparte con el móvil.
-8. **07 Inicio (y 07b):**
-   - Dos columnas (620 y 382, proporcionales si la ventana es menor de 1194): héroe de 620×200 (`MedidasHeroe.tablet`), "Ruta de tu Startup" y los módulos en 2 × 300 con separación 20; a la derecha reto, **Tu semana**, **Buzón** y el **consejo de Sarko** con Sarko de 120×150 al fondo.
-   - Componentes nuevos: `TarjetaSemana`, `TarjetaBuzonInicio` y `TarjetaConsejoSarko`. `LogicaInicio.consejo` arma el consejo y `precisionInicioProvider` trae la precisión del Perfil.
-   - Carga, error con reintento y sin datos se mantienen.
-9. **Galería:** sección "Componentes de tablet" con el riel y las tres tarjetas en sus estados.
+1. **Mapa + detalle (T08)**, solo a partir de 960 de ancho y dentro del riel:
+   - **Panel izquierdo** (596 de 1090, proporcional si la ventana es menor): `EncabezadoModulo` con medidas de tablet (`arribaMinimo` 16 y `abajoExtra` 16 → 134 de alto) y `MapaSprints` del móvil dibujado a 390 y ampliado × 1.12 (436.8) centrado. El camino se mide en el mapa sin escalar, así que sigue pasando por los centros.
+   - **Panel derecho** (494): `fondoSuperficie`, borde izquierdo de 1 y una columna de 430 centrada (también en alto) con el detalle y "Comenzar sprint" (430 × 52). Se desplaza si no cabe.
+   - **Detalle compartido** (`DetalleSprint` en `lib/funciones/mapa/detalle_sprint.dart`): lo usan la intro del móvil (centrado, elipse de 230) y el panel (a la izquierda, elipse de 207 y separación 14). También se movieron ahí `SarkoConElipse` y `comenzarSprint`; la intro móvil se ve igual que antes.
+   - **Selección:** al abrir queda el sprint actual (en curso o disponible), si no el último completado, si no el primero. Tocar o Enter sobre un sprint abierto lo selecciona sin navegar; los bloqueados no hacen nada y el Examen final habilitado abre la crisis.
+   - **Enlace profundo:** la ruta de la intro, en ancho, muestra esta vista con ese sprint seleccionado (lo decide `PantallaIntroSprint`, no el enrutador, así no se tocó `enrutador.dart`). Desde esa ruta, "atrás" va al Inicio.
+   - Entre 600 y 959 y en móvil, el mapa y la intro funcionan como antes (con riel en tablet).
+2. **Tienda (T24):** margen 32 y arriba 20; catálogo en **4 columnas** con medianil 24 (238.5 cada una a 1194); separaciones 28 · 10 · 26 · 10 · 24 · 24; **consejo de Sarko destacado** (nuevo texto de Figma) con Sarko de 136 × 170 a 44 de la tarjeta.
+3. **Perfil (T25):** dos columnas 500:502. A la izquierda la tarjeta, las estadísticas de 2 × 2 y las insignias **repartidas a todo el ancho**; a la derecha "Cuenta y preferencias" (H3), el menú y **"Progreso por módulo"** (`TarjetaProgresoModulos`: un renglón por módulo con nombre, "60 %" y barra de 8 del color del módulo). Para eso `DatosPerfil` guarda también los módulos (`modulos`), que ya se pedían; el porcentaje cuenta sprints completados sin el Examen final.
+4. **Ajustes (T26):** en tablet va dentro de `MarcoPrincipal` con el riel (**Perfil activo**) y en dos columnas 500:502: Visual y la nueva **vista previa** ("VISTA PREVIA · TEXTO AL N %", con el tamaño elegido) a la izquierda; Motor y auditiva y Cognitiva a la derecha. En móvil, sin cambios y sin navegación.
+5. **Diálogos en tablet:** `DialogoConfirmacion` llega a 440 (en móvil sigue en 400) y el selector de tamaño de texto pasa de hoja a **diálogo centrado de 440** con las esquinas redondeadas.
+6. **Arreglos de la T-12:**
+   - **Consejo de Sarko:** "Termina el Sprint N hoy y desbloquea <título del sprint siguiente>." y, en el último sprint normal, "… desbloquea el Examen final.". Se quitó `Textos.tramosConArticulo`.
+   - **Reserva del Buzón:** con riel el mapa ya no reserva el lugar del botón. Buzón, Tienda y Perfil **no la reservaban** (no tienen botón flotante); el Inicio de tablet tampoco.
+   - **Insignia del riel:** `totalBuzonRielProvider` depende de `apelacionesPendientesProvider`, que ya se invalida al resolver un juicio, registrar fallos del juego y terminar el Examen; así no hubo que tocar el juego, el Buzón ni el Examen. La Tienda lo invalida tras comprar.
+7. **Galería:** consejo destacado, progreso por módulo, vista previa y un nodo seleccionado.
 
-## Medidas que tomé de Figma (no venían en la tarea)
-- **Riel:** activo con ícono `textoPrimario`; inactivo con ícono `textoSecundario`. Insignia en Leyenda.
-- **T01 Splash:** logo vertical de 469.4 (isotipo 158.7 + marca 469.4 × 95.2), lema Inter SemiBold 20.3/29 en `#E8D8A8`, ancho 435; puntos de 12 con hueco 9.6 en y 648; "Powered by LawSwipe" en y 728.
-- **T02 a T04:** panel `fondo/superficie` de 597; círculo `#E8D8A8` al 70 % de 465 (el mismo `fondoDestacado` del móvil); contenido en una columna de 470 en x 661 con separación 20, título Fredoka Bold 26/32, texto Inter 16/24 en `textoSecundario`, un espacio de 8 antes del paginador y botón primario a todo el ancho; "Omitir" Inter SemiBold 14 en `textoSecundario`, termina en x 1162.
-- **T05:** el círculo es blanco al 6 % sobre el verde (`#1F4E35`); lema Inter SemiBold 14/20 en una línea.
-- **T06:** círculo de 520 en (−180, −120 − 32); logo horizontal de 320; frase «Más vale prevenir que litigar.» Fredoka SemiBold 20/26 en blanco en (64, 198); texto "Crea tu perfil y Sarko ajustará la dificultad de cada sprint a tu experiencia." Inter 16/24 en `#E8D8A8` en (64, 240), ancho 469; Sarko **sorprendido** de 240×300 en (317, 472); botón atrás de 48 en (657, 16); columna en y 143 con separación 14.
-- **T07:** Tu semana con relleno 20 y separación 12; estadísticas de `fondoSuperficieAlt` con relleno 12, separación 4; íconos flame y coin en `accionAcento` y check en `accionPrimaria`. Consejo con relleno 16 y separación 4.
+## Medidas que tomé de Figma (T24 a T26)
+- **T24 Tienda:** título en y 20 (52 − 32); saldo de 87 × 38 que termina en x 1162; "Tu inventario" en y 80, píldoras en 116 (alto 34, separación 8); "Comodines" en 176; catálogo en 212, 4 tarjetas de 238 × 228 con 24 entre ellas; nota RN03 de 1026 × 44 en 464; consejo de 846 × 100 en 532 (`fondoDestacado`, radio 20, relleno 20, separación 6, Leyenda `textoAcento` y Cuerpo/Base `textoPrimario`); Sarko de 136 × 170 en (1026, 492).
+- **T25 Perfil:** "Mi perfil" en y 20; botón de ajustes de 48 en (1114, 12); tarjeta de 500 × 92 en y 76; estadísticas de 245 × 62 con 10 entre ellas en y 184; "Insignias" en 346 y medallas en 386 (79 de ancho, x 0, 140, 280 y 420); derecha en x 660: "Cuenta y preferencias" (Fredoka SemiBold 17) en 80, menú de 502 × 198 en 116 (filas de 49), progreso de 502 × 248 en 338 (relleno 20, separación 12; fila: Cuerpo/Base, Etiqueta `textoSecundario`, barra de 8 con pista `fondoSuperficieAlt` y relleno del color del módulo, 6 debajo).
+- **T26 Ajustes:** atrás de 48 en (132, 12); título en (192, 20); subtítulo en y 72; títulos de sección en 124 y tarjetas en 146 (separación 6); izquierda de 500 (Visual de 185 de alto y vista previa de 166 a 28 de ella: `fondoSuperficieAlt`, radio 20, relleno 20, separación 10, Leyenda `textoSecundario`, H2 y Cuerpo/Base `textoSecundario`); derecha de 502 en x 660 (Motor de 124 y Cognitiva en 298).
 
 ## Decisiones propias (no vienen de Figma)
-- **Tablet vertical (600 a 959):** riel y una sola columna. El Inicio se centra con máximo 640; el acceso lleva arriba una **franja de marca de 240** (logo de 300 y Sarko de 168) y debajo el formulario de 470; el onboarding pone la ilustración × 1.2 arriba y la columna debajo.
-- **Ventanas entre 960 y 1194:** las columnas del Inicio se reparten en proporción 620:382; el panel de marca y el del onboarding miden la mitad de la ventana (hasta 597) y su contenido se reduce en la misma proporción (los textos no).
-- **Onboarding en tablet sin `PageView`:** las páginas cambian con un fundido de 250 ms (ninguno con "Reducir animaciones"); no hay deslizamiento lateral. Siguen "Omitir", el paginador y el botón.
-- **La ilustración del onboarding** es la del móvil escalada y centrada en el panel; en Figma cada página la centra según su propio contenido, así que el círculo queda hasta ~26 px más arriba o abajo que en Figma según la página.
-- **Formulario de 05 y 06:** los huecos de 06 son los del móvil (6, 16, 12, 14…); Figma usa 14 en casi todos.
-- **Buzón sin apelaciones:** "No tienes apelaciones pendientes." y **sin botón** (el riel sigue llevando al Buzón).
-- **Consejo de Sarko:** usa el tramo del **módulo siguiente** con su artículo ("la Ronda Semilla"), como Figma, aunque el sprint en curso no sea el último del módulo. En el último módulo usa el título del sprint siguiente; sin sprint en curso, "¡Tu Startup va por buen camino! Sigue practicando." (ver D2).
-- **Sin sprint en curso:** no hay tarjeta héroe (como en móvil) y "Ruta de tu Startup" sube.
-- **Consejo y Sarko al fondo:** la columna derecha llega al menos hasta el borde inferior (menos 24) para que el consejo quede abajo como en Figma; si no cabe, fluye al final.
-- **Héroe de tablet:** Sarko se oculta si la tarjeta mide menos de 596 de ancho (para que no quede cortado).
-- **Panel de registro:** Sarko se oculta si el panel mide menos de 600 de alto.
-- **Avatar del riel:** se anuncia "Perfil de Ana López" y lleva al Perfil.
-- **Rotar a mitad del onboarding:** si la ventana pasa de tablet a móvil, el `PageView` se crea en la página en la que iba.
+- **Seleccionado en el mapa:** el actual se distingue por su aro de pulso; otro seleccionado lleva un **borde de 3 en `accionPrimaria`** a 4 de la cara. Los dos se anuncian como "seleccionado". Con teclado aparece además el anillo de foco.
+- **Globo "Estás aquí" en tablet:** Figma T08 no lo muestra pero deja su espacio; lo oculté **conservando su lugar** y fuera del foco y del lector (el detalle ya tiene "Comenzar sprint").
+- **Detalle centrado en alto** dentro del panel (en Figma queda a 91 arriba y 90 abajo).
+- **Anuncio de la selección:** "Sprint 2, Consentimiento. Completado, 3 estrellas." (estado con mayúscula; las estrellas solo en completados).
+- **600 a 959:** Tienda con catálogo de 2 columnas, Perfil y Ajustes en una columna; los tres con ancho máximo de 640 centrado, como el Inicio. El mapa como en móvil, con riel.
+- **Progreso por módulo:** muestra los 5 módulos (Figma dibuja 4) con los nombres cortos del proyecto ("Licencias open source").
+- **Insignias en tablet:** se reparten a todo el ancho si caben; si no (texto grande o muchas), se desplazan como en móvil.
+- **Diálogos:** el de confirmación pasa de 400 a 440 solo en tablet.
 
 ## Accesibilidad
-- **Riel:** contenedor "Navegación principal"; cada destino es un botón con su nombre y `selected` en el activo; el Buzón se anuncia "Buzón, 6 apelaciones pendientes" (1: "1 apelación pendiente"); Ajustes "Ajustes de accesibilidad". Objetivos de 80×72 y 48×48.
-- **Orden de foco:** riel primero (destinos → Ajustes → avatar) y luego el contenido. En el Inicio: héroe → módulos → Buzón (orden explícito, igual en una columna).
-- **Tu semana:** cada estadística se lee como "Precisión: 82%" ("Precisión: sin datos" si falla).
-- **Contrastes AA verificados en pruebas:** etiquetas del riel (`textoPrimario` sobre `fondoDestacado`, `textoSecundario` y `textoPrimario` sobre `fondoSuperficie`), `textoEnPrimario` sobre `estadoIlegal` (insignia), y `#E8D8A8` y blanco sobre el verde del panel (también con el círculo encima), en claro y oscuro.
-- **Sin desbordes** en 1194×834, 834×1194 y 600×960 al 100 % y 200 %, en claro y oscuro (Inicio), y en las tres medidas al 100 % y 200 % para acceso, Splash y onboarding. Con texto grande, Tu semana apila sus estadísticas y la rejilla de módulos pasa a una columna.
-- "Reducir animaciones", háptica, "solo botones" y el tamaño de texto de la T-10b se respetan igual (el `builder` de la app los sigue aplicando antes del ámbito).
+- **Mapa en tablet:** orden de foco riel → atrás → nodos abiertos (de arriba abajo) → "Comenzar sprint" del detalle. El detalle se anuncia con `liveRegion` al cambiar la selección; los nodos conservan su etiqueta de 04b y suman "seleccionado".
+- **Progreso por módulo:** cada renglón se lee "1 · Protección de datos, 40 %".
+- **Contrastes AA verificados en pruebas (claro y oscuro):** `textoAcento` y `textoPrimario` sobre `fondoDestacado` (consejo de la Tienda) y `textoSecundario` sobre `fondoSuperficieAlt` (vista previa).
+- **Sin desbordes** en 1194×834, 834×1194 y 600×960 al 100 % y 200 %, claro y oscuro (mapa con detalle en 1194 en las cuatro combinaciones; Tienda, Perfil y Ajustes en las doce).
+- Los ajustes se siguen aplicando al instante; "Solo botones", tamaño de texto y demás reglas de T-10b no cambian.
 
 ## Verificación
 - `dart format`: sin cambios pendientes.
 - `flutter analyze`: `No issues found!`
-- `flutter test` (1116 pruebas; antes de T-12, 1025):
+- `flutter test` (1188 pruebas; antes de T-12b, 1116):
 ```
-+1116: All tests passed!
++1188: All tests passed!
 ```
-- **Pruebas nuevas (91):**
-  - `clase_pantalla_test.dart`: 390/599/600/959/960/1194, medidas, `Adaptativo` con el ancho disponible y la extensión;
-  - `riel_navegacion_test.dart`: medidas, activo, insignia (0, 1, 6, 99, 100 → "99+", sin dato), posición de la insignia, toques, Tab y Enter, colores del tema y contraste en claro/oscuro, 200 %;
-  - `inicio_tablet_test.dart`: riel sin barra ni botón flotante, posiciones de Figma, consejo al fondo, Tu semana y "—", Buzón con 6 y 0, consejo general, navegación del riel (Buzón, Tienda, Perfil, Ajustes y Mapa), Mapa con riel, una columna en 834 y 600, sin desbordes (3 tamaños × 100/200 % × claro/oscuro), lógica del consejo y móvil sin cambios;
-  - `acceso_tablet_test.dart`: panel y columna de 470, logo, Sarko, lema y círculo, formulario (errores, Enter, sesión), consentimientos separados, botón atrás, franja vertical, sin desbordes y contraste del panel;
-  - `bienvenida_tablet_test.dart`: Splash de tablet y de móvil, panel con la ilustración × 1.55, columna, Omitir, las 4 páginas, reducir animaciones, vertical, sin desbordes y el paso de tablet a móvil a mitad del onboarding.
-- **Ajustes en pruebas existentes:** solo la galería (22 botones, 24 logos y tocar "Perfil" dentro de la navegación inferior, porque el riel de la galería también dice "Perfil"). **Ninguna prueba cambió de tamaño.**
+- **Pruebas nuevas:**
+  - `mapa_tablet_test.dart`: paneles de 596 y 494, encabezado de 134, botón atrás en (120, 20), mapa × 1.12 en x 79.6, sin globo visible, las 6 piezas del detalle en 430, selección inicial (3 casos), tocar un completado (sin navegar, anuncio, borde, "seleccionado"), bloqueados y Examen bloqueado, Examen habilitado → crisis, "Comenzar sprint" → juego del seleccionado, ruta de la intro → vista combinada y atrás al Inicio, atrás sin pila, orden de foco, error, módulo no encontrado, 200 % claro/oscuro, 834 y 600 como hoy, reserva del Buzón con y sin riel y el texto del anuncio;
+  - `cuenta_tablet_test.dart`: Tienda (4 columnas, consejo, saldo, 2 columnas en vertical, compra con diálogo de 440 centrado), Perfil (2 columnas, progreso de los 5 módulos, medallas repartidas, cierre de sesión con diálogo, una columna en vertical, porcentaje), Ajustes (riel con Perfil activo, 2 columnas, vista previa, ajuste al instante, diálogo de tamaño de 440, atrás, móvil sin riel y con hoja), sin desbordes (36 casos), **insignia N → N−1 al ganar un juicio** y contrastes;
+  - consejo del Inicio con sprint siguiente, Examen final y general.
+- **Ajustes en pruebas existentes:** solo la galería (superficie de 28000 para que quepan las piezas nuevas, 6 nodos, 2 consejos). **Ninguna prueba cambió de tamaño.**
 
 ## Grafo
-- **Actualizados (`en curso`):** APP, MARCO-PRINCIPAL, TEMA-EFECTOS, TEXTOS, PANT-GALERIA, CODIGO-PANT-01, CODIGO-PANT-02..04, CODIGO-PANT-05, CODIGO-PANT-06, LOGICA-INICIO, EST-INICIO, CODIGO-PANT-07, COMP-HEROE, TEST-GALERIA y TEST-AYUDA.
-- **Nuevos:** ADAPTATIVO, COMP-RIEL, COMP-SEMANA, COMP-BUZON-INICIO, COMP-CONSEJO, PANEL-MARCA, TEST-ADAPTATIVO, TEST-TABLET, DEC-CLASE-PANTALLA y DEC-TABLET-VERTICAL.
-- PANT-01 a PANT-07b anotan que su vista de tablet vive en el mismo archivo.
-- **Obsoletos:** ninguno. Agregué una línea en el registro de cambios.
+- **Actualizados (`en curso`):** MARCO-PRINCIPAL, TEXTOS, PANT-GALERIA, LOGICA-INICIO, LOGICA-MAPA, CODIGO-PANT-08, CODIGO-PANT-09, COMP-ENCABEZADO-MODULO, COMP-NODO-SPRINT, EST-TIENDA, CODIGO-PANT-24, LOGICA-PERFIL, EST-PERFIL, CODIGO-PANT-25, COMP-PIEZAS-PERFIL, COMP-DIALOGO-CONFIRMACION, CODIGO-PANT-26, COMP-PIEZAS-AJUSTES, COMP-CONSEJO, TEST-GALERIA y TEST-TABLET.
+- **Nuevos:** DETALLE-SPRINT, TEST-TABLET-12B y DEC-SELECCION-MAPA.
+- PANT-08, 09, 24, 25 y 26 anotan su vista de tablet.
+- **Obsoletos:** ninguno (`Textos.tramosConArticulo` se quitó; no tenía nodo). Agregué una línea en el registro de cambios.
 
-## Para T-12b, c y d
-- **Clase de pantalla:** `context.clasePantalla` (`esTablet`, `esAncho`) para decidir la composición de una pantalla completa; `Adaptativo` dentro de paneles o columnas. No uses `MediaQuery.size` (ver D1).
-- **Medidas:** `MedidasAdaptativas.margen`, `medianil`, `riel`, `columnaFormulario` (470), `hojaLateral` (376) y `contenidoUnaColumna` (640).
-- **`MarcoPrincipal`** ya pinta el riel en Inicio, Mapa, Buzón, Tienda y Perfil. En tablet no hay botón Buzón ni barra inferior, así que las pantallas pueden dejar de reservar `MarcoPrincipal.reservaBuzon` cuando `MarcoPrincipal.conRiel(context)` sea `true` (hoy Mapa, Buzón, Tienda y Perfil siguen reservando ese espacio al final; no se nota, pero sobra). Para refrescar la insignia después de un juicio: `ref.invalidate(totalBuzonRielProvider)`.
-- **Pruebas:** `tamanoPantalla(tester, Tamano.tabletHorizontal)` (y `tabletVertical`, `tabletMinima`, `movil`); los ayudantes existentes (`abrirInicio`, `abrirEn`, `montarApp`) ya aceptan `tamano`.
-- **Componentes reutilizables:** `PanelMarca`/`DisposicionAccesoTablet` (panel + columna de 470) y `MedidasHeroe` como ejemplo de parametrizar medidas sin duplicar un componente.
-- Ajustes (`/perfil/ajustes`) no usa `MarcoPrincipal`, así que en tablet se ve sin riel (le toca a T-12b).
+## Para T-12c y T-12d
+- **`DetalleSprint` + `comenzarSprint`** ya sirven para cualquier panel lateral con el detalle de un sprint.
+- **Lista-detalle:** `_MapaConDetalle` es el patrón (dos `Expanded` con flex de Figma, panel derecho con borde izquierdo y columna centrada que se desplaza); el Buzón + Juicio (T-12d) puede seguirlo igual.
+- **Escalar una pieza móvil:** `MapaSprints.escala` muestra cómo ampliar un diseño de 390 sin rehacerlo (`SizedBox` con el ancho final + `FittedBox` + `SizedBox` de 390).
+- **Diálogos y hojas:** en tablet, diálogo centrado de 440 (`SelectorTamano.anchoDialogo`, `DialogoConfirmacion.anchoMaximoTablet`); las hojas laterales de 376 (`MedidasAdaptativas.hojaLateral`) quedan para T-12c.
+- **Insignia:** si una acción nueva cambia el Buzón, basta invalidar `apelacionesPendientesProvider` (o `totalBuzonRielProvider`).
 
 ## Dudas
-- **D1.** Para que las pruebas existentes siguieran en móvil sin cambiar su tamaño, la clase de pantalla sale del ancho real que recibe la app (un `LayoutBuilder` en el `builder` de `MaterialApp`), no de `MediaQuery`: en las pruebas, `setSurfaceSize` no cambia `MediaQuery` (sigue en 800×600). Esto tocó `lib/app/app.dart`, que no estaba en los archivos permitidos (una línea). ¿Está bien así?
-- **D2.** El consejo de Sarko: Figma dice "Termina el Sprint 3 hoy y desbloquea la Ronda Semilla", pero terminar el Sprint 3 desbloquea el Sprint 4, no el módulo 2. Lo dejé como Figma (tramo del módulo siguiente). ¿Prefieres que nombre el sprint siguiente ("Derechos ARCO") salvo en el último sprint del módulo?
-- **D3.** En tablet el onboarding no se puede deslizar (no hay `PageView`, solo los botones). ¿Agrego el gesto de deslizar?
-- **D4.** Con 0 apelaciones oculté el botón "Abrir Buzón" de la tarjeta del Inicio. ¿Lo prefieres deshabilitado y visible?
+- **D1.** Ajustes vive en `lib/funciones/ajustes/`, no en `lib/funciones/perfil/` como decía la tarea; lo cambié ahí. ¿Bien?
+- **D2.** Para el enlace profundo no toqué `enrutador.dart`: `PantallaIntroSprint` muestra el mapa con el detalle cuando el ancho es ≥ 960. Así, al rotar o cambiar el tamaño de la ventana se pasa de una vista a otra sin navegar. ¿Te parece bien o prefieres que lo decida la ruta?
+- **D3.** En la vista combinada, ¿el globo debería volver? Hoy no está (Figma deja su lugar vacío) y su lugar se conserva.
+- **D4.** "Progreso por módulo" usa el porcentaje de sprints completados (Ana: 40 % en el módulo 1). Figma dice 60 %. ¿El porcentaje debería venir del servidor o contar el sprint en curso?
+- **D5.** El consejo de la Tienda es fijo (texto de Figma). ¿Debería cambiar según el inventario o los artículos?
