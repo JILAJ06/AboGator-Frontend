@@ -138,7 +138,7 @@ class _PantallaInicioSesionState extends ConsumerState<PantallaInicioSesion> {
               alignment: Alignment.centerLeft,
               child: EnlaceTexto(
                 texto: Textos.olvidasteContrasena,
-                alPresionar: () => mostrarAvisoBreve(context, Textos.recuperacionPronto),
+                alPresionar: estado.enviando ? null : () => context.go(Rutas.recuperar),
               ),
             ),
             if (estado.errorGeneral != null) ...[
@@ -229,7 +229,7 @@ class _PantallaInicioSesionState extends ConsumerState<PantallaInicioSesion> {
                 alignment: Alignment.centerLeft,
                 child: EnlaceTexto(
                   texto: Textos.olvidasteContrasena,
-                  alPresionar: () => mostrarAvisoBreve(context, Textos.recuperacionPronto),
+                  alPresionar: estado.enviando ? null : () => context.go(Rutas.recuperar),
                 ),
               ),
               if (estado.errorGeneral != null) ...[

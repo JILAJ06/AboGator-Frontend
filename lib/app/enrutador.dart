@@ -2,11 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/textos/textos.dart';
 import '../datos/modelos/examen.dart';
 import '../datos/sincronizacion/estado_sincronizacion.dart';
 import '../funciones/acceso/pantalla_inicio_sesion.dart';
 import '../funciones/acceso/pantalla_registro.dart';
+import '../funciones/acceso/recuperacion/pantallas_recuperacion.dart';
 import '../funciones/acceso/sesion.dart';
 import '../funciones/ajustes/pantalla_ajustes.dart';
 import '../funciones/apelaciones/pantalla_buzon.dart';
@@ -21,12 +21,13 @@ import '../funciones/jefe/pantalla_resultado.dart';
 import '../funciones/juego/pantalla_juego.dart';
 import '../funciones/juego/pantalla_sprint_completado.dart';
 import '../funciones/juego/pantalla_startup_quiebra.dart';
+import '../funciones/legal/pantalla_legal.dart';
 import '../funciones/mapa/pantalla_intro_sprint.dart';
 import '../funciones/mapa/pantalla_mapa_sprints.dart';
+import '../funciones/notificaciones/pantalla_notificaciones.dart';
 import '../funciones/perfil/pantalla_perfil.dart';
 import '../funciones/tienda/pantalla_tienda.dart';
 import '../funciones/vidas/pantalla_sin_vidas.dart';
-import 'pantalla_pendiente.dart';
 import 'rutas.dart';
 
 /// Enrutador de la app. Arranca en el Splash.
@@ -39,6 +40,41 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
       GoRoute(path: Rutas.onboarding, builder: (context, state) => const PantallaOnboarding()),
       GoRoute(path: Rutas.inicioSesion, builder: (context, state) => const PantallaInicioSesion()),
       GoRoute(path: Rutas.registro, builder: (context, state) => const PantallaRegistro()),
+      // T-13b · 31 a 31e Recuperar contraseña (sin sesión).
+      GoRoute(
+        path: Rutas.recuperar,
+        builder: (context, state) => const PantallaRecuperar(),
+        routes: [
+          GoRoute(
+            path: Rutas.segmentoEnviado,
+            builder: (context, state) => const PantallaCorreoEnviado(),
+          ),
+          GoRoute(
+            path: Rutas.segmentoNueva,
+            // T-14: el token llega en el enlace profundo del correo.
+            builder: (context, state) =>
+                PantallaNuevaContrasena(token: state.uri.queryParameters['token'] ?? ''),
+          ),
+          GoRoute(
+            path: Rutas.segmentoListo,
+            builder: (context, state) => const PantallaResultadoRecuperacion(caducado: false),
+          ),
+          GoRoute(
+            path: Rutas.segmentoCaducado,
+            builder: (context, state) => const PantallaResultadoRecuperacion(caducado: true),
+          ),
+        ],
+      ),
+      // T-13b · 32 Aviso de Privacidad y 33 Términos de uso (sin sesión: los
+      // abre también el Registro).
+      GoRoute(
+        path: Rutas.legalAviso,
+        builder: (context, state) => const PantallaLegal(tipo: TipoDocumentoLegal.avisoPrivacidad),
+      ),
+      GoRoute(
+        path: Rutas.legalTerminos,
+        builder: (context, state) => const PantallaLegal(tipo: TipoDocumentoLegal.terminos),
+      ),
       GoRoute(
         path: Rutas.inicio,
         // Sin sesión (no debería pasar) se vuelve al inicio de sesión. También
@@ -131,23 +167,18 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
         builder: (context, state) => const PantallaPerfil(),
         routes: [
-          // Sin navegación inferior: 26 Ajustes y dos destinos que aún no
-          // tienen diseño.
+          // Sin navegación inferior: 26 Ajustes y su hija 34 Notificaciones.
           GoRoute(
             path: Rutas.segmentoAjustes,
             builder: (context, state) => const PantallaAjustes(),
-          ),
-          GoRoute(
-            path: Rutas.segmentoNotificaciones,
-            builder: (context, state) => const PantallaPendiente(
-              texto: Textos.pendienteNotificacionesRacha,
-              conVolver: true,
-            ),
-          ),
-          GoRoute(
-            path: Rutas.segmentoAvisoPrivacidad,
-            builder: (context, state) =>
-                const PantallaPendiente(texto: Textos.pendienteAvisoPrivacidad, conVolver: true),
+            routes: [
+              GoRoute(
+                path: Rutas.segmentoNotificaciones,
+                builder: (context, state) => PantallaNotificaciones(
+                  desdeRegistro: state.uri.queryParameters['desde'] == 'registro',
+                ),
+              ),
+            ],
           ),
         ],
       ),
