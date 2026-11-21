@@ -57,6 +57,9 @@ class PantallaBuzon extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final datos = ref.watch(datosBuzonProvider);
+    // Mantiene viva la selección de tablet mientras el Buzón está abierto,
+    // aunque al rotar a vertical se desmonte la lista-detalle (T-13).
+    ref.listen(seleccionBuzonProvider, (_, _) {});
     return MarcoPrincipal(
       pestana: PestanaApp.buzon,
       cuerpo: SafeArea(
@@ -239,6 +242,20 @@ class _Buzon extends ConsumerWidget {
   }
 }
 
+/// Apelación seleccionada en el Buzón de tablet (`null` = la primera). Vive
+/// mientras el Buzón está abierto, así la selección sobrevive a la rotación.
+final seleccionBuzonProvider = NotifierProvider.autoDispose<SeleccionBuzon, String?>(
+  SeleccionBuzon.new,
+);
+
+/// Guarda el id de la apelación seleccionada.
+class SeleccionBuzon extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void elegir(String id) => state = id;
+}
+
 /// Tarjeta de una apelación (para la vista previa del juicio en tablet, también
 /// de las que aún no se abren).
 final tarjetaApelacionProvider = FutureProvider.autoDispose.family<Tarjeta, String>(
@@ -263,7 +280,7 @@ class _BuzonTablet extends ConsumerStatefulWidget {
 }
 
 class _BuzonTabletState extends ConsumerState<_BuzonTablet> {
-  String? _seleccionada;
+  String? get _seleccionada => ref.watch(seleccionBuzonProvider);
   final Map<String, FocusNode> _focos = {};
 
   FocusNode _foco(String id) => _focos.putIfAbsent(id, () => FocusNode(debugLabel: id));
@@ -289,7 +306,7 @@ class _BuzonTabletState extends ConsumerState<_BuzonTablet> {
     // la lista con las flechas) no repite el anuncio: uno por cambio real
     // (T-13).
     if (a.id == _actual?.id) return;
-    setState(() => _seleccionada = a.id);
+    ref.read(seleccionBuzonProvider.notifier).elegir(a.id);
     unawaited(
       SemanticsService.sendAnnouncement(
         View.of(context),
