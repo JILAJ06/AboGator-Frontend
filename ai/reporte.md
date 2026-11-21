@@ -1,82 +1,73 @@
 # Reporte
-- **Tarea:** T-12b · Tablet: Mapa de sprints + detalle (lista-detalle), Tienda, Perfil y Ajustes
-- **Rama:** `12b-tablet-mapa-y-cuenta`
+- **Tarea:** T-12c · Tablet: zona de juego con panel lateral y hojas laterales
+- **Rama:** `12c-tablet-juego`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11. **Sin dependencias nuevas.**
-- **Comparé contra Figma** con el conector (solo lectura): T08 `96:582`, T24 `101:4306`, T25 `101:4553` y T26 `101:4759` (con `101:4545`, `101:4734` y `101:4888` en detalle).
-- **Prueba en el navegador** (web compilada a 1194×834, cuenta de prueba del mock en localhost): mapa con detalle, Tienda, Perfil, Ajustes y el diálogo de tamaño de texto coinciden con Figma (los revisé en modo oscuro, que es el que tenía el navegador).
+- **Comparé contra Figma** con el conector (solo lectura): T10 `97:772`, T12 `97:1563`, T14 `97:2660`, T16 `98:2894`, T18 `98:3819`, T10b `98:4108` y T10c `98:4367`.
+- **Prueba en el navegador** (web compilada a 1194×834, cuenta de prueba del mock en localhost): el sprint 3 se ve como T10 y, al responder, la hoja de veredicto como T12. Ahí encontré y corregí que la hoja salía con subrayados amarillos (al diálogo le faltaba un `Material`).
 
 ## Qué se hizo
-1. **Mapa + detalle (T08)**, solo a partir de 960 de ancho y dentro del riel:
-   - **Panel izquierdo** (596 de 1090, proporcional si la ventana es menor): `EncabezadoModulo` con medidas de tablet (`arribaMinimo` 16 y `abajoExtra` 16 → 134 de alto) y `MapaSprints` del móvil dibujado a 390 y ampliado × 1.12 (436.8) centrado. El camino se mide en el mapa sin escalar, así que sigue pasando por los centros.
-   - **Panel derecho** (494): `fondoSuperficie`, borde izquierdo de 1 y una columna de 430 centrada (también en alto) con el detalle y "Comenzar sprint" (430 × 52). Se desplaza si no cabe.
-   - **Detalle compartido** (`DetalleSprint` en `lib/funciones/mapa/detalle_sprint.dart`): lo usan la intro del móvil (centrado, elipse de 230) y el panel (a la izquierda, elipse de 207 y separación 14). También se movieron ahí `SarkoConElipse` y `comenzarSprint`; la intro móvil se ve igual que antes.
-   - **Selección:** al abrir queda el sprint actual (en curso o disponible), si no el último completado, si no el primero. Tocar o Enter sobre un sprint abierto lo selecciona sin navegar; los bloqueados no hacen nada y el Examen final habilitado abre la crisis.
-   - **Enlace profundo:** la ruta de la intro, en ancho, muestra esta vista con ese sprint seleccionado (lo decide `PantallaIntroSprint`, no el enrutador, así no se tocó `enrutador.dart`). Desde esa ruta, "atrás" va al Inicio.
-   - Entre 600 y 959 y en móvil, el mapa y la intro funcionan como antes (con riel en tablet).
-2. **Tienda (T24):** margen 32 y arriba 20; catálogo en **4 columnas** con medianil 24 (238.5 cada una a 1194); separaciones 28 · 10 · 26 · 10 · 24 · 24; **consejo de Sarko destacado** (nuevo texto de Figma) con Sarko de 136 × 170 a 44 de la tarjeta.
-3. **Perfil (T25):** dos columnas 500:502. A la izquierda la tarjeta, las estadísticas de 2 × 2 y las insignias **repartidas a todo el ancho**; a la derecha "Cuenta y preferencias" (H3), el menú y **"Progreso por módulo"** (`TarjetaProgresoModulos`: un renglón por módulo con nombre, "60 %" y barra de 8 del color del módulo). Para eso `DatosPerfil` guarda también los módulos (`modulos`), que ya se pedían; el porcentaje cuenta sprints completados sin el Examen final.
-4. **Ajustes (T26):** en tablet va dentro de `MarcoPrincipal` con el riel (**Perfil activo**) y en dos columnas 500:502: Visual y la nueva **vista previa** ("VISTA PREVIA · TEXTO AL N %", con el tamaño elegido) a la izquierda; Motor y auditiva y Cognitiva a la derecha. En móvil, sin cambios y sin navegación.
-5. **Diálogos en tablet:** `DialogoConfirmacion` llega a 440 (en móvil sigue en 400) y el selector de tamaño de texto pasa de hoja a **diálogo centrado de 440** con las esquinas redondeadas.
-6. **Arreglos de la T-12:**
-   - **Consejo de Sarko:** "Termina el Sprint N hoy y desbloquea <título del sprint siguiente>." y, en el último sprint normal, "… desbloquea el Examen final.". Se quitó `Textos.tramosConArticulo`.
-   - **Reserva del Buzón:** con riel el mapa ya no reserva el lugar del botón. Buzón, Tienda y Perfil **no la reservaban** (no tienen botón flotante); el Inicio de tablet tampoco.
-   - **Insignia del riel:** `totalBuzonRielProvider` depende de `apelacionesPendientesProvider`, que ya se invalida al resolver un juicio, registrar fallos del juego y terminar el Examen; así no hubo que tocar el juego, el Buzón ni el Examen. La Tienda lo invalida tras comprar.
-7. **Galería:** consejo destacado, progreso por módulo, vista previa y un nodo seleccionado.
+1. **Composición de tablet** (solo a partir de 960; `_JuegoTablet` en `pantalla_juego.dart`), sin riel:
+   - **Barra de juego de tablet** (`BarraJuegoTablet`): x 24, y 8, ancho de la ventana − 48, alto 64, separación 20; Salir y **Pausa** circulares de 48 (ícono de 22), progreso con Etiqueta y barra de 12, y el HUD con racha, monedas y vidas.
+   - **Zona izquierda** (de 24 a ventana − 424): la tarjeta de **380 × 470** con su pila (los 20 de la pila debajo) centrada; en 1194 queda en (207, 108). Debajo, los botones de veredicto (mismo orden y medidas) y, 16 más abajo, los comodines o las respuestas guardadas. Si la ventana es más baja, la tarjeta se encoge hasta el mínimo del móvil y la pantalla se desplaza.
+   - **Panel lateral** de 376 a 24 del borde (x 794 en 1194), con separación 16: **Tu Startup** (indicadores con sus cambios y la nota), **contexto del sprint** ("MÓDULO 1 · SPRINT 3", título y objetivo real) y **atajos de teclado**.
+   - El tinte del arrastre cubre toda la ventana; las flechas, Enter y Esc funcionan igual.
+   - Con **texto grande (más de 150 %)** todo pasa a una columna que se desplaza: zona de juego y, debajo, el panel (hasta 640 de ancho).
+2. **Hojas laterales** (`HojaLateral` en `lib/componentes/`): veredicto (correcto, bonus, parcial, incorrecto y Amparo), evidencia, justificación y Abogado Senior se abren a la derecha (376 de ancho, a 24 del borde derecho y 22 del inferior, con el alto de su contenido y hasta y 88). Se usa `showGeneralDialog` con el mismo velo, entrada desde la derecha de 280 ms (curva `easeOut`) y sin movimiento con "Reducir animaciones".
+   - **El contenido no cambia:** los paneles leen `HojaLateral.enHoja` y solo cambian la forma (cuatro esquinas de 28 y borde de 1; relleno inferior de 34 sin la zona segura).
+   - **Descarte igual que en móvil:** veredicto y justificación no se cierran con Esc, atrás ni tocando fuera; evidencia y Abogado sí, y el foco vuelve a su control de origen.
+   - Cada hoja se anuncia como contenedor: "Retroalimentación", "Evidencia", "Justificación" o "Abogado Senior".
+3. **Entre 600 y 959:** el juego del móvil centrado con ancho máximo de 440 y la hoja inferior de siempre, también de 440 como máximo y centrada. **En móvil no cambia nada.**
+4. **Pausa** (solo tablet): "Juego en pausa" (centrado, 440) con "Seguir jugando" y "Salir del sprint", que abre la misma confirmación de Salir.
+5. **Galería:** "Tu Startup", contexto, atajos y una `HojaLateral` con un panel.
 
-## Medidas que tomé de Figma (T24 a T26)
-- **T24 Tienda:** título en y 20 (52 − 32); saldo de 87 × 38 que termina en x 1162; "Tu inventario" en y 80, píldoras en 116 (alto 34, separación 8); "Comodines" en 176; catálogo en 212, 4 tarjetas de 238 × 228 con 24 entre ellas; nota RN03 de 1026 × 44 en 464; consejo de 846 × 100 en 532 (`fondoDestacado`, radio 20, relleno 20, separación 6, Leyenda `textoAcento` y Cuerpo/Base `textoPrimario`); Sarko de 136 × 170 en (1026, 492).
-- **T25 Perfil:** "Mi perfil" en y 20; botón de ajustes de 48 en (1114, 12); tarjeta de 500 × 92 en y 76; estadísticas de 245 × 62 con 10 entre ellas en y 184; "Insignias" en 346 y medallas en 386 (79 de ancho, x 0, 140, 280 y 420); derecha en x 660: "Cuenta y preferencias" (Fredoka SemiBold 17) en 80, menú de 502 × 198 en 116 (filas de 49), progreso de 502 × 248 en 338 (relleno 20, separación 12; fila: Cuerpo/Base, Etiqueta `textoSecundario`, barra de 8 con pista `fondoSuperficieAlt` y relleno del color del módulo, 6 debajo).
-- **T26 Ajustes:** atrás de 48 en (132, 12); título en (192, 20); subtítulo en y 72; títulos de sección en 124 y tarjetas en 146 (separación 6); izquierda de 500 (Visual de 185 de alto y vista previa de 166 a 28 de ella: `fondoSuperficieAlt`, radio 20, relleno 20, separación 10, Leyenda `textoSecundario`, H2 y Cuerpo/Base `textoSecundario`); derecha de 502 en x 660 (Motor de 124 y Cognitiva en 298).
+## Medidas que tomé de Figma
+- **Zona de juego** (igual en todos los marcos): barra en (24, 8) de 1146 × 64; tarjeta de 380 × 470 en (207, 108); pila 1 de 356 en (+12, +10) al 80 % y pila 2 de 332 en (+24, +20) al 50 %; acciones de 333 × 90 en (230.5, 594); comodines de 349 × 48 en (222.5, 700).
+- **Panel lateral:** x 794, 376 de ancho. Tu Startup en y 88 (relleno 16, título H3, indicadores de 342 a 12, nota a 12; 154 de alto, 170 con cambios); contexto 16 debajo (relleno 20, separación 12, 142 de alto); atajos 16 debajo (relleno 16, separación 8, 130 de alto).
+- **Hojas** (x 794, 376 de ancho, todas terminan 22 arriba del borde inferior): T12 veredicto con bonus en y 291 (489 de alto); T14 incorrecto en y 339 (441); T16 evidencia en y 311 (469: asa, título de 26, instrucción de 60, snippet de 222 y botón de 52 con separación 14); T18 justificación en y 250 (530; opciones de 342 de ancho); T10c Abogado en y 353 (427). Relleno 24 por lado (25 con el borde).
+- **Velo:** de pantalla completa (Figma lo pone sobre toda la ventana, también sobre la tarjeta).
+- **T10b Lupa:** no tiene hoja; la etiqueta "Lupa de Auditor: palabras trampa resaltadas" (308 × 28) va sobre el borde de la tarjeta, como en el móvil.
+- No medí aparte T11, T11b, T11c, T13, T12b, T12c, T14b, T15, T16b ni T17: comparten la misma composición y su contenido es el del panel móvil que ya se reutiliza.
 
 ## Decisiones propias (no vienen de Figma)
-- **Seleccionado en el mapa:** el actual se distingue por su aro de pulso; otro seleccionado lleva un **borde de 3 en `accionPrimaria`** a 4 de la cara. Los dos se anuncian como "seleccionado". Con teclado aparece además el anillo de foco.
-- **Globo "Estás aquí" en tablet:** Figma T08 no lo muestra pero deja su espacio; lo oculté **conservando su lugar** y fuera del foco y del lector (el detalle ya tiene "Comenzar sprint").
-- **Detalle centrado en alto** dentro del panel (en Figma queda a 91 arriba y 90 abajo).
-- **Anuncio de la selección:** "Sprint 2, Consentimiento. Completado, 3 estrellas." (estado con mayúscula; las estrellas solo en completados).
-- **600 a 959:** Tienda con catálogo de 2 columnas, Perfil y Ajustes en una columna; los tres con ancho máximo de 640 centrado, como el Inicio. El mapa como en móvil, con riel.
-- **Progreso por módulo:** muestra los 5 módulos (Figma dibuja 4) con los nombres cortos del proyecto ("Licencias open source").
-- **Insignias en tablet:** se reparten a todo el ancho si caben; si no (texto grande o muchas), se desplazan como en móvil.
-- **Diálogos:** el de confirmación pasa de 400 a 440 solo en tablet.
+- **Pausa:** solo en tablet; no detiene nada (el sprint no tiene reloj). Texto: "Tus respuestas están guardadas. Sigue cuando quieras: este sprint no tiene reloj."
+- **Contexto del sprint:** el objetivo real del sprint con la primera letra en mayúscula (`LogicaJuegoTablet.objetivo`); Figma trae un texto de ejemplo.
+- **Monedas del HUD:** el saldo al abrir el sprint (de la Tienda) más lo ganado en el sprint, porque el saldo real solo se actualiza al guardar el resultado.
+- **Entrada de la hoja:** desde la derecha en 280 ms con `easeOut`; sin movimiento con "Reducir animaciones".
+- **600 a 959:** juego y hoja inferior de 440 como máximo, centrados (no hay panel lateral).
+- **Texto grande:** con más de 150 % el panel lateral pasa debajo y la pantalla se desplaza.
 
 ## Accesibilidad
-- **Mapa en tablet:** orden de foco riel → atrás → nodos abiertos (de arriba abajo) → "Comenzar sprint" del detalle. El detalle se anuncia con `liveRegion` al cambiar la selección; los nodos conservan su etiqueta de 04b y suman "seleccionado".
-- **Progreso por módulo:** cada renglón se lee "1 · Protección de datos, 40 %".
-- **Contrastes AA verificados en pruebas (claro y oscuro):** `textoAcento` y `textoPrimario` sobre `fondoDestacado` (consejo de la Tienda) y `textoSecundario` sobre `fondoSuperficieAlt` (vista previa).
-- **Sin desbordes** en 1194×834, 834×1194 y 600×960 al 100 % y 200 %, claro y oscuro (mapa con detalle en 1194 en las cuatro combinaciones; Tienda, Perfil y Ajustes en las doce).
-- Los ajustes se siguen aplicando al instante; "Solo botones", tamaño de texto y demás reglas de T-10b no cambian.
+- Orden de foco: Salir → Pausa → tarjeta → botones de veredicto → comodines (el panel lateral es de solo lectura). La barra de progreso conserva su semántica ("Sprint 3 · Tarjeta 1 de 10").
+- Las hojas son modales (la ruta encierra el foco) y se anuncian con su etiqueta; el foco inicial va al título del panel, como en el móvil.
+- **Contrastes AA verificados en pruebas (claro y oscuro):** `textoSecundario` y `textoPrimario` sobre `fondoSuperficieAlt` (atajos), `textoAcento` sobre `fondoSuperficie` (contexto) y los cuatro colores de veredicto sobre `fondoSuperficie`.
+- **Sin desbordes** en 1194×834, 834×1194 y 600×960 al 100 % y 200 %, claro y oscuro, también con la hoja abierta.
 
 ## Verificación
 - `dart format`: sin cambios pendientes.
 - `flutter analyze`: `No issues found!`
-- `flutter test` (1188 pruebas; antes de T-12b, 1116):
+- `flutter test` (1219 pruebas; antes de T-12c, 1188):
 ```
-+1188: All tests passed!
++1219: All tests passed!
 ```
-- **Pruebas nuevas:**
-  - `mapa_tablet_test.dart`: paneles de 596 y 494, encabezado de 134, botón atrás en (120, 20), mapa × 1.12 en x 79.6, sin globo visible, las 6 piezas del detalle en 430, selección inicial (3 casos), tocar un completado (sin navegar, anuncio, borde, "seleccionado"), bloqueados y Examen bloqueado, Examen habilitado → crisis, "Comenzar sprint" → juego del seleccionado, ruta de la intro → vista combinada y atrás al Inicio, atrás sin pila, orden de foco, error, módulo no encontrado, 200 % claro/oscuro, 834 y 600 como hoy, reserva del Buzón con y sin riel y el texto del anuncio;
-  - `cuenta_tablet_test.dart`: Tienda (4 columnas, consejo, saldo, 2 columnas en vertical, compra con diálogo de 440 centrado), Perfil (2 columnas, progreso de los 5 módulos, medallas repartidas, cierre de sesión con diálogo, una columna en vertical, porcentaje), Ajustes (riel con Perfil activo, 2 columnas, vista previa, ajuste al instante, diálogo de tamaño de 440, atrás, móvil sin riel y con hoja), sin desbordes (36 casos), **insignia N → N−1 al ganar un juicio** y contrastes;
-  - consejo del Inicio con sprint siguiente, Examen final y general.
-- **Ajustes en pruebas existentes:** solo la galería (superficie de 28000 para que quepan las piezas nuevas, 6 nodos, 2 consejos). **Ninguna prueba cambió de tamaño.**
+- **Pruebas nuevas en `juego_tablet_test.dart` (31):** barra de tablet (posición, Salir y Pausa de 48, texto del paso), zona de 380 × 490 en x 207 con su pila y botones centrados en el orden de Figma, panel lateral con objetivo real y atajos, objetivo con mayúscula; hoja de veredicto (posición, etiqueta, no se descarta con Esc ni tocando fuera, sigue al cerrarla), evidencia (Esc y tocar fuera), justificación (no se descarta y lleva al veredicto en la misma hoja), Abogado (atrás), "Reducir animaciones", flecha + Enter; pausa (seguir y salir con confirmación); **un sprint completo en tablet con los tres tipos de tarjeta hasta "Sprint completado"**; 834×1194, 600×960 y móvil con hoja inferior (≤ 440 centrada en tablet); sin desbordes (12 casos); contrastes; `HojaLateral.enHoja`.
+- **Ajustes en pruebas existentes:** solo la galería (2 `IndicadoresStartup` y las piezas nuevas). Las pruebas del juego móvil siguen verdes **sin cambiar de tamaño**.
 
 ## Grafo
-- **Actualizados (`en curso`):** MARCO-PRINCIPAL, TEXTOS, PANT-GALERIA, LOGICA-INICIO, LOGICA-MAPA, CODIGO-PANT-08, CODIGO-PANT-09, COMP-ENCABEZADO-MODULO, COMP-NODO-SPRINT, EST-TIENDA, CODIGO-PANT-24, LOGICA-PERFIL, EST-PERFIL, CODIGO-PANT-25, COMP-PIEZAS-PERFIL, COMP-DIALOGO-CONFIRMACION, CODIGO-PANT-26, COMP-PIEZAS-AJUSTES, COMP-CONSEJO, TEST-GALERIA y TEST-TABLET.
-- **Nuevos:** DETALLE-SPRINT, TEST-TABLET-12B y DEC-SELECCION-MAPA.
-- PANT-08, 09, 24, 25 y 26 anotan su vista de tablet.
-- **Obsoletos:** ninguno (`Textos.tramosConArticulo` se quitó; no tenía nodo). Agregué una línea en el registro de cambios.
+- **Actualizados (`en curso`):** CODIGO-PANT-10, COMP-BARRA-JUEGO, COMP-PANEL-VEREDICTO, COMP-PANEL-EVIDENCIA, TEXTOS, PANT-GALERIA y TEST-GALERIA.
+- **Nuevos:** COMP-HOJA-LATERAL, COMP-PANEL-LATERAL-JUEGO, TEST-JUEGO-TABLET y DEC-PAUSA.
+- PANT-10 a PANT-18, 10b y 10c anotan su vista de tablet.
+- **Obsoletos:** ninguno. Agregué una línea en el registro de cambios.
 
-## Para T-12c y T-12d
-- **`DetalleSprint` + `comenzarSprint`** ya sirven para cualquier panel lateral con el detalle de un sprint.
-- **Lista-detalle:** `_MapaConDetalle` es el patrón (dos `Expanded` con flex de Figma, panel derecho con borde izquierdo y columna centrada que se desplaza); el Buzón + Juicio (T-12d) puede seguirlo igual.
-- **Escalar una pieza móvil:** `MapaSprints.escala` muestra cómo ampliar un diseño de 390 sin rehacerlo (`SizedBox` con el ancho final + `FittedBox` + `SizedBox` de 390).
-- **Diálogos y hojas:** en tablet, diálogo centrado de 440 (`SelectorTamano.anchoDialogo`, `DialogoConfirmacion.anchoMaximoTablet`); las hojas laterales de 376 (`MedidasAdaptativas.hojaLateral`) quedan para T-12c.
-- **Insignia:** si una acción nueva cambia el Buzón, basta invalidar `apelacionesPendientesProvider` (o `totalBuzonRielProvider`).
+## Para T-12d
+- **`HojaLateral(etiqueta:, child:)`** aloja cualquier panel a la derecha. Para el contraargumento del Jefe: si su panel usa `ContenedorPanelModal`, o lee `HojaLateral.radioDe/bordeDe/rellenoInferior`, se adapta solo. Para mostrarla: `showGeneralDialog` con `barrierColor: EfectosApp.colorVelo`, la duración `EfectosApp.duracionPanel` y la entrada desde la derecha (ver `_mostrarPanel` en `pantalla_juego.dart`).
+- **`BarraJuegoTablet`** ya tiene la forma de la barra de tablet; el Examen puede reutilizarla (le falta un texto de paso propio, como `paso` en `BarraJuego`).
+- Las pantallas de resultado (19, 19b, 20) siguen como en el móvil: les toca a T-12d.
 
 ## Dudas
-- **D1.** Ajustes vive en `lib/funciones/ajustes/`, no en `lib/funciones/perfil/` como decía la tarea; lo cambié ahí. ¿Bien?
-- **D2.** Para el enlace profundo no toqué `enrutador.dart`: `PantallaIntroSprint` muestra el mapa con el detalle cuando el ancho es ≥ 960. Así, al rotar o cambiar el tamaño de la ventana se pasa de una vista a otra sin navegar. ¿Te parece bien o prefieres que lo decida la ruta?
-- **D3.** En la vista combinada, ¿el globo debería volver? Hoy no está (Figma deja su lugar vacío) y su lugar se conserva.
-- **D4.** "Progreso por módulo" usa el porcentaje de sprints completados (Ana: 40 % en el módulo 1). Figma dice 60 %. ¿El porcentaje debería venir del servidor o contar el sprint en curso?
-- **D5.** El consejo de la Tienda es fijo (texto de Figma). ¿Debería cambiar según el inventario o los artículos?
+- **D1.** En Figma (T12, T14…) la tarjeta **sigue visible con su sello** mientras está abierta la hoja; en la app la tarjeta sale volando al confirmar (es la lógica de `MazoSwipe`, la misma del móvil) y no la cambié para no tocar la mecánica del juego. ¿Se cambia el vuelo en tablet (la tarjeta se queda con el sello hasta cerrar la hoja)?
+- **D2.** El HUD de tablet muestra saldo + ganado en el sprint. ¿Prefieres solo el saldo de la Tienda?
+- **D3.** Figma no muestra la pausa en ningún diálogo; ¿el texto del diálogo te parece bien?
+- **D4.** Figma pone el velo también sobre la tarjeta (y lo seguí). La tarea mencionaba dejar libre la tarjeta "si Figma así lo muestra"; Figma no lo muestra. ¿Correcto?
