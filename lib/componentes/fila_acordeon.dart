@@ -42,39 +42,42 @@ class FilaAcordeon extends StatelessWidget {
     final tokens = context.tokens;
     final estilos = context.estilos;
     final duracion = EfectosApp.duracion(context, milisegundos: 200);
-    final cabecera = AccionEnfocable(
-      alPresionar: alAlternar,
-      radio: radio,
-      semantica: (hijo) => Semantics(
-        button: true,
-        expanded: abierta,
-        label: etiquetaSemantica ?? titulo,
-        onTap: alAlternar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: altoCerrada),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  titulo,
-                  style: estilos.cuerpoEnfasis.copyWith(
-                    color: tokens.textoPrimario,
-                    fontWeight: abierta ? FontWeight.w700 : null,
+    final cabecera = Semantics(
+      container: true,
+      child: AccionEnfocable(
+        alPresionar: alAlternar,
+        radio: radio,
+        semantica: (hijo) => Semantics(
+          button: true,
+          expanded: abierta,
+          label: etiquetaSemantica ?? titulo,
+          onTap: alAlternar,
+          excludeSemantics: true,
+          child: hijo,
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: altoCerrada),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    titulo,
+                    style: estilos.cuerpoEnfasis.copyWith(
+                      color: tokens.textoPrimario,
+                      fontWeight: abierta ? FontWeight.w700 : null,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              AnimatedRotation(
-                duration: duracion,
-                turns: abierta ? 0.25 : 0,
-                child: IconoApp(IconosApp.chevron, tamano: 20, color: tokens.textoSecundario),
-              ),
-            ],
+                const SizedBox(width: 12),
+                AnimatedRotation(
+                  duration: duracion,
+                  turns: abierta ? 0.25 : 0,
+                  child: IconoApp(IconosApp.chevron, tamano: 20, color: tokens.textoSecundario),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -98,12 +101,16 @@ class FilaAcordeon extends StatelessWidget {
           children: [
             cabecera,
             if (abierta)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Text(
-                  cuerpo,
-                  key: const ValueKey('cuerpo-acordeon'),
-                  style: estilos.cuerpoBase.copyWith(color: tokens.textoPrimario),
+              // Nodo propio: el lector lee el cuerpo aparte de la cabecera.
+              Semantics(
+                container: true,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Text(
+                    cuerpo,
+                    key: const ValueKey('cuerpo-acordeon'),
+                    style: estilos.cuerpoBase.copyWith(color: tokens.textoPrimario),
+                  ),
                 ),
               ),
           ],
