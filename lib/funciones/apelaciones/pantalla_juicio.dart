@@ -322,6 +322,7 @@ class _JuicioState extends ConsumerState<_Juicio> {
                 '${Textos.falladaHace(datos.diasDesdeFallo)}.',
             alConfirmar: _alConfirmar,
             arrastreActivo: !soloBotones,
+            retenerAlConfirmar: context.clasePantalla.esAncho,
             tarjeta: TarjetaCaso(
               soloBotones: soloBotones,
               etiquetaCaso: LogicaApelacion.etiqueta(datos.apelacion.tema),
