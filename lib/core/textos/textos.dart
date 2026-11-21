@@ -656,6 +656,11 @@ abstract final class Textos {
   // ---------------------------------------------------------------------
   static const String ajustesTitulo = 'Accesibilidad';
   static const String ajustesSubtitulo = 'WCAG 2.1 AA · Ajusta la app a tu forma de aprender.';
+  static String vistaPreviaEtiqueta(int porcentaje) => 'VISTA PREVIA · TEXTO AL $porcentaje %';
+  static const String vistaPreviaPregunta = '¿La copio tal cual en nuestra app de código cerrado?';
+  static const String vistaPreviaTexto =
+      'Así se verán las tarjetas con el tamaño de texto elegido. El diseño se reacomoda sin '
+      'cortar palabras (WCAG 1.4.4 y 1.4.10).';
   static const String seccionVisual = 'VISUAL';
   static const String seccionMotora = 'MOTOR Y AUDITIVA';
   static const String seccionCognitiva = 'COGNITIVA (WCAG 2.2.1)';
