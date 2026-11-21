@@ -407,6 +407,12 @@ abstract final class Textos {
   static const String hojaEvidencia = 'Evidencia';
   static const String hojaJustificacion = 'Justificación';
   static const String hojaAbogado = 'Abogado Senior';
+
+  // Juicio y Buzón en tablet (T-12d)
+  static String contextoApelacion(int dia) => 'APELACIÓN · DÍA $dia';
+  static String contextoApelacionTexto(int dias) =>
+      '${dias == 1 ? 'Fallaste esta tarjeta hace 1 día' : 'Fallaste esta tarjeta hace $dias días'}. '
+      'Si aciertas ahora recuperas 1 vida.';
   static const String cargandoJuego = 'Cargando el sprint';
   static const String juegoErrorCarga = 'No pudimos cargar las tarjetas del sprint.';
   static const String sprintSinTarjetas = 'Este sprint todavía no tiene tarjetas.';
