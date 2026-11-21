@@ -3,7 +3,6 @@ import 'package:material_ui/material_ui.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import '../datos/modelos/estado_startup.dart';
-import 'bloque_lectura.dart';
 import 'indicadores_startup.dart';
 
 /// "Tu Startup" del panel lateral del juego en tablet (Figma `97:1814`):
@@ -28,9 +27,15 @@ class TarjetaTuStartup extends StatelessWidget {
           header: true,
           child: Text(Textos.tuStartup, style: estilos.h3.copyWith(color: tokens.textoPrimario)),
         ),
-        BloqueLectura(
-          etiqueta: Textos.indicadoresSemantica,
-          child: IndicadoresStartup(estado: estado, cambios: cambios),
+        // Solo lectura (T-13): el lector la lee, pero no es parada de Tab; el
+        // orden del teclado en tablet es Salir → Pausa → tarjeta → botones →
+        // comodines.
+        Semantics(
+          container: true,
+          label: Textos.indicadoresSemantica,
+          child: MergeSemantics(
+            child: IndicadoresStartup(estado: estado, cambios: cambios),
+          ),
         ),
         Text(
           Textos.notaIndicadores,

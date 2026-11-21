@@ -370,6 +370,7 @@ class _AuditoriaSuperadaState extends _EstadoResultado<PantallaAuditoriaSuperada
         key: ValueKey('confeti-auditoria'),
         piezas: ConfetiSprint.piezasAuditoriaTablet,
         anchoLienzo: DisposicionResultadoTablet.anchoPanel,
+        proporcional: true,
       ),
       ilustracionTablet: const IlustracionAmpliada(
         anchoBase: 296,

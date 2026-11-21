@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart' show CustomSemanticsAction;
 import 'package:material_ui/material_ui.dart';
 
+import '../../componentes/anillo_foco.dart';
 import '../../componentes/pila_tarjetas.dart';
 import '../../componentes/sello_veredicto.dart';
 import '../../core/textos/textos.dart';
@@ -52,6 +53,11 @@ class _ArrastreInmediato extends PanGestureRecognizer {
 /// - [previsualizar], [cancelarPrevia] y [confirmar] dan el mismo resultado
 ///   con teclado y botones.
 /// - Con "reducir animaciones" no hay vuelo, resorte ni entrada animada.
+/// - Con [retenerAlConfirmar] (tablet ancha, T-13) la tarjeta no sale volando
+///   al confirmar: se coloca en el umbral con su sello y se queda mientras la
+///   hoja lateral está abierta; sale volando cuando llega la siguiente (al
+///   cerrar la hoja). [alConfirmar] se llama en el mismo momento que con el
+///   vuelo.
 class MazoSwipe extends StatefulWidget {
   const MazoSwipe({
     required this.claveTarjeta,
@@ -62,6 +68,7 @@ class MazoSwipe extends StatefulWidget {
     required this.arrastre,
     this.alInspeccionar,
     this.arrastreActivo = true,
+    this.retenerAlConfirmar = false,
     super.key,
   });
 
@@ -93,6 +100,10 @@ class MazoSwipe extends StatefulWidget {
   /// acciones del lector siguen calificando, y un toque abre el visor.
   final bool arrastreActivo;
 
+  /// La tarjeta confirmada se queda con su sello hasta la siguiente (tablet
+  /// con hoja lateral; ver la descripción de la clase).
+  final bool retenerAlConfirmar;
+
   /// Movimiento máximo para que soltar cuente como toque.
   static const double toleranciaToque = 8;
 
@@ -116,6 +127,12 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
     duration: MazoSwipe.duracionEntrada,
   );
 
+  /// Vuelo de la tarjeta retenida cuando llega la siguiente.
+  late final AnimationController _salida = AnimationController(
+    vsync: this,
+    duration: MazoSwipe.duracionVuelo,
+  );
+
   EjeSwipe? _eje;
   Offset _arrastreBruto = Offset.zero;
   Offset _desplazamiento = Offset.zero;
@@ -130,7 +147,18 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
   /// La tarjeta ya salió de la zona: sin sello ni tinte hasta la siguiente
   /// (como en Figma 12 y 14, mientras está abierto el panel).
   bool _fuera = false;
+
+  /// La tarjeta confirmada se quedó en el umbral con su sello
+  /// ([MazoSwipe.retenerAlConfirmar]); [_veredictoRetenido] es su veredicto.
+  bool _retenida = false;
+  Veredicto? _veredictoRetenido;
+
+  /// Copia de la tarjeta retenida que sale volando sobre la nueva.
+  _TarjetaSaliente? _saliente;
   Size _zona = Size.zero;
+
+  /// La tarjeta se quedó en el umbral tras confirmar (pruebas y pantallas).
+  bool get retenida => _retenida;
 
   Animation<Offset>? _animDesplazamiento;
   Animation<double>? _animAngulo;
@@ -151,12 +179,26 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
       _publicar();
     });
     _entrada.addListener(() => setState(() {}));
+    _salida.addListener(() => setState(() {}));
   }
 
   @override
   void didUpdateWidget(MazoSwipe oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.claveTarjeta != widget.claveTarjeta) {
+      final veredicto = _veredictoRetenido;
+      if (_retenida && veredicto != null && !_sinAnimaciones) {
+        // La anterior sale volando desde donde se quedó (al cerrar la hoja).
+        _saliente = _TarjetaSaliente(
+          tarjeta: oldWidget.tarjeta,
+          veredicto: veredicto,
+          desde: _desplazamiento,
+          angulo: _angulo,
+        );
+        _salida.forward(from: 0).then((_) {
+          if (mounted) setState(() => _saliente = null);
+        });
+      }
       _reiniciar();
       if (_sinAnimaciones) {
         _entrada.value = 1;
@@ -170,6 +212,7 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
   void dispose() {
     _movimiento.dispose();
     _entrada.dispose();
+    _salida.dispose();
     super.dispose();
   }
 
@@ -182,6 +225,8 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
     _previa = null;
     _volando = false;
     _fuera = false;
+    _retenida = false;
+    _veredictoRetenido = null;
     // Se llama mientras se reconstruye: el tinte se avisa al terminar el cuadro.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _publicar();
@@ -271,13 +316,26 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
     if (_eje != eje || _veredictoActual != veredicto) {
       _colocar(eje, LogicaSwipe.desplazamientoPrevio(veredicto, _zona.width));
     }
-    final destino = LogicaSwipe.destinoVuelo(veredicto, _zona.width, _zona.height);
-    final anguloFinal = eje == EjeSwipe.horizontal
+    final retener = widget.retenerAlConfirmar;
+    // Retenida: la tarjeta va al umbral (con su sello completo) y se queda.
+    final destino = retener
+        ? LogicaSwipe.desplazamientoPrevio(veredicto, _zona.width)
+        : LogicaSwipe.destinoVuelo(veredicto, _zona.width, _zona.height);
+    final anguloFinal = retener
+        ? LogicaSwipe.anguloGrados(eje, destino, _zona.width)
+        : eje == EjeSwipe.horizontal
         ? LogicaSwipe.anguloVuelo * LogicaSwipe.direccion(veredicto).dx
         : 0.0;
     void terminar() {
       if (!mounted) return;
-      setState(() => _fuera = true);
+      setState(() {
+        if (retener) {
+          _retenida = true;
+          _veredictoRetenido = veredicto;
+        } else {
+          _fuera = true;
+        }
+      });
       widget.arrastre.value = const ArrastreVisible();
       widget.alConfirmar(veredicto);
     }
@@ -287,7 +345,12 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
       terminar();
       return;
     }
-    _animar(destino, anguloFinal, MazoSwipe.duracionVuelo, Curves.easeIn).then((_) => terminar());
+    _animar(
+      destino,
+      anguloFinal,
+      MazoSwipe.duracionVuelo,
+      retener ? Curves.easeOut : Curves.easeIn,
+    ).then((_) => terminar());
   }
 
   void _regresar() {
@@ -362,7 +425,9 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
                   },
                 ),
             },
-            child: widget.tarjeta,
+            // Parada de Tab de la tarjeta (orden 26b; T-13): sin atajos propios,
+            // así las flechas, Enter y Esc siguen llegando a la pantalla.
+            child: _FocoTarjeta(child: widget.tarjeta),
           ),
         );
 
@@ -388,9 +453,40 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
               ),
             ),
             ..._sellos(ancho, altoTarjeta, opacidad),
+            ?_dibujarSaliente(ancho, altoTarjeta),
           ],
         );
       },
+    );
+  }
+
+  /// La tarjeta retenida que sale volando hacia su veredicto (sin sello, sin
+  /// toques ni semántica) mientras entra la siguiente.
+  Widget? _dibujarSaliente(double ancho, double alto) {
+    final saliente = _saliente;
+    if (saliente == null) return null;
+    final t = Curves.easeIn.transform(_salida.value);
+    final destino = LogicaSwipe.destinoVuelo(saliente.veredicto, ancho, alto + MazoSwipe.altoPila);
+    final anguloFinal = LogicaSwipe.ejeDe(saliente.veredicto) == EjeSwipe.horizontal
+        ? LogicaSwipe.anguloVuelo * LogicaSwipe.direccion(saliente.veredicto).dx
+        : 0.0;
+    return Positioned(
+      key: const ValueKey('tarjeta-saliente'),
+      left: 0,
+      right: 0,
+      top: 0,
+      height: alto,
+      child: IgnorePointer(
+        child: ExcludeSemantics(
+          child: Transform.translate(
+            offset: Offset.lerp(saliente.desde, destino, t)!,
+            child: Transform.rotate(
+              angle: (saliente.angulo + (anguloFinal - saliente.angulo) * t) * math.pi / 180,
+              child: saliente.tarjeta,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -424,4 +520,67 @@ class MazoSwipeState extends State<MazoSwipe> with TickerProviderStateMixin {
     Veredicto.condicional => Textos.accionCondicional,
     Veredicto.escalar => Textos.accionEscalar,
   };
+}
+
+/// La tarjeta retenida que sale cuando llega la siguiente.
+@immutable
+class _TarjetaSaliente {
+  const _TarjetaSaliente({
+    required this.tarjeta,
+    required this.veredicto,
+    required this.desde,
+    required this.angulo,
+  });
+
+  final Widget tarjeta;
+  final Veredicto veredicto;
+  final Offset desde;
+  final double angulo;
+}
+
+/// Foco de teclado de la tarjeta: una parada de Tab con anillo (solo al
+/// navegar con teclado), sin nodo semántico propio ni atajos.
+class _FocoTarjeta extends StatefulWidget {
+  const _FocoTarjeta({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_FocoTarjeta> createState() => _FocoTarjetaState();
+}
+
+class _FocoTarjetaState extends State<_FocoTarjeta> {
+  final _nodo = FocusNode(debugLabel: 'tarjeta del juego');
+  bool _enfocada = false;
+
+  @override
+  void initState() {
+    super.initState();
+    FocusManager.instance.addHighlightModeListener(_alCambiarModo);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_alCambiarModo);
+    _nodo.dispose();
+    super.dispose();
+  }
+
+  void _alCambiarModo(FocusHighlightMode _) => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    final teclado = FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
+    return Focus(
+      focusNode: _nodo,
+      includeSemantics: false,
+      onFocusChange: (valor) => setState(() => _enfocada = valor),
+      child: AnilloFoco(
+        key: const ValueKey('foco-tarjeta'),
+        visible: _enfocada && teclado,
+        radio: 28,
+        child: widget.child,
+      ),
+    );
+  }
 }

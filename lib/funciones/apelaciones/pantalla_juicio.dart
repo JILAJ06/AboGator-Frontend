@@ -322,6 +322,7 @@ class _JuicioState extends ConsumerState<_Juicio> {
                 '${Textos.falladaHace(datos.diasDesdeFallo)}.',
             alConfirmar: _alConfirmar,
             arrastreActivo: !soloBotones,
+            retenerAlConfirmar: context.clasePantalla.esAncho,
             tarjeta: TarjetaCaso(
               soloBotones: soloBotones,
               etiquetaCaso: LogicaApelacion.etiqueta(datos.apelacion.tema),
@@ -467,14 +468,18 @@ class BarraJuicio extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            InsigniaVida(
-              key: const ValueKey('recompensa-juicio'),
-              texto: alMaximo ? Textos.vidasAlMaximo : Textos.masUnaVida,
-              destacada: !alMaximo,
-              conIcono: true,
-              etiquetaSemantica: alMaximo
-                  ? Textos.vidasAlMaximoSemantica
-                  : Textos.recompensaApelacionSemantica,
+            // Con texto grande la insignia parte su texto en lugar de empujar
+            // la barra fuera de la pantalla (T-13).
+            Flexible(
+              child: InsigniaVida(
+                key: const ValueKey('recompensa-juicio'),
+                texto: alMaximo ? Textos.vidasAlMaximo : Textos.masUnaVida,
+                destacada: !alMaximo,
+                conIcono: true,
+                etiquetaSemantica: alMaximo
+                    ? Textos.vidasAlMaximoSemantica
+                    : Textos.recompensaApelacionSemantica,
+              ),
             ),
           ],
         ),

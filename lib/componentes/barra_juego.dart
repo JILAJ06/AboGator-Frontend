@@ -20,6 +20,7 @@ class BarraJuego extends StatelessWidget {
     required this.vidas,
     required this.alSalir,
     this.paso,
+    this.colorProgreso,
     super.key,
   });
 
@@ -36,6 +37,9 @@ class BarraJuego extends StatelessWidget {
   /// Texto del paso en lugar de "Sprint N · Tarjeta k de n" (el Examen
   /// Final: "Crisis · Decisión k de 10").
   final String? paso;
+
+  /// Relleno de la barra de progreso (el Examen: accion/secundaria).
+  final Color? colorProgreso;
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +68,7 @@ class BarraJuego extends StatelessWidget {
                   BarraProgreso(
                     valor: total == 0 ? 0 : actual / total,
                     etiquetaSemantica: textoPaso,
+                    colorRelleno: colorProgreso,
                   ),
                 ],
               ),
@@ -93,6 +98,7 @@ class BarraJuegoTablet extends StatelessWidget {
     required this.alSalir,
     required this.alPausar,
     this.paso,
+    this.colorProgreso,
     super.key,
   });
 
@@ -114,6 +120,9 @@ class BarraJuegoTablet extends StatelessWidget {
 
   /// Texto del paso en lugar de "Sprint N · Tarjeta k de n" (el Examen).
   final String? paso;
+
+  /// Relleno de la barra de progreso (el Examen: accion/secundaria).
+  final Color? colorProgreso;
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +153,11 @@ class BarraJuegoTablet extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                BarraProgreso(valor: total == 0 ? 0 : actual / total, etiquetaSemantica: textoPaso),
+                BarraProgreso(
+                  valor: total == 0 ? 0 : actual / total,
+                  etiquetaSemantica: textoPaso,
+                  colorRelleno: colorProgreso,
+                ),
               ],
             ),
           ),

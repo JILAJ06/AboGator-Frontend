@@ -8,6 +8,7 @@ import '../core/textos/textos.dart';
 import '../funciones/ajustes/estado_ajustes.dart';
 import '../funciones/ajustes/logica_ajustes.dart';
 import 'enrutador.dart';
+import 'foco_siempre_visible.dart';
 
 /// Idioma único de la app: español de México.
 const Locale localeApp = Locale('es', 'MX');
@@ -36,7 +37,9 @@ class AppAbogator extends ConsumerWidget {
       // El ámbito publica la clase de pantalla (móvil o tablet) del ancho real.
       builder: (context, hijo) => MediaQuery(
         data: LogicaAjustes.aplicar(MediaQuery.of(context), ajustes),
-        child: AmbitoClasePantalla(child: hijo ?? const SizedBox.shrink()),
+        child: AmbitoClasePantalla(
+          child: FocoSiempreVisible(child: hijo ?? const SizedBox.shrink()),
+        ),
       ),
     );
   }

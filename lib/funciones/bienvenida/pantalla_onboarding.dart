@@ -11,6 +11,7 @@ import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
+import '../ajustes/estado_ajustes.dart';
 import 'flujo_bienvenida.dart';
 import 'ilustraciones_onboarding.dart';
 
@@ -103,17 +104,48 @@ class _PantallaOnboardingState extends ConsumerState<PantallaOnboarding> {
     }
   }
 
+  /// Deslizar en tablet (T-13): hacia la izquierda pasa a la siguiente
+  /// página y hacia la derecha vuelve a la anterior, como el PageView del
+  /// móvil (en la última página no termina el onboarding: eso es del botón).
+  void _alDeslizar(DragEndDetails detalles, double recorrido) {
+    final velocidad = detalles.primaryVelocity ?? 0;
+    final haciaIzquierda = recorrido < -umbralDeslizar || velocidad < -velocidadDeslizar;
+    final haciaDerecha = recorrido > umbralDeslizar || velocidad > velocidadDeslizar;
+    if (haciaIzquierda && !_esUltima) {
+      setState(() => _pagina++);
+    } else if (haciaDerecha && _pagina > 0) {
+      setState(() => _pagina--);
+    }
+  }
+
+  /// Recorrido (dp) o velocidad (dp/s) mínimos para cambiar de página.
+  static const double umbralDeslizar = 48;
+  static const double velocidadDeslizar = 300;
+
   @override
   Widget build(BuildContext context) {
+    // "Botones en lugar de deslizar": las páginas solo cambian con el botón.
+    final soloBotones = ref.watch(ajustesProvider.select((a) => a.soloBotones));
     if (context.clasePantalla.esTablet) {
+      var recorrido = 0.0;
+      final tablet = _OnboardingTablet(
+        indice: _pagina,
+        pagina: _paginas[_pagina],
+        total: _paginas.length,
+        alSiguiente: _siguiente,
+        alOmitir: _terminar,
+      );
       return Scaffold(
-        body: _OnboardingTablet(
-          indice: _pagina,
-          pagina: _paginas[_pagina],
-          total: _paginas.length,
-          alSiguiente: _siguiente,
-          alOmitir: _terminar,
-        ),
+        body: soloBotones
+            ? tablet
+            : GestureDetector(
+                key: const ValueKey('deslizar-onboarding'),
+                behavior: HitTestBehavior.translucent,
+                onHorizontalDragStart: (_) => recorrido = 0,
+                onHorizontalDragUpdate: (d) => recorrido += d.primaryDelta ?? 0,
+                onHorizontalDragEnd: (d) => _alDeslizar(d, recorrido),
+                child: tablet,
+              ),
       );
     }
     // Al pasar de tablet a móvil (rotar) el PageView empieza en la página actual.
@@ -136,6 +168,7 @@ class _PantallaOnboardingState extends ConsumerState<PantallaOnboarding> {
             Expanded(
               child: PageView.builder(
                 controller: _controlador,
+                physics: soloBotones ? const NeverScrollableScrollPhysics() : null,
                 itemCount: _paginas.length,
                 onPageChanged: (i) => setState(() => _pagina = i),
                 itemBuilder: (context, i) => _ContenidoPagina(indice: i, pagina: _paginas[i]),

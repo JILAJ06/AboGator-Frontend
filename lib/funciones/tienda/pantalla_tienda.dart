@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/marco_principal.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/dialogo_confirmacion.dart';
+import '../../componentes/foco_retorno.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/piezas_tienda.dart';
@@ -112,6 +113,21 @@ class _TiendaState extends ConsumerState<_Tienda> {
   /// Artículo que se está comprando (sin doble toque).
   String? _comprando;
 
+  /// Foco de cada tarjeta: al cerrar el diálogo de compra vuelve a la que lo
+  /// abrió (T-13).
+  final _focos = <String, FocusNode>{};
+
+  FocusNode _focoDe(String id) =>
+      _focos.putIfAbsent(id, () => FocoRetorno.nodoRetorno('artículo $id'));
+
+  @override
+  void dispose() {
+    for (final nodo in _focos.values) {
+      nodo.dispose();
+    }
+    super.dispose();
+  }
+
   void _avisar(String mensaje) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -132,7 +148,9 @@ class _TiendaState extends ConsumerState<_Tienda> {
       texto: Textos.confirmarCompraTexto(articulo.precio, monedas - articulo.precio),
       textoConfirmar: Textos.comprar,
     );
-    if (!confirmado || !mounted) return;
+    if (!mounted) return;
+    devolverFoco(_focoDe(articulo.id));
+    if (!confirmado) return;
     setState(() => _comprando = articulo.id);
     try {
       final r = await ref.read(repositorioTiendaProvider).comprarArticulo(articulo.id);
@@ -186,6 +204,7 @@ class _TiendaState extends ConsumerState<_Tienda> {
         bloqueo: bloqueo,
         faltan: LogicaTienda.faltan(a, datos.monedas),
         cargando: _comprando == a.id,
+        nodoFoco: _focoDe(a.id),
         alComprar: () => _comprar(a),
       );
     }

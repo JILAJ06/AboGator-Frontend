@@ -572,12 +572,29 @@ class PanelContraargumento extends StatelessWidget {
 /// "INSPECTORA VEGA · AUDITORÍA" (Leyenda texto/acento), la barra del Jefe y
 /// la regla (Cuerpo/Base texto/secundario).
 class TarjetaJefe extends StatelessWidget {
-  const TarjetaJefe({required this.hp, super.key});
+  const TarjetaJefe({required this.hp, this.chip, super.key});
 
   final int hp;
 
+  /// Chip de daño o de fallo (T28c, Figma `101:5587`): arriba a la derecha de
+  /// la tarjeta, a 14 del borde superior y 16 del derecho (T-13).
+  final Widget? chip;
+
   @override
   Widget build(BuildContext context) {
+    final tarjeta = _tarjeta(context);
+    final c = chip;
+    if (c == null) return tarjeta;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        tarjeta,
+        Positioned(key: const ValueKey('chip-golpe-tablet'), top: 14, right: 16, child: c),
+      ],
+    );
+  }
+
+  Widget _tarjeta(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
     return Container(

@@ -10,11 +10,16 @@ import 'boton_app.dart';
 /// fondo/superficie, radio 22, relleno 24, título en Título/H2 con el foco
 /// inicial, texto en Cuerpo/Base, botón primario y fantasma "Cancelar" de alto
 /// 48. Esc o tocar fuera cancelan (devuelve `false` o `null`).
+///
+/// [textoCancelar] cambia "Cancelar" (el Examen: "Seguir en el examen") y
+/// [focoEnCancelar] pone el foco inicial en ese botón en lugar del título.
 class DialogoConfirmacion extends StatelessWidget {
   const DialogoConfirmacion({
     required this.titulo,
     required this.texto,
     required this.textoConfirmar,
+    this.textoCancelar = Textos.cancelar,
+    this.focoEnCancelar = false,
     super.key,
   });
 
@@ -25,6 +30,8 @@ class DialogoConfirmacion extends StatelessWidget {
   final String titulo;
   final String texto;
   final String textoConfirmar;
+  final String textoCancelar;
+  final bool focoEnCancelar;
 
   /// Muestra el diálogo; `true` solo si se confirmó.
   static Future<bool> mostrar(
@@ -32,11 +39,18 @@ class DialogoConfirmacion extends StatelessWidget {
     required String titulo,
     required String texto,
     required String textoConfirmar,
+    String textoCancelar = Textos.cancelar,
+    bool focoEnCancelar = false,
   }) async {
     final confirmado = await showDialog<bool>(
       context: context,
-      builder: (contexto) =>
-          DialogoConfirmacion(titulo: titulo, texto: texto, textoConfirmar: textoConfirmar),
+      builder: (contexto) => DialogoConfirmacion(
+        titulo: titulo,
+        texto: texto,
+        textoConfirmar: textoConfirmar,
+        textoCancelar: textoCancelar,
+        focoEnCancelar: focoEnCancelar,
+      ),
     );
     return confirmado ?? false;
   }
@@ -64,7 +78,7 @@ class DialogoConfirmacion extends StatelessWidget {
             children: [
               BloqueLectura(
                 encabezado: true,
-                autofocus: true,
+                autofocus: !focoEnCancelar,
                 radio: 8,
                 child: Text(titulo, style: estilos.h2.copyWith(color: tokens.textoPrimario)),
               ),
@@ -80,9 +94,10 @@ class DialogoConfirmacion extends StatelessWidget {
               const SizedBox(height: 8),
               BotonApp(
                 key: const ValueKey('boton-cancelar'),
-                texto: Textos.cancelar,
+                texto: textoCancelar,
                 tipo: TipoBoton.fantasma,
                 altoMinimo: 48,
+                autofocus: focoEnCancelar,
                 alPresionar: () => Navigator.of(context).pop(false),
               ),
             ],

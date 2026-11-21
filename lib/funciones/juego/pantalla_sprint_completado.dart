@@ -98,6 +98,7 @@ class _PantallaSprintCompletadoState extends ConsumerState<PantallaSprintComplet
           ? const ConfetiSprint(
               piezas: ConfetiSprint.piezasSprintTablet,
               anchoLienzo: DisposicionResultadoTablet.anchoPanel,
+              proporcional: true,
             )
           : const ConfetiSprint(),
       // T19 (Figma 98:5016): Sarko y las estrellas de la ilustración móvil
