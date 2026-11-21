@@ -216,6 +216,19 @@ void main() {
       expect(find.byType(PantallaSprintCompletado), findsOneWidget);
     });
 
+    for (final extendido in [true, false]) {
+      testWidgets('Examen: la tecla P pausa solo con tiempo extendido ($extendido)', (
+        tester,
+      ) async {
+        await jefe.abrirCrisis(tester, ajustes: Ajustes(tiempoExtendido: extendido));
+        await pulsar(tester, find.byKey(const ValueKey('boton-enfrentar')));
+        await recorrerConTab(tester, 2);
+        await tester.sendKeyEvent(LogicalKeyboardKey.keyP);
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('capa-pausa')), extendido ? findsOneWidget : findsNothing);
+      });
+    }
+
     testWidgets('el Examen sin tiempo extendido no ofrece pausa; con él, sí', (tester) async {
       await jefe.abrirCrisis(tester);
       await pulsar(tester, find.byKey(const ValueKey('boton-enfrentar')));

@@ -605,6 +605,13 @@ class _DecisionState extends ConsumerState<_Decision> {
     if (mazo == null || ref.read(examenProvider)?.fase != FaseJefe.decision) {
       return KeyEventResult.ignored;
     }
+    // "P pausa" (atajos del Examen): con la misma regla que el botón, solo
+    // con tiempo extendido (T-13; el atajo se anunciaba y no existía).
+    if (evento.logicalKey == LogicalKeyboardKey.keyP && evento is KeyDownEvent) {
+      if (!ref.read(ajustesProvider).tiempoExtendido) return KeyEventResult.ignored;
+      unawaited(_examen.pausar());
+      return KeyEventResult.handled;
+    }
     final flecha = switch (evento.logicalKey) {
       LogicalKeyboardKey.arrowLeft => Veredicto.ilegal,
       LogicalKeyboardKey.arrowRight => Veredicto.legal,
