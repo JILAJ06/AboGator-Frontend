@@ -33,6 +33,7 @@ import 'package:abogator/componentes/paginador_puntos.dart';
 import 'package:abogator/componentes/panel_evidencia.dart';
 import 'package:abogator/componentes/panel_justificacion.dart';
 import 'package:abogator/componentes/panel_veredicto.dart';
+import 'package:abogator/componentes/piezas_ajustes.dart';
 import 'package:abogator/componentes/piezas_apelacion.dart';
 import 'package:abogator/componentes/piezas_jefe.dart';
 import 'package:abogator/componentes/piezas_perfil.dart';
@@ -58,7 +59,7 @@ import 'package:material_ui/material_ui.dart';
 /// Pantalla alta para que la galería entera quede construida.
 Future<void> montarGaleria(WidgetTester tester) async {
   await abrirGaleria(tester);
-  await agrandar(tester, const Size(390, 26000));
+  await agrandar(tester, const Size(390, 28000));
 }
 
 /// Agranda la superficie después de navegar (la transición de página no
@@ -89,7 +90,9 @@ void main() {
     expect(find.byType(RielNavegacion), findsOneWidget);
     expect(find.byType(TarjetaSemana), findsNWidgets(2));
     expect(find.byType(TarjetaBuzonInicio), findsNWidgets(2));
-    expect(find.byType(TarjetaConsejoSarko), findsOneWidget);
+    expect(find.byType(TarjetaConsejoSarko), findsNWidgets(2)); // Inicio y Tienda (T-12b)
+    expect(find.byType(TarjetaProgresoModulos), findsOneWidget);
+    expect(find.byType(VistaPreviaTexto), findsOneWidget);
     expect(find.byType(BotonVeredicto), findsNWidgets(12)); // 8 + los de las acciones
     expect(find.byType(CampoTextoApp), findsNWidgets(4));
     expect(find.byType(ChipHud), findsNWidgets(8)); // 5 + 2 encabezados + barra de juego
@@ -123,7 +126,7 @@ void main() {
     expect(find.byType(EstadisticasSprint), findsOneWidget);
     expect(find.byType(AvisoInformativo), findsNWidgets(2));
     expect(find.byType(EtiquetaQuiebra), findsNWidgets(2));
-    expect(find.byType(NodoSprint), findsNWidgets(5));
+    expect(find.byType(NodoSprint), findsNWidgets(6)); // + el nodo seleccionado de tablet (T-12b)
     expect(
       tester.widgetList<NodoSprint>(find.byType(NodoSprint)).map((n) => n.tipo).toSet(),
       TipoNodoSprint.values.toSet(),
