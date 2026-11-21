@@ -283,9 +283,13 @@ class _BuzonTabletState extends ConsumerState<_BuzonTablet> {
   }
 
   void _seleccionar(Apelacion a) {
-    setState(() => _seleccionada = a.id);
     // La fila elegida toma el foco, así las flechas siguen desde ella.
     _foco(a.id).requestFocus();
+    // Volver a elegir la que ya está seleccionada (o topar con el extremo de
+    // la lista con las flechas) no repite el anuncio: uno por cambio real
+    // (T-13).
+    if (a.id == _actual?.id) return;
+    setState(() => _seleccionada = a.id);
     unawaited(
       SemanticsService.sendAnnouncement(
         View.of(context),
@@ -310,7 +314,6 @@ class _BuzonTabletState extends ConsumerState<_BuzonTablet> {
     final i = (apelaciones.indexOf(actual) + paso).clamp(0, apelaciones.length - 1);
     final destino = apelaciones[i];
     _seleccionar(destino);
-    _foco(destino.id).requestFocus();
     return KeyEventResult.handled;
   }
 
@@ -467,8 +470,10 @@ class _DetalleJuicio extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
+                // Sin región en vivo: el cambio de selección ya se anuncia una
+                // vez desde la lista (T-13).
                 child: Semantics(
-                  liveRegion: true,
+                  container: true,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

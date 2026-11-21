@@ -25,6 +25,7 @@ class ConfetiSprint extends StatefulWidget {
   const ConfetiSprint({
     this.piezas = piezasSprint,
     this.anchoLienzo = ancho,
+    this.proporcional = false,
     this.altoLienzo = alto,
     super.key,
   });
@@ -65,6 +66,11 @@ class ConfetiSprint extends StatefulWidget {
   /// 597 en tablet).
   final double anchoLienzo;
   final double altoLienzo;
+
+  /// Con `true` (tablet, T-13) las posiciones horizontales se reparten en
+  /// proporción al ancho real: con un panel menor que [anchoLienzo] ninguna
+  /// pieza queda fuera. Sin él, el lienzo se centra con su ancho fijo (móvil).
+  final bool proporcional;
 
   /// Figma T19 (98:5164 a 98:5170) sobre el panel de 597, sin la barra de 32.
   static const List<PiezaConfeti> piezasSprintTablet = [
@@ -122,32 +128,45 @@ class _ConfetiSprintState extends State<ConfetiSprint> with SingleTickerProvider
   Widget build(BuildContext context) {
     final piezas = widget.piezas;
     final paso = piezas.length <= 1 ? 0.0 : math.min(0.05, 0.3 / (piezas.length - 1));
+    Widget lienzo(double ancho, double escalaX) => OverflowBox(
+      minWidth: ancho,
+      maxWidth: ancho,
+      child: AnimatedBuilder(
+        animation: _caida,
+        builder: (context, _) => Stack(
+          clipBehavior: Clip.none,
+          children: [
+            for (final (i, pieza) in piezas.indexed)
+              _Pieza(
+                key: ValueKey('confeti-$i'),
+                pieza: pieza,
+                x: escalaX == 1
+                    ? pieza.x
+                    : math.min(pieza.x * escalaX, ancho - ConfetiSprint.anchoPieza),
+                // Cada pieza empieza un poco después que la anterior
+                // (0.05 con 7 piezas; menos si hay más, para acabar en 1).
+                avance: Curves.easeOut.transform(
+                  Interval(i * paso, 0.7 + i * paso).transform(_caida.value),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
     return ExcludeSemantics(
       child: IgnorePointer(
         child: SizedBox(
           height: widget.altoLienzo,
-          child: OverflowBox(
-            minWidth: widget.anchoLienzo,
-            maxWidth: widget.anchoLienzo,
-            child: AnimatedBuilder(
-              animation: _caida,
-              builder: (context, _) => Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  for (final (i, pieza) in piezas.indexed)
-                    _Pieza(
-                      key: ValueKey('confeti-$i'),
-                      pieza: pieza,
-                      // Cada pieza empieza un poco después que la anterior
-                      // (0.05 con 7 piezas; menos si hay más, para acabar en 1).
-                      avance: Curves.easeOut.transform(
-                        Interval(i * paso, 0.7 + i * paso).transform(_caida.value),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
+          child: widget.proporcional
+              ? LayoutBuilder(
+                  builder: (context, restricciones) {
+                    final ancho = restricciones.maxWidth.isFinite
+                        ? restricciones.maxWidth
+                        : widget.anchoLienzo;
+                    return lienzo(ancho, ancho / widget.anchoLienzo);
+                  },
+                )
+              : lienzo(widget.anchoLienzo, 1),
         ),
       ),
     );
@@ -155,9 +174,12 @@ class _ConfetiSprintState extends State<ConfetiSprint> with SingleTickerProvider
 }
 
 class _Pieza extends StatelessWidget {
-  const _Pieza({required this.pieza, required this.avance, super.key});
+  const _Pieza({required this.pieza, required this.x, required this.avance, super.key});
 
   final PiezaConfeti pieza;
+
+  /// Posición horizontal ya escalada al lienzo.
+  final double x;
 
   /// 0 = arriba, fuera de la caja; 1 = en su lugar.
   final double avance;
@@ -166,7 +188,7 @@ class _Pieza extends StatelessWidget {
   Widget build(BuildContext context) {
     final caida = (1 - avance) * (pieza.y + ConfetiSprint.anchoPieza * 3);
     return Positioned(
-      left: pieza.x,
+      left: x,
       top: pieza.y - caida,
       child: Opacity(
         opacity: avance.clamp(0, 1),
