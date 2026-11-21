@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -9,12 +13,18 @@ import '../../componentes/boton_app.dart';
 import '../../componentes/fila_apelacion.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
+import '../../componentes/piezas_apelacion.dart';
 import '../../componentes/sarko_imagen.dart';
+import '../../componentes/tarjeta_caso.dart';
+import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/modelos/apelacion.dart';
 import '../../datos/modelos/buzon_apelaciones.dart';
+import '../../datos/modelos/tarjeta.dart';
 import '../../datos/repositorios/proveedores_repositorios.dart';
+import '../inicio/logica_inicio.dart';
+import 'logica_apelacion.dart';
 import 'sesion_apelaciones.dart';
 
 /// Lo que necesita el Buzón: el Buzón del servidor y el color de cada módulo.
@@ -52,8 +62,12 @@ class PantallaBuzon extends ConsumerWidget {
       cuerpo: SafeArea(
         bottom: false,
         child: switch (datos) {
-          AsyncData(:final value) when value.buzon.total == 0 => const _BuzonVacio(),
-          AsyncData(:final value) => _Buzon(datos: value),
+          AsyncData(:final value) when value.buzon.total == 0 => const _UnaColumna(
+            child: _BuzonVacio(),
+          ),
+          // T21 (tablet horizontal): lista-detalle.
+          AsyncData(:final value) when context.clasePantalla.esAncho => _BuzonTablet(datos: value),
+          AsyncData(:final value) => _UnaColumna(child: _Buzon(datos: value)),
           AsyncError() => MensajePantalla(
             texto: Textos.buzonErrorCarga,
             textoBoton: Textos.reintentar,
@@ -96,7 +110,7 @@ class _Buzon extends ConsumerWidget {
     context.go(Rutas.juicioApelacionDe(ids.first));
   }
 
-  void _abrir(BuildContext context, WidgetRef ref, Apelacion a, int dias) {
+  static void _abrir(BuildContext context, WidgetRef ref, Apelacion a, int dias) {
     if (dias <= 0) {
       _iniciar(context, ref, [a.id]);
       return;
@@ -223,6 +237,330 @@ class _Buzon extends ConsumerWidget {
       ],
     );
   }
+}
+
+/// Tarjeta de una apelación (para la vista previa del juicio en tablet, también
+/// de las que aún no se abren).
+final tarjetaApelacionProvider = FutureProvider.autoDispose.family<Tarjeta, String>(
+  (ref, tarjetaId) => ref.watch(repositorioTarjetasProvider).obtenerTarjeta(tarjetaId),
+);
+
+/// Buzón en tablet horizontal (T21, Figma `100:4028`): lista-detalle. A la
+/// izquierda (500 de 1058) el título, la recompensa, la lista y "Iniciar
+/// apelaciones de hoy"; a la derecha (526) la vista previa del juicio de la
+/// apelación **seleccionada** (la primera al abrir). Tocar una fila la
+/// selecciona; las flechas arriba y abajo recorren la lista.
+class _BuzonTablet extends ConsumerStatefulWidget {
+  const _BuzonTablet({required this.datos});
+
+  final DatosBuzon datos;
+
+  static const int flexLista = 500;
+  static const int flexDetalle = 526;
+
+  @override
+  ConsumerState<_BuzonTablet> createState() => _BuzonTabletState();
+}
+
+class _BuzonTabletState extends ConsumerState<_BuzonTablet> {
+  String? _seleccionada;
+  final Map<String, FocusNode> _focos = {};
+
+  FocusNode _foco(String id) => _focos.putIfAbsent(id, () => FocusNode(debugLabel: id));
+
+  @override
+  void dispose() {
+    for (final f in _focos.values) {
+      f.dispose();
+    }
+    super.dispose();
+  }
+
+  Apelacion? get _actual {
+    final apelaciones = widget.datos.buzon.apelaciones;
+    if (apelaciones.isEmpty) return null;
+    return apelaciones.where((a) => a.id == _seleccionada).firstOrNull ?? apelaciones.first;
+  }
+
+  void _seleccionar(Apelacion a) {
+    setState(() => _seleccionada = a.id);
+    unawaited(
+      SemanticsService.sendAnnouncement(
+        View.of(context),
+        Textos.juicioSeleccionado(a.titulo),
+        TextDirection.ltr,
+      ),
+    );
+  }
+
+  /// Flechas arriba y abajo: mueven la selección (y el foco) por la lista.
+  KeyEventResult _alTeclear(FocusNode _, KeyEvent evento) {
+    if (evento is! KeyDownEvent && evento is! KeyRepeatEvent) return KeyEventResult.ignored;
+    final paso = switch (evento.logicalKey) {
+      LogicalKeyboardKey.arrowDown => 1,
+      LogicalKeyboardKey.arrowUp => -1,
+      _ => 0,
+    };
+    if (paso == 0) return KeyEventResult.ignored;
+    final apelaciones = widget.datos.buzon.apelaciones;
+    final actual = _actual;
+    if (actual == null) return KeyEventResult.ignored;
+    final i = (apelaciones.indexOf(actual) + paso).clamp(0, apelaciones.length - 1);
+    final destino = apelaciones[i];
+    _seleccionar(destino);
+    _foco(destino.id).requestFocus();
+    return KeyEventResult.handled;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final estilos = context.estilos;
+    final datos = widget.datos;
+    final buzon = datos.buzon;
+    final deHoy = buzon.deHoy;
+    final actual = _actual;
+
+    final lista = Focus(
+      onKeyEvent: _alTeclear,
+      skipTraversal: true,
+      child: Semantics(
+        container: true,
+        label: Textos.listaApelaciones(buzon.apelaciones.length),
+        child: Container(
+          key: const ValueKey('lista-apelaciones'),
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: tokens.fondoSuperficie,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: tokens.bordeDefault),
+          ),
+          child: Column(
+            children: [
+              for (final (i, a) in buzon.apelaciones.indexed) ...[
+                if (i > 0) Divider(height: 1, thickness: 1, color: tokens.bordeDefault),
+                FilaApelacion(
+                  key: ValueKey('fila-${a.id}'),
+                  titulo: a.titulo,
+                  tema: a.tema,
+                  dia: a.diaRepaso,
+                  dias: buzon.diasHasta(a),
+                  colorModulo: datos.coloresModulo[a.moduloId] ?? tokens.bordeControl,
+                  seleccionada: a.id == actual?.id,
+                  nodoFoco: _foco(a.id),
+                  alPresionar: () => _seleccionar(a),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final columnaLista = SingleChildScrollView(
+      key: const ValueKey('buzon-desplazable'),
+      padding: const EdgeInsets.fromLTRB(0, 20, 0, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const _Titulo(),
+          const SizedBox(height: 8),
+          Text(
+            Textos.buzonSubtitulo,
+            style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
+          ),
+          const SizedBox(height: 28),
+          TarjetaRecompensaBuzon(deHoy: deHoy.length),
+          const SizedBox(height: 16),
+          lista,
+          const SizedBox(height: 24),
+          BotonApp(
+            key: const ValueKey('boton-apelaciones-hoy'),
+            texto: Textos.iniciarApelacionesHoy,
+            alPresionar: deHoy.isEmpty
+                ? null
+                : () => _Buzon._iniciar(context, ref, [for (final a in deHoy) a.id]),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            Textos.notaApelaciones,
+            textAlign: TextAlign.center,
+            style: estilos.leyenda.copyWith(color: tokens.textoSecundario),
+          ),
+        ],
+      ),
+    );
+
+    final detalle = actual == null
+        ? const SizedBox.shrink()
+        : _DetalleJuicio(
+            key: ValueKey('detalle-${actual.id}'),
+            apelacion: actual,
+            dias: buzon.diasHasta(actual),
+            colorModulo: datos.coloresModulo[actual.moduloId] ?? tokens.textoAcento,
+            alIniciar: () => _Buzon._abrir(context, ref, actual, buzon.diasHasta(actual)),
+          );
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(width: MedidasAdaptativas.margen),
+        Expanded(flex: _BuzonTablet.flexLista, child: columnaLista),
+        const SizedBox(width: MedidasAdaptativas.margen),
+        Expanded(
+          flex: _BuzonTablet.flexDetalle,
+          child: DecoratedBox(
+            key: const ValueKey('panel-detalle-juicio'),
+            decoration: BoxDecoration(
+              color: tokens.fondoSuperficie,
+              border: Border(left: BorderSide(color: tokens.bordeDefault)),
+            ),
+            child: detalle,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Vista previa del juicio en el panel de detalle del Buzón (T21): "PRÓXIMO
+/// JUICIO · DÍA N" (Leyenda texto/acento), el título (H2), Sarko de 96 arriba a
+/// la derecha, la tarjeta del caso de 342 × 440 con el aviso "La fallaste hace
+/// N días" y "Iniciar juicio" (342 × 52). Se desplaza si no cabe.
+class _DetalleJuicio extends ConsumerWidget {
+  const _DetalleJuicio({
+    required this.apelacion,
+    required this.dias,
+    required this.colorModulo,
+    required this.alIniciar,
+    super.key,
+  });
+
+  /// Ancho de la tarjeta y del botón (los del móvil).
+  static const double ancho = 342;
+
+  final Apelacion apelacion;
+  final int dias;
+  final Color colorModulo;
+  final VoidCallback alIniciar;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tokens = context.tokens;
+    final estilos = context.estilos;
+    final tarjeta = ref.watch(tarjetaApelacionProvider(apelacion.tarjetaId)).value;
+    final altoTarjeta =
+        TarjetaCaso.alto >
+            TarjetaCaso.altoMinimoPara(MediaQuery.textScalerOf(context), conAviso: true)
+        ? TarjetaCaso.alto
+        : TarjetaCaso.altoMinimoPara(MediaQuery.textScalerOf(context), conAviso: true);
+
+    return SingleChildScrollView(
+      key: const ValueKey('detalle-juicio'),
+      padding: const EdgeInsets.fromLTRB(39, 24, 39, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Semantics(
+                  liveRegion: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        Textos.proximoJuicio(apelacion.diaRepaso),
+                        style: estilos.leyenda.copyWith(color: tokens.textoAcento),
+                      ),
+                      const SizedBox(height: 8),
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          apelacion.titulo,
+                          style: estilos.h2.copyWith(color: tokens.textoPrimario),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              const SarkoImagen(
+                key: ValueKey('sarko-detalle-juicio'),
+                pose: PoseSarko.alegre,
+                ancho: 96,
+                decorativa: true,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: SizedBox(
+              width: ancho,
+              height: altoTarjeta,
+              child: tarjeta == null
+                  ? DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: tokens.fondoSuperficieAlt,
+                        borderRadius: BorderRadius.circular(TarjetaCaso.radio),
+                      ),
+                    )
+                  : TarjetaCaso(
+                      key: const ValueKey('tarjeta-detalle-juicio'),
+                      soloBotones: true,
+                      etiquetaCaso: LogicaApelacion.etiqueta(apelacion.tema),
+                      colorModulo: colorModulo,
+                      iniciales: tarjeta.iniciales ?? LogicaInicio.iniciales(tarjeta.personaje),
+                      personaje: tarjeta.personaje,
+                      rol: tarjeta.rol,
+                      texto: tarjeta.texto,
+                      aviso: AvisoFallo(dias: apelacion.diaRepaso),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: SizedBox(
+              width: ancho,
+              child: BotonApp(
+                key: const ValueKey('boton-iniciar-juicio'),
+                texto: Textos.iniciarJuicio,
+                alPresionar: alIniciar,
+              ),
+            ),
+          ),
+          if (dias > 0) ...[
+            const SizedBox(height: 8),
+            Text(
+              Textos.avisoApelacionFutura(dias),
+              textAlign: TextAlign.center,
+              style: estilos.leyenda.copyWith(color: tokens.textoSecundario),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// En tablet (vertical o el Buzón vacío) el contenido del móvil se centra con
+/// el ancho máximo de una columna (640); en móvil no cambia.
+class _UnaColumna extends StatelessWidget {
+  const _UnaColumna({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => context.clasePantalla.esTablet
+      ? Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: MedidasAdaptativas.contenidoUnaColumna),
+            child: child,
+          ),
+        )
+      : child;
 }
 
 /// Buzón sin apelaciones (no está en Figma): Sarko sorprendido, "Tu Buzón

@@ -410,6 +410,9 @@ abstract final class Textos {
 
   // Juicio y Buzón en tablet (T-12d)
   static String contextoApelacion(int dia) => 'APELACIÓN · DÍA $dia';
+  static const String iniciarJuicio = 'Iniciar juicio';
+  static String proximoJuicio(int dia) => 'PRÓXIMO JUICIO · DÍA $dia';
+  static String juicioSeleccionado(String titulo) => 'Seleccionada: $titulo';
   static String contextoApelacionTexto(int dias) =>
       '${dias == 1 ? 'Fallaste esta tarjeta hace 1 día' : 'Fallaste esta tarjeta hace $dias días'}. '
       'Si aciertas ahora recuperas 1 vida.';

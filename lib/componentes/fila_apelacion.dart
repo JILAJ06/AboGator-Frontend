@@ -62,11 +62,18 @@ class FilaApelacion extends StatelessWidget {
     required this.dias,
     required this.colorModulo,
     required this.alPresionar,
+    this.seleccionada,
+    this.nodoFoco,
     super.key,
   });
 
   final String titulo;
   final String tema;
+
+  /// Solo en la lista-detalle de tablet (T21): `true` le pone fondo/destacado
+  /// y la anuncia como seleccionada. `null` en móvil.
+  final bool? seleccionada;
+  final FocusNode? nodoFoco;
   final int dia;
   final int dias;
 
@@ -81,15 +88,18 @@ class FilaApelacion extends StatelessWidget {
     return AccionEnfocable(
       alPresionar: alPresionar,
       radio: 12,
+      nodoFoco: nodoFoco,
       semantica: (hijo) => Semantics(
         button: true,
+        selected: seleccionada,
         enabled: alPresionar != null,
         label: Textos.filaApelacionSemantica(titulo, tema, dia, dias),
         onTap: alPresionar,
         excludeSemantics: true,
         child: hijo,
       ),
-      child: Padding(
+      child: Container(
+        color: seleccionada == true ? tokens.fondoDestacado : null,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
