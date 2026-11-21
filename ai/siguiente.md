@@ -1,115 +1,113 @@
-# T-11 · Examen Final (Nivel Jefe): crisis, decisión, contraargumento y golpe
+# T-11b · Resultado del Examen Final: Auditoría superada (29) y La Inspectora ganó (30)
 
-**Rama:** `11-nivel-jefe` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-11**).
-**Pantallas:** 27 Crisis, 28 Decisión de crisis, 28b Contraargumento del Jefe y 28c Golpe al Jefe. **29 Auditoría superada y 30 La Inspectora ganó son la T-11b**: aquí solo se les deja la ruta. Figma (archivo `SYNAyUal3xVk4k8SEBEb7f`): 27 = `42:5885`, 28 = `42:6027`, 28b = `42:6140`, 28c = `42:6284`. Compara en Chrome con el conector (poses de Sarko, íconos y colores de los SVG).
+**Rama:** `11b-resultado-examen` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-11b**).
+**Pantallas:** 29 Auditoría superada (certificado) y 30 La Inspectora ganó. Figma (archivo `SYNAyUal3xVk4k8SEBEb7f`): 29 = `18:2916`, 30 = `18:3036`. Compara en Chrome con el conector (poses de Sarko, íconos y colores).
 
 ## Objetivo
-El Examen Final de un módulo: una crisis de 72 horas con **10 decisiones cronometradas**; cada acierto se defiende frente a la Inspectora Vega, y defenderlo bien le quita 20 HP. Esta tarea construye el motor y el recorrido completo del examen; **cómo termina** (certificado, reinicio, registro del resultado) lo hace la T-11b.
+Cerrar el Examen Final que dejó la T-11: al terminar, la app **registra el resultado** y muestra 29 (aprobado) o 30 (reprobado). Aprobar emite el **certificado del módulo** y **desbloquea el módulo siguiente**; reprobar manda **una apelación por cada decisión fallada** al Buzón y deja la auditoría lista para reiniciarse desde la hora 0.
 
-## Reglas (del diseño del backend, §6.3, RF-34 a RF-38)
-- El intento empieza con **HP del Jefe = 100** y las 10 decisiones del escenario. Los comodines están **desactivados** (RN03).
-- **Necesita conexión** para empezar (sin red no se inicia un Examen Final). Con 0 vidas no se puede empezar: lleva a "Sin vidas" (20) del módulo.
-- **Cada decisión:** 15 s (**22 s** con "Tiempo extendido", +50 %). El cronómetro de la pantalla es **monótono** (`Cronometro`, nunca el reloj del dispositivo) y arranca desde el límite que da el servidor. Si se agota: cuenta como fallo ("por tiempo"). El mock rechaza como `tiempoAgotado` toda respuesta que llegue 2 s después del límite (reloj inyectable).
-- **Veredicto incorrecto o tiempo agotado:** −1 vida y no hay contraargumento. No existe "parcial": solo cuenta el veredicto exacto.
-- **Veredicto correcto:** la Inspectora contraargumenta (28b) con **2 fundamentos**, uno correcto; hay **8 s** (**12 s** con tiempo extendido) para elegir. Correcto: **−20 HP** (28c). Incorrecto o sin tiempo: **−1 vida**, sin daño.
-- **Fin:** HP 0 → **aprobado** (29). 0 vidas, o se acaban las 10 decisiones con HP > 0 → **reprobado** (30). Con HP 0 el examen termina al instante, aunque queden decisiones.
-- **Pausa (RF-38):** solo existe con "Tiempo extendido" activo (`ajustesProvider`). El tiempo se detiene mientras está en pausa.
-- **Salir:** pide confirmación y **cierra el intento sin premio ni pérdida de vidas**; la crisis se reinicia desde la hora 0 la próxima vez.
-- Las apelaciones de las decisiones falladas y el resultado final los registra la T-11b: aquí el estado guarda todo lo necesario (resumen y falladas).
+Los números de los ejemplos de Figma (por ejemplo "9/10 aciertos" y "7/10 Llegaste a") **no son reales ni coherentes con las reglas**: son de relleno. Siempre se muestran los datos del intento.
+
+## Reglas (del diseño del backend, §6.3, RF-34 a RF-41)
+- **HP 0 → aprobado:** el servidor emite el certificado (folio único e imagen para compartir, RF-41) y se desbloquea el módulo siguiente. **0 vidas o se acaban las 10 decisiones con HP > 0 → reprobado.** No se otorga nada y la próxima vez la crisis arranca desde la hora 0 (intento nuevo).
+- El examen **no se puede iniciar sin conexión**, pero puede terminar con la conexión caída: el resultado se registra con el servidor, así que **registrar necesita conexión** y, si falla, se reintenta (ver "Registro").
+- Registrar el resultado **es idempotente**: abrir 29 o 30 dos veces (atrás, recarga, enlace profundo) no duplica certificado, desbloqueo ni apelaciones.
+- Las vidas ya las descontó el servidor durante el examen; aquí no se descuentan de nuevo.
 
 ## Datos
 ### Modelos (`lib/datos/modelos/`)
-- `DecisionCrisis{id, indice (1–10), tarjeta (Tarjeta sin respuesta correcta visible para la UI: usa solo texto, personaje, rol y etiqueta), hora (0–72), limite (Duration)}`.
-- `Replica{texto, fundamentos (2 textos)}` y `ResultadoDecision{correcta, tiempoAgotado, vidas, hpJefe, replica (solo si correcta), limiteReplica (Duration), estado (enCurso/aprobado/reprobado), siguiente (DecisionCrisis?)}`.
-- `ResultadoContraargumento{correcto, tiempoAgotado, vidas, hpJefe, danio (20 o 0), estado, siguiente}`.
-- `IntentoExamen{id, moduloId, hpJefe, vidas, totalDecisiones (10), decision (la primera)}` y `ResumenExamen{decisiones jugadas, aciertos, porTiempo, golpes, vidasRestantes, aprobado}`.
-- `FaseJefe`/estado de la UI: `intro`, `decision`, `replica`, `feedback` (golpe o fallo), `pausa`, `terminado`.
-- `Fase` por hora (para la línea de crisis y el texto de la hora): H0 Detección (0–5), H6 Contención (6–23), H24 Aviso (24–71), H72 Autoridad (72).
+- `Certificado{folio, moduloId, nombreModulo, nombrePersona, aciertos, totalDecisiones, fecha}`. `fecha` la manda el servidor (no `DateTime.now()`); en el mock, el reloj inyectable. Texto "28 oct 2026": usa `intl` (ya es dependencia) con el idioma `es`, mes abreviado en minúscula y sin punto; si `es` no está inicializado en la app, usa una tabla propia de 12 abreviaturas.
+- `ResultadoRegistrado{aprobado, certificado (solo si aprobó), siguienteModulo (id y número y nombre; null si era el último módulo), vidas, faltaParaProximaVida (Duration?, lo da el servidor; null con 5 vidas)}`.
 
-### Repositorio y mock
-- `RepositorioExamen`: `iniciar(moduloId)` → `IntentoExamen`; `responderDecision(intentoId, {Veredicto? veredicto})` (`null` = tiempo agotado); `responderContraargumento(intentoId, {int? fundamento})` (`null` = tiempo agotado); `pausar(intentoId)` y `reanudar(intentoId)`; `abandonar(intentoId)`. Errores: `ExcepcionExamen` (`sinConexion`, `sinVidas`, `intentoCerrado`, `examenNoDisponible`).
-- `MockExamen` (hace de servidor; recibe `RepositorioVidas` y un reloj inyectable): aplica las reglas de arriba, resta las vidas con `guardarVidas` y valida que no se responda dos veces (`intentoCerrado`). Un solo escenario real: **módulo 1 (Protección de datos)**; los demás módulos lanzan `examenNoDisponible` y 27 muestra `MensajePantalla` "Este examen aún no está disponible" con "Volver al mapa".
-- **Escenario "Ransomware" (10 decisiones, horas 0, 1, 3, 6, 9, 12, 18, 24, 48, 72).** Las decisiones **8** (hora 24, CTO "Fundador técnico", "Ya contuvimos el ataque. Propongo borrar los logs del incidente y no avisar a los usuarios para cuidar la reputación. ¿Lo hacemos?", correcto **Ilegal**; réplica "¿Seguro que no debes avisar? Si borras el log nadie se va a enterar."; fundamento correcto "Ocultar evidencia de una brecha agrava la infracción; hay que notificar a los titulares y a la autoridad.", incorrecto "Solo hay que avisar si los datos filtrados eran contraseñas.") y **9** (hora 48, "Abogada externa", "Despacho jurídico", "Ya pasaron 48 horas. ¿Notificamos ahora a la autoridad de protección de datos y a los usuarios afectados?", correcto **Legal**) vienen de Figma. Escribe tú las otras 8 y la réplica y fundamentos de la 9, en español de México, con el mismo tono, sobre el ciclo de una brecha (detección, contención, preservar evidencia, avisar a titulares y autoridad, documentar, proveedores) y **sin citar números de artículo**: nombra la ley solo de forma general (por ejemplo "la ley de protección de datos"). Reparte los veredictos (que no sean todos iguales) y alterna la posición del fundamento correcto (a veces primero, a veces segundo). **Todo el contenido legal queda en una lista en el reporte para que el usuario lo verifique contra su curso.**
-- Proveedor en `proveedores_repositorios.dart` (único sitio donde se elige la implementación).
+### Repositorios y mocks
+- **`RepositorioExamen`** agrega:
+  - `registrarResultado(String intentoId)` → `ResultadoRegistrado`. Idempotente por `intentoId`. Lanza `ExcepcionExamen(sinConexion)` sin red o `intentoCerrado` si el intento no terminó. En `MockExamen`: si el intento está aprobado, emite el certificado (folio determinista del tipo `AG-M1-0001`, el número crece con cada certificado), marca el Examen final del módulo como **completado** y pone el **primer sprint del módulo siguiente en curso** llamando a `RepositorioProgreso` (ver abajo); si reprobó, solo devuelve vidas y `faltaParaProximaVida` leyendo `RepositorioVidas`. Para que el repositorio de progreso llegue al mock, recíbelo en el constructor igual que `RepositorioVidas`; las pruebas lo inyectan.
+  - `obtenerCertificados()` → `List<Certificado>` (GET /me/certificados, RF-41). En el mock, los emitidos por la instancia.
+- **`RepositorioProgreso`** agrega `registrarExamenAprobado({required String moduloId})`: marca completado el nodo del Examen final (con 3 estrellas, es el máximo; no cambia sus reglas de apertura) y pone `enCurso` el primer sprint del módulo siguiente si estaba bloqueado. `MockProgreso` lo implementa (a continuación de `_completar`). El último módulo no desbloquea nada.
+- **`MockPerfil`** (T-10): `certificados` pasa a ser la cantidad que da `RepositorioExamen.obtenerCertificados()` (recíbelo opcional en el constructor; sin él, 0 como hoy). Así el Perfil muestra "1 de 5" después de aprobar. Refresca el Perfil al registrar.
+- **Apelaciones de las decisiones falladas** (las manda el cliente, como en el juego):
+  - Una `NuevaApelacion` por cada `DecisionFallada` (veredicto equivocado, tiempo agotado **o** fundamento equivocado en el contraargumento), sin duplicar por decisión (`registrarFallos` ya evita duplicados por `tarjetaId`).
+  - `tarjetaId` = `decision.id` (`ran-01`…`ran-10`), `moduloId` del examen, `titulo` ≤ 45 con el formato "Hora 24 · CTO fundador" (hora y personaje de la decisión; recorta con "…" si pasa de 45) y `tema` = "Brechas de seguridad".
+  - **El juicio (22) tiene que poder abrir esas apelaciones.** Hoy `MockTarjetas.obtenerTarjeta(id)` solo busca tarjetas de sprints. Haz que también resuelva los ids `ran-NN` construyendo una `Tarjeta` a partir de `DecisionEscenario` (tipo normal, `etiquetaCaso` = la etiqueta de la crisis, personaje, rol, texto, `respuestaCorrecta`, `explicacion` = el fundamento correcto, `titulo` y `tema` como arriba). Hazlo en una función pura del escenario (`EscenarioRansomware.comoTarjeta(id)`) para que T-14 solo cambie el origen.
+  - Se registran **solo si el examen se reprobó y también si se aprobó con decisiones falladas** (un examen aprobado puede tener fallos; cada uno va al Buzón igual).
+  - Tras registrar, invalida `datosInicioProvider`, `datosModuloProvider`, `apelacionesPendientesProvider`, el Perfil y los datos de vidas, igual que lo hace el juego.
+- El proveedor sigue eligiéndose solo en `proveedores_repositorios.dart`.
 
 ### Estado (`lib/funciones/jefe/`)
-- `examenProvider` (Notifier, **se mantiene vivo** hasta que la T-11b guarde el resultado o se salga): intento, decisión actual, fase, vidas, HP, resumen, falladas (con su veredicto y la respuesta correcta que devuelve el servidor al reprobar o al cierre) y el cronómetro de la decisión.
-- Los cronómetros usan `Cronometro` inyectable (en pruebas, falso). Al llegar a 0 se responde con `null`.
-- Cada respuesta se envía **una sola vez** (sin doble toque ni respuesta tardía tras el tiempo).
-- Sin conexión a mitad del examen: se muestra `AvisoConexion` sobre la tarjeta, sin pausar nada (el servidor manda el tiempo); anótalo en el reporte como asunto de la T-14.
-- Cuando `estado` pasa a `aprobado`/`reprobado`: tras el feedback (golpe o fallo), `go` a `Rutas.auditoriaSuperadaDe(moduloId)` o `Rutas.inspectoraGanoDe(moduloId)` (nuevos ayudantes; las pantallas reales son de la T-11b, por ahora `PantallaPendiente` con su texto propio y botón "Atrás" que vuelve al mapa).
+- `ExamenNotifier` agrega `registrarResultado()`: pide el registro al repositorio **una sola vez** (guarda el `ResultadoRegistrado` en el estado; si ya está, lo devuelve), manda las apelaciones y refresca los proveedores. Errores: se guarda el error en el estado para que 29 y 30 muestren el aviso con "Reintentar" (no pierden el resultado ni la lista de falladas).
+- `examenProvider` se **reinicia** (`state = null`) cuando la persona sale de 29 o 30 hacia otro destino, y al empezar un examen nuevo ya lo hace `preparar`. Abrir 29 o 30 sin un examen terminado de ese módulo (enlace profundo, recarga) redirige al mapa del módulo (`Rutas.mapaSprintsDe(moduloId)`); nunca muestra un certificado vacío.
+- Los datos de 29 y 30 salen de `examenProvider` (resumen, falladas, intento, vidas) y de `ResultadoRegistrado`. No hay carga propia más allá del registro.
 
-## 27 · Crisis (marco 390×844; **siempre oscura**, no cambia con el tema)
-Columna desplazable, relleno horizontal 24. Colores fuera de los tokens **solo** en `EfectosApp` (constantes iguales en claro y oscuro): fondo `#0F294A`, barra del Jefe `#162030`, avatar del Jefe `#6B4BA1`, vida `#F07070`, textos `#CBD5E1` y `#94A3B8`, punto inactivo y conectores `#2A3850`, verde `#68B678`, réplica `#B7A0E6`; el rojo de alerta es `#B52426` (como `estadoIlegal` claro). Barra de estado del sistema en claro (íconos blancos).
-- **Alerta** (24,64): `#B52426`, radio 999, relleno 12×6, separación 6, ícono `alert-triangle`/`alert` de 16 y "NIVEL JEFE · CRISIS EN CURSO" Etiqueta 12 blanca.
-- **Título** (24,104, ancho 240): "¡Ransomware! Se filtró la base de usuarios", Fredoka Bold 26/32 blanco. **Sarko** a la derecha (254,86; 112×140, recortado a medio cuerpo como en Figma; compara la pose con el conector y usa la de `IlustracionSarko`/`SarkoImagen` que más se parezca).
-- **Texto** (24,210, ancho 342): "Tienes 72 horas para tomar las decisiones correctas antes de que la Inspectora Vega cierre la auditoría." Cuerpo/Base `#CBD5E1`.
-- **Barra del Jefe** (24,286; componente `BarraDelJefe`): `#162030`, radio 18, relleno izq. 12 / der. 14 / vert. 10, separación 12; avatar 44 (radio 14, `#6B4BA1`, ícono `gavel` 24 blanco); columna (separación 6): fila "Inspectora Vega" (Inter SemiBold 14 blanco) y "HP 100%" (Etiqueta `#F07070`), pista de 10 (radio 5, blanco 15 %) con la vida (`#F07070`) **proporcional al HP**, y "Auditora de protección de datos" (Leyenda `#94A3B8`). Se lee "Inspectora Vega, auditora de protección de datos. HP 100 por ciento". (En Figma la vida mide siempre 250; aquí se calcula.)
-- **Línea de crisis** (32,378; `LineaDeCrisis`): cuatro puntos "H0 Detección", "H6 Contención", "H24 Aviso", "H72 Autoridad": punto 34×24 radio 12 con la hora (Leyenda), la etiqueta debajo (Leyenda `#CBD5E1`), separación 6, conectores 28×2. Activo `#B52426` con texto blanco; inactivo `#2A3850` con texto `#94A3B8`. En 27 solo el primero está activo. Se lee "Línea de crisis: detección, contención, aviso y autoridad".
-- **Reglas** (24,434, ancho 342): fondo blanco al 8 %, radio 20, relleno horizontal 16; 4 filas de relleno vertical 10, separación 12, ícono de 20 (`zap`, `megaphone`, `lock`, `heart`) y Cuerpo/Base blanco: "10 decisiones en secuencia rápida: 15 s cada una" (con tiempo extendido, "22 s cada una"), "La Inspectora te contraargumenta: defiende tu veredicto", "Comodines desactivados (RN03)", "Si pierdes todas tus vidas, la crisis se reinicia". Los colores de los íconos, léelos de los SVG de Figma.
-- **Tiempo extendido** (centrado, y=664, solo si el ajuste está activo): ícono `accessibility` 16 y "Tiempo extendido activo: 22 s por decisión" Leyenda `#68B678`.
-- **Botones** (fijos abajo): primario "Enfrentar la auditoría" (24,722; 342×52, `accionAcento`, sombra de botón) y texto "Ahora no" (centrado, alto 48, Inter SemiBold 14 `#CBD5E1`) que vuelve al mapa.
-- Sin conexión: el primario queda deshabilitado y aparece "Necesitas conexión para iniciar el examen." (Leyenda `#CBD5E1`). Sin vidas: al tocar el primario va a `Rutas.sinVidasDe(moduloId)`. Cargando: esqueleto oscuro. Error: `MensajePantalla` con "Reintentar".
-- Al empezar: foco en el título; "Enfrentar la auditoría" llama a `iniciar` y pasa a 28.
+## 29 · Auditoría superada (marco 390×844; fondo `fondoApp`, con los tokens del tema)
+Todo centrado en una columna desplazable (la pantalla se desplaza si el texto o el tamaño no caben); los botones van **fijos abajo** sobre `fondoApp` con 24 de margen lateral.
+- **Confeti (decorativo, sin semántica):** 8 piezas rectangulares de 12×6, radio 2, rotadas, con los colores `#B86B23`, `#68B678`, `#2B5FA8`, `#B52426` y `#E0A060` en posiciones fijas del marco (las toma de Figma `18:2916`). Reutiliza `ConfetiSprint` (T-06b): hoy tiene 7 piezas de Figma 19; **parametriza la lista de piezas** (`piezas:`) sin cambiar el valor por defecto y pásale las 8 de esta pantalla. La caída dura 1.2 s y se apaga con "Reducir animaciones" (queda quieto como en Figma); no se repite al reconstruir.
+- **Trofeo** (x 60, y 110): círculo de 96, fondo `accionAcento`, borde 6 `fondoDestacado`, ícono `trophy` de 48 (color del texto sobre `accionAcento`).
+- **Sarko** (x 170, y 90): 176×220, pose `alegre` **recortada al torso** (cabeza y hombros, alineada arriba). Usa `SarkoImagen` con recorte; si Figma usa otra pose, repórtalo en el reporte.
+- **Título** "¡Auditoría superada!": Fredoka Bold 26/32 `textoPrimario`, centrado, y = 330. Es el encabezado semántico de la pantalla y recibe el foco inicial.
+- **Texto** (y = 366): "Contuviste la crisis y la Inspectora Vega aprobó tu MVP. Desbloqueaste el Módulo 2: Ronda Semilla." Cuerpo/Base `textoSecundario`, centrado. El número y el nombre del módulo salen de `ResultadoRegistrado.siguienteModulo`. **Último módulo (sin siguiente):** "Contuviste la crisis y la Inspectora Vega aprobó tu MVP. ¡Completaste todos los módulos!" (sin la frase de desbloqueo) y el botón primario pasa a "Volver al mapa" (sin el ghost duplicado de arriba, ver abajo).
+- **Tarjeta del certificado** (x 24, y 430, ancho 342): `fondoSuperficie`, borde **2 punteado** (guion) `accionAcento`, radio 20, padding 20, separación 8, todo centrado:
+  1. Logo horizontal (isotipo 43.2 + wordmark 127.8×25.9; usa `LogoApp`, la variante que ya existe para fondo claro u oscuro según el tema).
+  2. "CERTIFICADO DE MÓDULO": Etiqueta `textoAcento`.
+  3. Nombre del módulo ("Protección de Datos Personales"): Fredoka SemiBold 20/26 `textoPrimario`.
+  4. "Ana López · 9/10 aciertos · 28 oct 2026": Leyenda `textoSecundario`. Nombre de `Certificado.nombrePersona`; `aciertos/totalDecisiones` es el real del intento; fecha formateada del certificado. Si el texto no cabe en una línea, parte en dos líneas centradas por el separador "·".
+  5. El **folio** (`AG-M1-0001`) como segunda Leyenda `textoSecundario` debajo ("Folio AG-M1-0001"). No está en Figma: se añade porque RF-41 lo exige; repórtalo.
+  El borde punteado se dibuja con un `CustomPainter` (rect redondeado, trazo 2, guion 6 y hueco 4) **sin dependencias nuevas**.
+- **Botones** (fijos abajo): primario `accionPrimaria` "Ir al Módulo 2" (x 24, y 690, 342×52, ícono flecha derecha opcional como en los otros primarios) y fantasma "Compartir certificado" (x 24, y 750, 342×48, texto `textoAcento`). "Ir al Módulo 2" → `Rutas.mapaSprintsDe(moduloSiguiente)` reemplazando la ruta (no deja el examen en la pila). Con el estado `terminado` y el registro hecho se reinicia `examenProvider`.
+- **Compartir certificado:** sin dependencias nuevas, **copia al portapapeles** un texto como "Obtuve el certificado «Protección de Datos Personales» en AboGator · Folio AG-M1-0001 · 28 oct 2026" (`Clipboard.setData`) y muestra el mismo tipo de aviso breve que usa la Tienda tras comprar (reutiliza ese mecanismo; anúncialo con `SemanticsService`): "Certificado copiado". La imagen para compartir (RF-41) y la hoja de compartir nativa llegan en T-14; anótalo en el reporte.
+- **Cargando el registro:** esqueleto de la tarjeta del certificado (mismas medidas) y botones deshabilitados; Sarko, trofeo y título ya se ven. **Error:** el texto y el certificado se sustituyen por `MensajePantalla` ("No pudimos guardar tu resultado" con "Reintentar") y el botón "Volver al mapa"; no se muestra un certificado sin folio.
+- **Android atrás** y cualquier salida: va al mapa del módulo actual (`Rutas.mapaSprintsDe(moduloId)`), nunca de vuelta al examen.
 
-## 28 · Decisión de crisis (marco 390×844; con los tokens del tema)
-Fondo `fondoApp` y encima un **tinte de urgencia** de pantalla completa (`estadoIlegal` al 6 %, decorativo, siempre presente en 28, 28b y 28c). Sin navegación inferior.
-- **Barra de juego** (y=48, alto 56): reusa `BarraJuego` con `paso` "Crisis · Decisión 8 de 10", progreso k/10 y el chip de vidas ("2"). Salir (48) abre la confirmación.
-- **Barra del Jefe** (24,108) con el HP actual ("HP 60%").
-- **Hora de crisis** (40,186): `#B52426` (`estadoIlegal`), radio 999, relleno izq. 10 / der. 12 / vert. 5, separación 6, ícono `clock` 14 y "Hora 24 de 72" (Etiqueta blanca).
-- **Tarjeta** (24,200; 342×410): reusa `TarjetaCaso` y `MazoSwipe` (4 direcciones, sellos, botones equivalentes, solo botones si el ajuste lo pide). Etiqueta "CRISIS · BRECHA DE DATOS" (chip `#B86B23` al 14 %, texto `textoAcento`; el color sale de `EfectosApp`), avatar con iniciales ("CT"), "CTO / Fundador técnico", globo con el texto y la pista de gestos.
-- **Temporizador** (`TemporizadorCrisis`): fondo circular de 80 (superficie con sombra) en (298,176) y anillo de 64 en (306,184) con el número en Fredoka Bold 24; el anillo se vacía con el tiempo restante. **Normal:** número y anillo `accionPrimaria`. **Urgente** (≤ 5 s): `estadoIlegal`. Lee el SVG del anillo en Figma (`10:184` y `10:188`) para el grosor. No es el reloj del dispositivo.
-- **Acciones** (28.5,626): `AccionesVeredicto` (los 4 botones de 68, separación 14).
-- **Comodines** (56.5,740): píldora de 48 `fondoSuperficieAlt`, radio 999, relleno izq. 10 / der. 12, ícono `lock` 16 y "Comodines desactivados en el examen" (Etiqueta `textoSecundario`). Usa `BarraComodines(habilitados: false)` solo si ya da este resultado; si no, un componente propio.
-- **Pausa** (322,782; 48×48, `fondoSuperficie`, borde 1, radio 12, ícono `pause` 18): **solo con tiempo extendido**. Abre una capa opaca `fondoApp` con "Examen en pausa", "El tiempo está detenido." y los botones "Continuar" y "Salir del examen"; mientras dura, la tarjeta no se ve.
-- **Al responder:** vibración (`acierto` / `error` del `ServicioHaptico`); tarjeta vuela (animación del juego). Incorrecto o sin tiempo: chip de fallo (ver abajo) y luego la siguiente decisión; correcto: 28b.
-- **Chip de fallo** (mismo lugar y forma que el de daño de 28c): superficie `fondoSuperficie`, borde `estadoIlegal`, ícono `heart` y "−1 vida · Fallaste" / "−1 vida · Se acabó el tiempo" / "−1 vida · Ese fundamento no sirve" (Etiqueta `textoPrimario`); visible ~1.5 s; región en vivo.
+## 30 · La Inspectora ganó (marco 390×844; fondo `fondoApp`)
+- **Ilustración:** fondo circular 230×230 en (80, 90) y Sarko `triste` de 184×230 en (103, 92). Reutiliza `IlustracionSarko` (pose `triste`, `diametro` 230, `anchoSarko` 184, `colorFondo` el de la pantalla 20).
+- **Título** "La Inspectora ganó": Fredoka Bold 26/32 `estadoIlegal`, centrado, y = 340. Encabezado semántico con el foco inicial.
+- **Texto** (y = 376), `textoSecundario`, centrado, según cómo terminó:
+  - **0 vidas:** "Te quedaste sin vidas durante la crisis. La auditoría se reiniciará desde la hora 0."
+  - **Sin decisiones con HP > 0:** "Se acabaron las decisiones y la Inspectora Vega sigue en pie. La auditoría se reiniciará desde la hora 0."
+  (La variante "sin decisiones" no está en Figma; repórtala.)
+- **Resumen** (x 24, y 440): fila de **tres tarjetas** de 107 de ancho, separación 10: `fondoSuperficie`, borde 1 `bordeDefault`, radio 16, padding vertical 12, centradas. Valor Fredoka SemiBold 20 y etiqueta Leyenda `textoSecundario`:
+  1. **"N/10" · "Llegaste a"** (valor `textoPrimario`): `decisionesJugadas` y `totalDecisiones`.
+  2. **"N" · "Aciertos"** (valor `estadoLegal`): `aciertos`.
+  3. **"N" · "Por tiempo"** (valor `estadoIlegal`): `porTiempo`.
+  La fila no puede desbordar con texto al 200 %: las tarjetas crecen en alto y, si hace falta, la fila pasa a **columna** a partir de 1.5× de escala. Las tres se leen como un solo bloque semántico ("Llegaste a la decisión 7 de 10. 5 aciertos. 2 por tiempo agotado").
+- **Próxima vida** (x 24, y 540, ancho 342): `fondoDestacado`, radio 16, padding 14×12, ícono `clock` de 20 y Leyenda "Próxima vida en 01:59:40. Repasa los temas del módulo mientras tanto." con la hora en `CuentaRegresivaVida`/el mismo formato de 20 (el tiempo viene de `faltaParaProximaVida`; **cuenta regresiva monótona** con el `Cronometro` inyectable y se detiene en 0). **Se oculta** si `faltaParaProximaVida` es null (ya hay 5 vidas) o si quedan vidas por la derrota de decisiones agotadas: entonces la tarjeta dice "Aún tienes N vidas. Repasa los temas del módulo antes de volver a intentarlo." (Leyenda, mismo estilo, sin ícono de reloj; repórtalo, no está en Figma).
+- **Botones** (fijos abajo): primario "Repasar en el Buzón" (x 24, y 690, 342×52) → `Rutas.buzon`; fantasma "Volver al mapa" (x 24, y 750, 342×48) → `Rutas.mapaSprintsDe(moduloId)`. Si se registraron 0 apelaciones (no debería pasar al reprobar, pero cubre el caso) "Repasar en el Buzón" se oculta y "Volver al mapa" pasa a primario.
+- **Cargando y error del registro:** como en 29 (el texto y el resumen se ven de inmediato porque salen del estado local; solo la "Próxima vida" espera al servidor). Con error, aviso breve "No pudimos guardar tus apelaciones" con "Reintentar" encima de los botones; los botones **siguen activos** (la persona puede irse; reintentar registra de nuevo de forma idempotente al volver a entrar).
+- **Atrás:** al mapa del módulo, nunca al examen.
+- Si la persona llega a 30 con el examen **aprobado** o a 29 con el **reprobado** (enlace profundo cruzado): redirige a la pantalla que corresponde al estado del examen.
 
-## 28b · Contraargumento del Jefe
-Es 28 con la tarjeta ya enviada y un **velo** `#0B1220` al 40 % (decorativo, no cierra nada) más el **panel de contraargumento** anclado abajo.
-- **Tarjeta enviada:** queda a la vista en la pose de vuelo del veredicto elegido (en Figma, "Ilegal": girada −14° y movida a la izquierda, con el sello visible) y el temporizador **detenido** en su valor.
-- **Panel** (`PanelContraargumento`, y=423, ancho 390, hasta abajo): `fondoSuperficie`, radio superior 28, sombra elevada, relleno arriba 12 / abajo 34 / horizontal 24, separación 14; sin descarte (ni deslizar, ni tocar el velo; atrás abre "Salir del examen").
-  - Agarre 40×5 (radio 3, `bordeDefault`).
-  - **Réplica:** avatar 44 del Jefe (radio 14, `#6B4BA1`, `gavel`) y globo `#162030` (radios 4/16/16/16, relleno 14×12): "INSPECTORA VEGA" (Leyenda `#B7A0E6`) y la cita entre comillas curvas en Fredoka SemiBold 17/22 blanco.
-  - "Defiende tu veredicto · elige el fundamento" (Etiqueta `textoSecundario`).
-  - **2 `OpcionJustificacion`** (el componente de la T-07, radio, ancho completo). **Tocar una opción responde de inmediato** (no hay botón de confirmar: hay prisa; anótalo como decisión en el reporte).
-  - Fila de tiempo: ícono `alert` 14 y "Tienes 8 s para responder" (Leyenda `estadoIlegal`), con la cuenta regresiva real ("Tienes 5 s…"); con tiempo extendido, 12 s.
-- Accesibilidad: al abrir, foco en la réplica y anuncio "La Inspectora contraargumenta: … Tienes 8 segundos"; se anuncia de nuevo a los 3 s. Orden: réplica → fundamento 1 → fundamento 2.
-
-## 28c · Golpe al Jefe
-Vuelve a 28 con la **siguiente decisión** ya cargada ("Crisis · Decisión 9 de 10", "Hora 48 de 72", otra tarjeta) y el HP ya reducido ("HP 40%"; la barra baja en 300 ms, sin animación con "reducir animaciones").
-- **Chip de daño** (152,92, centrado sobre la barra del Jefe): `#B52426`, radio 999, relleno 12×6, separación 6, sombra (0,16,40, 22 %), ícono `zap` 16 y "−20 HP · ¡Argumento sólido!" (Etiqueta blanca). Visible ~1.5 s, región en vivo ("Daño a la Inspectora: menos 20 HP. Le quedan 40."), vibración `acierto`.
-- **El tiempo de la nueva decisión empieza a correr cuando el chip desaparece**, no antes (el temporizador se ve lleno y detenido mientras tanto).
-- Si el golpe lleva el HP a 0, el examen termina: tras el chip, `go` a la ruta de 29.
-
-## Accesibilidad (todo el flujo)
-- Cada decisión: etiqueta de la tarjeta "Decisión k de 10. personaje, rol: texto", con la hora ("Hora 24 de 72") y el HP leídos en su propio bloque. El temporizador **no** se lee continuamente: se anuncia el límite al empezar, a los 10 s, a los 5 s y "Tiempo agotado".
-- Objetivos ≥ 48 (los botones de veredicto de 68); foco inicial en la tarjeta; orden de foco: barra de juego → Jefe → hora → tarjeta → botones → pausa.
-- Nada depende solo del color (urgencia: número y anillo más el texto "Quedan N segundos" en la semántica). Tinte de urgencia al 6 %, sin parpadeos.
-- Contrastes AA verificados en pruebas: blanco sobre `#B52426`, `#94A3B8` y `#CBD5E1` sobre `#0F294A` y `#162030`, `#F07070` sobre `#162030`, `#68B678` sobre `#0F294A`, `#B7A0E6` sobre `#162030`, `estadoIlegal` sobre `fondoSuperficie`, `textoSecundario` sobre `fondoSuperficieAlt`.
-- Texto al 200 % sin desbordes en 390×844, 360×640 y 320×640 (27 se desplaza; en 28 la tarjeta se estira o la pantalla se desplaza como en el juego).
-- Los ajustes "Reducir animaciones", "Solo botones", "Vibración" y "Tiempo extendido" se respetan aquí (los dos últimos con efecto real).
+## Accesibilidad
+- Foco inicial en el título de cada pantalla; orden de lectura: título → texto → certificado o resumen → próxima vida → botones. Confeti, trofeo y Sarko decorativos (excluidos de la semántica).
+- Al terminar de registrar, anunciar con `SemanticsService`: "Auditoría superada. Certificado emitido. Módulo 2 desbloqueado" (o "La Inspectora ganó. N apelaciones en el Buzón").
+- Objetivos ≥ 48; los botones fijos no tapan el contenido desplazable (relleno inferior igual al alto de los botones).
+- La tarjeta del certificado se lee como un solo bloque: "Certificado de módulo. Protección de datos personales. Ana López, 9 de 10 aciertos, 28 de octubre de 2026. Folio AG-M1-0001."
+- Contrastes AA verificados en pruebas: `estadoIlegal` sobre `fondoApp` (título 30), `textoAcento` sobre `fondoSuperficie`, `estadoLegal` y `estadoIlegal` sobre `fondoSuperficie` (valores del resumen), `textoSecundario` sobre `fondoDestacado`.
+- Texto al 200 % sin desbordes en 390×844, 360×640 y 320×640, claro y oscuro; "Reducir animaciones" detiene la caída del confeti; la vibración usa `ServicioHaptico` (acierto al aprobar con el aviso del certificado, error suave al reprobar) y respeta el ajuste.
 
 ## Rutas
-`Rutas.crisisJefe` pasa a `PantallaJefe` (27 → 28 → 28b → 28c dentro de la misma ruta, con la fase en `examenProvider`), exige sesión como las demás, y sin navegación inferior. Añade `Rutas.auditoriaSuperadaDe(moduloId)` y `Rutas.inspectoraGanoDe(moduloId)` y deja sus constantes con marcadores (`PantallaPendiente`, texto propio y "Atrás"). Quita `Textos.pendienteJefe`. "Comenzar" en la intro del Examen (09) ya llega a 27: verifícalo.
+`Rutas.auditoriaSuperadaDe(moduloId)` y `Rutas.inspectoraGanoDe(moduloId)` pasan de `PantallaPendiente` a `PantallaAuditoriaSuperada` y `PantallaInspectoraGano` (hijas de `/jefe/:moduloId`, exigen sesión, sin navegación inferior). Desde 28c: HP 0 → 29 (`go`, reemplaza el examen en la pila); 0 vidas o fin de decisiones → 30. Quita los marcadores de 29 y 30 y sus textos propios en `Textos`, y en `PantallaPendiente` el parámetro `alVolver` **si ya nadie lo usa** (si otro destino lo usa, déjalo).
 
 ## Archivos permitidos
-`lib/datos/` (modelos y repositorio del examen, `MockExamen`, el escenario y `proveedores_repositorios.dart`), `lib/app/enrutador.dart` y `rutas.dart`, `lib/funciones/jefe/` (pantallas, estado, lógica, piezas), `lib/componentes/` (`BarraDelJefe`, `LineaDeCrisis`, `TemporizadorCrisis`, `PanelContraargumento`, chips de hora, daño y fallo, y ajustes menores a `BarraJuego`, `TarjetaCaso` y `ChipHud` si hace falta), `lib/core/tema/efectos.dart` e `iconos_app.dart` si falta algo, `lib/core/textos/textos.dart`, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). Lee `ServicioHaptico` y `ajustesProvider` sin cambiarlos. **Sin dependencias nuevas.**
+`lib/datos/` (modelos de `Certificado` y `ResultadoRegistrado`, `RepositorioExamen`, `RepositorioProgreso`, `MockExamen`, `MockProgreso`, `MockPerfil`, `MockTarjetas`, el escenario y `proveedores_repositorios.dart`), `lib/app/enrutador.dart` y `rutas.dart` y `pantalla_pendiente.dart`, `lib/funciones/jefe/` (pantallas 29 y 30, estado y lógica del registro), `lib/componentes/` (`TarjetaCertificado`, borde punteado, `TarjetaResumenExamen`, fila de resumen; ajuste de `ConfetiSprint` para recibir piezas; `IlustracionSarko` o `SarkoImagen` solo si necesitan un recorte), `lib/core/tema/efectos.dart` (las 8 piezas del confeti si usan colores nuevos), `iconos_app.dart` si falta algo, `lib/core/textos/textos.dart`, la galería, pruebas y documentación de `ai/` (grafo sección 4, reporte). Lee `ServicioHaptico` y `ajustesProvider` sin cambiarlos. **Sin dependencias nuevas.** No toques `estado_juego.dart` ni las pantallas del juego.
 
 ## Pruebas
-- **Mock:** 10 decisiones con 4 veredictos; correcto → réplica con 2 fundamentos; fundamento correcto −20 HP, incorrecto o sin tiempo −1 vida; incorrecto y tiempo agotado −1 vida sin réplica; 5 golpes → aprobado (también antes de la decisión 10); 0 vidas → reprobado; se acaban las decisiones con HP > 0 → reprobado; respuesta repetida o fuera de turno → `intentoCerrado`; respuesta 2 s tarde → `tiempoAgotado` (reloj inyectado); tiempo extendido (22 s y 12 s); sin vidas o sin red no inician; módulo sin escenario → `examenNoDisponible`; salir no cambia vidas.
-- **Lógica:** fases por hora; HP proporcional; urgencia a ≤ 5 s; textos de cada resultado.
-- **27:** estructura y medidas de Figma, línea de crisis, reglas (15 s y 22 s), línea de tiempo extendido solo con el ajuste, sin conexión (botón deshabilitado y aviso), sin vidas (va a 20), módulo sin examen, error y reintento, "Ahora no", sin sesión redirige.
-- **28:** medidas y piezas de Figma en claro y oscuro (tinte, hora, temporizador normal y urgente, pastilla de comodines, pausa solo con tiempo extendido); arrastre y botones dan el mismo resultado; tiempo agotado responde `null` una sola vez (cronómetro falso); fallo con chip y vidas; pausa detiene el cronómetro y no deja ver la tarjeta; Salir (confirmación, cancelar, confirmar → mapa sin perder vidas).
-- **28b:** panel y velo, cuenta regresiva (8 s y 12 s), tocar una opción responde, tiempo agotado = fallo, no se descarta, foco y anuncios.
-- **28c:** chip de daño, HP 60 → 40, el cronómetro de la siguiente decisión espera al chip, HP 0 navega a 29, 0 vidas o fin de decisiones navega a 30.
-- **Flujo completo:** examen ganado (5 golpes) y perdido (por vidas y por decisiones) en pruebas de widget con cronómetro falso.
-- Accesibilidad: semántica, anuncios del temporizador, contrastes, desbordes (390×844, 360×640, 320×640 al 100 % y 200 %), ajustes de la T-10b (solo botones, háptica con servicio falso, reducir animaciones).
-- Las 938 pruebas previas siguen verdes.
+- **Mock del examen:** `registrarResultado` aprobado emite un certificado con folio, módulo, aciertos y fecha del reloj inyectado; llamarlo dos veces devuelve el **mismo** certificado y no duplica nada; reprobado no emite; con el intento sin terminar lanza `intentoCerrado`; sin red lanza `sinConexion`; `obtenerCertificados` cuenta uno por módulo aprobado.
+- **Progreso:** `registrarExamenAprobado` completa el nodo del examen y pone en curso el primer sprint del módulo siguiente; el último módulo no desbloquea nada; aprobar dos veces no cambia nada más.
+- **Apelaciones del examen:** una por decisión fallada (veredicto, tiempo y fundamento), sin duplicados al reintentar; título ≤ 45; `MockTarjetas.obtenerTarjeta('ran-03')` devuelve la tarjeta de la decisión y el juicio (22) abre una apelación de examen de punta a punta (con repositorios reales de memoria).
+- **Perfil:** el contador de certificados pasa de 0 a 1 tras aprobar.
+- **29:** medidas y estructura de Figma en claro y oscuro (trofeo, Sarko recortado, título, texto con el módulo siguiente y variante del último módulo, tarjeta de certificado con borde punteado y folio, botones), confeti de 8 piezas y sin movimiento con "Reducir animaciones", "Ir al Módulo 2" navega al mapa del siguiente y reinicia `examenProvider`, "Compartir certificado" copia el texto exacto y avisa, cargando (esqueleto, botones apagados), error con reintento, atrás va al mapa del módulo, sin examen terminado redirige al mapa, sin sesión redirige.
+- **30:** medidas y estructura de Figma, variantes del texto (0 vidas y sin decisiones), tarjetas del resumen con los datos reales, cuenta regresiva con cronómetro falso (inicia, baja, se detiene en 0, se oculta con 5 vidas), "Repasar en el Buzón" (con y sin apelaciones) y "Volver al mapa", error con reintento sin bloquear los botones, enlace cruzado redirige.
+- **Flujo completo:** examen ganado → 29 → módulo 2 desbloqueado en el mapa y Perfil con "1 de 5"; examen perdido por vidas → 30 → las apelaciones aparecen en el Buzón → se abre el juicio de una de ellas; examen perdido por decisiones → 30 con su texto.
+- Accesibilidad: semántica de la tarjeta y del resumen, anuncios, contrastes, desbordes (390×844, 360×640 y 320×640 al 100 % y 200 %), ajustes de la T-10b (háptica con servicio falso, reducir animaciones).
+- La galería (sección "Examen Final") suma las piezas nuevas (tarjeta del certificado, borde punteado, tarjeta de resumen, confeti de 8 piezas); `TEST-GALERIA` actualiza su cuenta.
+- Las 985 pruebas previas siguen verdes.
 
 ## Criterios de aceptación
-- [ ] 27, 28, 28b y 28c coinciden con Figma; lo que no viene de Figma (chip de fallo, pausa, tocar responde, escenario de las otras 8 decisiones, módulos sin examen, avisos sin conexión) queda en el reporte, y la lista de contenido legal para que el usuario la verifique.
-- [ ] Las reglas del examen se cumplen en el mock y en la pantalla con el cronómetro monótono; nunca se usa `DateTime.now()` fuera de los mocks.
-- [ ] El flujo completo funciona de principio a fin hasta las rutas de 29 y 30 (marcadores).
+- [ ] 29 y 30 coinciden con Figma; lo que no viene de Figma (folio, variantes del texto, tarjeta de próxima vida con vidas restantes, estados de carga y error, copiar el certificado) queda en el reporte.
+- [ ] Aprobar emite **un solo** certificado, completa el Examen final, desbloquea el módulo siguiente y se ve en el Perfil; reprobar registra **una apelación por decisión fallada** que se puede abrir en el juicio; todo es idempotente.
+- [ ] Nunca se usa `DateTime.now()` fuera de los mocks (fecha del certificado y cuenta regresiva vienen del servidor o del reloj inyectado).
+- [ ] Abrir 29 o 30 sin el estado correcto no muestra datos vacíos: redirige.
 - [ ] Sin dependencias nuevas; análisis, formato y pruebas en verde; commits sin prefijo y sin menciones a Claude.
+
+## Para el reporte
+Las dudas numeradas (D1, D2…), la lista de decisiones propias (folio, variantes, copiar certificado, cruce de enlaces) y una nota para T-14: la imagen de certificado para compartir (RF-41), la fecha y el folio reales del servidor, y el registro con la conexión caída a mitad del examen.
