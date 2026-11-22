@@ -140,6 +140,7 @@ Cada lote es una rama y un PR. Se ordenan de lo seguro y compartido a lo delicad
 |---|---|---|---|---|---|
 | T-15b | 35 552 (211 archivos) | 35 476 (214 archivos) | **−76** | 19 673 → 19 832 (+159, pruebas nuevas) | 3025 → 3034 |
 | T-15c | 35 476 (214 archivos) | 35 453 (218 archivos) | **−23** | 19 832 → 20 077 (+245, pruebas nuevas) | 3034 → 3045 |
+| T-15e | 35 453 (218 archivos) | 35 373 (219 archivos) | **−80** | 20 077 → 20 253 (+176, pruebas nuevas) | 3045 → 3052 |
 
 - **T-15b, desglose:**
   - En los archivos que ya existían se fueron 237 líneas netas: 49 de `pantalla_pendiente.dart`, 17 de `mostrarAvisoBreve`, unas 100 de los botones de caja y los agarres, unas 50 de las 22 píldoras y unas 20 de los avisos.
@@ -164,6 +165,21 @@ Cada lote es una rama y un PR. Se ordenan de lo seguro y compartido a lo delicad
     - los paneles del juego (`panel_*`), cuyos títulos llevan etiqueta propia y excluyen los hijos;
     - el resultado del juicio, que tiene `nodoFoco`;
     - las cajas con sombra, degradado, borde de otro color u otro fondo.
+
+- **T-15e, por patrón** (neto = archivos existentes − componente nuevo):
+
+| Patrón | Usos | Archivos existentes | Componente | Neto | Puntos de cambio |
+|---|---|---|---|---|---|
+| P-08 `AccionEnfocable.boton` | 13 controles (7 iguales y 6 con `enabled`, `selected`, `link` o `expanded`) | −78 | +43 | **−35** | semántica de botón: 13 → 1 |
+| P-13 `DesplazableAltoMinimo` | 10 desplazables | −60 | +48 | **−12** | alto mínimo con relleno: 10 → 1 |
+| P-16 Inicio (piezas privadas) | héroe, reto, título de la ruta y tarjeta de módulo | −23 | — | **−23** | móvil y tablet: 2 → 1 |
+| P-19 Acceso (piezas privadas) | enlace «¿Olvidaste…?», error y los dos botones | −10 | — | **−10** | móvil y tablet: 2 → 1 |
+
+  - **No se hicieron:**
+    - **P-12 `mostrarHojaAdaptativa`:** solo 2 usos iguales (Ajustes y el selector de hora). El del juego usa `HojaLateral`, no deja arrastrar y tiene su propia animación.
+    - **P-17 `DosColumnasTablet`:** solo Ajustes y Perfil coinciden. Inicio tiene alto mínimo y `spaceBetween` a la derecha, y el Buzón no tiene ese patrón.
+    - **`BotonIconoCuadrado` → `BotonIconoCaja`:** su `Semantics` no tiene `onTap`. Pasarlo daría a los lectores de pantalla una acción que hoy no tienen (D1 del reporte de la T-15e).
+  - **Quedan con su propia semántica en P-08** (tienen `checked`, `toggled`, grupo excluyente, `container` o no tienen `onTap`): `casilla_app`, `chip_seleccion`, `opcion_justificacion`, `barra_comodines`, `piezas_ajustes` ×3, `piezas_perfil` ×2 y `piezas_tienda`.
 
 ## Reglas de toda la T-15
 1. **Cero cambios visibles.** Se mantienen las mismas medidas, textos, colores, foco, orden de lectura, semántica y animaciones. La auditoría de `test/auditoria/` debe seguir verde **sin tocar sus escenas**. Las demás pruebas solo cambian si un lote lo autoriza de forma explícita (T-15d).
