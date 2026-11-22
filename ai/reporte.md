@@ -1,112 +1,75 @@
 # Reporte
-- **Tarea:** T-13b · Pantallas de cuenta, legal y notificaciones (ronda 2: correcciones tras la revisión)
-- **Rama:** `13b-pantallas-cuenta-y-legal`
+- **Tarea:** T-15a · Auditoría de duplicación (solo análisis)
+- **Rama:** `15a-auditoria-de-duplicacion`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
 
-## Entorno
-- Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11. **Sin dependencias nuevas.**
-- Medidas de T34 tomadas de `siguiente.md` (Figma `150:5709`).
+## Qué se hizo
+- **Nuevo** `ai/conocimiento/09-duplicacion.md`, con:
+  - la medición inicial;
+  - un catálogo de 20 patrones de `lib/` y 3 de `test/`, con su ubicación (archivo:línea), las líneas repetidas, la API propuesta, el riesgo y las pruebas que lo cubren;
+  - la lista de código muerto;
+  - cinco lotes, de la T-15b a la T-15f;
+  - las 8 reglas de la T-15.
+- **Grafo:** fila nueva DOC-09 (`en curso`, para que la revises) y una línea en el registro de cambios. No hay más índice de conocimiento que las filas DOC-* del grafo.
+- **Sin cambios en `lib/` ni `test/`** (`git diff --stat` solo muestra `ai/`). Sin dependencias nuevas.
 
-## Ronda 2 · lo corregido
-### A · Notificaciones de racha en tablet (T34): panel de ilustración
-- **Composición nueva** `DisposicionIlustracionTablet` (`lib/componentes/disposicion_ilustracion_tablet.dart`, para la T-15).
-  - No reutilicé `DisposicionAccesoTablet`: su panel es el verde de marca, con logo y lema. Este es el panel `fondo/destacado` del onboarding, sin logo.
-- **1194×834:**
-  - Panel izquierdo de 597 × 834 en `fondo/destacado` con `IlustracionRacha` centrada:
-    - círculo `fondo/superficie` de 340;
-    - Sarko alegre de 230 de ancho, a (+55, +12) del círculo;
-    - insignia de 84 `accionPrimaria` con `flame` de 40, a (+257, −18): arriba a la derecha del círculo, como en Figma.
-  - La ilustración no crece y se reduce si el panel es más chico.
-  - Atrás de 48 × 48 en el panel, en (32, 32).
-  - A la derecha, la columna de 470 centrada en alto, **sin** Sarko ni atrás: título, descripción, tarjeta de tres filas (470 de ancho), nota, "Activar notificaciones" y "Ahora no".
-- **834×1194 y 600–959:** el panel pasa a una franja de 260 arriba, con la misma ilustración reducida y el atrás, y la columna de 470 debajo (el mismo patrón que Recuperar).
-- **Selector de hora (34c) en tablet:** sigue siendo el diálogo de 440 sobre el velo del 40 %; no cambió.
-- **Móvil:** como antes, salvo las filas (B).
+## Medición inicial
+- `lib/` tiene **35 552 líneas** en 211 archivos:
+  - `componentes` 10 861;
+  - `datos` 4 955;
+  - `core` 2 646;
+  - `app` 656;
+  - `funciones` 16 405 (la carpeta más grande es `juego`, con 3 093).
+- `test/` tiene **19 673 líneas** en 82 archivos.
+- Pruebas: **3025** (879 declaraciones `test`/`testWidgets`; el resto sale de los bucles).
+- Los archivos más largos son `mock_tarjetas.dart` (1 429), `galeria_componentes.dart` (1 234), `pantalla_jefe.dart` (1 182) y `textos.dart` (1 124). La tabla de los 20 está en `09`.
+- Detector de clones (ventanas de 6 líneas normalizadas): **1 780 líneas** en tramos repetidos en `lib/` y **828** en `test/`.
 
-### B · Filas de 34 sin íconos
-- `FilaAjuste.icono` ahora es opcional (Ajustes lo sigue pasando) y hay `rellenoHorizontal`: 16 en móvil y 20 en tablet.
-- Las tres filas de 34 (y la del recordatorio, que es propia) ya no llevan `flame`, `gavel` ni `clock`.
-- El texto empieza en x16 (móvil) o x20 (tablet) y el interruptor de 52 × 32 queda a la derecha.
+## Hallazgo general
+La app ya reutiliza bien los controles: **no hay botones, campos ni casillas hechos a mano**, ni colores o `TextStyle` sueltos fuera del tema. La duplicación está en tres sitios:
+- piezas visuales pequeñas copiadas;
+- contenido armado dos veces (móvil y tablet, o las dos listas de `ColumnaFinSprint`);
+- lógica de pantalla repetida (el teclado del mazo, las hojas adaptativas y el `switch` de carga, error y datos).
 
-### Respuestas aplicadas
-- D1, D2, D3 y D6: sin cambios.
-- D7: Claude Chat agregó PANT-31 a PANT-34; `PantallaPendiente` se borra en la T-15.
-- D8: queda "el correo del equipo del proyecto".
+## Los 5 patrones que más ahorran
+1. **P-01 · Esqueletos de carga** (≈ 150 líneas, riesgo bajo): 10 clases `_Esqueleto*` con el mismo armazón. Propuesta: `EsqueletoPantalla` + `BloqueEsqueleto`.
+2. **P-04 · Caja de superficie** (≈ 120, bajo): 39 `BoxDecoration` con fondo, radio y borde opcional copiados. Propuesta: `CajaSuperficie(fondo:, radio:, conBorde:)`.
+3. **P-11 · Contenido doble en `ColumnaFinSprint`** (≈ 100, medio): Sprint completado, Quiebra y el resultado del juicio arman las mismas piezas para móvil y para tablet.
+4. **P-14 · Teclado del mazo y tinte** (≈ 100, alto): `_alTeclear` y `_envolver` están copiados en el juego, el Examen y el juicio. Propuesta: `MarcoMazo`, al final.
+5. **P-08 · Semántica de botón en `AccionEnfocable`** (≈ 90, medio): 18 copias de `Semantics(button, label, onTap, excludeSemantics)`. Propuesta: `AccionEnfocable.boton(etiqueta:)`.
 
-## Qué hay en la T-13b (resumen de la ronda 1, aprobada)
-- **Recuperar contraseña (31 a 31e):**
-  - Rutas `/recuperar`, `/enviado`, `/nueva?token=`, `/listo` y `/caducado`.
-  - Mock con `solicitarRecuperacion` y `restablecer`: el token `caducado` lleva a 31e.
-  - Cuenta de 45 s para reenviar, anunciada una vez.
-  - Validaciones con foco en el primer campo con error.
-  - En tablet, el panel de marca con la expresión de cada paso y la insignia de 96 en la columna.
-- **Aviso de Privacidad y Términos de uso (32, 33):**
-  - `PantallaLegal` con `FilaAcordeon`: una sección abierta a la vez, con borde de 2 `accionAcento` y semántica expandida.
-  - Textos en `textos_legales.dart`, marcados como BORRADOR.
-  - En tablet, columna de 640.
-  - Accesos desde el Registro (enlaces con push), el Perfil y Ajustes ("Legal").
-- **Notificaciones de racha (34, 34c, 34b):**
-  - `/ajustes/notificaciones`, de primer nivel.
-  - Interruptores guardados al instante en el repositorio de ajustes.
-  - Selector de hora aislado: hoja en móvil, diálogo en tablet, ajustable con lector y teclado, y botones + y − con "Solo botones".
-  - Se abre tras el primer registro, una vez.
-  - En la galería, las dos notificaciones de 34b con `NotificacionSistema`.
+También ahorran bastante: P-15 (Examen móvil/tablet, ≈ 90), T-02 (falsos de prueba repetidos, ≈ 130 en `test/`) y T-01 (matriz «sin desbordes» en 9 archivos, ≈ 90 en `test/`).
 
-## Componentes compartidos (para la T-15)
-- **Nuevo en la ronda 2:** `DisposicionIlustracionTablet`.
-- **De la ronda 1:**
-  - `InsigniaCircular` (ahora con `tamanoIcono`) e `IlustracionInsignia`;
-  - `FilaAcordeon`;
-  - `InterruptorApp(grande:)` e `InterruptorTocable`;
-  - `NotificacionSistema`;
-  - `RuedaSelector`;
-  - `PanelMarca`, `FranjaMarca` y `DisposicionAccesoTablet` con `pose`.
-- **Sin compartir:** `IlustracionRacha` vive en `pantalla_notificaciones.dart` porque es propia de T34.
+## Código muerto
+- `lib/app/pantalla_pendiente.dart` (49 líneas; ninguna ruta la usa).
+- `mostrarAvisoBreve` (`aviso_error.dart:41`).
+- 7 textos sin uso: `buzonApelaciones`, `veredictoAnuncio`, `sinCambios`, `noSeleccionada`, `noMarcada`, `lineaClave` y `notificacionApelacionPie`.
+- `MedidasAdaptativas.lienzoTablet` y `Rutas.juicioApelacion`.
+- No hay imports sobrantes.
 
-## Decisiones propias (ronda 2)
-- **Círculo del panel en `fondo/superficie`:** así se distingue del panel `fondo/destacado`, como el del onboarding.
-- **Sarko de 230 × 287.5:** `SarkoImagen` guarda la relación 4:5, así que no llega a los 301 de alto de Figma. No lo deformé.
-- **La franja vertical mide 260:** la ilustración de 341 × 358 se reduce para caber.
-- **El atrás de la franja** va en (32, 32), igual que en el panel.
+## Plan de lotes
+| Lote | Patrones | Ahorro | Riesgo |
+|---|---|---|---|
+| T-15b `15b-limpieza-y-piezas-pequenas` | código muerto, P-03, P-02, P-06, P-07, P-18 | ≈ 280 | bajo |
+| T-15c `15c-superficies-y-estados` | P-04, P-05, P-01, P-09, P-10 | ≈ 385 | bajo-medio |
+| T-15d `15d-ayudantes-de-pruebas` | T-01, T-02, T-03 (solo `test/`) | ≈ 240 en `test/` | bajo |
+| T-15e `15e-marcos-y-disposiciones` | P-08, P-13, P-12, P-17, P-16, P-19 | ≈ 310 | medio |
+| T-15f `15f-juego-examen-y-fin-de-sprint` | P-11, P-15, P-14 (al final, sola si hace falta), P-20 | ≈ 335 | medio-alto |
 
-## Accesibilidad
-- La auditoría de cuenta (13 escenas × 4 tamaños × claro y oscuro × 100, 160 y 200 % = 312 combinaciones) y el foco visible en 31, 31c, 32 y 34 siguen verdes con la composición nueva.
-- Se verifica: sin desbordes, zona táctil Android e iOS, etiquetas, contraste y anillo en cada parada de Tab.
-- En tablet el orden de foco es: atrás (en el panel) → título → filas → botones.
+- **Total estimado:** ≈ 1 310 líneas menos en `lib/` (≈ 3,7 %) y ≈ 240 en `test/`.
+- Es menos de lo que sugiere el tamaño de la app, porque la base ya está bien componentizada. Gran parte del volumen es contenido (mocks, textos y la galería), no duplicación.
+- Las pruebas que protegen cada lote están en `09`.
 
 ## Verificación
-- `dart format`: sin cambios pendientes.
-- `flutter analyze`: `No issues found!`
-- `flutter test`: **3025 pruebas** (3019 en la ronda 1; 6 más en esta):
-```
-+3025: All tests passed!
-```
-- **Pruebas nuevas o ajustadas en la ronda 2:**
-  - notificaciones: 20 (antes 14). La de "columna de 470 centrada" se reemplazó por:
-    - panel de 597 con círculo, Sarko, insignia y atrás en (32, 32);
-    - columna de 470 a la derecha, sin Sarko ni atrás, y cuyo atrás cierra;
-    - franja en 834×1194 y en 600×960;
-    - selector como diálogo;
-    - filas sin íconos en móvil y tablet, con el texto en x16 o x20.
-  - galería: la ilustración de T34 suma una imagen de Sarko.
-
-## Grafo actualizado
-- **`en curso`:** COMP-PIEZAS-AJUSTES, COMP-ILUSTRACION-INSIGNIA, CODIGO-PANT-34, PANT-GALERIA, TEST-NOTIFICACIONES y TEST-GALERIA.
-- **Nuevo:** COMP-DISPOSICION-ILUSTRACION.
-- **Obsoletos:** sin nuevos (PANT-PENDIENTE sigue `obsoleto` desde la ronda 1).
-- Línea nueva en el registro de cambios.
-
-## Para la T-14 (sin cambios desde la ronda 1)
-- **Recuperación:**
-  - el enlace profundo del correo y "Abrir correo" (hoy, el token `demo`);
-  - la caducidad real (30 minutos) y el uso único del token;
-  - el reenvío con límite del servidor;
-  - el cierre de las sesiones en otros dispositivos.
-- **Notificaciones:**
-  - el permiso del sistema y el alta del dispositivo al "Activar";
-  - el envío real (racha, días 3, 7 y 14, máximo 2 al día);
-  - la hora del recordatorio programada por el servidor, con la zona horaria.
-- **Legal:** la versión y la fecha vigentes del Aviso y los Términos, y qué versión aceptó cada usuario.
+- `git diff --stat develop`: solo `ai/conocimiento/09-duplicacion.md`, `ai/grafo.md` y `ai/reporte.md`.
+- No corrí la suite: no cambió código. Las 3025 pruebas son las de `develop` tras la T-13b.
 
 ## Dudas
-- **D1.** Sarko del panel de T34 mide 230 × 287.5 (4:5) y no 230 × 301 como en Figma, para no deformar la imagen. ¿Bien así, o lo hago de 240 de ancho para acercarme a los 301 de alto?
+- **D1.** La matriz «sin desbordes» de 9 archivos de pruebas (6 combinaciones cada uno) se cruza con la auditoría de `test/auditoria/`, que ya revisa desbordes en 4 tamaños × 3 escalas. Hay dos opciones:
+  - pasarla a un ayudante común y conservar las mismas pruebas (es lo que propongo);
+  - borrarla por redundante, con lo que bajaría el número de pruebas.
+- **D2.** `mostrarAvisoBreve` (sin uso) tiene otro estilo: flotante y con `accionSecundaria`. Los 9 avisos reales usan el `SnackBar` del tema. Propongo que `mostrarAviso` use el estilo actual y borrar `mostrarAvisoBreve`. ¿De acuerdo?
+- **D3.** La regla «entrada en la galería» no tiene sentido para lo que no tiene vista propia (`mostrarAviso`, `mostrarHojaAdaptativa`, `VistaAsincrona` y `DesplazableAltoMinimo`). Lo dejé como excepción en las reglas; confírmalo.
+- **D4.** 21 clases públicas de `lib/componentes/` solo se usan en su propio archivo (pintores y subpiezas). ¿Las volvemos privadas en la T-15b para que la API pública muestre solo lo reutilizable? No ahorra líneas.
+- **D5.** El `TextButton` «Ahora no» del Examen (48 de alto, color crisis) se repite 2 veces en `pantalla_jefe.dart`. Si aparece un tercer uso con otro color, propongo `BotonApp(tipo: TipoBoton.texto)`. ¿Existe ya un tipo de texto en el diseño (Figma) que deba usar?
+- **D6.** Quitar el `copyWith(color: tokens.textoPrimario)` redundante (P-03) no cambia nada visible, pero deja implícito el color. ¿Prefieres conservarlo por claridad? Si se conserva, el ahorro de la T-15b baja ≈ 40 líneas.
