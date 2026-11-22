@@ -8,6 +8,7 @@ import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import '../datos/modelos/examen.dart';
 import 'agarre_hoja.dart';
+import 'caja_superficie.dart';
 import 'hoja_lateral.dart';
 import 'icono_app.dart';
 import 'opcion_justificacion.dart';
@@ -583,14 +584,11 @@ class TarjetaJefe extends StatelessWidget {
   Widget _tarjeta(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
-    return Container(
-      key: const ValueKey('tarjeta-jefe'),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficie,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: tokens.bordeDefault),
-      ),
+    return CajaSuperficie(
+      clave: const ValueKey('tarjeta-jefe'),
+      relleno: const EdgeInsets.all(20),
+      radio: 20,
+      conBorde: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

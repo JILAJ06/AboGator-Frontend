@@ -7,13 +7,13 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
 import '../../componentes/aviso_snack.dart';
-import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/foco_retorno.dart';
 import '../../componentes/icono_app.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/piezas_ajustes.dart';
 import '../../componentes/piezas_perfil.dart';
+import '../../componentes/titulo_enfocado.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/tema/iconos_app.dart';
@@ -248,17 +248,8 @@ class _PantallaAjustesState extends ConsumerState<PantallaAjustes> {
           ),
         ),
         const SizedBox(width: 4),
-        Expanded(
-          child: BloqueLectura(
-            key: const ValueKey('titulo-ajustes'),
-            encabezado: true,
-            autofocus: true,
-            radio: 8,
-            child: Text(
-              Textos.ajustesTitulo,
-              style: estilos.h1.copyWith(color: tokens.textoPrimario),
-            ),
-          ),
+        const Expanded(
+          child: TituloEnfocado(Textos.ajustesTitulo, clave: ValueKey('titulo-ajustes')),
         ),
       ],
     );

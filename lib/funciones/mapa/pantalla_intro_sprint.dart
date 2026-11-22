@@ -6,10 +6,11 @@ import '../../app/rutas.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_cerrar.dart';
 import '../../componentes/chip_hud.dart';
+import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/mensaje_pantalla.dart';
+import '../../componentes/vista_asincrona.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
-import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/modelos/modulo.dart';
 import 'detalle_sprint.dart';
 import 'estado_mapa.dart';
@@ -44,15 +45,13 @@ class PantallaIntroSprint extends ConsumerWidget {
     }
     final datos = ref.watch(datosModuloProvider(moduloId));
     return Scaffold(
-      body: switch (datos) {
-        AsyncData(:final value) => _contenido(context, value),
-        AsyncError() => MensajePantalla(
-          texto: Textos.introErrorCarga,
-          textoBoton: Textos.reintentar,
-          alPresionar: () => ref.invalidate(datosModuloProvider(moduloId)),
-        ),
-        _ => const _EsqueletoIntro(),
-      },
+      body: VistaAsincrona(
+        valor: datos,
+        datos: (value) => _contenido(context, value),
+        textoError: Textos.introErrorCarga,
+        alReintentar: () => ref.invalidate(datosModuloProvider(moduloId)),
+        esqueleto: const _EsqueletoIntro(),
+      ),
     );
   }
 
@@ -141,37 +140,22 @@ class _EsqueletoIntro extends StatelessWidget {
   const _EsqueletoIntro();
 
   @override
-  Widget build(BuildContext context) {
-    final color = context.tokens.fondoSuperficieAlt;
-    Widget bloque(double alto, {double? ancho, double radio = 18}) => Container(
-      width: ancho,
-      height: alto,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(radio)),
-    );
-    return Semantics(
-      label: Textos.cargandoIntro,
-      liveRegion: true,
-      excludeSemantics: true,
-      child: SafeArea(
-        child: SingleChildScrollView(
-          key: const ValueKey('esqueleto-intro'),
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(24, 62, 24, 0),
-          child: Column(
-            children: [
-              bloque(230, ancho: 230, radio: 115),
-              const SizedBox(height: 20),
-              bloque(16, ancho: 140, radio: 8),
-              const SizedBox(height: 6),
-              bloque(64, radio: 8),
-              const SizedBox(height: 8),
-              bloque(60, radio: 8),
-              const SizedBox(height: 14),
-              bloque(180),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const EsqueletoPantalla(
+    etiqueta: Textos.cargandoIntro,
+    clave: ValueKey('esqueleto-intro'),
+    areaSegura: true,
+    relleno: EdgeInsets.fromLTRB(24, 62, 24, 0),
+    alineacion: CrossAxisAlignment.center,
+    hijos: [
+      BloqueEsqueleto(230, ancho: 230, radio: 115),
+      SizedBox(height: 20),
+      BloqueEsqueleto(16, ancho: 140, radio: 8),
+      SizedBox(height: 6),
+      BloqueEsqueleto(64, radio: 8),
+      SizedBox(height: 8),
+      BloqueEsqueleto(60, radio: 8),
+      SizedBox(height: 14),
+      BloqueEsqueleto(180, radio: 18),
+    ],
+  );
 }

@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 
 /// "Tu semana" del Inicio en tablet (Figma 96:543): fondo/superficie, borde 1
@@ -60,14 +61,11 @@ class TarjetaSemana extends StatelessWidget {
       ),
     ];
 
-    return Container(
-      key: const ValueKey('tarjeta-semana'),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficie,
-        borderRadius: BorderRadius.circular(radio),
-        border: Border.all(color: tokens.bordeDefault),
-      ),
+    return CajaSuperficie(
+      clave: const ValueKey('tarjeta-semana'),
+      relleno: const EdgeInsets.all(20),
+      radio: radio,
+      conBorde: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -137,12 +135,10 @@ class _Estadistica extends StatelessWidget {
       container: true,
       label: Textos.semanaEstadistica(etiqueta, valorSemantico ?? valor),
       excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficieAlt,
-          borderRadius: BorderRadius.circular(TarjetaSemana.radioEstadistica),
-        ),
+      child: CajaSuperficie(
+        relleno: const EdgeInsets.all(12),
+        fondo: FondoCaja.superficieAlt,
+        radio: TarjetaSemana.radioEstadistica,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

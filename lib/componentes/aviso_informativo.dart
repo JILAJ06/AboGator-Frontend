@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/utilidades/extensiones_contexto.dart';
 import 'bloque_lectura.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 
 /// Aviso con ícono sobre `fondo/destacado` (aviso del buzón en 19 y de
@@ -32,13 +33,10 @@ class AvisoInformativo extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     return BloqueLectura(
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 14, vertical: rellenoVertical),
-        decoration: BoxDecoration(
-          color: tokens.fondoDestacado,
-          borderRadius: BorderRadius.circular(radio),
-        ),
+      child: CajaSuperficie(
+        ancho: double.infinity,
+        relleno: EdgeInsets.symmetric(horizontal: 14, vertical: rellenoVertical),
+        fondo: FondoCaja.destacado,
         child: Row(
           children: [
             IconoApp(icono, tamano: tamanoIcono, color: colorIcono ?? tokens.accionSecundaria),

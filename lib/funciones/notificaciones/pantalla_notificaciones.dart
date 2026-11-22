@@ -9,15 +9,16 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/rutas.dart';
 import '../../componentes/accion_enfocable.dart';
 import '../../componentes/aviso_snack.dart';
-import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_atras.dart';
+import '../../componentes/caja_superficie.dart';
 import '../../componentes/disposicion_ilustracion_tablet.dart';
 import '../../componentes/foco_retorno.dart';
 import '../../componentes/ilustracion_insignia.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/piezas_ajustes.dart';
 import '../../componentes/sarko_imagen.dart';
+import '../../componentes/titulo_enfocado.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/textos/textos.dart';
@@ -150,56 +151,39 @@ class _NotificacionesState extends ConsumerState<_Notificaciones> {
     final tablet = context.clasePantalla.esTablet;
     // Figma: texto en x16 (móvil) o x20 (tablet); sin íconos (T-13b, ronda 2).
     final relleno = tablet ? 20.0 : 16.0;
-    final tarjeta = Container(
-      key: const ValueKey('tarjeta-notificaciones'),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficie,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: tokens.bordeDefault),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FilaAjuste(
-            key: const ValueKey('notif-racha'),
-            rellenoHorizontal: relleno,
-            titulo: Textos.rachaEnRiesgo,
-            detalle: Textos.rachaEnRiesgoDetalle,
-            interruptor: _p.rachaEnRiesgo,
-            control: InterruptorApp(valor: _p.rachaEnRiesgo, grande: true),
-            alPresionar: () => _cambiar(_p.copyWith(rachaEnRiesgo: !_p.rachaEnRiesgo)),
-          ),
-          Divider(height: 1, thickness: 1, color: tokens.bordeDefault),
-          FilaAjuste(
-            key: const ValueKey('notif-apelaciones'),
-            rellenoHorizontal: relleno,
-            titulo: Textos.juiciosApelacion,
-            detalle: Textos.juiciosApelacionDetalle,
-            interruptor: _p.apelaciones,
-            control: InterruptorApp(valor: _p.apelaciones, grande: true),
-            alPresionar: () => _cambiar(_p.copyWith(apelaciones: !_p.apelaciones)),
-          ),
-          Divider(height: 1, thickness: 1, color: tokens.bordeDefault),
-          _FilaRecordatorio(
-            relleno: relleno,
-            hora: hora,
-            activo: _p.recordatorioDiario,
-            nodoFoco: _focoRecordatorio,
-            alAbrir: _elegirHora,
-            alCambiar: (v) => _cambiar(_p.copyWith(recordatorioDiario: v)),
-          ),
-        ],
-      ),
+    final tarjeta = TarjetaLista(
+      clave: const ValueKey('tarjeta-notificaciones'),
+      filas: [
+        FilaAjuste(
+          key: const ValueKey('notif-racha'),
+          rellenoHorizontal: relleno,
+          titulo: Textos.rachaEnRiesgo,
+          detalle: Textos.rachaEnRiesgoDetalle,
+          interruptor: _p.rachaEnRiesgo,
+          control: InterruptorApp(valor: _p.rachaEnRiesgo, grande: true),
+          alPresionar: () => _cambiar(_p.copyWith(rachaEnRiesgo: !_p.rachaEnRiesgo)),
+        ),
+        FilaAjuste(
+          key: const ValueKey('notif-apelaciones'),
+          rellenoHorizontal: relleno,
+          titulo: Textos.juiciosApelacion,
+          detalle: Textos.juiciosApelacionDetalle,
+          interruptor: _p.apelaciones,
+          control: InterruptorApp(valor: _p.apelaciones, grande: true),
+          alPresionar: () => _cambiar(_p.copyWith(apelaciones: !_p.apelaciones)),
+        ),
+        _FilaRecordatorio(
+          relleno: relleno,
+          hora: hora,
+          activo: _p.recordatorioDiario,
+          nodoFoco: _focoRecordatorio,
+          alAbrir: _elegirHora,
+          alCambiar: (v) => _cambiar(_p.copyWith(recordatorioDiario: v)),
+        ),
+      ],
     );
 
-    final titulo = BloqueLectura(
-      key: const ValueKey('titulo-notificaciones'),
-      encabezado: true,
-      autofocus: true,
-      radio: 8,
-      child: Text(Textos.protegeTuRacha, style: estilos.h1.copyWith(color: tokens.textoPrimario)),
-    );
+    const titulo = TituloEnfocado(Textos.protegeTuRacha, clave: ValueKey('titulo-notificaciones'));
     final contenido = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -212,14 +196,14 @@ class _NotificacionesState extends ConsumerState<_Notificaciones> {
             child: BotonAtras(alPresionar: _volver),
           ),
           const SizedBox(height: 12),
-          Row(
+          const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Padding(padding: const EdgeInsets.only(top: 24), child: titulo),
+                child: Padding(padding: EdgeInsets.only(top: 24), child: titulo),
               ),
-              const SizedBox(width: 12),
-              const SarkoImagen(pose: PoseSarko.alegre, ancho: 96, decorativa: true),
+              SizedBox(width: 12),
+              SarkoImagen(pose: PoseSarko.alegre, ancho: 96, decorativa: true),
             ],
           ),
         ],

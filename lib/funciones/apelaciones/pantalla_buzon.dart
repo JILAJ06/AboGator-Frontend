@@ -9,14 +9,16 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
 import '../../componentes/aviso_snack.dart';
-import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/caja_superficie.dart';
+import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/fila_apelacion.dart';
-import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/piezas_apelacion.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/tarjeta_caso.dart';
+import '../../componentes/titulo_enfocado.dart';
+import '../../componentes/vista_asincrona.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
@@ -65,20 +67,18 @@ class PantallaBuzon extends ConsumerWidget {
       pestana: PestanaApp.buzon,
       cuerpo: SafeArea(
         bottom: false,
-        child: switch (datos) {
-          AsyncData(:final value) when value.buzon.total == 0 => const _UnaColumna(
-            child: _BuzonVacio(),
-          ),
-          // T21 (tablet horizontal): lista-detalle.
-          AsyncData(:final value) when context.clasePantalla.esAncho => _BuzonTablet(datos: value),
-          AsyncData(:final value) => _UnaColumna(child: _Buzon(datos: value)),
-          AsyncError() => MensajePantalla(
-            texto: Textos.buzonErrorCarga,
-            textoBoton: Textos.reintentar,
-            alPresionar: () => ref.invalidate(datosBuzonProvider),
-          ),
-          _ => const _EsqueletoBuzon(),
-        },
+        child: VistaAsincrona(
+          valor: datos,
+          datos: (value) => value.buzon.total == 0
+              ? const _UnaColumna(child: _BuzonVacio())
+              // T21 (tablet horizontal): lista-detalle.
+              : context.clasePantalla.esAncho
+              ? _BuzonTablet(datos: value)
+              : _UnaColumna(child: _Buzon(datos: value)),
+          textoError: Textos.buzonErrorCarga,
+          alReintentar: () => ref.invalidate(datosBuzonProvider),
+          esqueleto: const _EsqueletoBuzon(),
+        ),
       ),
     );
   }
@@ -89,16 +89,8 @@ class _Titulo extends StatelessWidget {
   const _Titulo();
 
   @override
-  Widget build(BuildContext context) => BloqueLectura(
-    key: const ValueKey('titulo-buzon'),
-    encabezado: true,
-    autofocus: true,
-    radio: 8,
-    child: Text(
-      Textos.buzonTitulo,
-      style: context.estilos.h1.copyWith(color: context.tokens.textoPrimario),
-    ),
-  );
+  Widget build(BuildContext context) =>
+      const TituloEnfocado(Textos.buzonTitulo, clave: ValueKey('titulo-buzon'));
 }
 
 class _Buzon extends ConsumerWidget {
@@ -168,30 +160,22 @@ class _Buzon extends ConsumerWidget {
     final lista = Semantics(
       container: true,
       label: Textos.listaApelaciones(apelaciones.length),
-      child: Container(
-        key: const ValueKey('lista-apelaciones'),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficie,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: tokens.bordeDefault),
-        ),
-        child: Column(
-          children: [
-            for (final (i, a) in apelaciones.indexed) ...[
-              if (i > 0) Divider(height: 1, thickness: 1, color: tokens.bordeDefault),
-              FilaApelacion(
-                key: ValueKey('fila-${a.id}'),
-                titulo: a.titulo,
-                tema: a.tema,
-                dia: a.diaRepaso,
-                dias: buzon.diasHasta(a),
-                colorModulo: datos.coloresModulo[a.moduloId] ?? tokens.bordeControl,
-                alPresionar: () => _abrir(context, ref, a, buzon.diasHasta(a)),
-              ),
-            ],
-          ],
-        ),
+      child: TarjetaLista(
+        clave: const ValueKey('lista-apelaciones'),
+        radio: 20,
+        alineacion: CrossAxisAlignment.center,
+        filas: [
+          for (final a in apelaciones)
+            FilaApelacion(
+              key: ValueKey('fila-${a.id}'),
+              titulo: a.titulo,
+              tema: a.tema,
+              dia: a.diaRepaso,
+              dias: buzon.diasHasta(a),
+              colorModulo: datos.coloresModulo[a.moduloId] ?? tokens.bordeControl,
+              alPresionar: () => _abrir(context, ref, a, buzon.diasHasta(a)),
+            ),
+        ],
       ),
     );
 
@@ -347,32 +331,24 @@ class _BuzonTabletState extends ConsumerState<_BuzonTablet> {
       child: Semantics(
         container: true,
         label: Textos.listaApelaciones(buzon.apelaciones.length),
-        child: Container(
-          key: const ValueKey('lista-apelaciones'),
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: tokens.fondoSuperficie,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: tokens.bordeDefault),
-          ),
-          child: Column(
-            children: [
-              for (final (i, a) in buzon.apelaciones.indexed) ...[
-                if (i > 0) Divider(height: 1, thickness: 1, color: tokens.bordeDefault),
-                FilaApelacion(
-                  key: ValueKey('fila-${a.id}'),
-                  titulo: a.titulo,
-                  tema: a.tema,
-                  dia: a.diaRepaso,
-                  dias: buzon.diasHasta(a),
-                  colorModulo: datos.coloresModulo[a.moduloId] ?? tokens.bordeControl,
-                  seleccionada: a.id == actual?.id,
-                  nodoFoco: _foco(a.id),
-                  alPresionar: () => _seleccionar(a),
-                ),
-              ],
-            ],
-          ),
+        child: TarjetaLista(
+          clave: const ValueKey('lista-apelaciones'),
+          radio: 20,
+          alineacion: CrossAxisAlignment.center,
+          filas: [
+            for (final a in buzon.apelaciones)
+              FilaApelacion(
+                key: ValueKey('fila-${a.id}'),
+                titulo: a.titulo,
+                tema: a.tema,
+                dia: a.diaRepaso,
+                dias: buzon.diasHasta(a),
+                colorModulo: datos.coloresModulo[a.moduloId] ?? tokens.bordeControl,
+                seleccionada: a.id == actual?.id,
+                nodoFoco: _foco(a.id),
+                alPresionar: () => _seleccionar(a),
+              ),
+          ],
         ),
       ),
     );
@@ -632,34 +608,18 @@ class _EsqueletoBuzon extends StatelessWidget {
   const _EsqueletoBuzon();
 
   @override
-  Widget build(BuildContext context) {
-    final color = context.tokens.fondoSuperficieAlt;
-    Widget bloque(double alto, {double? ancho, double radio = 16}) => Container(
-      width: ancho,
-      height: alto,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(radio)),
-    );
-    return Semantics(
-      label: Textos.cargandoBuzon,
-      liveRegion: true,
-      excludeSemantics: true,
-      child: SingleChildScrollView(
-        key: const ValueKey('esqueleto-buzon'),
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            bloque(32, ancho: 260, radio: 8),
-            const SizedBox(height: 8),
-            bloque(40, ancho: 230, radio: 8),
-            const SizedBox(height: 44),
-            bloque(64, radio: 18),
-            const SizedBox(height: 12),
-            bloque(340, radio: 20),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const EsqueletoPantalla(
+    etiqueta: Textos.cargandoBuzon,
+    clave: ValueKey('esqueleto-buzon'),
+    relleno: EdgeInsets.fromLTRB(24, 12, 24, 0),
+    hijos: [
+      BloqueEsqueleto(32, ancho: 260, radio: 8),
+      SizedBox(height: 8),
+      BloqueEsqueleto(40, ancho: 230, radio: 8),
+      SizedBox(height: 44),
+      BloqueEsqueleto(64, radio: 18),
+      SizedBox(height: 12),
+      BloqueEsqueleto(340, radio: 20),
+    ],
+  );
 }

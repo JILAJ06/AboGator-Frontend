@@ -12,11 +12,11 @@ import '../../componentes/acciones_veredicto.dart';
 import '../../componentes/aviso_conexion.dart';
 import '../../componentes/aviso_snack.dart';
 import '../../componentes/barra_juego.dart';
-import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/composicion_juego_tablet.dart';
 import '../../componentes/dialogo_confirmacion.dart';
 import '../../componentes/disposicion_resultado_tablet.dart';
+import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/hoja_lateral.dart';
 import '../../componentes/icono_app.dart';
 import '../../componentes/mensaje_pantalla.dart';
@@ -28,6 +28,7 @@ import '../../componentes/sarko_imagen.dart';
 import '../../componentes/sello_veredicto.dart';
 import '../../componentes/tarjeta_caso.dart';
 import '../../componentes/tinte_veredicto.dart';
+import '../../componentes/titulo_enfocado.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/tema/iconos_app.dart';
@@ -250,16 +251,11 @@ class _Crisis extends ConsumerWidget {
     if (context.clasePantalla.esAncho) {
       return _CrisisTablet(
         alerta: alerta,
-        titulo: BloqueLectura(
-          key: const ValueKey('titulo-crisis'),
-          encabezado: true,
-          autofocus: true,
-          radio: 8,
-          child: Text(
-            info.titulo,
-            textAlign: TextAlign.center,
-            style: estilos.h1.copyWith(color: EfectosApp.blancoCrisis),
-          ),
+        titulo: TituloEnfocado(
+          info.titulo,
+          clave: const ValueKey('titulo-crisis'),
+          color: EfectosApp.blancoCrisis,
+          alineacion: TextAlign.center,
         ),
         descripcion: Text(
           info.descripcion,
@@ -319,15 +315,10 @@ class _Crisis extends ConsumerWidget {
               padding: const EdgeInsets.only(right: 102),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 96),
-                child: BloqueLectura(
-                  key: const ValueKey('titulo-crisis'),
-                  encabezado: true,
-                  autofocus: true,
-                  radio: 8,
-                  child: Text(
-                    info.titulo,
-                    style: estilos.h1.copyWith(color: EfectosApp.blancoCrisis),
-                  ),
+                child: TituloEnfocado(
+                  info.titulo,
+                  clave: const ValueKey('titulo-crisis'),
+                  color: EfectosApp.blancoCrisis,
                 ),
               ),
             ),
@@ -426,43 +417,27 @@ class _Crisis extends ConsumerWidget {
 class _EsqueletoCrisis extends StatelessWidget {
   const _EsqueletoCrisis();
 
+  static const _color = EfectosApp.fondoReglasCrisis;
+
   @override
-  Widget build(BuildContext context) {
-    Widget bloque(double alto, {double? ancho, double radio = 16}) => Container(
-      width: ancho,
-      height: alto,
-      decoration: BoxDecoration(
-        color: EfectosApp.fondoReglasCrisis,
-        borderRadius: BorderRadius.circular(radio),
-      ),
-    );
-    return Semantics(
-      label: Textos.cargandoExamen,
-      liveRegion: true,
-      excludeSemantics: true,
-      child: SingleChildScrollView(
-        key: const ValueKey('esqueleto-crisis'),
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            bloque(28, ancho: 230, radio: 999),
-            const SizedBox(height: 12),
-            bloque(96, ancho: 240, radio: 8),
-            const SizedBox(height: 10),
-            bloque(60),
-            const SizedBox(height: 16),
-            bloque(80, radio: 18),
-            const SizedBox(height: 12),
-            bloque(40, ancho: 300),
-            const SizedBox(height: 16),
-            bloque(200, radio: 20),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const EsqueletoPantalla(
+    etiqueta: Textos.cargandoExamen,
+    clave: ValueKey('esqueleto-crisis'),
+    relleno: EdgeInsets.fromLTRB(24, 16, 24, 0),
+    hijos: [
+      BloqueEsqueleto(28, ancho: 230, radio: 999, color: _color),
+      SizedBox(height: 12),
+      BloqueEsqueleto(96, ancho: 240, radio: 8, color: _color),
+      SizedBox(height: 10),
+      BloqueEsqueleto(60, color: _color),
+      SizedBox(height: 16),
+      BloqueEsqueleto(80, radio: 18, color: _color),
+      SizedBox(height: 12),
+      BloqueEsqueleto(40, ancho: 300, color: _color),
+      SizedBox(height: 16),
+      BloqueEsqueleto(200, radio: 20, color: _color),
+    ],
+  );
 }
 
 // =========================================================================
@@ -954,16 +929,10 @@ class _CapaPausa extends StatelessWidget {
               children: [
                 IconoApp(IconosApp.pause, tamano: 40, color: tokens.textoPrimario),
                 const SizedBox(height: 16),
-                BloqueLectura(
-                  encabezado: true,
+                const TituloEnfocado(
+                  Textos.examenEnPausa,
+                  alineacion: TextAlign.center,
                   enVivo: true,
-                  autofocus: true,
-                  radio: 8,
-                  child: Text(
-                    Textos.examenEnPausa,
-                    textAlign: TextAlign.center,
-                    style: estilos.h1.copyWith(color: tokens.textoPrimario),
-                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(

@@ -127,11 +127,11 @@ Cada lote es una rama y un PR. Se ordenan de lo seguro y compartido a lo delicad
 |---|---|---|---|---|---|
 | **T-15b** | `15b-limpieza-y-piezas-pequenas` | código muerto, P-03 (color redundante), P-02 (`mostrarAviso`), P-06 (`AgarreHoja`), P-07 (`BotonIconoCaja`), P-18 (`Pildora`) | ≈ 280 | bajo | suite completa; auditoría; pruebas de avisos, atrás y cerrar; contrastes |
 | **T-15c** | `15c-superficies-y-estados` | P-04 (`CajaSuperficie`), P-05 (`TarjetaLista`), P-01 (`EsqueletoPantalla`), P-09 (`VistaAsincrona`), P-10 (`TituloEnfocado`) | ≈ 385 | bajo-medio | claves `esqueleto-*`; pruebas de error con «Reintentar»; foco inicial (`criterios_test`); medidas por clave |
-| **T-15d** | `15d-ayudantes-de-pruebas` | T-01, T-02, T-03 (solo `test/`; sin tocar `lib/`) | ≈ 240 en `test/` | bajo | el mismo número de pruebas antes y después (salvo D1) |
-| **T-15e** | `15e-marcos-y-disposiciones` | P-08 (`AccionEnfocable.boton`), P-13 (`DesplazableAltoMinimo`), P-12 (`mostrarHojaAdaptativa`), P-17 (`DosColumnasTablet`), P-16 (Inicio), P-19 (Acceso) | ≈ 310 | medio | auditoría completa (etiquetas, desbordes al 200 %); pruebas de tablet de cada área; `ajustes_test` y `notificaciones_test` (hojas) |
-| **T-15f** | `15f-juego-examen-y-fin-de-sprint` | P-11 (`ColumnaFinSprint`), P-15 (Examen), P-14 (`MarcoMazo`), P-20 | ≈ 335 | medio-alto | `juego_test`, `veredicto_test`, `jefe_test`, `examen_tablet_test`, `juicio_test`, `fin_sprint_test`, `resultados_tablet_test`, `pulido_test`, auditoría de juego y de Examen |
+| **T-15d** | `15d-ayudantes-de-pruebas` | T-01, T-02, T-03 (solo `test/`; sin tocar `lib/`) | neto ≈ −150 en `test/` (antes ≈ 240); puntos: 9 matrices → 1, 4 falsos duplicados → 1 | bajo | el mismo número de pruebas antes y después (salvo D1) |
+| **T-15e** | `15e-marcos-y-disposiciones` | P-08 (`AccionEnfocable.boton`), P-13 (`DesplazableAltoMinimo`), P-12 (`mostrarHojaAdaptativa`), P-17 (`DosColumnasTablet`), P-16 (Inicio), P-19 (Acceso) | neto ≈ −210 (antes ≈ 310): P-08 −75, P-16 −55, P-19 −30, P-13 −25, P-12 −15, P-17 −10; puntos: 18 semánticas → 1, 11 desplazables → 1, 3 hojas → 1 | medio | auditoría completa (etiquetas, desbordes al 200 %); pruebas de tablet de cada área; `ajustes_test` y `notificaciones_test` (hojas) |
+| **T-15f** | `15f-juego-examen-y-fin-de-sprint` | P-11 (`ColumnaFinSprint`), P-15 (Examen), P-14 (`MarcoMazo`), P-20 | neto ≈ −310 (antes ≈ 335): P-11 −100, P-15 −90, P-14 −75, P-20 −45; puntos: teclado del mazo 3 → 1 | medio-alto | `juego_test`, `veredicto_test`, `jefe_test`, `examen_tablet_test`, `juicio_test`, `fin_sprint_test`, `resultados_tablet_test`, `pulido_test`, auditoría de juego y de Examen |
 
-- **Total estimado:** ≈ 1 310 líneas menos en `lib/` (≈ 3,7 %) y ≈ 240 menos en `test/`.
+- **Total estimado (original):** ≈ 1 310 líneas menos en `lib/` y ≈ 240 en `test/`. **Corregido tras T-15b y T-15c (neto):** T-15b −76 y T-15c −23 (reales); T-15e ≈ −210 y T-15f ≈ −310 (estimados) → ≈ −620 en `lib/` (≈ 1,7 %); T-15d ≈ −150 en `test/`. El beneficio principal de la T-15 son los **puntos de cambio únicos**, más que las líneas.
 - La T-15d puede hacerse cuando se quiera, porque no toca `lib/`. Conviene **no** juntarla con un lote de `lib/`, para que un cambio de app nunca coincida con un cambio de las pruebas que lo protegen.
 - Si un lote queda grande, se puede partir. En la T-15f, P-14 (el mazo) debe ir sola y al final.
 
@@ -139,11 +139,31 @@ Cada lote es una rama y un PR. Se ordenan de lo seguro y compartido a lo delicad
 | Lote | `lib/` antes | `lib/` después | Diferencia | `test/` antes → después | Pruebas |
 |---|---|---|---|---|---|
 | T-15b | 35 552 (211 archivos) | 35 476 (214 archivos) | **−76** | 19 673 → 19 832 (+159, pruebas nuevas) | 3025 → 3034 |
+| T-15c | 35 476 (214 archivos) | 35 453 (218 archivos) | **−23** | 19 832 → 20 077 (+245, pruebas nuevas) | 3034 → 3045 |
 
 - **T-15b, desglose:**
   - En los archivos que ya existían se fueron 237 líneas netas: 49 de `pantalla_pendiente.dart`, 17 de `mostrarAvisoBreve`, unas 100 de los botones de caja y los agarres, unas 50 de las 22 píldoras y unas 20 de los avisos.
   - Los cuatro componentes nuevos, con su documentación, suman 161 líneas; la sección de la galería, 24.
 - **Corrección a la estimación:** el ahorro esperado (≈ 280) contaba las líneas repetidas, pero no restaba bien el costo de los componentes nuevos. Además, 5 de los 7 «textos sin uso» no lo eran. Para los lotes siguientes, conviene estimar el ahorro **neto**: líneas quitadas menos el componente y su entrada en la galería.
+
+- **T-15c, por patrón** (medido aplicando cada patrón solo sobre el punto de partida; «neto» resta el componente nuevo):
+
+| Patrón | Usos | Archivos existentes | Componente | Neto | Puntos de cambio (antes → después) |
+|---|---|---|---|---|---|
+| P-01 `EsqueletoPantalla` + `BloqueEsqueleto` | 9 esqueletos + el bloque del certificado | −130 | +68 | **−62** | armazón (región en vivo, sin desplazamiento, bloque gris): 10 → 1 |
+| P-04 `CajaSuperficie` | 30 cajas en 23 archivos | −84 | ≈ +60 | **−24** | fondo, radio y borde de las cajas: 30 → 1 |
+| P-05 `TarjetaLista` (en `caja_superficie.dart`) | `MenuAgrupado` (8 usos), Buzón ×2 y notificaciones | −43 | ≈ +38 | **−5** | divisores y recorte de las listas: 4 → 1 |
+| P-10 `TituloEnfocado` | 12 títulos (11 automáticos y el legal a mano) | −68 | +49 | **−19** | encabezado, foco inicial y radio del anillo: 12 → 1 |
+| P-09 `VistaAsincrona` | 7 pantallas | ≈ −8 | +55 | **≈ +47** | mensaje de error con «Reintentar» y política de carga: 7 → 1 |
+| Galería y textos | — | +38 | — | **+38** | — |
+
+  - **P-09 aumenta líneas pero se hizo** porque reduce los puntos de cambio de 7 a 1, como permite la regla del lote. Queda como duda D1 del reporte de la T-15c.
+  - **Quedaron fuera:**
+    - el Examen (`pantalla_jefe`), que tiene un error propio «no disponible»;
+    - el juicio, que revisa «sin conexión» antes que los datos y no ofrece «Reintentar»;
+    - los paneles del juego (`panel_*`), cuyos títulos llevan etiqueta propia y excluyen los hijos;
+    - el resultado del juicio, que tiene `nodoFoco`;
+    - las cajas con sombra, degradado, borde de otro color u otro fondo.
 
 ## Reglas de toda la T-15
 1. **Cero cambios visibles.** Se mantienen las mismas medidas, textos, colores, foco, orden de lectura, semántica y animaciones. La auditoría de `test/auditoria/` debe seguir verde **sin tocar sus escenas**. Las demás pruebas solo cambian si un lote lo autoriza de forma explícita (T-15d).

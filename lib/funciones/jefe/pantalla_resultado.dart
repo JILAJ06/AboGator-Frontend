@@ -8,8 +8,8 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/rutas.dart';
 import '../../componentes/aviso_snack.dart';
-import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/caja_superficie.dart';
 import '../../componentes/confeti_sprint.dart';
 import '../../componentes/cuenta_regresiva_vida.dart';
 import '../../componentes/disposicion_resultado_tablet.dart';
@@ -17,6 +17,7 @@ import '../../componentes/icono_app.dart';
 import '../../componentes/ilustracion_sarko.dart';
 import '../../componentes/piezas_resultado.dart';
 import '../../componentes/sarko_imagen.dart';
+import '../../componentes/titulo_enfocado.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/textos/textos.dart';
@@ -143,16 +144,11 @@ class _TituloResultado extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) => BloqueLectura(
-    key: const ValueKey('titulo-resultado'),
-    encabezado: true,
-    autofocus: true,
-    radio: 8,
-    child: Text(
-      texto,
-      textAlign: TextAlign.center,
-      style: context.estilos.h1.copyWith(color: color),
-    ),
+  Widget build(BuildContext context) => TituloEnfocado(
+    texto,
+    clave: const ValueKey('titulo-resultado'),
+    color: color,
+    alineacion: TextAlign.center,
   );
 }
 
@@ -187,14 +183,8 @@ class _ErrorResultado extends StatelessWidget {
   );
 }
 
-Widget _bloque(BuildContext context, double alto, {double? ancho}) => Container(
-  width: ancho,
-  height: alto,
-  decoration: BoxDecoration(
-    color: context.tokens.fondoSuperficieAlt,
-    borderRadius: BorderRadius.circular(8),
-  ),
-);
+Widget _bloque(BuildContext context, double alto, {double? ancho}) =>
+    CajaSuperficie(ancho: ancho, alto: alto, fondo: FondoCaja.superficieAlt, radio: 8);
 
 // =========================================================================
 // 29 · Auditoría superada
@@ -562,14 +552,11 @@ class _TarjetaVida extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    return Container(
-      key: ValueKey(reloj ? 'proxima-vida' : 'vidas-restantes'),
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: tokens.fondoDestacado,
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return CajaSuperficie(
+      clave: ValueKey(reloj ? 'proxima-vida' : 'vidas-restantes'),
+      ancho: double.infinity,
+      relleno: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      fondo: FondoCaja.destacado,
       child: Row(
         children: [
           if (reloj) ...[

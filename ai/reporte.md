@@ -1,76 +1,91 @@
 # Reporte
-- **Tarea:** T-15b · Limpieza y piezas pequeñas
-- **Rama:** `15b-limpieza-y-piezas-pequenas`
+- **Tarea:** T-15c · Superficies y estados
+- **Rama:** `15c-superficies-y-estados`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
 
 ## Resumen
-- **Líneas de `lib/`:** 35 552 → **35 476 (−76)**, en 211 → 214 archivos.
-- **Líneas de `test/`:** 19 673 → 19 832 (+159, solo por las pruebas nuevas).
-- **Pruebas:** 3025 → **3034**: las 9 nuevas de las piezas. No cambió ninguna prueba existente.
+- **Líneas de `lib/`:** 35 476 → **35 453 (−23)**, en 214 → 218 archivos.
+- **Líneas de `test/`:** 19 832 → 20 077 (+245, solo por las pruebas nuevas).
+- **Pruebas:** 3034 → **3045**: las 11 nuevas. No cambió ninguna prueba existente.
 - **Auditoría** (`test/auditoria/`): verde y sin tocar sus escenas.
-- **Cero cambios visibles:** mismas medidas, colores, claves, semántica y foco.
-- **El ahorro quedó muy por debajo del estimado** (≈ 280; ver D1).
+- **Cero cambios visibles:** mismas claves, etiquetas, foco inicial, medidas y política de carga, error y datos.
+- **El beneficio de este lote son los puntos de cambio:** 63 lugares quedan en 5 componentes. Las líneas casi no bajan (ver D1).
 
-## 1 · Código muerto
-- **Borrados:**
-  - `lib/app/pantalla_pendiente.dart` (49 líneas);
-  - `mostrarAvisoBreve` (`aviso_error.dart`);
-  - `Textos.veredictoAnuncio` y `Textos.notificacionApelacionPie`;
-  - `MedidasAdaptativas.lienzoTablet`;
-  - `Rutas.juicioApelacion`, cuyo patrón `/buzon/:apelacionId` queda en el comentario de `juicioApelacionDe`.
-- **No se borraron 5 textos:** `buzonApelaciones`, `sinCambios`, `noSeleccionada`, `noMarcada` y `lineaClave`.
-  - En la T-15a los marqué como sin uso por error: los usan otras funciones de `textos.dart` sin el prefijo `Textos.`, por ejemplo `buzonSemantica` e `impactoSemantica`.
-  - Ninguna prueba los usa. Lo corregí en la tabla de `09-duplicacion.md`.
-- **Clases que pasaron a privadas (6):** `_PildoraPlazo`, `_AvatarJefe`, `_PintorAnillo`, `_TarjetaResumenExamen`, `_PistaGesto` y, al principio, `PiezaConfeti`.
-- **Clases que siguen públicas (15), por la regla de D4:**
-  - **`PiezaConfeti`:** forma parte de la API pública de `ConfetiSprint` (sus listas estáticas). Como privada, `flutter analyze` daba `library_private_types_in_public_api`.
-  - **Las usan las pruebas** (`find.byType`, `is` o `as`): `PildoraComodin`, `PintorCamino`, `PintorCorazon`, `EstrellasNodo`, `ChipBonusEvidencia`, `PildoraRepaso`, `PintorBordePunteado`, `BotonPrecio`, `TextoConTrampas`, `PintorTrampas`, `ChipTipoTarjeta`, `BotonEvidencia` y `AvisoDilema`.
-  - **Las usa la galería:** `NotificacionApelacion` y `NotificacionSistema`.
+## Ahorro neto y puntos de cambio por patrón
+Lo medí aplicando cada patrón solo, sobre el punto de partida.
 
-## 2 · Componentes nuevos (`lib/componentes/`)
-| Componente | API | Dónde se usa |
+| Patrón | Usos | Archivos existentes | Componente | Neto | Puntos de cambio |
+|---|---|---|---|---|---|
+| P-01 `EsqueletoPantalla` + `BloqueEsqueleto` | 9 esqueletos + el bloque del certificado | −130 | +68 | **−62** | 10 → 1 |
+| P-04 `CajaSuperficie` | 30 cajas en 23 archivos | −84 | ≈ +60 | **−24** | 30 → 1 |
+| P-05 `TarjetaLista` | `MenuAgrupado` (8 usos), Buzón ×2 y notificaciones | −43 | ≈ +38 | **−5** | 4 → 1 |
+| P-10 `TituloEnfocado` | 12 títulos | −68 | +49 | **−19** | 12 → 1 |
+| P-09 `VistaAsincrona` | 7 pantallas | ≈ −8 | +55 | **≈ +47** | 7 → 1 |
+| Galería y textos | — | +38 | — | +38 | — |
+
+`CajaSuperficie` y `TarjetaLista` viven en `caja_superficie.dart` (98 líneas entre las dos).
+
+## Qué se hizo
+- **`EsqueletoPantalla` + `BloqueEsqueleto`** (`esqueleto_pantalla.dart`):
+  - **Armazón y bloques:** Inicio, Buzón, juicio, juego, intro, Perfil, Tienda y Examen; el Examen pasa su color propio a los bloques.
+  - **Solo el armazón:** el mapa, porque sus círculos se calculan por posición.
+  - **Solo el bloque:** el certificado, porque su marco es un borde punteado.
+  - Conservan la clave `esqueleto-…`, la etiqueta, la región en vivo, el relleno, la alineación y el `SafeArea`.
+  - **Medidas que se mantienen a mano:** el radio por defecto cambiaba entre esqueletos (16 o 18), así que donde era 18 lo puse explícito.
+- **`VistaAsincrona`** (`vista_asincrona.dart`):
+  - Inicio, Buzón, juego, intro y mapa usan el mismo `switch` de antes (`AsyncData`, `AsyncError` y lo demás como carga). Los casos especiales (Buzón vacío, sin vidas, sin tarjetas, módulo no encontrado) van dentro de `datos`.
+  - Perfil y Tienda tenían otra política: el valor previo gana al error y a la carga. Para ellas existe `conservarValor: true`.
+  - **Quedaron fuera:**
+    - el Examen, que tiene un error propio «no disponible»;
+    - el juicio, que revisa «sin conexión» antes que los datos y no ofrece «Reintentar».
+- **`CajaSuperficie`:** 30 cajas, solo las que coinciden exactamente.
+  - Fondo superficie, superficie-alt o destacado; radio; borde de 1 en borde/default o sin borde.
+  - Si tenían clave, relleno, ancho, alto, alineación o recorte, se conservan.
+  - Las cajas con sombra, degradado, borde de otro color u otro fondo se quedaron como estaban.
+- **`TarjetaLista`:**
+  - `MenuAgrupado` pasa a ser una envoltura de una línea (radio 18, clave `menu-perfil`).
+  - Las dos listas del Buzón usan `alineacion: center`, como antes; la de notificaciones, la alineación por defecto.
+- **`TituloEnfocado`:** 12 títulos.
+  - Diálogo de confirmación (H2, con su `autofocus` condicional), recuperación, Ajustes, Buzón, Examen (2 y la pausa con `enVivo`), resultado del Examen, pausa del juego (H2), fin de sprint, notificaciones y `TituloPestana`.
+  - El legal lo hice a mano, por su estilo H3 de 18.
+  - **Quedaron fuera:** los títulos de los paneles del juego (llevan etiqueta propia y excluyen los hijos) y el del resultado del juicio (tiene `nodoFoco`).
+- **Galería:** sección nueva «Superficies, lista, esqueleto y título». El título de ejemplo va sin `autofocus`, para no quitarle el foco a la galería.
+- **Pruebas nuevas** (`test/componentes/superficies_y_estados_test.dart`, 11):
+  - medidas, colores, radios y bordes en claro y oscuro;
+  - divisores de la lista;
+  - región en vivo del esqueleto;
+  - encabezado y foco inicial del título;
+  - `VistaAsincrona` con los tres estados, el reintento y las dos políticas.
+
+## Cifras corregidas en `09-duplicacion.md`
+Las calculé con el criterio neto y los puntos de cambio:
+
+| Lote | Antes | Ahora |
 |---|---|---|
-| `mostrarAviso` / `mostrarAvisoEn` (`aviso_snack.dart`) | `(context o mensajero, texto, {clave})`: `SnackBar` del tema, quita el anterior y anuncia en región en vivo | 9 avisos: Ajustes, Buzón, juicio, Examen (2), resultado del Examen, notificaciones, Perfil y Tienda. Sin galería (D3) |
-| `AgarreHoja` | sin parámetros; 40 × 5, radio 3, `bordeDefault`, `ExcludeSemantics` y clave `agarre` | `panel_evidencia`, `panel_veredicto`, `piezas_jefe` y `selector_hora` |
-| `BotonIconoCaja` | `etiqueta`, `alPresionar`, `icono` o `hijo`, `claveCaja`, `fondo`, `conBorde`, `colorIcono` | `BotonAtras` y `BotonCerrar` (envolturas con sus claves `caja-atras` y `caja-cerrar`), el atrás de `EncabezadoModulo` (fondo al 18 %, sin borde y blanco) y los + y − del selector de hora (`hijo`) |
-| `Pildora` | `fondo`, `relleno`, `child` y, opcionales, `borde`, `sombra`, `altoMinimo` y `clave` (la clave va en la caja) | **22 píldoras** en 15 archivos: las 6 del catálogo y además comodines, chip HUD, etiqueta de la lupa, quiebra, impacto, interruptor de conexión, chip de justificación, plazo, repasos, golpe, comodines bloqueados, inventario, etiqueta del caso, chip de tipo y la del onboarding |
+| T-15d (en `test/`) | ≈ 240 | ≈ −150 |
+| T-15e | ≈ 310 | ≈ −210 |
+| T-15f | ≈ 335 | ≈ −310 |
 
-- **Galería:** sección nueva «Piezas pequeñas (agarre, botón de caja y píldora)», con tres textos nuevos en `Textos`.
-- **Pruebas nuevas:** `test/componentes/piezas_pequenas_test.dart`, con 9 pruebas.
-  - Medidas, colores y radios de cada pieza en claro y oscuro.
-  - Semántica de botón y teclado de `BotonIconoCaja`.
-  - Sombra y alto mínimo de `Pildora`.
-  - `mostrarAviso`: clave, región en vivo y que reemplaza el aviso anterior.
-
-### Para no cambiar nada visible
-- **Claves en la misma caja:** `Pildora.clave` y `BotonIconoCaja.claveCaja` ponen la clave en el mismo `Container`, porque las pruebas leen la decoración con `tester.widget<Container>(find.byKey(…))`.
-- **Agarres de `piezas_jefe` y `selector_hora`:** antes no tenían `ExcludeSemantics` ni clave. Un `Container` decorado no aporta semántica, así que el árbol que lee el lector es el mismo.
-- **Botones + y − del selector:** la clave `mas-…` o `menos-…` pasa de `AccionEnfocable` a `BotonIconoCaja`. El ancestro es el mismo y las pruebas lo encuentran igual. `alignment: center` pasó a `Center`, con el mismo resultado.
-- **Fuera del lote:** P-03 (color redundante), por la decisión D6.
+- **Total corregido:** ≈ −620 en `lib/` (≈ 1,7 %), contando las reales de la T-15b y la T-15c.
+- La sección «Resultados por lote» tiene la fila de la T-15c y su desglose por patrón.
 
 ## Verificación
 - `dart format`: sin cambios pendientes.
 - `flutter analyze`: `No issues found!`
-- `flutter test`: **3034 pruebas**.
+- `flutter test`: **3045 pruebas**.
 ```
-+3034: All tests passed!
++3045: All tests passed!
 ```
 
 ## Grafo actualizado
-- **`en curso`:** COMP-ATRAS, COMP-CERRAR, COMP-ENCABEZADO-MODULO, SELECTOR-HORA, COMP-PANEL-VEREDICTO, COMP-PANEL-EVIDENCIA, COMP-PIEZAS-JEFE, COMP-FILA-APELACION, COMP-TARJETA-CASO, COMP-PIEZAS-RESULTADO, TEXTOS, RUTAS, ADAPTATIVO y PANT-GALERIA.
-- **Nuevos:** COMP-AGARRE-HOJA, COMP-BOTON-ICONO-CAJA, COMP-PILDORA, COMP-AVISO-SNACK y TEST-PIEZAS-PEQUENAS.
-- **Obsoleto:** PANT-PENDIENTE sigue `obsoleto`, con la nota «archivo borrado» (según `06`, no se borra la fila).
-- `09-duplicacion.md`:
-  - sección nueva «Resultados por lote», con las líneas antes y después;
-  - corrección de los 5 textos que no eran código muerto.
+- **`en curso` (38 nodos de los archivos que se tocaron):**
+  - CODIGO-PANT-07, 08, 09, 10, 19, 20, 21, 22, 24, 25, 26, 27, 29, 32 y 34;
+  - COMP-AVISO, BUZON-INICIO, DIALOGO-CONFIRMACION, ESTADISTICAS, FILA-APELACION, FILA-DETALLE, MODULO, PANEL-ABOGADO, PANEL-LATERAL-JUEGO, PANEL-VEREDICTO, PIEZAS-AJUSTES, PIEZAS-JEFE, PIEZAS-PERFIL, PIEZAS-RESULTADO, PIEZAS-TIENDA, PROGRESO, SEMANA y TARJETA-CASO;
+  - MARCO-RECUPERACION, PANT-GALERIA, PIEZAS-FIN-SPRINT, SELECTOR-HORA y TEXTOS.
+- **Nuevos:** COMP-CAJA-SUPERFICIE, COMP-ESQUELETO, COMP-VISTA-ASINCRONA, COMP-TITULO-ENFOCADO y TEST-SUPERFICIES.
+- **Obsoletos:** ninguno.
 
 ## Dudas
-- **D1. El ahorro neto fue de −76 líneas, no de −200 a −280.**
-  - En los archivos existentes se fueron 237 líneas; los 4 componentes nuevos, documentados, suman 161, y la galería, 24.
-  - Las píldoras ahorran poco cada una: cambian 5 líneas de `padding` y `decoration` por 3.
-  - Mi estimación de la T-15a no restaba bien el costo de los componentes.
-  - Propongo que en los lotes siguientes la T-15 se mida por **ahorro neto** y por **puntos de cambio únicos**: hoy un cambio de píldora, agarre o botón de caja se hace en 1 archivo y no en 22, 4 o 4. ¿Ajusto las cifras de los lotes T-15c a T-15f en `09` con ese criterio?
-- **D2.** ¿Hay que tratar `PildoraComodin`, `PildoraRepaso` y las demás clases que las pruebas buscan por tipo?
-  - Para volverlas privadas habría que cambiar esas pruebas a buscar por clave, y eso queda fuera de la regla de este lote.
-  - Propongo dejarlas públicas, o tratarlas en la T-15d, que es solo de pruebas.
-- **D3.** `PiezaConfeti` se queda pública porque `ConfetiSprint` la expone en sus listas estáticas, que ve la prueba de confeti. ¿Bien así?
+- **D1. `VistaAsincrona` suma unas 47 líneas netas.** Cada pantalla ahorra poco: el `switch` ya era compacto. La hice porque baja los puntos de cambio de 7 a 1 (mensaje de error, «Reintentar» y política de carga), como permite la regla del lote. ¿La dejamos, o prefieres revertirla y volver a los `switch`?
+- **D2. Encontré un duplicado que no estaba en el catálogo:** `BotonIconoCuadrado` (`piezas_perfil.dart`, 3 usos: Perfil, Ajustes y Examen) es casi igual a `BotonIconoCaja`. No lo toqué porque no estaba en el alcance. ¿Lo paso a envoltura de `BotonIconoCaja` en la T-15e?
+- **D3.** El radio por defecto de `BloqueEsqueleto` es 16. En los esqueletos que usaban 18 (Inicio e intro) lo puse explícito. ¿Bien así, o unificamos el radio de los esqueletos? Unificarlo sería un cambio visible.

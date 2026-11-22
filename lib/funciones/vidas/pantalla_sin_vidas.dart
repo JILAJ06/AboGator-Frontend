@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/rutas.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_cerrar.dart';
+import '../../componentes/caja_superficie.dart';
 import '../../componentes/corazon_vida.dart';
 import '../../componentes/cuenta_regresiva_vida.dart';
 import '../../componentes/disposicion_resultado_tablet.dart';
@@ -228,14 +229,12 @@ class SugerenciaBuzon extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
-    return Container(
-      key: const ValueKey('sugerencia-buzon'),
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: tokens.fondoDestacado,
-        borderRadius: BorderRadius.circular(22),
-      ),
+    return CajaSuperficie(
+      clave: const ValueKey('sugerencia-buzon'),
+      ancho: double.infinity,
+      relleno: const EdgeInsets.all(18),
+      fondo: FondoCaja.destacado,
+      radio: 22,
       child: Column(
         children: [
           MergeSemantics(

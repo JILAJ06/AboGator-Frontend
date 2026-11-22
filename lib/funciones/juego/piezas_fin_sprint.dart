@@ -1,10 +1,9 @@
 import 'package:flutter/semantics.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../componentes/bloque_lectura.dart';
 import '../../componentes/disposicion_resultado_tablet.dart';
+import '../../componentes/titulo_enfocado.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
-import '../../core/utilidades/extensiones_contexto.dart';
 
 /// Título de 19 y 19b: Título/H1 `texto/primario` centrado. Se anuncia al
 /// abrir la pantalla y recibe el foco (sin anillo, como el panel de T-06).
@@ -15,17 +14,11 @@ class TituloFinSprint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BloqueLectura(
-      key: const ValueKey('titulo-fin-sprint'),
-      encabezado: true,
+    return TituloEnfocado(
+      texto,
+      clave: const ValueKey('titulo-fin-sprint'),
+      alineacion: TextAlign.center,
       enVivo: true,
-      autofocus: true,
-      radio: 8,
-      child: Text(
-        texto,
-        style: context.estilos.h1.copyWith(color: context.tokens.textoPrimario),
-        textAlign: TextAlign.center,
-      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'bloque_lectura.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 
 /// Tres tarjetas con el resultado del sprint (19): aciertos, XP (con bonus) y
@@ -93,13 +94,10 @@ class _Estadistica extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficie,
-        borderRadius: BorderRadius.circular(EstadisticasSprint.radio),
-        border: Border.all(color: tokens.bordeDefault),
-      ),
+    return CajaSuperficie(
+      relleno: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+      radio: EstadisticasSprint.radio,
+      conBorde: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

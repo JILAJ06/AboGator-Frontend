@@ -6,9 +6,10 @@ import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
 import '../../componentes/aviso_snack.dart';
 import '../../componentes/dialogo_confirmacion.dart';
-import '../../componentes/mensaje_pantalla.dart';
+import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/piezas_perfil.dart';
+import '../../componentes/vista_asincrona.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/textos/textos.dart';
@@ -30,20 +31,18 @@ class PantallaPerfil extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final datos = ref.watch(datosPerfilProvider);
-    final valor = datos.value;
     return MarcoPrincipal(
       pestana: PestanaApp.perfil,
       cuerpo: SafeArea(
         bottom: false,
-        child: valor != null
-            ? _Perfil(datos: valor)
-            : datos.hasError
-            ? MensajePantalla(
-                texto: Textos.perfilErrorCarga,
-                textoBoton: Textos.reintentar,
-                alPresionar: () => ref.invalidate(datosPerfilProvider),
-              )
-            : const _EsqueletoPerfil(),
+        child: VistaAsincrona(
+          valor: datos,
+          conservarValor: true,
+          datos: (valor) => _Perfil(datos: valor),
+          textoError: Textos.perfilErrorCarga,
+          alReintentar: () => ref.invalidate(datosPerfilProvider),
+          esqueleto: const _EsqueletoPerfil(),
+        ),
       ),
     );
   }
@@ -417,36 +416,21 @@ class _EsqueletoPerfil extends StatelessWidget {
   const _EsqueletoPerfil();
 
   @override
-  Widget build(BuildContext context) {
-    final color = context.tokens.fondoSuperficieAlt;
-    Widget bloque(double alto, {double? ancho, double radio = 16}) => Container(
-      width: ancho,
-      height: alto,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(radio)),
-    );
-    return Semantics(
-      label: Textos.cargandoPerfil,
-      liveRegion: true,
-      excludeSemantics: true,
-      child: SingleChildScrollView(
-        key: const ValueKey('esqueleto-perfil'),
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            bloque(48, radio: 12),
-            const SizedBox(height: 10),
-            bloque(92, radio: 22),
-            const SizedBox(height: 10),
-            bloque(140),
-            const SizedBox(height: 16),
-            bloque(130),
-            const SizedBox(height: 24),
-            bloque(196, radio: 18),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const EsqueletoPantalla(
+    etiqueta: Textos.cargandoPerfil,
+    clave: ValueKey('esqueleto-perfil'),
+    relleno: EdgeInsets.fromLTRB(24, 6, 24, 0),
+    alineacion: CrossAxisAlignment.stretch,
+    hijos: [
+      BloqueEsqueleto(48, radio: 12),
+      SizedBox(height: 10),
+      BloqueEsqueleto(92, radio: 22),
+      SizedBox(height: 10),
+      BloqueEsqueleto(140),
+      SizedBox(height: 16),
+      BloqueEsqueleto(130),
+      SizedBox(height: 24),
+      BloqueEsqueleto(196, radio: 18),
+    ],
+  );
 }

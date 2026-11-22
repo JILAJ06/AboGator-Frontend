@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 
 /// Interruptor de los ajustes (Figma 26): 48×28, radio 14 y pulgar de 22.
@@ -115,12 +116,10 @@ class ChipValor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficieAlt,
-        borderRadius: BorderRadius.circular(10),
-      ),
+    return CajaSuperficie(
+      relleno: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      fondo: FondoCaja.superficieAlt,
+      radio: 10,
       child: Text(
         texto,
         textAlign: TextAlign.center,
@@ -349,13 +348,11 @@ class VistaPreviaTexto extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
-    return Container(
-      key: const ValueKey('vista-previa'),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficieAlt,
-        borderRadius: BorderRadius.circular(20),
-      ),
+    return CajaSuperficie(
+      clave: const ValueKey('vista-previa'),
+      relleno: const EdgeInsets.all(20),
+      fondo: FondoCaja.superficieAlt,
+      radio: 20,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

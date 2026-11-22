@@ -9,6 +9,7 @@ import '../core/utilidades/extensiones_contexto.dart';
 import '../datos/modelos/tarjeta.dart';
 import 'accion_enfocable.dart';
 import 'avatar_app.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 import 'pildora.dart';
 
@@ -467,14 +468,12 @@ class AvisoDilema extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    return Container(
-      key: const ValueKey('aviso-dilema'),
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: tokens.fondoDestacado,
-        borderRadius: BorderRadius.circular(14),
-      ),
+    return CajaSuperficie(
+      clave: const ValueKey('aviso-dilema'),
+      ancho: double.infinity,
+      relleno: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      fondo: FondoCaja.destacado,
+      radio: 14,
       child: Row(
         children: [
           IconoApp(IconosApp.star, tamano: 20, color: tokens.textoAcento),

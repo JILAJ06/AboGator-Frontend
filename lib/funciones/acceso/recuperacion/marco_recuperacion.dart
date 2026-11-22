@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 
-import '../../../componentes/bloque_lectura.dart';
 import '../../../componentes/sarko_imagen.dart';
+import '../../../componentes/titulo_enfocado.dart';
 import '../../../core/adaptativo/clase_pantalla.dart';
 import '../../../core/utilidades/extensiones_contexto.dart';
 import '../panel_marca.dart';
@@ -93,13 +93,8 @@ class TituloRecuperacion extends StatelessWidget {
   final String texto;
 
   @override
-  Widget build(BuildContext context) => BloqueLectura(
-    key: const ValueKey('titulo-recuperacion'),
-    encabezado: true,
-    autofocus: true,
-    radio: 8,
-    child: Text(texto, style: context.estilos.h1.copyWith(color: context.tokens.textoPrimario)),
-  );
+  Widget build(BuildContext context) =>
+      TituloEnfocado(texto, clave: const ValueKey('titulo-recuperacion'));
 }
 
 /// Texto de apoyo (Cuerpo/Base texto/secundario).

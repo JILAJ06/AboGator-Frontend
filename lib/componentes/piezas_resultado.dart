@@ -6,6 +6,8 @@ import '../core/recursos/imagenes_app.dart';
 import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
+import 'caja_superficie.dart';
+import 'esqueleto_pantalla.dart';
 import 'icono_app.dart';
 import 'logo_app.dart';
 
@@ -82,13 +84,10 @@ class TarjetaCertificado extends StatelessWidget {
         key: const ValueKey('tarjeta-certificado'),
         // Encima del fondo de la tarjeta (si no, el fondo lo tapa).
         foregroundPainter: PintorBordePunteado(color: tokens.accionAcento),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: tokens.fondoSuperficie,
-            borderRadius: BorderRadius.circular(radio),
-          ),
+        child: CajaSuperficie(
+          ancho: double.infinity,
+          relleno: const EdgeInsets.all(20),
+          radio: radio,
           child: Column(
             children: [
               const LogoApp(forma: FormaLogo.horizontal, ancho: 178, decorativo: true),
@@ -137,14 +136,7 @@ class EsqueletoCertificado extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    Widget bloque(double alto, double ancho) => Container(
-      width: ancho,
-      height: alto,
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficieAlt,
-        borderRadius: BorderRadius.circular(8),
-      ),
-    );
+    Widget bloque(double alto, double ancho) => BloqueEsqueleto(alto, ancho: ancho, radio: 8);
     return CustomPaint(
       key: const ValueKey('esqueleto-certificado'),
       foregroundPainter: PintorBordePunteado(color: tokens.bordeDefault),
@@ -211,14 +203,10 @@ class _TarjetaResumenExamen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficie,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: tokens.bordeDefault),
-      ),
+    return CajaSuperficie(
+      ancho: double.infinity,
+      relleno: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      conBorde: true,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
