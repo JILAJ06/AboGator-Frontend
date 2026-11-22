@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/adaptativo/clase_pantalla.dart';
 import '../core/utilidades/extensiones_contexto.dart';
+import 'desplazable_alto_minimo.dart';
 
 /// Composición de tablet con un panel de ilustración (Figma T34 `150:5709`,
 /// T-13b; para la T-15).
@@ -63,22 +64,17 @@ class DisposicionIlustracionTablet extends StatelessWidget {
       ),
     );
 
-    Widget columna(BoxConstraints restricciones, {required bool centrarAlto}) =>
-        SingleChildScrollView(
-          key: const ValueKey('columna-ilustracion-tablet'),
-          padding: const EdgeInsets.symmetric(horizontal: MedidasAdaptativas.margen, vertical: 24),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: centrarAlto ? math.max(0, restricciones.maxHeight - 48) : 0,
-            ),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: MedidasAdaptativas.columnaFormulario),
-                child: contenido,
-              ),
-            ),
-          ),
-        );
+    Widget columna({required bool centrarAlto}) => DesplazableAltoMinimo(
+      claveDesplazable: const ValueKey('columna-ilustracion-tablet'),
+      relleno: const EdgeInsets.symmetric(horizontal: MedidasAdaptativas.margen, vertical: 24),
+      conAltoMinimo: centrarAlto,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: MedidasAdaptativas.columnaFormulario),
+          child: contenido,
+        ),
+      ),
+    );
 
     return LayoutBuilder(
       builder: (context, restricciones) {
@@ -90,12 +86,7 @@ class DisposicionIlustracionTablet extends StatelessWidget {
                 width: math.min(anchoPanel, restricciones.maxWidth / 2),
                 child: panel(relleno: 24),
               ),
-              Expanded(
-                child: SafeArea(
-                  left: false,
-                  child: LayoutBuilder(builder: (context, r) => columna(r, centrarAlto: true)),
-                ),
-              ),
+              Expanded(child: SafeArea(left: false, child: columna(centrarAlto: true))),
             ],
           );
         }
@@ -103,12 +94,7 @@ class DisposicionIlustracionTablet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(height: altoFranja, child: panel(relleno: 16)),
-            Expanded(
-              child: SafeArea(
-                top: false,
-                child: LayoutBuilder(builder: (context, r) => columna(r, centrarAlto: false)),
-              ),
-            ),
+            Expanded(child: SafeArea(top: false, child: columna(centrarAlto: false))),
           ],
         );
       },

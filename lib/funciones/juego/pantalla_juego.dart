@@ -15,6 +15,7 @@ import '../../componentes/barra_juego.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/composicion_juego_tablet.dart';
+import '../../componentes/desplazable_alto_minimo.dart';
 import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/etiqueta_lupa.dart';
 import '../../componentes/hoja_lateral.dart';
@@ -624,23 +625,18 @@ class _JuegoState extends ConsumerState<_Juego> {
 
     return _envolver(
       SafeArea(
-        child: LayoutBuilder(
-          builder: (context, restricciones) => SingleChildScrollView(
-            key: const ValueKey('juego-desplazable'),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: restricciones.maxHeight),
-              // Entre 600 y 959 el juego del móvil va centrado con ancho máximo.
-              child: IntrinsicHeight(
-                child: clase.esTablet
-                    ? Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: anchoJuegoTabletVertical),
-                          child: contenido,
-                        ),
-                      )
-                    : contenido,
-              ),
-            ),
+        child: DesplazableAltoMinimo(
+          claveDesplazable: const ValueKey('juego-desplazable'),
+          // Entre 600 y 959 el juego del móvil va centrado con ancho máximo.
+          child: IntrinsicHeight(
+            child: clase.esTablet
+                ? Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: anchoJuegoTabletVertical),
+                      child: contenido,
+                    ),
+                  )
+                : contenido,
           ),
         ),
       ),

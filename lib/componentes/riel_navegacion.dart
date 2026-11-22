@@ -6,6 +6,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
+import 'desplazable_alto_minimo.dart';
 import 'icono_app.dart';
 import 'logo_app.dart';
 import 'navegacion_inferior_app.dart';
@@ -117,21 +118,14 @@ class RielNavegacion extends StatelessWidget {
             color: tokens.fondoSuperficie,
             border: Border(right: BorderSide(color: tokens.bordeDefault)),
           ),
-          child: LayoutBuilder(
-            builder: (context, restricciones) => SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: restricciones.hasBoundedHeight ? restricciones.maxHeight : 0,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  // Sin flex: con alto mínimo, "spaceBetween" deja Ajustes y
-                  // el avatar abajo; si no cabe, todo se desplaza.
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [arriba, abajo],
-                  ),
-                ),
+          child: DesplazableAltoMinimo(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              // Sin flex: con alto mínimo, "spaceBetween" deja Ajustes y
+              // el avatar abajo; si no cabe, todo se desplaza.
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [arriba, abajo],
               ),
             ),
           ),
@@ -164,17 +158,11 @@ class _Destino extends StatelessWidget {
         ? Textos.rielBuzonSemantica(cantidad)
         : pestana.nombre;
 
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: alPresionar,
       radio: 16,
-      semantica: (hijo) => Semantics(
-        button: true,
-        selected: activo,
-        label: etiqueta,
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
+      etiqueta: etiqueta,
+      seleccionado: activo,
       child: ConstrainedBox(
         constraints: const BoxConstraints.tightFor(width: RielNavegacion.anchoDestino)
             .copyWith(minHeight: RielNavegacion.altoDestino),
@@ -276,16 +264,10 @@ class _BotonCircular extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const lado = RielNavegacion.ladoBoton;
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: alPresionar,
       radio: lado / 2,
-      semantica: (hijo) => Semantics(
-        button: true,
-        label: etiqueta,
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
+      etiqueta: etiqueta,
       child: Container(
         width: lado,
         height: lado,

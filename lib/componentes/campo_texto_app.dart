@@ -197,16 +197,10 @@ class _CampoTextoAppState extends State<CampoTextoApp> {
     final etiqueta = _ocultarTexto ? Textos.mostrarContrasena : Textos.ocultarContrasena;
     // Con anillo de foco al llegar con teclado, como los demás controles
     // (T-13; antes usaba el resaltado de Material, que no se veía).
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: _alternarOcultar,
       radio: 24,
-      semantica: (hijo) => Semantics(
-        button: true,
-        label: etiqueta,
-        excludeSemantics: true,
-        onTap: _alternarOcultar,
-        child: hijo,
-      ),
+      etiqueta: etiqueta,
       child: SizedBox.square(
         dimension: 48,
         child: Center(

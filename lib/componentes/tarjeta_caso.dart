@@ -390,18 +390,12 @@ class BotonEvidencia extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = context.tokens.accionSecundaria;
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: alPresionar,
       nodoFoco: nodoFoco,
       radio: radio,
-      semantica: (hijo) => Semantics(
-        button: true,
-        enabled: alPresionar != null,
-        label: Textos.accionInspeccionar,
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
+      etiqueta: Textos.accionInspeccionar,
+      habilitado: alPresionar != null,
       child: CustomPaint(
         key: const ValueKey('boton-evidencia'),
         painter: _BordeDiscontinuo(color: color),

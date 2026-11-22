@@ -34,16 +34,10 @@ class BotonBuzon extends StatelessWidget {
       child: Center(child: IconoApp(IconosApp.inbox, tamano: 26, color: tokens.textoEnPrimario)),
     );
 
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: alPresionar,
       radio: radio,
-      semantica: (hijo) => Semantics(
-        button: true,
-        label: Textos.buzonSemantica(pendientes),
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
+      etiqueta: Textos.buzonSemantica(pendientes),
       child: Stack(
         clipBehavior: Clip.none,
         children: [

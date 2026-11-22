@@ -169,16 +169,10 @@ class _BotonContinuar extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final color = tokens.textoEnPrimario;
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: alPresionar,
       radio: 12,
-      semantica: (hijo) => Semantics(
-        button: true,
-        label: Textos.continuarSprint,
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
+      etiqueta: Textos.continuarSprint,
       child: Container(
         key: const ValueKey('boton-continuar'),
         constraints: const BoxConstraints(minWidth: 148, minHeight: 48),

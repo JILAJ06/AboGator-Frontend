@@ -19,6 +19,7 @@ import '../../componentes/vista_asincrona.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
+import '../../datos/modelos/modulo.dart';
 import '../../datos/modelos/usuario.dart';
 import '../acceso/sesion.dart';
 import 'estado_inicio.dart';
@@ -61,6 +62,59 @@ class PantallaInicio extends ConsumerWidget {
   }
 }
 
+// Piezas que arman igual el Inicio de móvil y el de tablet (T-15e).
+
+TarjetaHeroeStartup _tarjetaHeroe(
+  BuildContext context,
+  ({Modulo modulo, Sprint sprint, int numeroSprint}) actual, {
+  MedidasHeroe medidas = MedidasHeroe.movil,
+}) => TarjetaHeroeStartup(
+  medidas: medidas,
+  titulo: LogicaInicio.tramo(actual.modulo),
+  subtitulo: Textos.heroeSubtitulo(
+    actual.numeroSprint,
+    LogicaInicio.totalSprints(actual.modulo),
+    LogicaInicio.nombreCorto(actual.modulo),
+  ),
+  alContinuar: () => context.go(Rutas.introSprintDe(actual.modulo.id, actual.sprint.id)),
+);
+
+TarjetaRetoDiario _retoDiario(Usuario usuario) => TarjetaRetoDiario(
+  titulo: Textos.retoTitulo,
+  subtitulo: Textos.retoSubtitulo(usuario.racha, RetoDiario.monedas),
+  actual: RetoDiario.actual,
+  total: RetoDiario.total,
+);
+
+TarjetaModulo _tarjetaModulo(BuildContext context, Modulo modulo) => TarjetaModulo(
+  key: ValueKey('modulo-${modulo.id}'),
+  numero: modulo.numero,
+  nombreCorto: LogicaInicio.nombreCorto(modulo),
+  titulo: LogicaInicio.tramo(modulo),
+  estado: LogicaInicio.estadoDe(modulo),
+  completados: LogicaInicio.completados(modulo),
+  total: LogicaInicio.totalSprints(modulo),
+  color: modulo.color,
+  icono: LogicaInicio.iconoDe(modulo),
+  alPresionar: () => context.go(Rutas.mapaSprintsDe(modulo.id)),
+);
+
+/// "Ruta de tu Startup" (Título/H2, encabezado).
+class _TituloRuta extends StatelessWidget {
+  const _TituloRuta();
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    header: true,
+    label: Textos.rutaStartup,
+    excludeSemantics: true,
+    child: Text(
+      Textos.rutaStartup,
+      style: context.estilos.h2.copyWith(color: context.tokens.textoPrimario),
+    ),
+  );
+}
+
 class _Contenido extends StatelessWidget {
   const _Contenido({required this.usuario, required this.datos});
 
@@ -69,7 +123,6 @@ class _Contenido extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
     final actual = LogicaInicio.actual(datos.modulos);
 
     return SafeArea(
@@ -82,49 +135,15 @@ class _Contenido extends StatelessWidget {
               children: [
                 _Encabezado(usuario: usuario, datos: datos),
                 const SizedBox(height: 22),
-                if (actual != null)
-                  TarjetaHeroeStartup(
-                    titulo: LogicaInicio.tramo(actual.modulo),
-                    subtitulo: Textos.heroeSubtitulo(
-                      actual.numeroSprint,
-                      LogicaInicio.totalSprints(actual.modulo),
-                      LogicaInicio.nombreCorto(actual.modulo),
-                    ),
-                    alContinuar: () =>
-                        context.go(Rutas.introSprintDe(actual.modulo.id, actual.sprint.id)),
-                  ),
+                if (actual != null) _tarjetaHeroe(context, actual),
                 const SizedBox(height: 14),
-                TarjetaRetoDiario(
-                  titulo: Textos.retoTitulo,
-                  subtitulo: Textos.retoSubtitulo(usuario.racha, RetoDiario.monedas),
-                  actual: RetoDiario.actual,
-                  total: RetoDiario.total,
-                ),
+                _retoDiario(usuario),
                 const SizedBox(height: 18),
-                Semantics(
-                  header: true,
-                  label: Textos.rutaStartup,
-                  excludeSemantics: true,
-                  child: Text(
-                    Textos.rutaStartup,
-                    style: context.estilos.h2.copyWith(color: tokens.textoPrimario),
-                  ),
-                ),
+                const _TituloRuta(),
                 const SizedBox(height: 10),
                 for (final (i, modulo) in datos.modulos.indexed) ...[
                   if (i > 0) const SizedBox(height: 12),
-                  TarjetaModulo(
-                    key: ValueKey('modulo-${modulo.id}'),
-                    numero: modulo.numero,
-                    nombreCorto: LogicaInicio.nombreCorto(modulo),
-                    titulo: LogicaInicio.tramo(modulo),
-                    estado: LogicaInicio.estadoDe(modulo),
-                    completados: LogicaInicio.completados(modulo),
-                    total: LogicaInicio.totalSprints(modulo),
-                    color: modulo.color,
-                    icono: LogicaInicio.iconoDe(modulo),
-                    alPresionar: () => context.go(Rutas.mapaSprintsDe(modulo.id)),
-                  ),
+                  _tarjetaModulo(context, modulo),
                 ],
               ],
             ),
@@ -167,7 +186,6 @@ class _ContenidoTablet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tokens = context.tokens;
     final actual = LogicaInicio.actual(datos.modulos);
     final precision = ref.watch(precisionInicioProvider).value;
     var orden = 0.0;
@@ -176,37 +194,9 @@ class _ContenidoTablet extends ConsumerWidget {
 
     final heroe = actual == null
         ? null
-        : ordenado(
-            TarjetaHeroeStartup(
-              medidas: MedidasHeroe.tablet,
-              titulo: LogicaInicio.tramo(actual.modulo),
-              subtitulo: Textos.heroeSubtitulo(
-                actual.numeroSprint,
-                LogicaInicio.totalSprints(actual.modulo),
-                LogicaInicio.nombreCorto(actual.modulo),
-              ),
-              alContinuar: () =>
-                  context.go(Rutas.introSprintDe(actual.modulo.id, actual.sprint.id)),
-            ),
-          );
+        : ordenado(_tarjetaHeroe(context, actual, medidas: MedidasHeroe.tablet));
 
-    final modulos = [
-      for (final modulo in datos.modulos)
-        ordenado(
-          TarjetaModulo(
-            key: ValueKey('modulo-${modulo.id}'),
-            numero: modulo.numero,
-            nombreCorto: LogicaInicio.nombreCorto(modulo),
-            titulo: LogicaInicio.tramo(modulo),
-            estado: LogicaInicio.estadoDe(modulo),
-            completados: LogicaInicio.completados(modulo),
-            total: LogicaInicio.totalSprints(modulo),
-            color: modulo.color,
-            icono: LogicaInicio.iconoDe(modulo),
-            alPresionar: () => context.go(Rutas.mapaSprintsDe(modulo.id)),
-          ),
-        ),
-    ];
+    final modulos = [for (final modulo in datos.modulos) ordenado(_tarjetaModulo(context, modulo))];
 
     final izquierda = Column(
       key: const ValueKey('inicio-columna-izquierda'),
@@ -214,27 +204,14 @@ class _ContenidoTablet extends ConsumerWidget {
       children: [
         ?heroe,
         if (heroe != null) const SizedBox(height: 26),
-        Semantics(
-          header: true,
-          label: Textos.rutaStartup,
-          excludeSemantics: true,
-          child: Text(
-            Textos.rutaStartup,
-            style: context.estilos.h2.copyWith(color: tokens.textoPrimario),
-          ),
-        ),
+        const _TituloRuta(),
         const SizedBox(height: 14),
         _RejillaModulos(modulos: modulos),
       ],
     );
 
     final derechaArriba = <Widget>[
-      TarjetaRetoDiario(
-        titulo: Textos.retoTitulo,
-        subtitulo: Textos.retoSubtitulo(usuario.racha, RetoDiario.monedas),
-        actual: RetoDiario.actual,
-        total: RetoDiario.total,
-      ),
+      _retoDiario(usuario),
       const SizedBox(height: 20),
       TarjetaSemana(racha: usuario.racha, precision: precision, monedas: datos.monedas),
       const SizedBox(height: 16),

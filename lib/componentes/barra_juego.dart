@@ -198,16 +198,10 @@ class _BotonCircular extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     const lado = BarraJuegoTablet.ladoBoton;
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: alPresionar,
       radio: lado / 2,
-      semantica: (hijo) => Semantics(
-        button: true,
-        label: etiqueta,
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
+      etiqueta: etiqueta,
       child: Container(
         width: lado,
         height: lado,

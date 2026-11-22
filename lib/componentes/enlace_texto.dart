@@ -13,17 +13,11 @@ class EnlaceTexto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: alPresionar,
       radio: 8,
-      semantica: (hijo) => Semantics(
-        link: true,
-        button: true,
-        label: texto,
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
+      etiqueta: texto,
+      enlace: true,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 48),
         child: Center(

@@ -14,6 +14,7 @@ import '../../componentes/boton_app.dart';
 import '../../componentes/boton_cerrar.dart';
 import '../../componentes/composicion_juego_tablet.dart';
 import '../../componentes/corazon_vida.dart';
+import '../../componentes/desplazable_alto_minimo.dart';
 import '../../componentes/disposicion_resultado_tablet.dart';
 import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/ilustracion_sarko.dart';
@@ -402,14 +403,9 @@ class _JuicioState extends ConsumerState<_Juicio> {
             )
           else
             SafeArea(
-              child: LayoutBuilder(
-                builder: (context, restricciones) => SingleChildScrollView(
-                  key: const ValueKey('juicio-desplazable'),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: restricciones.maxHeight),
-                    child: IntrinsicHeight(child: contenido),
-                  ),
-                ),
+              child: DesplazableAltoMinimo(
+                claveDesplazable: const ValueKey('juicio-desplazable'),
+                child: IntrinsicHeight(child: contenido),
               ),
             ),
         ],

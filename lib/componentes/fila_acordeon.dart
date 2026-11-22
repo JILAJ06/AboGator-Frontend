@@ -44,17 +44,11 @@ class FilaAcordeon extends StatelessWidget {
     final duracion = EfectosApp.duracion(context, milisegundos: 200);
     final cabecera = Semantics(
       container: true,
-      child: AccionEnfocable(
+      child: AccionEnfocable.boton(
         alPresionar: alAlternar,
         radio: radio,
-        semantica: (hijo) => Semantics(
-          button: true,
-          expanded: abierta,
-          label: etiquetaSemantica ?? titulo,
-          onTap: alAlternar,
-          excludeSemantics: true,
-          child: hijo,
-        ),
+        etiqueta: etiquetaSemantica ?? titulo,
+        expandido: abierta,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: altoCerrada),
           child: Padding(

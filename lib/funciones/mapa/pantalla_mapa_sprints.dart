@@ -10,6 +10,7 @@ import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/camino_sprints.dart';
+import '../../componentes/desplazable_alto_minimo.dart';
 import '../../componentes/encabezado_modulo.dart';
 import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/globo_sprint_actual.dart';
@@ -672,50 +673,43 @@ class _PanelDetalle extends ConsumerWidget {
       ),
       child: SafeArea(
         left: false,
-        child: LayoutBuilder(
-          builder: (context, restricciones) => SingleChildScrollView(
-            key: const ValueKey('detalle-desplazable'),
-            padding: const EdgeInsets.symmetric(horizontal: relleno, vertical: relleno),
+        child: DesplazableAltoMinimo(
+          claveDesplazable: const ValueKey('detalle-desplazable'),
+          relleno: const EdgeInsets.symmetric(horizontal: relleno, vertical: relleno),
+          child: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: math.max(0, restricciones.maxHeight - 2 * relleno),
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: anchoColumna),
-                  child: elegido == null
-                      ? const SizedBox.shrink()
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Anuncia la selección cada vez que cambia.
-                            Semantics(
-                              key: ValueKey('anuncio-${elegido.id}'),
-                              liveRegion: true,
-                              label: LogicaMapa.anuncioSeleccion(modulo, elegido),
-                              child: const SizedBox.shrink(),
-                            ),
-                            DetalleSprint(
-                              key: ValueKey('detalle-${elegido.id}'),
-                              modulo: modulo,
-                              sprint: elegido,
-                              disposicion: DisposicionDetalle.panel,
-                            ),
-                            const SizedBox(height: 14),
-                            FocusTraversalOrder(
-                              order: const NumericFocusOrder(PantallaMapaSprints.ordenDetalle),
-                              child: BotonApp(
-                                key: const ValueKey('comenzar-detalle'),
-                                texto: Textos.comenzarSprint,
-                                alPresionar: LogicaMapa.puedeAbrir(modulo, elegido)
-                                    ? () => comenzarSprint(context, ref, modulo, elegido)
-                                    : null,
-                              ),
-                            ),
-                          ],
+              constraints: const BoxConstraints(maxWidth: anchoColumna),
+              child: elegido == null
+                  ? const SizedBox.shrink()
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Anuncia la selección cada vez que cambia.
+                        Semantics(
+                          key: ValueKey('anuncio-${elegido.id}'),
+                          liveRegion: true,
+                          label: LogicaMapa.anuncioSeleccion(modulo, elegido),
+                          child: const SizedBox.shrink(),
                         ),
-                ),
-              ),
+                        DetalleSprint(
+                          key: ValueKey('detalle-${elegido.id}'),
+                          modulo: modulo,
+                          sprint: elegido,
+                          disposicion: DisposicionDetalle.panel,
+                        ),
+                        const SizedBox(height: 14),
+                        FocusTraversalOrder(
+                          order: const NumericFocusOrder(PantallaMapaSprints.ordenDetalle),
+                          child: BotonApp(
+                            key: const ValueKey('comenzar-detalle'),
+                            texto: Textos.comenzarSprint,
+                            alPresionar: LogicaMapa.puedeAbrir(modulo, elegido)
+                                ? () => comenzarSprint(context, ref, modulo, elegido)
+                                : null,
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ),
         ),
