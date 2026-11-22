@@ -22,7 +22,8 @@ AboGator (motor técnico: LawSwipe) es una app móvil educativa y gamificada par
 - **Comodines** (tienda): Lupa de Auditor, Abogado Senior, Amparo. No funcionan en el Examen Final (regla RN03).
 - **Apelaciones (Buzón)**: los fallos regresan a los 3 y 7 días (y 14 al ganar); ganar una apelación devuelve 1 vida; no avanzan el mapa.
 - **Nivel Jefe / Examen Final**: crisis de 72 horas (ransomware), 10 decisiones de 15 s cada una (22 s con tiempo extendido), contraargumentos de la Inspectora Vega, HP del Jefe. Al aprobar: certificado del módulo.
-- **Módulos** (color propio): 1 Protección de Datos, 2 Licencias y Propiedad Intelectual, 3 Delitos Informáticos, 4 Contratos Digitales, 5 Auditoría y Cumplimiento.
+- **Módulos** (color propio), **orden definitivo decidido por el usuario el 2026-11-21** (de lo básico a lo complejo para un ingeniero de software principiante): 1 Licencias y Propiedad Intelectual, 2 Protección de Datos, 3 Delitos Informáticos, 4 Contratos Digitales, 5 Auditoría y Cumplimiento.
+  - **Pendiente de aplicar en el código:** hoy el mock tiene Protección de Datos como módulo 1 (`mod-1`) y es el único con tarjetas y el Examen del ransomware; Licencias aún no tiene contenido. El orden real lo traerá el servidor (`numero`) en la T-14. Los ids no cambian; el color sigue a cada módulo, no a su posición.
 
 ## Idioma
 Toda la interfaz y los textos están en **español (México)**. El código (nombres de clases y variables) puede estar en inglés o español, pero debe ser consistente con la convención que fije la tarea T-00.
