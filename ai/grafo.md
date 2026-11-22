@@ -2,7 +2,7 @@
 
 Mapa navegable del proyecto: qué existe, dónde está y con qué se relaciona. **Se actualiza cada vez que se crea, mueve, renombra o elimina algo** (reglas en `ai/conocimiento/06-grafo-de-conocimiento.md`). Si algo de aquí no coincide con la realidad, el grafo está mal y hay que corregirlo.
 
-Última actualización: 2026-11-22 · por Claude Code · tarea: T-15e (corrección)
+Última actualización: 2026-11-22 · por Claude Chat · tarea: T-15g
 
 ## Cómo leerlo
 - Cada fila es un **nodo** con un ID único. La columna **Relaciones** son las **aristas**: `→` apunta a otro nodo, con un verbo corto (`usa`, `muestra`, `navega a`, `implementa`, `depende de`, `define`).
@@ -35,7 +35,7 @@ flowchart LR
 | DOC-08 | Accesibilidad (WCAG 2.1 AA): matriz, contrastes, orden de foco, alternativas al gesto, atajos y verificación manual (lo creó Claude Code en T-13; Claude Chat lo revisa) T-15e (corrección): línea nueva sobre la acción de tocar y `acciones_de_tocar_test.dart`. | ai/conocimiento/08-accesibilidad.md | en curso | ← lo verifica TEST-AUDITORIA; → aplica a todas las PANT-* |
 | DOC-09 | Duplicación: medición inicial, catálogo de 20 patrones de `lib/` y 3 de `test/`, código muerto, lotes T-15b a T-15f y reglas de la T-15 (lo creó Claude Code en T-15a; Claude Chat lo revisa) | ai/conocimiento/09-duplicacion.md | hecho | → guía T-15; → señala PANT-PENDIENTE como código muerto |
 | GRAFO | Este archivo | ai/grafo.md | hecho | ← lo actualizan Claude Chat y Claude Code |
-| SIG | Tarea actual (T-15e-fix: acción de tocar en controles) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
+| SIG | Tarea actual (T-15g: teclado y tinte del mazo) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
 | REP | Reporte | ai/reporte.md | hecho | ← lo escribe Claude Code; → responde a SIG |
 
 ## 2 · Externos
