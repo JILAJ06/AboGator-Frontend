@@ -35,7 +35,7 @@ flowchart LR
 | DOC-08 | Accesibilidad (WCAG 2.1 AA): matriz, contrastes, orden de foco, alternativas al gesto, atajos y verificación manual (lo creó Claude Code en T-13; Claude Chat lo revisa) | ai/conocimiento/08-accesibilidad.md | hecho | ← lo verifica TEST-AUDITORIA; → aplica a todas las PANT-* |
 | DOC-09 | Duplicación: medición inicial, catálogo de 20 patrones de `lib/` y 3 de `test/`, código muerto, lotes T-15b a T-15f y reglas de la T-15 (lo creó Claude Code en T-15a; Claude Chat lo revisa) | ai/conocimiento/09-duplicacion.md | hecho | → guía T-15; → señala PANT-PENDIENTE como código muerto |
 | GRAFO | Este archivo | ai/grafo.md | hecho | ← lo actualizan Claude Chat y Claude Code |
-| SIG | Tarea actual (T-15b: limpieza y piezas pequeñas) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
+| SIG | Tarea actual (T-15c: superficies y estados) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
 | REP | Reporte | ai/reporte.md | hecho | ← lo escribe Claude Code; → responde a SIG |
 
 ## 2 · Externos
@@ -75,7 +75,8 @@ flowchart LR
 | T-13 | 13-accesibilidad-y-pulido | hecho | todas | T-12 |
 | T-13b | 13b-pantallas-cuenta-y-legal | hecho | recuperar contraseña (31–31e), Aviso, Términos, Notificaciones de racha (34, 34b, 34c) | T-13 |
 | T-15a | 15a-auditoria-de-duplicacion | hecho | análisis de duplicación (sin cambios de código) | T-13b |
-| T-15b | 15b-limpieza-y-piezas-pequenas | en curso | código muerto, AgarreHoja, BotonIconoCaja, Pildora, mostrarAviso | T-15a |
+| T-15b | 15b-limpieza-y-piezas-pequenas | hecho | código muerto, AgarreHoja, BotonIconoCaja, Pildora, mostrarAviso | T-15a |
+| T-15c | 15c-superficies-y-estados | en curso | CajaSuperficie, TarjetaLista, EsqueletoPantalla, VistaAsincrona, TituloEnfocado | T-15b |
 | T-15 | 15-componentes-globales | planeado | optimización: componentes globales, menos vistas y duplicación (el usuario explicará el alcance; **recordárselo antes de T-14**) | T-13b |
 | T-14 | 14-integracion-api | planeado | REPO-* → HTTP | EXT-BACK listo, T-15 |
 
@@ -488,3 +489,4 @@ Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
 - 2026-11-21 · Claude Code · T-15a: nodo nuevo DOC-09 (`en curso`, a revisar por Claude Chat). Sin cambios en nodos de código (la tarea no tocó `lib/` ni `test/`).
 - 2026-11-21 · Claude Chat · cierre de T-15a (PR #28): `09-duplicacion.md` aprobado. T-15b `en curso` (lote 1 de la T-15).
 - 2026-11-21 · Claude Code · T-15b: `en curso` para COMP-ATRAS, COMP-CERRAR, COMP-ENCABEZADO-MODULO, SELECTOR-HORA, COMP-PANEL-VEREDICTO, COMP-PANEL-EVIDENCIA, COMP-PIEZAS-JEFE, COMP-FILA-APELACION, COMP-TARJETA-CASO, COMP-PIEZAS-RESULTADO, TEXTOS, RUTAS, ADAPTATIVO, PANT-GALERIA. Nodos nuevos: COMP-AGARRE-HOJA, COMP-BOTON-ICONO-CAJA, COMP-PILDORA, COMP-AVISO-SNACK y TEST-PIEZAS-PEQUENAS. PANT-PENDIENTE sigue `obsoleto` (archivo borrado).
+- 2026-11-21 · Claude Chat · cierre de T-15b (PR mergeado, lib/ −76 líneas netas, 3034 pruebas). T-15c `en curso` (lote 2: superficies y estados).
