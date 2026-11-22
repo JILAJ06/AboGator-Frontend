@@ -11,8 +11,9 @@ import '../../componentes/accion_enfocable.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_atras.dart';
+import '../../componentes/disposicion_ilustracion_tablet.dart';
 import '../../componentes/foco_retorno.dart';
-import '../../componentes/icono_app.dart';
+import '../../componentes/ilustracion_insignia.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/piezas_ajustes.dart';
 import '../../componentes/sarko_imagen.dart';
@@ -151,6 +152,9 @@ class _NotificacionesState extends ConsumerState<_Notificaciones> {
     final estilos = context.estilos;
     final hora = LogicaHora.formatear(_p.minutosRecordatorio);
 
+    final tablet = context.clasePantalla.esTablet;
+    // Figma: texto en x16 (móvil) o x20 (tablet); sin íconos (T-13b, ronda 2).
+    final relleno = tablet ? 20.0 : 16.0;
     final tarjeta = Container(
       key: const ValueKey('tarjeta-notificaciones'),
       clipBehavior: Clip.antiAlias,
@@ -164,7 +168,7 @@ class _NotificacionesState extends ConsumerState<_Notificaciones> {
         children: [
           FilaAjuste(
             key: const ValueKey('notif-racha'),
-            icono: IconosApp.flame,
+            rellenoHorizontal: relleno,
             titulo: Textos.rachaEnRiesgo,
             detalle: Textos.rachaEnRiesgoDetalle,
             interruptor: _p.rachaEnRiesgo,
@@ -174,7 +178,7 @@ class _NotificacionesState extends ConsumerState<_Notificaciones> {
           Divider(height: 1, thickness: 1, color: tokens.bordeDefault),
           FilaAjuste(
             key: const ValueKey('notif-apelaciones'),
-            icono: IconosApp.gavel,
+            rellenoHorizontal: relleno,
             titulo: Textos.juiciosApelacion,
             detalle: Textos.juiciosApelacionDetalle,
             interruptor: _p.apelaciones,
@@ -183,6 +187,7 @@ class _NotificacionesState extends ConsumerState<_Notificaciones> {
           ),
           Divider(height: 1, thickness: 1, color: tokens.bordeDefault),
           _FilaRecordatorio(
+            relleno: relleno,
             hora: hora,
             activo: _p.recordatorioDiario,
             nodoFoco: _focoRecordatorio,
@@ -193,36 +198,36 @@ class _NotificacionesState extends ConsumerState<_Notificaciones> {
       ),
     );
 
+    final titulo = BloqueLectura(
+      key: const ValueKey('titulo-notificaciones'),
+      encabezado: true,
+      autofocus: true,
+      radio: 8,
+      child: Text(Textos.protegeTuRacha, style: estilos.h1.copyWith(color: tokens.textoPrimario)),
+    );
     final contenido = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: BotonAtras(alPresionar: _volver),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 24),
-                child: BloqueLectura(
-                  key: const ValueKey('titulo-notificaciones'),
-                  encabezado: true,
-                  autofocus: true,
-                  radio: 8,
-                  child: Text(
-                    Textos.protegeTuRacha,
-                    style: estilos.h1.copyWith(color: tokens.textoPrimario),
-                  ),
-                ),
+        // En tablet el atrás y Sarko van en el panel de la ilustración.
+        if (tablet)
+          titulo
+        else ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: BotonAtras(alPresionar: _volver),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Padding(padding: const EdgeInsets.only(top: 24), child: titulo),
               ),
-            ),
-            const SizedBox(width: 12),
-            const SarkoImagen(pose: PoseSarko.alegre, ancho: 96, decorativa: true),
-          ],
-        ),
+              const SizedBox(width: 12),
+              const SarkoImagen(pose: PoseSarko.alegre, ancho: 96, decorativa: true),
+            ],
+          ),
+        ],
         const SizedBox(height: 12),
         Text(
           Textos.notificacionesDescripcion,
@@ -257,20 +262,28 @@ class _NotificacionesState extends ConsumerState<_Notificaciones> {
       ],
     );
 
-    final tablet = context.clasePantalla.esTablet;
-    final arriba = tablet ? 24.0 : 8.0;
-    // Contenido arriba y botones abajo sin medidas intrínsecas (las filas usan
-    // LayoutBuilder): la columna mide al menos el alto disponible.
+    // T34 (Figma 150:5709): panel de ilustración a la izquierda (o franja
+    // arriba) con el atrás, y la columna de 470 con el contenido y los botones.
+    if (tablet) {
+      return DisposicionIlustracionTablet(
+        ilustracion: const IlustracionRacha(),
+        boton: BotonAtras(alPresionar: _volver),
+        contenido: Column(
+          key: const ValueKey('columna-notificaciones'),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [contenido, botones],
+        ),
+      );
+    }
+    // Móvil: contenido arriba y botones abajo sin medidas intrínsecas (las
+    // filas usan LayoutBuilder): la columna mide al menos el alto disponible.
     return LayoutBuilder(
       builder: (context, restricciones) => SingleChildScrollView(
         key: const ValueKey('notificaciones-desplazable'),
-        padding: EdgeInsets.fromLTRB(24, arriba, 24, 24),
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: tablet ? MedidasAdaptativas.columnaFormulario : double.infinity,
-              minHeight: math.max(0, restricciones.maxHeight - arriba - 24),
-            ),
+            constraints: BoxConstraints(minHeight: math.max(0, restricciones.maxHeight - 32)),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -288,6 +301,7 @@ class _NotificacionesState extends ConsumerState<_Notificaciones> {
 /// controles con su propio nombre para el lector.
 class _FilaRecordatorio extends StatelessWidget {
   const _FilaRecordatorio({
+    required this.relleno,
     required this.hora,
     required this.activo,
     required this.nodoFoco,
@@ -295,6 +309,8 @@ class _FilaRecordatorio extends StatelessWidget {
     required this.alCambiar,
   });
 
+  /// Relleno izquierdo del texto (16 en móvil, 20 en tablet).
+  final double relleno;
   final String hora;
   final bool activo;
   final FocusNode nodoFoco;
@@ -323,11 +339,9 @@ class _FilaRecordatorio extends StatelessWidget {
             ),
             child: Container(
               constraints: const BoxConstraints(minHeight: FilaAjuste.altoMinimo),
-              padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+              padding: EdgeInsets.fromLTRB(relleno, 12, 8, 12),
               child: Row(
                 children: [
-                  IconoApp(IconosApp.clock, tamano: 22, color: tokens.textoPrimario),
-                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,6 +373,55 @@ class _FilaRecordatorio extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Ilustración del panel de T34 (Figma 150:5709): círculo fondo/superficie de
+/// 340, Sarko alegre de 230 y la insignia de 84 (accion/primaria con `flame`
+/// de 40) arriba a la derecha del círculo. Decorativa.
+class IlustracionRacha extends StatelessWidget {
+  const IlustracionRacha({super.key});
+
+  static const double circulo = 340;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    // La insignia sobresale 18 por arriba y 1 por la derecha del círculo.
+    return SizedBox(
+      key: const ValueKey('ilustracion-racha'),
+      width: circulo + 1,
+      height: circulo + 18,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            top: 18,
+            child: Container(
+              width: circulo,
+              height: circulo,
+              decoration: BoxDecoration(color: tokens.fondoSuperficie, shape: BoxShape.circle),
+            ),
+          ),
+          const Positioned(
+            left: 55,
+            top: 30,
+            child: SarkoImagen(pose: PoseSarko.alegre, ancho: 230, decorativa: true),
+          ),
+          Positioned(
+            left: 257,
+            top: 0,
+            child: InsigniaCircular(
+              key: const ValueKey('insignia-racha'),
+              icono: IconosApp.flame,
+              color: tokens.accionPrimaria,
+              diametro: 84,
+              tamanoIcono: 40,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -83,6 +83,7 @@ import '../../datos/modelos/examen.dart';
 import '../../datos/modelos/tarjeta.dart';
 import '../apelaciones/pantalla_juicio.dart';
 import '../inicio/logica_inicio.dart';
+import '../notificaciones/pantalla_notificaciones.dart';
 import '../notificaciones/selector_hora.dart';
 import '../vidas/pantalla_sin_vidas.dart';
 
@@ -768,6 +769,8 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                   etiqueta: Textos.recordatorioDiario,
                   alCambiar: (_) {},
                 ),
+                // T34 · ilustración del panel de tablet.
+                const IlustracionRacha(),
                 // 34b · notificaciones del sistema simuladas.
                 NotificacionSistema(
                   titulo: Textos.notificacionRachaRiesgoTitulo(7),

@@ -1,6 +1,12 @@
 import 'package:abogator/app/rutas.dart';
+import 'package:abogator/componentes/boton_atras.dart';
+import 'package:abogator/componentes/disposicion_ilustracion_tablet.dart';
+import 'package:abogator/componentes/icono_app.dart';
+import 'package:abogator/componentes/ilustracion_insignia.dart';
 import 'package:abogator/componentes/piezas_ajustes.dart';
 import 'package:abogator/componentes/sarko_imagen.dart';
+import 'package:abogator/core/tema/iconos_app.dart';
+import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/mocks/ajustes_en_memoria.dart';
 import 'package:abogator/datos/modelos/ajustes.dart';
@@ -217,12 +223,99 @@ void main() {
     });
   });
 
-  group('tablet', () {
-    testWidgets('34 en 1194×834: columna de 470 centrada', (tester) async {
+  group('filas sin íconos (Figma 34, ronda 2)', () {
+    for (final t in [Tamano.movil, Tamano.tabletHorizontal]) {
+      testWidgets('ninguna fila lleva ícono y el texto empieza en x16 o x20 (${t.name})', (
+        tester,
+      ) async {
+        await abrirNotificaciones(tester, tamano: t.medida);
+        final tarjeta = find.byKey(const ValueKey('tarjeta-notificaciones'));
+        expect(find.descendant(of: tarjeta, matching: find.byType(IconoApp)), findsNothing);
+        final borde = tester.getRect(tarjeta).left;
+        final relleno = t == Tamano.movil ? 16.0 : 20.0;
+        for (final texto in [
+          Textos.rachaEnRiesgo,
+          Textos.juiciosApelacion,
+          Textos.recordatorioDiario,
+        ]) {
+          expect(
+            tester.getTopLeft(find.descendant(of: tarjeta, matching: find.text(texto))).dx - borde,
+            closeTo(relleno, 1.5),
+          );
+        }
+      });
+    }
+  });
+
+  group('tablet (T34, Figma 150:5709)', () {
+    testWidgets('1194×834: panel de 597 con círculo de 340, Sarko de 230 e insignia de 84', (
+      tester,
+    ) async {
       await abrirNotificaciones(tester, tamano: Tamano.tabletHorizontal.medida);
-      final tarjeta = tester.getRect(find.byKey(const ValueKey('tarjeta-notificaciones')));
-      expect(tarjeta.width, 470);
-      expect(tarjeta.center.dx, closeTo(1194 / 2, 1));
+      final panel = tester.getRect(find.byKey(const ValueKey('panel-ilustracion-tablet')));
+      expect(panel.left, 0);
+      expect(panel.width, DisposicionIlustracionTablet.anchoPanel);
+      expect(panel.height, 834);
+      final color = tester
+          .widget<ColoredBox>(find.byKey(const ValueKey('panel-ilustracion-tablet')))
+          .color;
+      expect(color, TokensColor.claro.fondoDestacado);
+      // La ilustración a escala 1, centrada en el panel.
+      final ilustracion = tester.getRect(find.byKey(const ValueKey('ilustracion-racha')));
+      expect(ilustracion.width, closeTo(IlustracionRacha.circulo + 1, 0.5));
+      expect(ilustracion.center.dx, closeTo(panel.center.dx, 1));
+      final sarko = find.descendant(
+        of: find.byKey(const ValueKey('ilustracion-racha')),
+        matching: find.byType(SarkoImagen),
+      );
+      expect(tester.getSize(sarko).width, closeTo(230, 0.5));
+      expect(tester.widget<SarkoImagen>(sarko).pose, PoseSarko.alegre);
+      final insignia = tester.widget<InsigniaCircular>(
+        find.byKey(const ValueKey('insignia-racha')),
+      );
+      expect(insignia.diametro, 84);
+      expect(insignia.icono, IconosApp.flame);
+      expect(insignia.tamanoIcono, 40);
+      // Atrás en el panel, con margen de 32.
+      final atras = tester.getRect(find.byType(BotonAtras));
+      expect(atras.topLeft, const Offset(32, 32));
+      expect(atras.size, const Size(48, 48));
+    });
+
+    testWidgets('1194×834: columna de 470 a la derecha, sin Sarko ni atrás dentro', (tester) async {
+      await abrirNotificaciones(tester, tamano: Tamano.tabletHorizontal.medida);
+      final columna = find.byKey(const ValueKey('columna-notificaciones'));
+      final r = tester.getRect(columna);
+      expect(r.width, 470);
+      expect(r.center.dx, closeTo(597 + (1194 - 597) / 2, 1));
+      expect(find.descendant(of: columna, matching: find.byType(SarkoImagen)), findsNothing);
+      expect(find.descendant(of: columna, matching: find.byType(BotonAtras)), findsNothing);
+      expect(tester.getSize(find.byKey(const ValueKey('tarjeta-notificaciones'))).width, 470);
+      // El atrás del panel cierra.
+      await pulsar(tester, find.byType(BotonAtras));
+      expect(find.byType(PantallaAjustes), findsOneWidget);
+    });
+
+    for (final t in [Tamano.tabletVertical, Tamano.tabletMinima]) {
+      testWidgets('${t.name}: franja arriba con la ilustración reducida y la columna debajo', (
+        tester,
+      ) async {
+        await abrirNotificaciones(tester, tamano: t.medida);
+        final franja = tester.getRect(find.byKey(const ValueKey('panel-ilustracion-tablet')));
+        expect(franja.width, t.medida.width);
+        expect(franja.height, DisposicionIlustracionTablet.altoFranja);
+        final ilustracion = tester.getRect(find.byKey(const ValueKey('ilustracion-racha')));
+        expect(ilustracion.height, lessThan(franja.height));
+        final columna = tester.getRect(find.byKey(const ValueKey('columna-notificaciones')));
+        expect(columna.top, greaterThanOrEqualTo(franja.bottom));
+        expect(columna.width, 470);
+      });
+    }
+
+    testWidgets('el selector de hora sigue siendo el diálogo de 440', (tester) async {
+      await abrirNotificaciones(tester, tamano: Tamano.tabletHorizontal.medida);
+      await pulsar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
+      expect(find.byType(Dialog), findsOneWidget);
     });
   });
 }
