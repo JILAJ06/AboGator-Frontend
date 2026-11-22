@@ -391,6 +391,10 @@ Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
 | PANT-20 | Sin vidas (cuenta regresiva del servidor) · tablet T-12d (hecho) | T-08 | 21 · volver |
 | PANT-23 | Sin conexión (offline-first) · tablet: el aviso sobre la tarjeta del juego de T-12c (sin cambios en T-12d) | T-08 | tarjeta normal |
 | PANT-21b | Notificación de apelación | T-09 | 22 |
+| PANT-31 | Recuperar contraseña (31, 31b, 31c, 31d, 31e) · `lib/funciones/acceso/recuperacion/` (T-13b) | T-13b | 05 · 31 → 31b → 31c → 31d; 31e si el enlace caducó |
+| PANT-32 | Aviso de Privacidad · `lib/funciones/legal/` (T-13b) | T-13b | 06, 24, 26 · atrás |
+| PANT-33 | Términos de uso · `lib/funciones/legal/` (T-13b) | T-13b | 06, 24, 26 · atrás |
+| PANT-34 | Notificaciones de racha y selector de hora (34, 34b, 34c) · `lib/funciones/notificaciones/` (T-13b) | T-13b | 06 (tras el primer registro), 24, 26 |
 | PANT-21 | Buzón de Apelaciones · tablet T-12d (hecho) | T-09 | 22 |
 | PANT-22 | Juicio de apelación · `lib/funciones/apelaciones/pantalla_juicio.dart` (hecho) · tablet T-12d (hecho) | T-09b | 22b o la perdida · Salir → 21 |
 | PANT-22b | Apelación ganada (+1 vida) · `lib/funciones/apelaciones/pantalla_juicio.dart` (en curso; la perdida, no en Figma, en el mismo archivo) · tablet T-12d (hecho) | T-09b | 22 (siguiente) · 21 |

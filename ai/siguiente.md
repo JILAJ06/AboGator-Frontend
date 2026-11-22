@@ -1,53 +1,41 @@
-# T-13b · Pantallas de cuenta, legal y notificaciones
+# T-13b · Correcciones tras la revisión
 
-**Rama:** `13b-pantallas-cuenta-y-legal` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-13b**).
-**Figma** (`SYNAyUal3xVk4k8SEBEb7f`): móvil en la página Vistas `2:5`, sección `148:4651` ("7 · Cuenta…"); tablet en la página `94:23`, sección `150:5097` ("T7 · Cuenta…"). Todo lo necesario está abajo; si una medida falta, pregúntala como D#.
+**Rama:** `13b-pantallas-cuenta-y-legal` (la misma; el PR sigue abierto o se abre al terminar)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-13b**, ronda 2: reescríbelo completo).
 
-## Objetivo
-Programar 5 flujos nuevos, **solo con mocks** (nada de red): recuperar contraseña (5 pantallas), Aviso de Privacidad, Términos de uso, Notificaciones de racha (con selector de hora). Móvil, tablet vertical y tablet horizontal, claro y oscuro, con la infraestructura adaptativa y la accesibilidad de la T-12/T-13 (foco, 48 dp, semántica, "Solo botones", "Reducir animaciones", texto al 200 %).
+Todo lo demás de la T-13b está aprobado. Solo hay que corregir lo siguiente, que salió de volver a medir Figma (T34 `150:5709`).
 
-Reutiliza lo existente: `COMP-BOTON`, `COMP-CAMPO`, `COMP-ATRAS`, `COMP-ENLACE`, Sarko (`Expresión`), `PanelMarca` (tablet), `HojaLateral`, validadores de contraseña del Registro ("Mínimo 8 caracteres, incluye un número"), textos solo en `textos.dart`. **No dupliques** componentes: si algo se repite 3 veces (insignia circular, fila de acordeón, interruptor), hazlo componente en `lib/componentes/` (lo usará la T-15).
+## Respuestas a tus dudas
+- **D1** Bien: 34 tras el primer registro, una vez.
+- **D2** Bien: ruta de primer nivel.
+- **D3** Bien: los enlaces bajo las casillas.
+- **D4** **No coincide con Figma; corrígelo (A).**
+- **D5** Figma **no** lleva íconos en las filas de 34: quítalos (B).
+- **D6** Bien: "Ahora no" conserva los interruptores como estén.
+- **D7** Las filas PANT-31 a PANT-34 ya las agregué yo al grafo. `PantallaPendiente` se borra en la T-15.
+- **D8** No hay dirección real todavía: deja "el correo del equipo del proyecto"; el usuario la pondrá al validar el texto legal.
+- Tus decisiones propias (insignia de 96 en la columna de recuperación en tablet, 31d/31e sin atrás, íconos aparte, `DEC-NOTIF-RUTA`) están aprobadas, salvo el ícono de las filas.
 
-## 1 · Recuperar contraseña (frames 31, 31b, 31c, 31d, 31e; tablet T31…T31e)
-Móvil 390×844, márgenes 24, columna 342. Barra de estado 48. Tablet: panel de marca a la izquierda (como Login/Registro, Sarko según la expresión de cada paso) y columna de formulario de 470 a la derecha.
+## A · Notificaciones de racha en tablet (T34): panel de marca, no columna sola
+Figma 1194×834 (horizontal):
+- **Panel izquierdo de 597 × 834** (`fondo/destacado`, igual que el panel de ilustración del onboarding): círculo de 340 centrado (x128, y250), Sarko `Alegre` de **230 × 301** (x183, y262) y una **insignia de 84** `accionPrimaria` con el ícono `flame` de 40 (x385, y232, arriba a la derecha del círculo). Sin logo ni lema.
+- **Columna de 470** a la derecha (x661, y200, alto 466), **sin** Sarko ni botón atrás dentro de ella: Título "Protege tu racha" (y0), descripción (y48), tarjeta de 3 filas (y104; filas de 65, ancho 470; texto en x20 con ancho 364; interruptor de 52 × 32 en x396), nota (y316), "Activar notificaciones" (y346) y "Ahora no" fantasma (y414).
+- **Atrás en tablet:** como no hay botón dentro de la columna, ponlo en el panel izquierdo (esquina superior izquierda, 48 × 48, con margen 32), igual que en el Registro de tablet.
+- Reutiliza `DisposicionAccesoTablet`/el panel de ilustración si encaja; si no, haz el panel como pieza propia en `lib/componentes/` y dilo en el reporte (T-15).
+- **Tablet vertical (834×1194) y 600–959:** el panel pasa a franja arriba (como el Login) con la misma ilustración reducida, y la columna de 470 debajo; usa el mismo patrón que ya aplicaste en Recuperar.
+- La hoja del selector (34c) en tablet sigue siendo el diálogo de 440 centrado sobre un velo de 40 %; ya está bien.
 
-- **31 Recuperar contraseña:** botón atrás (48×48, x24, y60). Título "¿Olvidaste tu contraseña?" (H1, 2 líneas, y140). Sarko `Sorprendido` 96×120 arriba a la derecha (x270, y130). Contenido (y262): descripción "Escribe el correo de tu cuenta y te enviaremos un enlace para crear una nueva contraseña.", campo "Correo electrónico", nota "Por seguridad, te respondemos igual aunque el correo no esté registrado." Primario "Enviar enlace" (y482), fantasma "Volver a iniciar sesión" (y550, alto 48), leyenda al pie "El enlace caduca en 30 minutos" (y750, centrada).
-- **31b Revisa tu correo:** atrás. Ilustración 260×260 (y110, centrada): círculo claro de 230, Sarko `Alegre` 150×196 y insignia circular 64 `accionPrimaria` con ícono mail (arriba a la derecha). Título "Revisa tu correo", descripción "Enviamos un enlace a {correo}. Ábrelo en este dispositivo para crear tu nueva contraseña." Primario "Abrir correo", deshabilitado "Reenviar enlace en 0:45" (cuenta atrás de 45 s; al llegar a 0 pasa a fantasma "Reenviar enlace"; anunciar el cambio una vez), nota "¿No lo ves? Revisa la carpeta de spam."
-- **31c Nueva contraseña:** botón cerrar (X) en lugar de atrás. Título "Crea tu nueva contraseña", descripción "Elige una contraseña que no uses en otros sitios.", campo "Nueva contraseña" con la ayuda "Mínimo 8 caracteres, incluye un número", campo "Confirmar contraseña" (debe coincidir), primario "Guardar contraseña". Ojo de mostrar/ocultar igual que en el Registro.
-- **31d Contraseña actualizada:** ilustración como 31b con insignia `accionPrimaria` y ícono check. Título "Contraseña actualizada", descripción "Ya puedes iniciar sesión con tu nueva contraseña. Por seguridad, cerramos tus sesiones en otros dispositivos.", primario "Iniciar sesión".
-- **31e Enlace caducado:** igual a 31d pero Sarko `Triste`, insignia `accionAcento` con ícono alerta, título "Este enlace ya no es válido", descripción "Caducó o ya se usó. Pide uno nuevo y te lo enviamos de inmediato.", primario "Pedir un enlace nuevo" (vuelve a 31 con el correo ya escrito) y fantasma "Iniciar sesión".
-
-**Rutas** (go_router): `/recuperar`, `/recuperar/enviado`, `/recuperar/nueva` (recibe `token`), `/recuperar/listo`, `/recuperar/caducado`. Se abre desde el enlace "¿Olvidaste tu contraseña?" del Login (ya existe; conéctalo). **Mock** en el repositorio de autenticación (`RepositorioAuth`: `solicitarRecuperacion(correo)`, `restablecer(token, nueva)`) con respuestas simuladas: siempre responde igual aunque el correo no exista; el token `caducado` devuelve `EnlaceCaducado`; cualquier otro token vale. "Abrir correo" en el mock navega a `/recuperar/nueva?token=demo` (en T-14 será el enlace profundo del correo; déjalo marcado con un comentario `// T-14`). Errores: correo vacío o con formato inválido (validador del Login), contraseñas que no coinciden, regla incumplida; el error se anuncia y el foco va al primer campo con error.
-
-## 2 · Aviso de Privacidad y Términos de uso (frames 32, 33; tablet T32, T33)
-Pantalla de lectura: atrás (x24, y56), título centrado 18 px en y69 ("Aviso de Privacidad" / "Términos de uso"), línea "Versión 1.0 · Vigente desde el 21 de noviembre de 2026" (Leyenda, x24, y122), lista de **secciones tipo acordeón** (x24, y152, ancho 342, separación 10) y botón fijo abajo "Entendido" (x24, y752) que cierra.
-- Fila cerrada: alto 50, radio 16, fondo `fondo/superficie`, borde `borde/default` 1 px, título (Cuerpo/Énfasis) y chevron a la derecha.
-- Fila abierta: mismo fondo `fondo/superficie`, **borde de 2 px `accionAcento`**, chevron hacia abajo, título en negrita y el texto debajo (Cuerpo/Base). Solo una abierta a la vez (por defecto: "¿Qué datos recopilamos?" en el Aviso y "Contenido educativo" en los Términos). `ExpansionTile` o equivalente con `Semantics(expanded)`, Enter/Espacio abre, animación de 200 ms (ninguna con "Reducir animaciones"). El contenido se desplaza si no cabe (texto al 200 %).
-- **Tablet:** columna de lectura de **640 centrada** (sin hoja lateral ni riel; se abre desde Registro, Perfil y Ajustes), mismos componentes.
-- **Contenido (borrador, marcado `// BORRADOR legal: revisar antes de publicar` en `textos.dart`; guárdalo como datos `SeccionLegal(titulo, cuerpo)` en `lib/core/textos/textos_legales.dart`):**
-  - *Aviso:* ¿Quién es responsable? · ¿Qué datos recopilamos? ("Datos de cuenta: nombre, correo electrónico y perfil (estudiante, desarrollador o legal). Datos de uso: tus respuestas, progreso, vidas, monedas y racha. Datos del dispositivo: tipo de dispositivo y tus preferencias de accesibilidad. No recopilamos datos personales sensibles.") · ¿Para qué los usamos? · Tus derechos ARCO · Transferencias de datos · Conservación y seguridad · Cambios a este aviso.
-  - *Términos:* Aceptación de los términos · Tu cuenta · Uso permitido · Contenido educativo ("AboGator es una herramienta educativa. Los casos y veredictos sirven para aprender y no sustituyen la asesoría de un abogado. Revisa siempre la normativa vigente de tu país antes de aplicarla en un proyecto real.") · Vidas, monedas y compras · Propiedad intelectual · Suspensión de la cuenta · Cambios a los términos.
-  - Los cuerpos que no están arriba escríbelos tú en 2–3 frases claras en español neutro, de acuerdo con el título (en el Aviso, mexicano: LFPDPPP, derechos ARCO = acceso, rectificación, cancelación y oposición, contacto por correo del equipo del proyecto). **Marca los textos como borrador**; los valida el usuario con su docente (no es asesoría legal).
-- **Acceso:** los enlaces "Aviso de Privacidad" y "Términos de uso" ya existentes en el Registro (casilla), y filas nuevas en **Perfil** y **Ajustes** (sección "Legal"): rutas `/legal/aviso` y `/legal/terminos`.
-
-## 3 · Notificaciones de racha (frames 34, 34c, 34b; tablet T34, T34c, T34b)
-- **34:** atrás; Sarko `Alegre` 96×120 (x270, y120); título "Protege tu racha"; descripción "Te avisamos cuando tu racha esté en riesgo y cuando te toque un juicio de apelación."; tarjeta de 3 filas (borde `borde/default`, radio 16; alto 65 cada una) con interruptor de 52×32 (activo `accionPrimaria`, apagado `borde/control`): **Racha en riesgo** ("Si aún no completas el reto del día", activo), **Juicios de apelación** ("Cuando toca el día 3, 7 o 14", activo), **Recordatorio diario** ("Todos los días a las 7:00 p. m.", apagado; **tocar la fila** abre el selector de hora); nota "Máximo 2 avisos al día. Puedes cambiarlo cuando quieras en Ajustes."; primario "Activar notificaciones" (y696) y fantasma "Ahora no".
-- **34c Hora del recordatorio:** móvil: **hoja inferior** (390 de ancho, radio superior 28, agarre 40×5, padding 24, `Sombra/Elevada`) sobre un velo `#0B1220` al 40 %; título "Hora del recordatorio" (H3), leyenda "Te avisaremos todos los días a esta hora.", selector de 3 ruedas (hora 1–12, minutos de 5 en 5, a. m./p. m.; fila seleccionada de 48 con fondo `fondo/superficie-alt` y radio 14, los vecinos más tenues), primario "Guardar" y fantasma "Cancelar". Tablet: **diálogo centrado de 440** (radio 28) con el mismo contenido. Usa `showModalBottomSheet`/`showDialog` según `ClasePantalla`. Accesibilidad: las ruedas son ajustables (`Semantics` con aumentar/disminuir, flechas arriba/abajo con teclado), Esc cancela, el foco vuelve a la fila que abrió el selector (`FocoRetorno`), se anuncia la hora al guardar. Con "Solo botones" agrega botones − / + junto a cada rueda (el arrastre no puede ser la única vía).
-- **34b:** es la **notificación de sistema** simulada (misma que 21b con otros textos; reutiliza `COMP` de la notificación): en la galería, dos ejemplos: racha en riesgo ("Tu racha de 7 días está en riesgo") y racha perdida ("Perdiste tu racha de 7 días"). No hay notificaciones reales todavía.
-- **Estado:** `ajustesNotificacionesProvider` (racha en riesgo, apelaciones, recordatorio diario + hora) guardado con el repositorio de ajustes existente (SQLite/memoria). "Activar notificaciones" y "Ahora no" guardan y cierran (mock: no pide permiso del sistema; deja `// T-14: permiso del sistema`). **Nota del backend/servidor:** el selector de hora puede depender de él (la hora la define el cliente, pero el envío no); déjalo aislado en su propio archivo para poder quitarlo.
-- **Acceso:** se abre tras el primer registro exitoso (una vez) y desde **Ajustes → Notificaciones** (ruta `/ajustes/notificaciones`); revisa el orden con el Registro actual y dime en D# si prefieres otra cosa.
+## B · Filas de 34 sin íconos
+Quita `flame`, `gavel` y `clock` de las tres filas (móvil y tablet). Móvil: texto en x16 con ancho 244 e interruptor en x272; tablet: texto en x20 con ancho 364 e interruptor en x396. Deja el parámetro de ícono si `FilaAjuste` lo comparte con Ajustes (solo no lo pases aquí). Actualiza las pruebas y la auditoría.
 
 ## Archivos permitidos
-`lib/funciones/acceso/` (nuevas pantallas de recuperación), `lib/funciones/legal/` (nuevo), `lib/funciones/notificaciones/` (nuevo), `lib/componentes/` (componentes compartidos), `lib/core/textos/` (incluye `textos_legales.dart`), enrutador, repositorio y mock de auth y de ajustes (solo agregar métodos), Perfil y Ajustes (solo las filas de acceso), galería, `test/` y `ai/`. **Sin dependencias nuevas. No toques** reglas del juego ni el diseño de otras pantallas.
+`lib/funciones/notificaciones/`, `lib/componentes/` (solo el panel de ilustración si lo extraes), `panel_marca.dart` si hace falta, galería, `test/` y `ai/`. Nada más.
 
 ## Criterios de aceptación
-- [ ] Las 5 pantallas de recuperación funcionan de punta a punta con el mock (correo → enviado → nueva contraseña → listo; token `caducado` → 31e → pedir otro).
-- [ ] Aviso y Términos con acordeón de una fila abierta (fondo blanco, borde de acento 2 px), accesibles desde Registro, Perfil y Ajustes; tablet en columna de 640.
-- [ ] Notificaciones de racha con interruptores persistidos y selector de hora (hoja en móvil, diálogo en tablet) con alternativa "Solo botones".
-- [ ] Móvil (360×640, 390×844) y tablet (834×1194, 1194×834), claro y oscuro, texto 100 % y 200 %: sin desbordes, objetivos ≥ 48, etiquetas, foco visible, orden de foco, Esc/Enter. Las pruebas de `test/auditoria/` incluyen las pantallas nuevas.
-- [ ] Galería actualizada con las pantallas y estados nuevos.
-- [ ] Las 2650 pruebas previas siguen verdes; análisis, formato y pruebas en verde; sin dependencias nuevas; commits sin prefijo y sin menciones a Claude.
+- [ ] T34 en tablet horizontal: panel de 597 con círculo, Sarko 230 × 301 e insignia de 84 con flame; columna de 470 a la derecha, atrás en el panel; vertical y 600–959 con franja arriba.
+- [ ] Filas de 34 sin íconos en móvil y tablet.
+- [ ] Auditoría (4 tamaños × claro/oscuro × 100/160/200 %) y foco visible siguen verdes con los cambios; análisis y formato limpios; todas las pruebas verdes.
+- [ ] Commits sin prefijo y sin menciones a Claude.
 
 ## Para el reporte
-Dudas numeradas (D1, D2…), decisiones propias, qué componentes nuevos compartiste (para la T-15) y lo que depende del servidor para la T-14 (enlace profundo del correo, caducidad real del token, reenvío con límite, cierre de sesiones en otros dispositivos, permiso y envío real de notificaciones, hora del recordatorio).
+Reescribe `reporte.md` completo (ID T-13b), con lo corregido, el número de pruebas y cualquier D# nuevo.
