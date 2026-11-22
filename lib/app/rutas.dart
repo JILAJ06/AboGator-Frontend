@@ -69,9 +69,10 @@ abstract final class Rutas {
   /// 26 / 26b Ajustes de accesibilidad (T-10b), sin navegación inferior.
   static const String ajustes = '$perfil/$segmentoAjustes';
 
-  /// 34 Notificaciones de racha (T-13b): hija de Ajustes ("Ajustes →
-  /// Notificaciones"); también se abre desde el Perfil y tras el registro.
-  static const String notificacionesRacha = '$ajustes/$segmentoNotificaciones';
+  /// 34 Notificaciones de racha (T-13b): "Ajustes → Notificaciones" (con
+  /// push), desde el Perfil y tras el registro. Es de primer nivel: abrirla
+  /// directo solo construye esta página (sin Perfil ni Ajustes debajo).
+  static const String notificacionesRacha = '/ajustes/$segmentoNotificaciones';
 
   /// Parámetro de [notificacionesRacha] cuando se abre tras el registro: al
   /// cerrar va al Inicio en lugar de regresar.

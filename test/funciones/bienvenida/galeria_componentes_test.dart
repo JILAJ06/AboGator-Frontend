@@ -17,10 +17,12 @@ import 'package:abogator/componentes/encabezado_modulo.dart';
 import 'package:abogator/componentes/estadisticas_sprint.dart';
 import 'package:abogator/componentes/estrellas_sprint.dart';
 import 'package:abogator/componentes/etiqueta_quiebra.dart';
+import 'package:abogator/componentes/fila_acordeon.dart';
 import 'package:abogator/componentes/fila_apelacion.dart';
 import 'package:abogator/componentes/fila_detalle_sprint.dart';
 import 'package:abogator/componentes/globo_sprint_actual.dart';
 import 'package:abogator/componentes/hoja_lateral.dart';
+import 'package:abogator/componentes/ilustracion_insignia.dart';
 import 'package:abogator/componentes/impacto_startup.dart';
 import 'package:abogator/componentes/indicador_pendientes.dart';
 import 'package:abogator/componentes/indicadores_startup.dart';
@@ -53,6 +55,7 @@ import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/funciones/bienvenida/galeria_componentes.dart';
+import 'package:abogator/funciones/notificaciones/selector_hora.dart';
 import 'package:abogator/funciones/vidas/pantalla_sin_vidas.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -61,7 +64,7 @@ import 'package:material_ui/material_ui.dart';
 /// Pantalla alta para que la galería entera quede construida.
 Future<void> montarGaleria(WidgetTester tester) async {
   await abrirGaleria(tester);
-  await agrandar(tester, const Size(390, 30000));
+  await agrandar(tester, const Size(390, 36000));
 }
 
 /// Agranda la superficie después de navegar (la transición de página no
@@ -88,7 +91,7 @@ void main() {
   testWidgets('la app abre en la galería con todos los componentes', (tester) async {
     await montarGaleria(tester);
     expect(find.text(Textos.galeriaTitulo), findsOneWidget);
-    expect(find.byType(BotonApp), findsNWidgets(22)); // 8 + globo + 5 paneles + 3 visores + panel 18 + Abogado + 2 del Buzón (20) + Buzón del Inicio de tablet
+    expect(find.byType(BotonApp), findsNWidgets(26)); // 8 + globo + 5 paneles + 3 visores + panel 18 + Abogado + 2 del Buzón (20) + Buzón del Inicio de tablet + 4 de los selectores de hora (T-13b)
     expect(find.byType(RielNavegacion), findsOneWidget);
     expect(find.byType(TarjetaSemana), findsNWidgets(2));
     expect(find.byType(TarjetaBuzonInicio), findsNWidgets(2));
@@ -123,8 +126,11 @@ void main() {
     expect(find.byType(FilaResumenExamen), findsOneWidget);
     expect(find.byType(TrofeoCertificado), findsOneWidget);
     expect(find.byType(PaginadorPuntos), findsOneWidget);
-    expect(find.byType(SarkoImagen), findsNWidgets(10)); // 5 + 5 paneles
-    expect(find.byType(LogoApp), findsNWidgets(24)); // + isotipo del riel
+    expect(find.byType(SarkoImagen), findsNWidgets(13)); // 5 + 5 paneles + 3 ilustraciones (T-13b)
+    expect(
+      find.byType(LogoApp),
+      findsNWidgets(26),
+    ); // + isotipo del riel + 2 notificaciones de racha (T-13b)
     expect(find.byType(NavegacionInferiorApp), findsOneWidget);
     expect(find.byType(EncabezadoModulo), findsNWidgets(2));
     // Fin de sprint (19 y 19b).
@@ -160,6 +166,12 @@ void main() {
     expect(find.byType(FilaApelacion), findsNWidgets(5)); // + la seleccionada (T-12d)
     expect(find.byType(TarjetaJefe), findsOneWidget);
     expect(find.byType(NotificacionApelacion), findsNWidgets(2));
+    // T-13b: 21b (2) + 34b (2) comparten la notificación del sistema.
+    expect(find.byType(NotificacionSistema), findsNWidgets(4));
+    expect(find.byType(IlustracionInsignia), findsNWidgets(3));
+    expect(find.byType(FilaAcordeon), findsNWidgets(2));
+    expect(find.byType(InterruptorTocable), findsOneWidget);
+    expect(find.byType(SelectorHora), findsNWidgets(2));
     expect(
       tester.widgetList<PanelVeredicto>(find.byType(PanelVeredicto)).map((p) => p.tipo),
       TipoPanelVeredicto.values,

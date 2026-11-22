@@ -1076,6 +1076,7 @@ abstract final class Textos {
   static const String galeriaPerfil = 'Piezas del Perfil';
   static const String galeriaAjustes = 'Piezas de los Ajustes';
   static const String galeriaJefe = 'Piezas del Examen Final';
+  static const String galeriaCuenta = 'Cuenta, legal y notificaciones';
   static const String galeriaLogos = 'Logos (4 formas × 5 tonos)';
   static String galeriaLogo(String forma, String tono) => '$forma · $tono';
   static const String galeriaIconos = 'Íconos';

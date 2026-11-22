@@ -167,20 +167,19 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
         builder: (context, state) => const PantallaPerfil(),
         routes: [
-          // Sin navegación inferior: 26 Ajustes y su hija 34 Notificaciones.
+          // Sin navegación inferior: 26 Ajustes.
           GoRoute(
             path: Rutas.segmentoAjustes,
             builder: (context, state) => const PantallaAjustes(),
-            routes: [
-              GoRoute(
-                path: Rutas.segmentoNotificaciones,
-                builder: (context, state) => PantallaNotificaciones(
-                  desdeRegistro: state.uri.queryParameters['desde'] == 'registro',
-                ),
-              ),
-            ],
           ),
         ],
+      ),
+      // T-13b · 34 Notificaciones de racha (con sesión).
+      GoRoute(
+        path: Rutas.notificacionesRacha,
+        redirect: (context, state) => ref.read(sesionProvider) == null ? Rutas.inicioSesion : null,
+        builder: (context, state) =>
+            PantallaNotificaciones(desdeRegistro: state.uri.queryParameters['desde'] == 'registro'),
       ),
       if (kDebugMode)
         GoRoute(path: Rutas.galeria, builder: (context, state) => const GaleriaComponentes()),
