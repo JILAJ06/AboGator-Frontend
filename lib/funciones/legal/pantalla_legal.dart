@@ -2,10 +2,10 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/rutas.dart';
-import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_atras.dart';
 import '../../componentes/fila_acordeon.dart';
+import '../../componentes/titulo_enfocado.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
 import '../../core/textos/textos_legales.dart';
@@ -77,16 +77,12 @@ class _PantallaLegalState extends State<PantallaLegal> {
         BotonAtras(alPresionar: () => PantallaLegal.cerrar(context)),
         const SizedBox(width: 8),
         Expanded(
-          child: BloqueLectura(
-            key: const ValueKey('titulo-legal'),
-            encabezado: true,
-            autofocus: true,
-            radio: 8,
-            child: Text(
-              documento.titulo,
-              textAlign: TextAlign.center,
-              style: estilos.h3.copyWith(color: tokens.textoPrimario, fontSize: 18),
-            ),
+          child: TituloEnfocado(
+            documento.titulo,
+            clave: const ValueKey('titulo-legal'),
+            estilo: estilos.h3.copyWith(fontSize: 18),
+            color: tokens.textoPrimario,
+            alineacion: TextAlign.center,
           ),
         ),
         const SizedBox(width: 8 + BotonAtras.lado),

@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../core/utilidades/extensiones_contexto.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 
 /// Fila de detalle de la intro del sprint (Figma 13:850): ícono de 22 en
@@ -60,15 +61,11 @@ class TarjetaDetallesSprint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    return Container(
-      key: const ValueKey('tarjeta-detalles'),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficie,
-        borderRadius: BorderRadius.circular(radio),
-        border: Border.all(color: tokens.bordeDefault),
-      ),
+    return CajaSuperficie(
+      clave: const ValueKey('tarjeta-detalles'),
+      relleno: const EdgeInsets.symmetric(horizontal: 16),
+      radio: radio,
+      conBorde: true,
       child: Column(mainAxisSize: MainAxisSize.min, children: filas),
     );
   }

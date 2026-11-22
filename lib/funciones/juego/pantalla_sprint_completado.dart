@@ -6,6 +6,7 @@ import '../../app/rutas.dart';
 import '../../componentes/aviso_informativo.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/caja_superficie.dart';
 import '../../componentes/confeti_sprint.dart';
 import '../../componentes/disposicion_resultado_tablet.dart';
 import '../../componentes/estadisticas_sprint.dart';
@@ -152,14 +153,10 @@ class _PantallaSprintCompletadoState extends ConsumerState<PantallaSprintComplet
                   style: estilos.etiqueta.copyWith(color: tokens.textoSecundario),
                 ),
                 const SizedBox(height: 16),
-                Container(
-                  key: const ValueKey('caja-indicadores-tablet'),
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: tokens.fondoSuperficie,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: tokens.bordeDefault),
-                  ),
+                CajaSuperficie(
+                  clave: const ValueKey('caja-indicadores-tablet'),
+                  relleno: const EdgeInsets.all(10),
+                  conBorde: true,
                   child: IndicadoresStartup(estado: juego.estadoStartup, cambios: cambiosStartup),
                 ),
               ],

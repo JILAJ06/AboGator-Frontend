@@ -15,6 +15,7 @@ import '../../componentes/boton_cerrar.dart';
 import '../../componentes/composicion_juego_tablet.dart';
 import '../../componentes/corazon_vida.dart';
 import '../../componentes/disposicion_resultado_tablet.dart';
+import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/ilustracion_sarko.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/panel_lateral_juego.dart';
@@ -697,34 +698,19 @@ class _EsqueletoJuicio extends StatelessWidget {
   const _EsqueletoJuicio();
 
   @override
-  Widget build(BuildContext context) {
-    final color = context.tokens.fondoSuperficieAlt;
-    Widget bloque(double alto, {double radio = 16}) => Container(
-      height: alto,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(radio)),
-    );
-    return Semantics(
-      label: Textos.cargandoApelacion,
-      liveRegion: true,
-      excludeSemantics: true,
-      child: SafeArea(
-        child: SingleChildScrollView(
-          key: const ValueKey('esqueleto-juicio'),
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 4),
-              bloque(48, radio: 12),
-              const SizedBox(height: 12),
-              bloque(TarjetaCaso.alto, radio: TarjetaCaso.radio),
-              const SizedBox(height: 18),
-              bloque(90),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const EsqueletoPantalla(
+    etiqueta: Textos.cargandoApelacion,
+    clave: ValueKey('esqueleto-juicio'),
+    areaSegura: true,
+    relleno: EdgeInsets.symmetric(horizontal: 24),
+    alineacion: CrossAxisAlignment.stretch,
+    hijos: [
+      SizedBox(height: 4),
+      BloqueEsqueleto(48, radio: 12),
+      SizedBox(height: 12),
+      BloqueEsqueleto(TarjetaCaso.alto, radio: TarjetaCaso.radio),
+      SizedBox(height: 18),
+      BloqueEsqueleto(90),
+    ],
+  );
 }

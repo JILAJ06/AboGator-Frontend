@@ -9,6 +9,7 @@ import '../datos/modelos/tarjeta.dart';
 import 'agarre_hoja.dart';
 import 'bloque_lectura.dart';
 import 'boton_app.dart';
+import 'caja_superficie.dart';
 import 'hoja_lateral.dart';
 import 'icono_app.dart';
 import 'impacto_startup.dart';
@@ -229,14 +230,11 @@ class _Explicacion extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
-    return Container(
-      key: const ValueKey('caja-explicacion'),
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficieAlt,
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return CajaSuperficie(
+      clave: const ValueKey('caja-explicacion'),
+      ancho: double.infinity,
+      relleno: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      fondo: FondoCaja.superficieAlt,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -262,14 +260,11 @@ class _MicroPregunta extends StatelessWidget {
     final tokens = context.tokens;
     final total = pregunta.opciones.length;
     final elegir = alElegir;
-    return Container(
-      key: const ValueKey('caja-micro-pregunta'),
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: tokens.fondoDestacado,
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return CajaSuperficie(
+      clave: const ValueKey('caja-micro-pregunta'),
+      ancho: double.infinity,
+      relleno: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      fondo: FondoCaja.destacado,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

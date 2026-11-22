@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/tema/efectos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
+import 'caja_superficie.dart';
 
 /// Barra de progreso: alto 12, radio 6, relleno accion/primaria con brillo
 /// (franja de 3 de alto, blanco al 35 %, a 6 del borde izquierdo y 2.5 de
@@ -44,13 +45,11 @@ class BarraProgreso extends StatelessWidget {
           builder: (context, restricciones) {
             final total = restricciones.maxWidth;
             final relleno = total * acotado;
-            return Container(
-              height: alto,
-              width: total,
-              decoration: BoxDecoration(
-                color: tokens.fondoSuperficieAlt,
-                borderRadius: BorderRadius.circular(6),
-              ),
+            return CajaSuperficie(
+              ancho: total,
+              alto: alto,
+              fondo: FondoCaja.superficieAlt,
+              radio: 6,
               child: Stack(
                 children: [
                   AnimatedContainer(

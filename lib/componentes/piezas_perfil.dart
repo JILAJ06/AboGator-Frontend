@@ -5,6 +5,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 
 /// Tarjeta de perfil (Figma 25): accion/primaria, radio 22, relleno 16,
@@ -99,14 +100,10 @@ class TarjetaEstadistica extends StatelessWidget {
       container: true,
       label: Textos.estadisticaSemantica(etiqueta, valorSemantico ?? valor),
       excludeSemantics: true,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficie,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: tokens.bordeDefault),
-        ),
+      child: CajaSuperficie(
+        ancho: double.infinity,
+        relleno: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        conBorde: true,
         child: Row(
           children: [
             IconoApp(icono, tamano: 22, color: colorIcono),
@@ -252,27 +249,8 @@ class MenuAgrupado extends StatelessWidget {
   final List<Widget> filas;
 
   @override
-  Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    return Container(
-      key: const ValueKey('menu-perfil'),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficie,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: tokens.bordeDefault),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final (i, f) in filas.indexed) ...[
-            if (i > 0) Divider(height: 1, thickness: 1, color: tokens.bordeDefault),
-            f,
-          ],
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      TarjetaLista(clave: const ValueKey('menu-perfil'), radio: 18, filas: filas);
 }
 
 /// Botón cuadrado de 48 (Figma 25, ajustes): fondo/superficie, borde 1,
@@ -297,15 +275,12 @@ class BotonIconoCuadrado extends StatelessWidget {
       radio: 12,
       semantica: (hijo) =>
           Semantics(button: true, label: etiqueta, excludeSemantics: true, child: hijo),
-      child: Container(
-        width: 48,
-        height: 48,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficie,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: tokens.bordeDefault),
-        ),
+      child: CajaSuperficie(
+        ancho: 48,
+        alto: 48,
+        alineacion: Alignment.center,
+        radio: 12,
+        conBorde: true,
         child: IconoApp(icono, tamano: 20, color: tokens.textoPrimario),
       ),
     );
@@ -342,14 +317,11 @@ class TarjetaProgresoModulos extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
-    return Container(
-      key: const ValueKey('progreso-modulos'),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficie,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: tokens.bordeDefault),
-      ),
+    return CajaSuperficie(
+      clave: const ValueKey('progreso-modulos'),
+      relleno: const EdgeInsets.all(20),
+      radio: 20,
+      conBorde: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

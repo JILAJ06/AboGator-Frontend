@@ -15,6 +15,7 @@ import '../../componentes/boton_atras.dart';
 import '../../componentes/boton_buzon.dart';
 import '../../componentes/boton_icono_caja.dart';
 import '../../componentes/boton_veredicto.dart';
+import '../../componentes/caja_superficie.dart';
 import '../../componentes/campo_texto_app.dart';
 import '../../componentes/casilla_app.dart';
 import '../../componentes/chip_hud.dart';
@@ -24,6 +25,7 @@ import '../../componentes/corazon_vida.dart';
 import '../../componentes/cuenta_regresiva_vida.dart';
 import '../../componentes/encabezado_modulo.dart';
 import '../../componentes/enlace_texto.dart';
+import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/estadisticas_sprint.dart';
 import '../../componentes/estrellas_sprint.dart';
 import '../../componentes/etiqueta_lupa.dart';
@@ -69,6 +71,7 @@ import '../../componentes/tarjeta_heroe_startup.dart';
 import '../../componentes/tarjeta_modulo.dart';
 import '../../componentes/tarjeta_reto_diario.dart';
 import '../../componentes/tarjeta_semana.dart';
+import '../../componentes/titulo_enfocado.dart';
 import '../../core/recursos/imagenes_app.dart';
 import '../../core/tema/colores_marca.dart';
 import '../../core/tema/efectos.dart';
@@ -867,6 +870,36 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 ),
                 const EtiquetaQuiebra(causa: CausaQuiebra.riesgoLegal),
                 const EtiquetaQuiebra(causa: CausaQuiebra.presupuesto),
+              ],
+            ),
+            const _Seccion(
+              titulo: Textos.galeriaSuperficies,
+              hijos: [
+                TituloEnfocado(Textos.galeriaTituloEjemplo, autofocus: false),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    CajaSuperficie(ancho: 96, alto: 56, conBorde: true),
+                    CajaSuperficie(ancho: 96, alto: 56, fondo: FondoCaja.superficieAlt),
+                    CajaSuperficie(ancho: 96, alto: 56, fondo: FondoCaja.destacado, radio: 22),
+                  ],
+                ),
+                TarjetaLista(
+                  filas: [
+                    Padding(padding: EdgeInsets.all(16), child: Text(Textos.galeriaFilaUno)),
+                    Padding(padding: EdgeInsets.all(16), child: Text(Textos.galeriaFilaDos)),
+                  ],
+                ),
+                EsqueletoPantalla(
+                  etiqueta: Textos.galeriaEsqueleto,
+                  clave: ValueKey('esqueleto-galeria'),
+                  hijos: [
+                    BloqueEsqueleto(26, ancho: 168, radio: 8),
+                    SizedBox(height: 10),
+                    BloqueEsqueleto(60),
+                  ],
+                ),
               ],
             ),
             _Seccion(

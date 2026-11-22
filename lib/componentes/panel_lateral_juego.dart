@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import '../datos/modelos/estado_startup.dart';
+import 'caja_superficie.dart';
 import 'indicadores_startup.dart';
 
 /// "Tu Startup" del panel lateral del juego en tablet (Figma `97:1814`):
@@ -95,13 +96,11 @@ class TarjetaAtajos extends StatelessWidget {
     final estilos = context.estilos;
     final linea = estilos.cuerpoBase.copyWith(color: tokens.textoPrimario);
     return MergeSemantics(
-      child: Container(
-        key: const ValueKey('tarjeta-atajos'),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficieAlt,
-          borderRadius: BorderRadius.circular(_Tarjeta.radio),
-        ),
+      child: CajaSuperficie(
+        clave: const ValueKey('tarjeta-atajos'),
+        relleno: const EdgeInsets.all(16),
+        fondo: FondoCaja.superficieAlt,
+        radio: _Tarjeta.radio,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -128,14 +127,10 @@ class _Tarjeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    return Container(
-      padding: EdgeInsets.all(relleno),
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficie,
-        borderRadius: BorderRadius.circular(radio),
-        border: Border.all(color: tokens.bordeDefault),
-      ),
+    return CajaSuperficie(
+      relleno: EdgeInsets.all(relleno),
+      radio: radio,
+      conBorde: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

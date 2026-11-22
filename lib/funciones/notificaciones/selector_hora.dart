@@ -9,6 +9,7 @@ import '../../componentes/agarre_hoja.dart';
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_icono_caja.dart';
+import '../../componentes/caja_superficie.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/textos/textos.dart';
@@ -320,14 +321,8 @@ class _RuedaSelectorState extends State<RuedaSelector> {
       height: alto * 3,
       child: Stack(
         children: [
-          Center(
-            child: Container(
-              height: alto,
-              decoration: BoxDecoration(
-                color: tokens.fondoSuperficieAlt,
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
+          const Center(
+            child: CajaSuperficie(alto: alto, fondo: FondoCaja.superficieAlt, radio: 14),
           ),
           ListWheelScrollView.useDelegate(
             key: ValueKey('rueda-${widget.clave}'),

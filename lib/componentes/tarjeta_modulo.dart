@@ -5,6 +5,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 
 /// Estado de un módulo en la ruta de la Startup.
@@ -187,15 +188,13 @@ class _BarraSprints extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final fraccion = total == 0 ? 0.0 : (completados / total).clamp(0.0, 1.0);
-    return Container(
-      key: const ValueKey('barra-sprints'),
-      width: TarjetaModulo.anchoBarra,
-      height: 8,
-      decoration: BoxDecoration(
-        color: tokens.fondoSuperficieAlt,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      alignment: Alignment.centerLeft,
+    return CajaSuperficie(
+      clave: const ValueKey('barra-sprints'),
+      ancho: TarjetaModulo.anchoBarra,
+      alto: 8,
+      alineacion: Alignment.centerLeft,
+      fondo: FondoCaja.superficieAlt,
+      radio: 4,
       child: Container(
         key: const ValueKey('relleno-sprints'),
         width: TarjetaModulo.anchoBarra * fraccion,

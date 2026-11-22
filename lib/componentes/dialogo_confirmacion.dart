@@ -3,8 +3,8 @@ import 'package:material_ui/material_ui.dart';
 import '../core/adaptativo/clase_pantalla.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
-import 'bloque_lectura.dart';
 import 'boton_app.dart';
+import 'titulo_enfocado.dart';
 
 /// Diálogo de confirmación (compra en la Tienda y "Cerrar sesión"):
 /// fondo/superficie, radio 22, relleno 24, título en Título/H2 con el foco
@@ -76,12 +76,7 @@ class DialogoConfirmacion extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              BloqueLectura(
-                encabezado: true,
-                autofocus: !focoEnCancelar,
-                radio: 8,
-                child: Text(titulo, style: estilos.h2.copyWith(color: tokens.textoPrimario)),
-              ),
+              TituloEnfocado(titulo, estilo: context.estilos.h2, autofocus: !focoEnCancelar),
               const SizedBox(height: 8),
               Text(texto, style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario)),
               const SizedBox(height: 20),

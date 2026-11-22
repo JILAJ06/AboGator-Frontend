@@ -1078,6 +1078,11 @@ abstract final class Textos {
   static const String galeriaPiezasPequenas = 'Piezas pequeñas (agarre, botón de caja y píldora)';
   static const String galeriaPildoraEjemplo = 'Píldora';
   static const String galeriaBotonMas = 'Más';
+  static const String galeriaSuperficies = 'Superficies, lista, esqueleto y título';
+  static const String galeriaTituloEjemplo = 'Título de pantalla';
+  static const String galeriaFilaUno = 'Primera fila';
+  static const String galeriaFilaDos = 'Segunda fila';
+  static const String galeriaEsqueleto = 'Cargando el ejemplo';
   static const String galeriaLogos = 'Logos (4 formas × 5 tonos)';
   static String galeriaLogo(String forma, String tono) => '$forma · $tono';
   static const String galeriaIconos = 'Íconos';

@@ -4,6 +4,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'boton_app.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 
 /// Tarjeta "Buzón de Apelaciones" del Inicio en tablet (Figma 96:564):
@@ -25,13 +26,11 @@ class TarjetaBuzonInicio extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
-    return Container(
-      key: const ValueKey('tarjeta-buzon-inicio'),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: tokens.fondoDestacado,
-        borderRadius: BorderRadius.circular(radio),
-      ),
+    return CajaSuperficie(
+      clave: const ValueKey('tarjeta-buzon-inicio'),
+      relleno: const EdgeInsets.all(20),
+      fondo: FondoCaja.destacado,
+      radio: radio,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -5,6 +5,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
+import 'caja_superficie.dart';
 import 'chip_hud.dart';
 import 'foco_retorno.dart';
 import 'icono_app.dart';
@@ -241,14 +242,11 @@ class TarjetaArticulo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: tokens.fondoDestacado,
-              borderRadius: BorderRadius.circular(16),
-            ),
+          CajaSuperficie(
+            ancho: 52,
+            alto: 52,
+            alineacion: Alignment.center,
+            fondo: FondoCaja.destacado,
             child: IconoApp(icono, tamano: 28, color: tokens.textoAcento),
           ),
           const SizedBox(height: 10),
@@ -292,13 +290,10 @@ class NotaTienda extends StatelessWidget {
     final tokens = context.tokens;
     return Semantics(
       container: true,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficieAlt,
-          borderRadius: BorderRadius.circular(16),
-        ),
+      child: CajaSuperficie(
+        ancho: double.infinity,
+        relleno: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        fondo: FondoCaja.superficieAlt,
         child: Row(
           children: [
             IconoApp(icono, tamano: 20, color: tokens.textoPrimario),

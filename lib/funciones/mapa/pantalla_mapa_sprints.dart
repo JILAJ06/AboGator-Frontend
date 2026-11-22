@@ -11,11 +11,13 @@ import '../../app/rutas.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/camino_sprints.dart';
 import '../../componentes/encabezado_modulo.dart';
+import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/globo_sprint_actual.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/nodo_sprint.dart';
 import '../../componentes/sarko_imagen.dart';
+import '../../componentes/vista_asincrona.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
@@ -69,46 +71,46 @@ class PantallaMapaSprints extends ConsumerWidget {
       pestana: PestanaApp.mapa,
       apelacionesPendientes: modulo == null ? null : valor?.apelacionesPendientes,
       focoOrdenado: true,
-      cuerpo: switch (datos) {
-        AsyncData(value: DatosModulo(modulo: final Modulo modulo, :final vidas))
-            when context.clasePantalla.esAncho =>
-          _MapaConDetalle(
-            modulo: modulo,
-            vidas: vidas.cantidad,
-            sprintInicial: sprintId,
-            alAtras: () => _volverAlInicio(context),
-          ),
-        AsyncData(value: DatosModulo(modulo: final Modulo modulo, :final vidas)) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(ordenAtras),
-              child: EncabezadoModulo(
-                numero: modulo.numero,
-                nombreCorto: LogicaInicio.nombreCorto(modulo),
-                titulo: LogicaInicio.tramo(modulo),
-                color: modulo.color,
-                vidas: vidas.cantidad,
-                completados: LogicaInicio.completados(modulo),
-                total: LogicaInicio.totalSprints(modulo),
-                alAtras: () => _volverAlInicio(context),
-              ),
+      cuerpo: VistaAsincrona(
+        valor: datos,
+        datos: (valor) => switch (valor) {
+          DatosModulo(modulo: final Modulo modulo, :final vidas)
+              when context.clasePantalla.esAncho =>
+            _MapaConDetalle(
+              modulo: modulo,
+              vidas: vidas.cantidad,
+              sprintInicial: sprintId,
+              alAtras: () => _volverAlInicio(context),
             ),
-            Expanded(child: MapaSprints(modulo: modulo)),
-          ],
-        ),
-        AsyncData() => MensajePantalla(
-          texto: Textos.moduloNoEncontrado,
-          textoBoton: Textos.volverAlInicio,
-          alPresionar: () => context.go(Rutas.inicio),
-        ),
-        AsyncError() => MensajePantalla(
-          texto: Textos.mapaErrorCarga,
-          textoBoton: Textos.reintentar,
-          alPresionar: () => ref.invalidate(datosModuloProvider(moduloId)),
-        ),
-        _ => const _EsqueletoMapa(),
-      },
+          DatosModulo(modulo: final Modulo modulo, :final vidas) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FocusTraversalOrder(
+                order: const NumericFocusOrder(ordenAtras),
+                child: EncabezadoModulo(
+                  numero: modulo.numero,
+                  nombreCorto: LogicaInicio.nombreCorto(modulo),
+                  titulo: LogicaInicio.tramo(modulo),
+                  color: modulo.color,
+                  vidas: vidas.cantidad,
+                  completados: LogicaInicio.completados(modulo),
+                  total: LogicaInicio.totalSprints(modulo),
+                  alAtras: () => _volverAlInicio(context),
+                ),
+              ),
+              Expanded(child: MapaSprints(modulo: modulo)),
+            ],
+          ),
+          _ => MensajePantalla(
+            texto: Textos.moduloNoEncontrado,
+            textoBoton: Textos.volverAlInicio,
+            alPresionar: () => context.go(Rutas.inicio),
+          ),
+        },
+        textoError: Textos.mapaErrorCarga,
+        alReintentar: () => ref.invalidate(datosModuloProvider(moduloId)),
+        esqueleto: const _EsqueletoMapa(),
+      ),
     );
   }
 }
@@ -736,41 +738,34 @@ class _EsqueletoMapa extends StatelessWidget {
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
 
-    return Semantics(
-      label: Textos.cargandoMapa,
-      liveRegion: true,
-      excludeSemantics: true,
-      child: SingleChildScrollView(
-        key: const ValueKey('esqueleto-mapa'),
-        physics: const NeverScrollableScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(height: arriba + EncabezadoModulo.altoContenido, color: color),
-            const SizedBox(height: MapaSprints.margenSuperior + 10),
-            LayoutBuilder(
-              builder: (context, restricciones) {
-                final ancho = restricciones.maxWidth;
-                return Column(
-                  children: [
-                    for (var i = 0; i < 3; i++)
-                      Padding(
-                        padding: EdgeInsets.only(
-                          left: (ancho * LogicaMapa.fraccionX(i, esExamenFinal: false) - 36).clamp(
-                            0.0,
-                            ancho - 72,
-                          ),
-                          bottom: 48,
-                        ),
-                        child: Align(alignment: Alignment.centerLeft, child: circulo(72)),
+    return EsqueletoPantalla(
+      etiqueta: Textos.cargandoMapa,
+      clave: const ValueKey('esqueleto-mapa'),
+      alineacion: CrossAxisAlignment.stretch,
+      hijos: [
+        Container(height: arriba + EncabezadoModulo.altoContenido, color: color),
+        const SizedBox(height: MapaSprints.margenSuperior + 10),
+        LayoutBuilder(
+          builder: (context, restricciones) {
+            final ancho = restricciones.maxWidth;
+            return Column(
+              children: [
+                for (var i = 0; i < 3; i++)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: (ancho * LogicaMapa.fraccionX(i, esExamenFinal: false) - 36).clamp(
+                        0.0,
+                        ancho - 72,
                       ),
-                  ],
-                );
-              },
-            ),
-          ],
+                      bottom: 48,
+                    ),
+                    child: Align(alignment: Alignment.centerLeft, child: circulo(72)),
+                  ),
+              ],
+            );
+          },
         ),
-      ),
+      ],
     );
   }
 }

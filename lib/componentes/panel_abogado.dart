@@ -5,6 +5,7 @@ import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'bloque_lectura.dart';
 import 'boton_app.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 import 'panel_evidencia.dart';
 
@@ -82,14 +83,11 @@ class PanelAbogado extends StatelessWidget {
         ),
         BloqueLectura(
           key: const ValueKey('traduccion-abogado'),
-          child: Container(
-            key: const ValueKey('caja-traduccion'),
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: tokens.fondoSuperficieAlt,
-              borderRadius: BorderRadius.circular(16),
-            ),
+          child: CajaSuperficie(
+            clave: const ValueKey('caja-traduccion'),
+            ancho: double.infinity,
+            relleno: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            fondo: FondoCaja.superficieAlt,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

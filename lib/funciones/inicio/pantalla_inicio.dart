@@ -6,7 +6,7 @@ import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
 import '../../componentes/avatar_app.dart';
 import '../../componentes/chip_hud.dart';
-import '../../componentes/mensaje_pantalla.dart';
+import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/tarjeta_buzon_inicio.dart';
@@ -15,6 +15,7 @@ import '../../componentes/tarjeta_heroe_startup.dart';
 import '../../componentes/tarjeta_modulo.dart';
 import '../../componentes/tarjeta_reto_diario.dart';
 import '../../componentes/tarjeta_semana.dart';
+import '../../componentes/vista_asincrona.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
@@ -43,22 +44,19 @@ class PantallaInicio extends ConsumerWidget {
       apelacionesPendientes: datos.value?.apelacionesPendientes,
       cuerpo: usuario == null
           ? const SizedBox.shrink()
-          : switch (datos) {
-              AsyncData(:final value) =>
-                context.clasePantalla.esTablet
-                    ? _ContenidoTablet(
-                        usuario: usuario,
-                        datos: value,
-                        dosColumnas: context.clasePantalla.esAncho,
-                      )
-                    : _Contenido(usuario: usuario, datos: value),
-              AsyncError() => MensajePantalla(
-                texto: Textos.inicioErrorCarga,
-                textoBoton: Textos.reintentar,
-                alPresionar: () => ref.invalidate(datosInicioProvider),
-              ),
-              _ => const _Esqueleto(),
-            },
+          : VistaAsincrona(
+              valor: datos,
+              datos: (value) => context.clasePantalla.esTablet
+                  ? _ContenidoTablet(
+                      usuario: usuario,
+                      datos: value,
+                      dosColumnas: context.clasePantalla.esAncho,
+                    )
+                  : _Contenido(usuario: usuario, datos: value),
+              textoError: Textos.inicioErrorCarga,
+              alReintentar: () => ref.invalidate(datosInicioProvider),
+              esqueleto: const _Esqueleto(),
+            ),
     );
   }
 }
@@ -501,49 +499,31 @@ class _Esqueleto extends StatelessWidget {
   const _Esqueleto();
 
   @override
-  Widget build(BuildContext context) {
-    final color = context.tokens.fondoSuperficieAlt;
-    Widget bloque(double alto, {double? ancho, double radio = 18}) => Container(
-      width: ancho,
-      height: alto,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(radio)),
-    );
-
-    return Semantics(
-      label: Textos.cargandoInicio,
-      liveRegion: true,
-      excludeSemantics: true,
-      child: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          key: const ValueKey('esqueleto-inicio'),
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  bloque(44, ancho: 44, radio: 22),
-                  const SizedBox(width: 10),
-                  Expanded(child: bloque(36, radio: 8)),
-                ],
-              ),
-              const SizedBox(height: 22),
-              bloque(TarjetaHeroeStartup.alto, radio: TarjetaHeroeStartup.radio),
-              const SizedBox(height: 14),
-              bloque(60),
-              const SizedBox(height: 18),
-              bloque(26, ancho: 168, radio: 8),
-              const SizedBox(height: 10),
-              for (var i = 0; i < 3; i++) ...[
-                bloque(92, radio: TarjetaModulo.radio),
-                const SizedBox(height: 12),
-              ],
-            ],
-          ),
-        ),
+  Widget build(BuildContext context) => EsqueletoPantalla(
+    etiqueta: Textos.cargandoInicio,
+    clave: const ValueKey('esqueleto-inicio'),
+    areaSegura: true,
+    areaSeguraAbajo: false,
+    relleno: const EdgeInsets.fromLTRB(24, 10, 24, 0),
+    hijos: [
+      const Row(
+        children: [
+          BloqueEsqueleto(44, ancho: 44, radio: 22),
+          SizedBox(width: 10),
+          Expanded(child: BloqueEsqueleto(36, radio: 8)),
+        ],
       ),
-    );
-  }
+      const SizedBox(height: 22),
+      const BloqueEsqueleto(TarjetaHeroeStartup.alto, radio: TarjetaHeroeStartup.radio),
+      const SizedBox(height: 14),
+      const BloqueEsqueleto(60, radio: 18),
+      const SizedBox(height: 18),
+      const BloqueEsqueleto(26, ancho: 168, radio: 8),
+      const SizedBox(height: 10),
+      for (var i = 0; i < 3; i++) ...[
+        const BloqueEsqueleto(92, radio: TarjetaModulo.radio),
+        const SizedBox(height: 12),
+      ],
+    ],
+  );
 }

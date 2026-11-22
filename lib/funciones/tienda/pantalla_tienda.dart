@@ -5,14 +5,15 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/marco_principal.dart';
 import '../../componentes/aviso_snack.dart';
-import '../../componentes/bloque_lectura.dart';
 import '../../componentes/dialogo_confirmacion.dart';
+import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/foco_retorno.dart';
-import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/piezas_tienda.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/tarjeta_consejo_sarko.dart';
+import '../../componentes/titulo_enfocado.dart';
+import '../../componentes/vista_asincrona.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/textos/textos.dart';
@@ -53,20 +54,18 @@ class PantallaTienda extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final datos = ref.watch(datosTiendaProvider);
-    final valor = datos.value;
     return MarcoPrincipal(
       pestana: PestanaApp.tienda,
       cuerpo: SafeArea(
         bottom: false,
-        child: valor != null
-            ? _Tienda(datos: valor)
-            : datos.hasError
-            ? MensajePantalla(
-                texto: Textos.tiendaErrorCarga,
-                textoBoton: Textos.reintentar,
-                alPresionar: () => ref.invalidate(datosTiendaProvider),
-              )
-            : const _EsqueletoTienda(),
+        child: VistaAsincrona(
+          valor: datos,
+          conservarValor: true,
+          datos: (valor) => _Tienda(datos: valor),
+          textoError: Textos.tiendaErrorCarga,
+          alReintentar: () => ref.invalidate(datosTiendaProvider),
+          esqueleto: const _EsqueletoTienda(),
+        ),
       ),
     );
   }
@@ -79,13 +78,8 @@ class TituloPestana extends StatelessWidget {
   final String texto;
 
   @override
-  Widget build(BuildContext context) => BloqueLectura(
-    key: const ValueKey('titulo-pestana'),
-    encabezado: true,
-    autofocus: true,
-    radio: 8,
-    child: Text(texto, style: context.estilos.h1.copyWith(color: context.tokens.textoPrimario)),
-  );
+  Widget build(BuildContext context) =>
+      TituloEnfocado(texto, clave: const ValueKey('titulo-pestana'));
 }
 
 /// Subtítulo de sección (Título/H2, encabezado).
@@ -355,38 +349,22 @@ class _EsqueletoTienda extends StatelessWidget {
   const _EsqueletoTienda();
 
   @override
-  Widget build(BuildContext context) {
-    final color = context.tokens.fondoSuperficieAlt;
-    Widget bloque(double alto, {double? ancho, double radio = 16}) => Container(
-      width: ancho,
-      height: alto,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(radio)),
-    );
-    return Semantics(
-      label: Textos.cargandoTienda,
-      liveRegion: true,
-      excludeSemantics: true,
-      child: SingleChildScrollView(
-        key: const ValueKey('esqueleto-tienda'),
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            bloque(38, ancho: 342, radio: 999),
-            const SizedBox(height: 14),
-            bloque(26, ancho: 160, radio: 8),
-            const SizedBox(height: 8),
-            bloque(34, ancho: 300, radio: 999),
-            const SizedBox(height: 18),
-            bloque(26, ancho: 140, radio: 8),
-            const SizedBox(height: 10),
-            bloque(226, radio: 22),
-            const SizedBox(height: 12),
-            bloque(226, radio: 22),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const EsqueletoPantalla(
+    etiqueta: Textos.cargandoTienda,
+    clave: ValueKey('esqueleto-tienda'),
+    relleno: EdgeInsets.fromLTRB(24, 12, 24, 0),
+    hijos: [
+      BloqueEsqueleto(38, ancho: 342, radio: 999),
+      SizedBox(height: 14),
+      BloqueEsqueleto(26, ancho: 160, radio: 8),
+      SizedBox(height: 8),
+      BloqueEsqueleto(34, ancho: 300, radio: 999),
+      SizedBox(height: 18),
+      BloqueEsqueleto(26, ancho: 140, radio: 8),
+      SizedBox(height: 10),
+      BloqueEsqueleto(226, radio: 22),
+      SizedBox(height: 12),
+      BloqueEsqueleto(226, radio: 22),
+    ],
+  );
 }

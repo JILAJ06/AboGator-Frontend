@@ -15,6 +15,7 @@ import '../../componentes/barra_juego.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/composicion_juego_tablet.dart';
+import '../../componentes/esqueleto_pantalla.dart';
 import '../../componentes/etiqueta_lupa.dart';
 import '../../componentes/hoja_lateral.dart';
 import '../../componentes/indicador_pendientes.dart';
@@ -28,6 +29,8 @@ import '../../componentes/panel_lateral_juego.dart';
 import '../../componentes/panel_veredicto.dart';
 import '../../componentes/tarjeta_caso.dart';
 import '../../componentes/tinte_veredicto.dart';
+import '../../componentes/titulo_enfocado.dart';
+import '../../componentes/vista_asincrona.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/textos/textos.dart';
@@ -71,22 +74,22 @@ class PantallaJuego extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final datos = ref.watch(datosJuegoProvider(sprintId));
     return Scaffold(
-      body: switch (datos) {
-        // Sin vidas al abrir el sprint: directo a "Sin vidas" (20).
-        AsyncData(:final value) when value.sinVidas => PantallaSinVidas(moduloId: value.modulo?.id),
-        AsyncData(:final value) when value.tarjetas.isEmpty => MensajePantalla(
-          texto: Textos.sprintSinTarjetas,
-          textoBoton: value.modulo == null ? Textos.volverAlInicio : Textos.volverAlMapa,
-          alPresionar: () => volver(context, value.modulo?.id),
-        ),
-        AsyncData(:final value) => _Juego(sprintId: sprintId, datos: value),
-        AsyncError() => MensajePantalla(
-          texto: Textos.juegoErrorCarga,
-          textoBoton: Textos.reintentar,
-          alPresionar: () => ref.invalidate(datosJuegoProvider(sprintId)),
-        ),
-        _ => const _EsqueletoJuego(),
-      },
+      body: VistaAsincrona(
+        valor: datos,
+        datos: (value) => value.sinVidas
+            // Sin vidas al abrir el sprint: directo a "Sin vidas" (20).
+            ? PantallaSinVidas(moduloId: value.modulo?.id)
+            : value.tarjetas.isEmpty
+            ? MensajePantalla(
+                texto: Textos.sprintSinTarjetas,
+                textoBoton: value.modulo == null ? Textos.volverAlInicio : Textos.volverAlMapa,
+                alPresionar: () => volver(context, value.modulo?.id),
+              )
+            : _Juego(sprintId: sprintId, datos: value),
+        textoError: Textos.juegoErrorCarga,
+        alReintentar: () => ref.invalidate(datosJuegoProvider(sprintId)),
+        esqueleto: const _EsqueletoJuego(),
+      ),
     );
   }
 }
@@ -706,15 +709,7 @@ class _DialogoPausa extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              BloqueLectura(
-                encabezado: true,
-                autofocus: true,
-                radio: 8,
-                child: Text(
-                  Textos.pausaTitulo,
-                  style: estilos.h2.copyWith(color: tokens.textoPrimario),
-                ),
-              ),
+              TituloEnfocado(Textos.pausaTitulo, estilo: context.estilos.h2),
               const SizedBox(height: 8),
               Text(
                 Textos.pausaTexto,
@@ -837,37 +832,21 @@ class _EsqueletoJuego extends StatelessWidget {
   const _EsqueletoJuego();
 
   @override
-  Widget build(BuildContext context) {
-    final color = context.tokens.fondoSuperficieAlt;
-    Widget bloque(double alto, {double? ancho, double radio = 16}) => Container(
-      width: ancho,
-      height: alto,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(radio)),
-    );
-    return Semantics(
-      label: Textos.cargandoJuego,
-      liveRegion: true,
-      excludeSemantics: true,
-      child: SafeArea(
-        child: SingleChildScrollView(
-          key: const ValueKey('esqueleto-juego'),
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 4),
-              bloque(48, radio: 12),
-              const SizedBox(height: 6),
-              bloque(46),
-              const SizedBox(height: 12),
-              bloque(TarjetaCaso.alto, radio: TarjetaCaso.radio),
-              const SizedBox(height: 18),
-              bloque(90),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const EsqueletoPantalla(
+    etiqueta: Textos.cargandoJuego,
+    clave: ValueKey('esqueleto-juego'),
+    areaSegura: true,
+    relleno: EdgeInsets.symmetric(horizontal: 24),
+    alineacion: CrossAxisAlignment.stretch,
+    hijos: [
+      SizedBox(height: 4),
+      BloqueEsqueleto(48, radio: 12),
+      SizedBox(height: 6),
+      BloqueEsqueleto(46),
+      SizedBox(height: 12),
+      BloqueEsqueleto(TarjetaCaso.alto, radio: TarjetaCaso.radio),
+      SizedBox(height: 18),
+      BloqueEsqueleto(90),
+    ],
+  );
 }

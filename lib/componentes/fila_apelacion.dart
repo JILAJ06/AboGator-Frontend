@@ -4,6 +4,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
+import 'caja_superficie.dart';
 import 'icono_app.dart';
 import 'pildora.dart';
 
@@ -150,14 +151,12 @@ class TarjetaRecompensaBuzon extends StatelessWidget {
     final tokens = context.tokens;
     final estilos = context.estilos;
     return MergeSemantics(
-      child: Container(
-        key: const ValueKey('recompensa-buzon'),
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: tokens.fondoDestacado,
-          borderRadius: BorderRadius.circular(18),
-        ),
+      child: CajaSuperficie(
+        clave: const ValueKey('recompensa-buzon'),
+        ancho: double.infinity,
+        relleno: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        fondo: FondoCaja.destacado,
+        radio: 18,
         child: Row(
           children: [
             Container(
