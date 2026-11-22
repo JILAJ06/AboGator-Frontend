@@ -35,7 +35,7 @@ flowchart LR
 | DOC-08 | Accesibilidad (WCAG 2.1 AA): matriz, contrastes, orden de foco, alternativas al gesto, atajos y verificación manual (lo creó Claude Code en T-13; Claude Chat lo revisa) | ai/conocimiento/08-accesibilidad.md | hecho | ← lo verifica TEST-AUDITORIA; → aplica a todas las PANT-* |
 | DOC-09 | Duplicación: medición inicial, catálogo de 20 patrones de `lib/` y 3 de `test/`, código muerto, lotes T-15b a T-15f y reglas de la T-15 (lo creó Claude Code en T-15a; Claude Chat lo revisa) | ai/conocimiento/09-duplicacion.md | hecho | → guía T-15; → señala PANT-PENDIENTE como código muerto |
 | GRAFO | Este archivo | ai/grafo.md | hecho | ← lo actualizan Claude Chat y Claude Code |
-| SIG | Tarea actual (T-15e: marcos y disposiciones) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
+| SIG | Tarea actual (T-15e-fix: acción de tocar en controles) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
 | REP | Reporte | ai/reporte.md | hecho | ← lo escribe Claude Code; → responde a SIG |
 
 ## 2 · Externos
@@ -77,7 +77,8 @@ flowchart LR
 | T-15a | 15a-auditoria-de-duplicacion | hecho | análisis de duplicación (sin cambios de código) | T-13b |
 | T-15b | 15b-limpieza-y-piezas-pequenas | hecho | código muerto, AgarreHoja, BotonIconoCaja, Pildora, mostrarAviso | T-15a |
 | T-15c | 15c-superficies-y-estados | hecho | CajaSuperficie, TarjetaLista, EsqueletoPantalla, VistaAsincrona, TituloEnfocado | T-15b |
-| T-15e | 15e-marcos-y-disposiciones | en curso | AccionEnfocable.boton, DesplazableAltoMinimo, mostrarHojaAdaptativa, DosColumnasTablet, BotonIconoCuadrado | T-15c |
+| T-15e | 15e-marcos-y-disposiciones | hecho | AccionEnfocable.boton, DesplazableAltoMinimo, mostrarHojaAdaptativa, DosColumnasTablet, BotonIconoCuadrado | T-15c |
+| T-15e-fix | fix/15-accion-de-tocar-en-controles | en curso | acción de tocar en controles con excludeSemantics; BotonIconoCuadrado → BotonIconoCaja | T-15e |
 | T-15 | 15-componentes-globales | planeado | optimización: componentes globales, menos vistas y duplicación (el usuario explicará el alcance; **recordárselo antes de T-14**) | T-13b |
 | T-14 | 14-integracion-api | planeado | REPO-* → HTTP | EXT-BACK listo, T-15 |
 
@@ -501,3 +502,4 @@ Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
 - 2026-11-22 · Claude Code · T-15c: `en curso` para CODIGO-PANT-07, CODIGO-PANT-08, CODIGO-PANT-09, CODIGO-PANT-10, CODIGO-PANT-19, CODIGO-PANT-20, CODIGO-PANT-21, CODIGO-PANT-22, CODIGO-PANT-24, CODIGO-PANT-25, CODIGO-PANT-26, CODIGO-PANT-27, CODIGO-PANT-29, CODIGO-PANT-32, CODIGO-PANT-34, COMP-AVISO, COMP-BUZON-INICIO, COMP-DIALOGO-CONFIRMACION, COMP-ESTADISTICAS, COMP-FILA-APELACION, COMP-FILA-DETALLE, COMP-MODULO, COMP-PANEL-ABOGADO, COMP-PANEL-LATERAL-JUEGO, COMP-PANEL-VEREDICTO, COMP-PIEZAS-AJUSTES, COMP-PIEZAS-JEFE, COMP-PIEZAS-PERFIL, COMP-PIEZAS-RESULTADO, COMP-PIEZAS-TIENDA, COMP-PROGRESO, COMP-SEMANA, COMP-TARJETA-CASO, MARCO-RECUPERACION, PANT-GALERIA, PIEZAS-FIN-SPRINT, SELECTOR-HORA, TEXTOS. Nodos nuevos: COMP-CAJA-SUPERFICIE, COMP-ESQUELETO, COMP-VISTA-ASINCRONA, COMP-TITULO-ENFOCADO y TEST-SUPERFICIES. Sin obsoletos.
 - 2026-11-22 · Claude Chat · cierre de T-15c (PR mergeado, lib/ −23 líneas netas, 63 puntos de cambio en 5 componentes, 3045 pruebas). T-15e `en curso`; orden acordado: T-15e, T-15f y al final T-15d.
 - 2026-11-22 · Claude Code · T-15e: `en curso` para CODIGO-PANT-02..04, CODIGO-PANT-05, CODIGO-PANT-07, CODIGO-PANT-08, CODIGO-PANT-10, CODIGO-PANT-22, CODIGO-PANT-27, CODIGO-PANT-34, COMP-ACCION, COMP-BARRA-JUEGO, COMP-BOTON-ICONO-CAJA, COMP-BUZON, COMP-CAMPO, COMP-DISPOSICION-ILUSTRACION, COMP-ENLACE, COMP-FILA-ACORDEON, COMP-FILA-APELACION, COMP-HEROE, COMP-MODULO, COMP-RESULTADO-TABLET, COMP-RIEL, COMP-TARJETA-CASO, MARCO-RECUPERACION, PANEL-MARCA. Nodos nuevos: COMP-DESPLAZABLE y TEST-MARCOS. COMP-ACCION suma `AccionEnfocable.boton`. Sin obsoletos.
+- 2026-11-22 · Claude Chat · cierre de T-15e (PR mergeado, lib/ −80 líneas netas, 3052 pruebas). Hallazgo de accesibilidad: controles con `excludeSemantics` sin `onTap`; corrección en `fix/15-accion-de-tocar-en-controles` (`en curso`) antes de la T-15f.
