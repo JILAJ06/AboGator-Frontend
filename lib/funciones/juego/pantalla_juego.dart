@@ -29,7 +29,6 @@ import '../../componentes/panel_justificacion.dart';
 import '../../componentes/panel_lateral_juego.dart';
 import '../../componentes/panel_veredicto.dart';
 import '../../componentes/tarjeta_caso.dart';
-import '../../componentes/tinte_veredicto.dart';
 import '../../componentes/titulo_enfocado.dart';
 import '../../componentes/vista_asincrona.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
@@ -47,7 +46,6 @@ import '../inicio/logica_inicio.dart';
 import '../vidas/pantalla_sin_vidas.dart';
 import 'estado_juego.dart';
 import 'logica_comodines.dart';
-import 'logica_swipe.dart';
 import 'logica_veredicto.dart';
 import 'mazo_swipe.dart';
 import 'saldo_juego.dart';
@@ -377,29 +375,7 @@ class _JuegoState extends ConsumerState<_Juego> {
     if (evento is! KeyDownEvent && evento is! KeyRepeatEvent) return KeyEventResult.ignored;
     final mazo = _mazo.currentState;
     if (mazo == null) return KeyEventResult.ignored;
-    final flecha = switch (evento.logicalKey) {
-      LogicalKeyboardKey.arrowLeft => Veredicto.ilegal,
-      LogicalKeyboardKey.arrowRight => Veredicto.legal,
-      LogicalKeyboardKey.arrowUp => Veredicto.condicional,
-      LogicalKeyboardKey.arrowDown => Veredicto.escalar,
-      _ => null,
-    };
-    if (flecha != null) {
-      mazo.previsualizar(flecha);
-      return KeyEventResult.handled;
-    }
-    final previa = mazo.previa;
-    if (previa == null) return KeyEventResult.ignored;
-    if (evento.logicalKey == LogicalKeyboardKey.enter ||
-        evento.logicalKey == LogicalKeyboardKey.numpadEnter) {
-      mazo.confirmar(previa);
-      return KeyEventResult.handled;
-    }
-    if (evento.logicalKey == LogicalKeyboardKey.escape) {
-      mazo.cancelarPrevia();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
+    return teclearMazo(mazo, evento);
   }
 
   @override
@@ -651,15 +627,7 @@ class _JuegoState extends ConsumerState<_Juego> {
     onKeyEvent: _alTeclear,
     child: Stack(
       children: [
-        Positioned.fill(
-          child: ValueListenableBuilder<ArrastreVisible>(
-            valueListenable: _arrastre,
-            builder: (context, arrastre, _) => TinteVeredicto(
-              veredicto: arrastre.veredicto,
-              opacidad: arrastre.progreso * LogicaSwipe.opacidadTinte,
-            ),
-          ),
-        ),
+        TinteArrastre(arrastre: _arrastre),
         cuerpo,
       ],
     ),
