@@ -83,6 +83,29 @@ class _PantallaSprintCompletadoState extends ConsumerState<PantallaSprintComplet
         monedas: juego.monedas,
       ),
     );
+    final sarko = IlustracionSarko(
+      pose: PoseSarko.alegre,
+      diametro: 200,
+      anchoSarko: 160,
+      colorFondo: tokens.fondoDestacado,
+    );
+    final estrellas = ElementoOrdenado(orden: 2, child: EstrellasSprint(ganadas: juego.estrellas));
+    // Título y mensaje: se leen juntos y van primero en el orden de foco.
+    Widget titulo({required double separacion}) => ElementoOrdenado(
+      orden: 1,
+      child: Column(
+        children: [
+          const TituloFinSprint(Textos.sprintCompletadoTitulo),
+          SizedBox(height: separacion),
+          Text(
+            _datos?.sprint?.mensajeCompletado ?? Textos.sprintCompletadoGenerico,
+            key: const ValueKey('subtitulo-fin-sprint'),
+            style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
     final cambiosStartup = LogicaFinSprint.cambios(juego.estadoInicial, juego.estadoStartup);
     final avisoBuzon = aviso == null
         ? null
@@ -109,34 +132,11 @@ class _PantallaSprintCompletadoState extends ConsumerState<PantallaSprintComplet
         escala: escalaTablet,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            IlustracionSarko(
-              pose: PoseSarko.alegre,
-              diametro: 200,
-              anchoSarko: 160,
-              colorFondo: tokens.fondoDestacado,
-            ),
-            const SizedBox(height: 10),
-            ElementoOrdenado(orden: 2, child: EstrellasSprint(ganadas: juego.estrellas)),
-          ],
+          children: [sarko, const SizedBox(height: 10), estrellas],
         ),
       ),
       contenidoTablet: [
-        ElementoOrdenado(
-          orden: 1,
-          child: Column(
-            children: [
-              const TituloFinSprint(Textos.sprintCompletadoTitulo),
-              const SizedBox(height: 16),
-              Text(
-                _datos?.sprint?.mensajeCompletado ?? Textos.sprintCompletadoGenerico,
-                key: const ValueKey('subtitulo-fin-sprint'),
-                style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+        titulo(separacion: 16),
         const SizedBox(height: 16),
         estadisticas,
         const SizedBox(height: 16),
@@ -169,30 +169,11 @@ class _PantallaSprintCompletadoState extends ConsumerState<PantallaSprintComplet
       // final → aviso → botones.
       contenido: [
         const SizedBox(height: 22),
-        IlustracionSarko(
-          pose: PoseSarko.alegre,
-          diametro: 200,
-          anchoSarko: 160,
-          colorFondo: tokens.fondoDestacado,
-        ),
+        sarko,
         const SizedBox(height: 10),
-        ElementoOrdenado(orden: 2, child: EstrellasSprint(ganadas: juego.estrellas)),
+        estrellas,
         const SizedBox(height: 8),
-        ElementoOrdenado(
-          orden: 1,
-          child: Column(
-            children: [
-              const TituloFinSprint(Textos.sprintCompletadoTitulo),
-              const SizedBox(height: 4),
-              Text(
-                _datos?.sprint?.mensajeCompletado ?? Textos.sprintCompletadoGenerico,
-                key: const ValueKey('subtitulo-fin-sprint'),
-                style: estilos.cuerpoBase.copyWith(color: tokens.textoSecundario),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+        titulo(separacion: 4),
         const SizedBox(height: 10),
         estadisticas,
         const SizedBox(height: 18),
