@@ -78,7 +78,10 @@ flowchart LR
 | T-15b | 15b-limpieza-y-piezas-pequenas | hecho | código muerto, AgarreHoja, BotonIconoCaja, Pildora, mostrarAviso | T-15a |
 | T-15c | 15c-superficies-y-estados | hecho | CajaSuperficie, TarjetaLista, EsqueletoPantalla, VistaAsincrona, TituloEnfocado | T-15b |
 | T-15e | 15e-marcos-y-disposiciones | hecho | AccionEnfocable.boton, DesplazableAltoMinimo, mostrarHojaAdaptativa, DosColumnasTablet, BotonIconoCuadrado | T-15c |
-| T-15e-fix | fix/15-accion-de-tocar-en-controles | en curso | acción de tocar en controles con excludeSemantics; BotonIconoCuadrado → BotonIconoCaja | T-15e |
+| T-15e-fix | fix/15-accion-de-tocar-en-controles | hecho | acción de tocar en controles con excludeSemantics; BotonIconoCuadrado → BotonIconoCaja | T-15e |
+| T-15f | 15f-fin-de-sprint-examen-y-resumenes | hecho | P-11 fin de sprint, P-15 Examen móvil/tablet, P-20 repetidos locales | T-15e |
+| T-15g | 15g-teclado-y-tinte-del-mazo | en curso | P-14: teclado y tinte del mazo en juego, Examen y juicio | T-15f |
+| T-15d | 15d-ayudantes-de-pruebas | planeado | ayudantes de pruebas (T-01, T-02, T-03) y extender la auditoría de acciones de tocar a casillas e interruptores | T-15g |
 | T-15 | 15-componentes-globales | planeado | optimización: componentes globales, menos vistas y duplicación (el usuario explicará el alcance; **recordárselo antes de T-14**) | T-13b |
 | T-14 | 14-integracion-api | planeado | REPO-* → HTTP | EXT-BACK listo, T-15 |
 
