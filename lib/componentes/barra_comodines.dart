@@ -5,6 +5,7 @@ import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
 import 'icono_app.dart';
+import 'pildora.dart';
 
 /// Estado de una píldora de comodín.
 enum EstadoComodin {
@@ -170,15 +171,12 @@ class PildoraComodin extends StatelessWidget {
         excludeSemantics: true,
         child: hijo,
       ),
-      child: Container(
-        key: ValueKey('pildora-$nombre'),
-        constraints: const BoxConstraints(minHeight: BarraComodines.alto),
-        padding: const EdgeInsets.only(left: 10, right: 12, top: 8, bottom: 8),
-        decoration: BoxDecoration(
-          color: fondo,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: borde, width: 1.5),
-        ),
+      child: Pildora(
+        clave: ValueKey('pildora-$nombre'),
+        altoMinimo: BarraComodines.alto,
+        fondo: fondo,
+        relleno: const EdgeInsets.only(left: 10, right: 12, top: 8, bottom: 8),
+        borde: Border.all(color: borde, width: 1.5),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

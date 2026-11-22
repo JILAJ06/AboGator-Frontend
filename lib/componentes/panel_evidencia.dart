@@ -4,10 +4,12 @@ import '../core/tema/efectos.dart';
 import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
+import 'agarre_hoja.dart';
 import 'bloque_lectura.dart';
 import 'boton_app.dart';
 import 'hoja_lateral.dart';
 import 'icono_app.dart';
+import 'pildora.dart';
 import 'snippet_codigo.dart';
 
 /// Contenedor de los paneles modales del juego (evidencia y justificación):
@@ -46,19 +48,7 @@ class ContenedorPanelModal extends StatelessWidget {
         child: Column(
           crossAxisAlignment: alineacion,
           children: [
-            Center(
-              child: ExcludeSemantics(
-                child: Container(
-                  key: const ValueKey('agarre'),
-                  width: 40,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: tokens.bordeDefault,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-            ),
+            const Center(child: AgarreHoja()),
             for (final hijo in hijos) ...[const SizedBox(height: separacion), hijo],
           ],
         ),
@@ -187,13 +177,10 @@ class ChipBonusEvidencia extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    return Container(
-      key: const ValueKey('chip-bonus-evidencia'),
-      padding: const EdgeInsets.fromLTRB(10, 6, 12, 6),
-      decoration: BoxDecoration(
-        color: tokens.fondoDestacado,
-        borderRadius: BorderRadius.circular(999),
-      ),
+    return Pildora(
+      clave: const ValueKey('chip-bonus-evidencia'),
+      fondo: tokens.fondoDestacado,
+      relleno: const EdgeInsets.fromLTRB(10, 6, 12, 6),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

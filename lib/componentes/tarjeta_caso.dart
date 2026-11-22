@@ -10,6 +10,7 @@ import '../datos/modelos/tarjeta.dart';
 import 'accion_enfocable.dart';
 import 'avatar_app.dart';
 import 'icono_app.dart';
+import 'pildora.dart';
 
 /// Tarjeta de caso del juego (Figma 10:5): 342×440 (el alto lo da quien la
 /// usa), fondo/superficie, borde 1 borde/default, radio 28 y sombra de la
@@ -145,13 +146,10 @@ class TarjetaCaso extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       runSpacing: 8,
                       children: [
-                        Container(
-                          key: const ValueKey('etiqueta-caso'),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: colorModulo.withValues(alpha: EfectosApp.opacidadEtiquetaCaso),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
+                        Pildora(
+                          clave: const ValueKey('etiqueta-caso'),
+                          fondo: colorModulo.withValues(alpha: EfectosApp.opacidadEtiquetaCaso),
+                          relleno: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           child: Text(
                             etiquetaCaso,
                             style: estilos.leyenda.copyWith(color: tokens.textoAcento),
@@ -215,7 +213,7 @@ class TarjetaCaso extends StatelessWidget {
                   if (aviso case final aviso?) ...[const SizedBox(height: 18), aviso],
                   const Spacer(),
                   const SizedBox(height: 18),
-                  PistaGesto(soloBotones: soloBotones),
+                  _PistaGesto(soloBotones: soloBotones),
                 ],
               ),
             ),
@@ -350,13 +348,10 @@ class ChipTipoTarjeta extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final evidencia = tipo == TipoTarjeta.evidencia;
-    return Container(
-      key: const ValueKey('chip-tipo'),
-      padding: const EdgeInsets.fromLTRB(8, 4, 10, 4),
-      decoration: BoxDecoration(
-        color: evidencia ? tokens.accionSecundaria : tokens.accionAcento,
-        borderRadius: BorderRadius.circular(999),
-      ),
+    return Pildora(
+      clave: const ValueKey('chip-tipo'),
+      fondo: evidencia ? tokens.accionSecundaria : tokens.accionAcento,
+      relleno: const EdgeInsets.fromLTRB(8, 4, 10, 4),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -499,8 +494,8 @@ class AvisoDilema extends StatelessWidget {
 /// Pista de gesto al pie de la tarjeta: "← ILEGAL" (estado/ilegal), "↑
 /// CONDICIONAL" sobre "↓ ESCALAR" (estado/condicional y estado/escalar) y
 /// "LEGAL →" (estado/legal). Decorativa: los botones dicen lo mismo.
-class PistaGesto extends StatelessWidget {
-  const PistaGesto({this.soloBotones = false, super.key});
+class _PistaGesto extends StatelessWidget {
+  const _PistaGesto({this.soloBotones = false});
 
   /// Sin arrastre: "Elige con los botones" (Etiqueta texto/secundario).
   final bool soloBotones;

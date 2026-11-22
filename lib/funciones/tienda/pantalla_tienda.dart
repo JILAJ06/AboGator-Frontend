@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/marco_principal.dart';
+import '../../componentes/aviso_snack.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/dialogo_confirmacion.dart';
 import '../../componentes/foco_retorno.dart';
@@ -129,14 +130,7 @@ class _TiendaState extends ConsumerState<_Tienda> {
   }
 
   void _avisar(String mensaje) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          key: const ValueKey('aviso-tienda'),
-          content: Semantics(liveRegion: true, child: Text(mensaje)),
-        ),
-      );
+    mostrarAviso(context, mensaje, clave: const ValueKey('aviso-tienda'));
   }
 
   Future<void> _comprar(ArticuloTienda articulo) async {

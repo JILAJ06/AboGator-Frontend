@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
+import '../../componentes/aviso_snack.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/foco_retorno.dart';
@@ -59,14 +60,11 @@ class _PantallaAjustesState extends ConsumerState<PantallaAjustes> {
     final mensajero = ScaffoldMessenger.of(context);
     final guardado = await ref.read(ajustesProvider.notifier).cambiar(nuevos);
     if (guardado) return;
-    mensajero
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          key: const ValueKey('error-guardar-ajuste'),
-          content: Semantics(liveRegion: true, child: const Text(Textos.errorGuardarAjuste)),
-        ),
-      );
+    mostrarAvisoEn(
+      mensajero,
+      Textos.errorGuardarAjuste,
+      clave: const ValueKey('error-guardar-ajuste'),
+    );
   }
 
   Future<void> _elegirTamano(BuildContext context, WidgetRef ref) async {

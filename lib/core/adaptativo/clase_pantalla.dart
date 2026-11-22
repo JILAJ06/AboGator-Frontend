@@ -53,9 +53,6 @@ abstract final class MedidasAdaptativas {
 
   /// Ancho máximo del contenido en una sola columna (tablet entre 600 y 959).
   static const double contenidoUnaColumna = 640;
-
-  /// Lienzo de referencia de Figma (iPad 11" horizontal, sin barra de estado).
-  static const Size lienzoTablet = Size(1194, 802);
 }
 
 /// Clase de pantalla según el ancho de la **ventana**: la que publica

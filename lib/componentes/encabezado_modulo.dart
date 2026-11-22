@@ -6,9 +6,8 @@ import '../core/tema/efectos.dart';
 import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
-import 'accion_enfocable.dart';
+import 'boton_icono_caja.dart';
 import 'chip_hud.dart';
-import 'icono_app.dart';
 
 /// Encabezado del mapa de sprints (Figma 13:574): fondo del color del módulo,
 /// botón atrás de 48 (blanco al 18 %, radio 12), etiqueta "MÓDULO N · NOMBRE"
@@ -174,29 +173,13 @@ class _BotonAtrasEncabezado extends StatelessWidget {
   final VoidCallback? alPresionar;
 
   @override
-  Widget build(BuildContext context) {
-    return AccionEnfocable(
-      alPresionar: alPresionar,
-      radio: EncabezadoModulo.radioAtras,
-      semantica: (hijo) => Semantics(
-        button: true,
-        label: Textos.atras,
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
-      child: Container(
-        key: const ValueKey('atras-encabezado'),
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: EfectosApp.fondoAtrasEncabezado,
-          borderRadius: BorderRadius.circular(EncabezadoModulo.radioAtras),
-        ),
-        child: const Center(
-          child: IconoApp(IconosApp.back, tamano: 20, color: EfectosApp.textoEncabezado),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => BotonIconoCaja(
+    claveCaja: const ValueKey('atras-encabezado'),
+    icono: IconosApp.back,
+    etiqueta: Textos.atras,
+    alPresionar: alPresionar,
+    fondo: EfectosApp.fondoAtrasEncabezado,
+    conBorde: false,
+    colorIcono: EfectosApp.textoEncabezado,
+  );
 }

@@ -5,6 +5,7 @@ import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import '../funciones/apelaciones/logica_apelacion.dart';
 import 'icono_app.dart';
+import 'pildora.dart';
 
 /// Píldora de vidas de la apelación, radio 999:
 /// - en la barra de 22: relleno 10/6, separación 4, `heart` 14 y Leyenda;
@@ -44,12 +45,9 @@ class InsigniaVida extends StatelessWidget {
       container: true,
       label: etiquetaSemantica ?? texto,
       excludeSemantics: true,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: grande ? 12 : 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: destacada ? tokens.estadoIlegal : tokens.fondoSuperficieAlt,
-          borderRadius: BorderRadius.circular(999),
-        ),
+      child: Pildora(
+        fondo: destacada ? tokens.estadoIlegal : tokens.fondoSuperficieAlt,
+        relleno: EdgeInsets.symmetric(horizontal: grande ? 12 : 10, vertical: 6),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -77,13 +75,10 @@ class AvisoFallo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    return Container(
-      key: const ValueKey('aviso-fallo'),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: tokens.fondoDestacado,
-        borderRadius: BorderRadius.circular(999),
-      ),
+    return Pildora(
+      clave: const ValueKey('aviso-fallo'),
+      fondo: tokens.fondoDestacado,
+      relleno: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -118,13 +113,10 @@ class PildoraRepaso extends StatelessWidget {
       container: true,
       label: Textos.diaRepasoSemantica(dia, hecho: hecho),
       excludeSemantics: true,
-      child: Container(
-        key: ValueKey('repaso-$dia'),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: hecho ? tokens.estadoLegal : tokens.fondoSuperficieAlt,
-          borderRadius: BorderRadius.circular(999),
-        ),
+      child: Pildora(
+        clave: ValueKey('repaso-$dia'),
+        fondo: hecho ? tokens.estadoLegal : tokens.fondoSuperficieAlt,
+        relleno: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../componentes/acciones_veredicto.dart';
+import '../../componentes/agarre_hoja.dart';
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/avatar_app.dart';
 import '../../componentes/aviso_conexion.dart';
@@ -12,6 +13,7 @@ import '../../componentes/barra_progreso.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_atras.dart';
 import '../../componentes/boton_buzon.dart';
+import '../../componentes/boton_icono_caja.dart';
 import '../../componentes/boton_veredicto.dart';
 import '../../componentes/campo_texto_app.dart';
 import '../../componentes/casilla_app.dart';
@@ -55,6 +57,7 @@ import '../../componentes/piezas_perfil.dart';
 import '../../componentes/piezas_resultado.dart';
 import '../../componentes/piezas_tienda.dart';
 import '../../componentes/pila_tarjetas.dart';
+import '../../componentes/pildora.dart';
 import '../../componentes/riel_navegacion.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/sello_veredicto.dart';
@@ -864,6 +867,34 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                 ),
                 const EtiquetaQuiebra(causa: CausaQuiebra.riesgoLegal),
                 const EtiquetaQuiebra(causa: CausaQuiebra.presupuesto),
+              ],
+            ),
+            _Seccion(
+              titulo: Textos.galeriaPiezasPequenas,
+              hijos: [
+                const Center(child: AgarreHoja()),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    BotonIconoCaja(
+                      icono: IconosApp.back,
+                      etiqueta: Textos.atras,
+                      alPresionar: () {},
+                    ),
+                    BotonIconoCaja(
+                      etiqueta: Textos.galeriaBotonMas,
+                      alPresionar: () {},
+                      hijo: Text('+', style: context.estilos.h2),
+                    ),
+                    Pildora(
+                      fondo: context.tokens.fondoDestacado,
+                      relleno: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      child: Text(Textos.galeriaPildoraEjemplo, style: context.estilos.etiqueta),
+                    ),
+                  ],
+                ),
               ],
             ),
             _Seccion(

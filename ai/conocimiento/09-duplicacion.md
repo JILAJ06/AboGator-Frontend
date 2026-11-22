@@ -107,11 +107,11 @@ El riesgo pesa 1 si es bajo, 2 si es medio y 3 si es alto. Las ubicaciones son `
 |---|---|---|---|
 | `PantallaPendiente` (ninguna ruta la usa desde la T-13b) | `lib/app/pantalla_pendiente.dart` | 49 | Borrar el archivo y el nodo PANT-PENDIENTE |
 | `mostrarAvisoBreve` (sin uso; otro estilo de `SnackBar`) | `lib/funciones/acceso/aviso_error.dart:41` | 15 | Borrarla, o convertirla en el `mostrarAviso` de P-02 (D2) |
-| `Textos.buzonApelaciones` | `lib/core/textos/textos.dart:236` | 1 | Borrar |
+| `Textos.buzonApelaciones` | `lib/core/textos/textos.dart:236` | 1 | **No es muerto** (T-15b): lo usa `buzonSemantica` dentro de `textos.dart` sin el prefijo `Textos.` |
 | `Textos.veredictoAnuncio` | `textos.dart:470` | 1 | Borrar |
-| `Textos.sinCambios` | `textos.dart:492` | 1 | Borrar |
-| `Textos.noSeleccionada` | `textos.dart:500` | 1 | Borrar |
-| `Textos.noMarcada` y `Textos.lineaClave` | `textos.dart:528` y `:529` | 2 | Borrar |
+| `Textos.sinCambios` | `textos.dart:492` | 1 | **No es muerto** (T-15b): lo usa `impactoSemantica` en el mismo archivo |
+| `Textos.noSeleccionada` | `textos.dart:500` | 1 | **No es muerto** (T-15b): se usa en el mismo archivo |
+| `Textos.noMarcada` y `Textos.lineaClave` | `textos.dart:528` y `:529` | 2 | **No son muertos** (T-15b): se usan en el mismo archivo |
 | `Textos.notificacionApelacionPie` | `textos.dart:692` | 1 | Borrar |
 | `MedidasAdaptativas.lienzoTablet` | `lib/core/adaptativo/clase_pantalla.dart:58` | 1 | Borrar |
 | `Rutas.juicioApelacion` (plantilla documental; el enrutador usa los segmentos) | `lib/app/rutas.dart:53` | 1 | Borrar o dejar como comentario |
@@ -134,6 +134,16 @@ Cada lote es una rama y un PR. Se ordenan de lo seguro y compartido a lo delicad
 - **Total estimado:** ≈ 1 310 líneas menos en `lib/` (≈ 3,7 %) y ≈ 240 menos en `test/`.
 - La T-15d puede hacerse cuando se quiera, porque no toca `lib/`. Conviene **no** juntarla con un lote de `lib/`, para que un cambio de app nunca coincida con un cambio de las pruebas que lo protegen.
 - Si un lote queda grande, se puede partir. En la T-15f, P-14 (el mazo) debe ir sola y al final.
+
+## Resultados por lote
+| Lote | `lib/` antes | `lib/` después | Diferencia | `test/` antes → después | Pruebas |
+|---|---|---|---|---|---|
+| T-15b | 35 552 (211 archivos) | 35 476 (214 archivos) | **−76** | 19 673 → 19 832 (+159, pruebas nuevas) | 3025 → 3034 |
+
+- **T-15b, desglose:**
+  - En los archivos que ya existían se fueron 237 líneas netas: 49 de `pantalla_pendiente.dart`, 17 de `mostrarAvisoBreve`, unas 100 de los botones de caja y los agarres, unas 50 de las 22 píldoras y unas 20 de los avisos.
+  - Los cuatro componentes nuevos, con su documentación, suman 161 líneas; la sección de la galería, 24.
+- **Corrección a la estimación:** el ahorro esperado (≈ 280) contaba las líneas repetidas, pero no restaba bien el costo de los componentes nuevos. Además, 5 de los 7 «textos sin uso» no lo eran. Para los lotes siguientes, conviene estimar el ahorro **neto**: líneas quitadas menos el componente y su entrada en la galería.
 
 ## Reglas de toda la T-15
 1. **Cero cambios visibles.** Se mantienen las mismas medidas, textos, colores, foco, orden de lectura, semántica y animaciones. La auditoría de `test/auditoria/` debe seguir verde **sin tocar sus escenas**. Las demás pruebas solo cambian si un lote lo autoriza de forma explícita (T-15d).

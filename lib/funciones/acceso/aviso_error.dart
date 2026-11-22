@@ -36,20 +36,3 @@ class AvisoError extends StatelessWidget {
     );
   }
 }
-
-/// Aviso breve y no bloqueante en la parte inferior.
-void mostrarAvisoBreve(BuildContext context, String mensaje) {
-  final tokens = context.tokens;
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: tokens.accionSecundaria,
-        content: Text(
-          mensaje,
-          style: context.estilos.cuerpoBase.copyWith(color: tokens.textoEnPrimario),
-        ),
-      ),
-    );
-}

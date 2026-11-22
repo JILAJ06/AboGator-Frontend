@@ -196,8 +196,8 @@ class TrofeoCertificado extends StatelessWidget {
 
 /// Una tarjeta del resumen de 30: fondo/superficie, borde 1, radio 16,
 /// relleno vertical 12; valor en Título/H2 y etiqueta en Leyenda.
-class TarjetaResumenExamen extends StatelessWidget {
-  const TarjetaResumenExamen({
+class _TarjetaResumenExamen extends StatelessWidget {
+  const _TarjetaResumenExamen({
     required this.valor,
     required this.etiqueta,
     required this.colorValor,
@@ -263,19 +263,19 @@ class FilaResumenExamen extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final tarjetas = [
-      TarjetaResumenExamen(
+      _TarjetaResumenExamen(
         key: const ValueKey('resumen-llegaste'),
         valor: Textos.llegasteValor(jugadas, total),
         etiqueta: Textos.llegasteA,
         colorValor: tokens.textoPrimario,
       ),
-      TarjetaResumenExamen(
+      _TarjetaResumenExamen(
         key: const ValueKey('resumen-aciertos'),
         valor: '$aciertos',
         etiqueta: Textos.aciertos,
         colorValor: tokens.estadoLegal,
       ),
-      TarjetaResumenExamen(
+      _TarjetaResumenExamen(
         key: const ValueKey('resumen-tiempo'),
         valor: '$porTiempo',
         etiqueta: Textos.porTiempo,

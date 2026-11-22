@@ -10,6 +10,7 @@ import 'boton_app.dart';
 import 'icono_app.dart';
 import 'opcion_justificacion.dart';
 import 'panel_evidencia.dart';
+import 'pildora.dart';
 
 /// Panel de justificación (Figma 18 = 38:4737): se abre tras dictar el
 /// veredicto en una tarjeta de dilema, antes del panel de veredicto.
@@ -89,13 +90,10 @@ class _PanelJustificacionState extends State<PanelJustificacion> {
           radio: 8,
           child: Column(
             children: [
-              Container(
-                key: const ValueKey('chip-veredicto'),
-                padding: const EdgeInsets.fromLTRB(10, 6, 12, 6),
-                decoration: BoxDecoration(
-                  color: PanelJustificacion.color(v, tokens),
-                  borderRadius: BorderRadius.circular(999),
-                ),
+              Pildora(
+                clave: const ValueKey('chip-veredicto'),
+                fondo: PanelJustificacion.color(v, tokens),
+                relleno: const EdgeInsets.fromLTRB(10, 6, 12, 6),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

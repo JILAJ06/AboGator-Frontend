@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/rutas.dart';
 import '../../componentes/acciones_veredicto.dart';
+import '../../componentes/aviso_snack.dart';
 import '../../componentes/barra_progreso.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
@@ -243,14 +244,11 @@ class _JuicioState extends ConsumerState<_Juicio> {
         _intento++;
         _arrastre.value = const ArrastreVisible();
       });
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            key: const ValueKey('error-guardar-apelacion'),
-            content: Semantics(liveRegion: true, child: const Text(Textos.errorGuardarApelacion)),
-          ),
-        );
+      mostrarAviso(
+        context,
+        Textos.errorGuardarApelacion,
+        clave: const ValueKey('error-guardar-apelacion'),
+      );
     }
   }
 

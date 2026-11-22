@@ -5,6 +5,7 @@ import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import '../datos/modelos/estado_startup.dart';
 import 'icono_app.dart';
+import 'pildora.dart';
 
 /// Píldora de "Startup en quiebra" (19b): `estado/ilegal`, relleno 12×6,
 /// separación 6, ícono trending-down de 16 y "RIESGO LEGAL 100%" (o
@@ -33,12 +34,9 @@ class EtiquetaQuiebra extends StatelessWidget {
       container: true,
       label: etiquetaSemantica,
       excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: tokens.estadoIlegal,
-          borderRadius: BorderRadius.circular(999),
-        ),
+      child: Pildora(
+        fondo: tokens.estadoIlegal,
+        relleno: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

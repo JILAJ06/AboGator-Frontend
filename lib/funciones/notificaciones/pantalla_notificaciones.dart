@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/rutas.dart';
 import '../../componentes/accion_enfocable.dart';
+import '../../componentes/aviso_snack.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/boton_atras.dart';
@@ -86,17 +87,11 @@ class _NotificacionesState extends ConsumerState<_Notificaciones> {
   Future<bool> _cambiar(AjustesNotificaciones nuevas) async {
     final ok = await ref.read(ajustesNotificacionesProvider.notifier).cambiar(nuevas);
     if (!ok && mounted) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            key: const ValueKey('error-guardar-notificaciones'),
-            content: Semantics(
-              liveRegion: true,
-              child: const Text(Textos.errorGuardarNotificaciones),
-            ),
-          ),
-        );
+      mostrarAviso(
+        context,
+        Textos.errorGuardarNotificaciones,
+        clave: const ValueKey('error-guardar-notificaciones'),
+      );
     }
     return ok;
   }

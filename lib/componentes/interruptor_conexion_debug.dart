@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
+import 'pildora.dart';
 
 /// Solo en depuración: píldora pequeña con un `Switch` para simular que no
 /// hay conexión (la única forma de ver el estado 23 sin backend). En release
@@ -26,15 +27,12 @@ class InterruptorConexionDebug extends StatelessWidget {
     if (!visible) return const SizedBox.shrink();
     final tokens = context.tokens;
     return Center(
-      child: Container(
-        key: const ValueKey('interruptor-conexion'),
-        constraints: const BoxConstraints(minHeight: 48),
-        padding: const EdgeInsets.only(left: 14, right: 4),
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficieAlt,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: tokens.bordeDefault),
-        ),
+      child: Pildora(
+        clave: const ValueKey('interruptor-conexion'),
+        altoMinimo: 48,
+        fondo: tokens.fondoSuperficieAlt,
+        relleno: const EdgeInsets.only(left: 14, right: 4),
+        borde: Border.all(color: tokens.bordeDefault),
         child: MergeSemantics(
           child: Row(
             mainAxisSize: MainAxisSize.min,

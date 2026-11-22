@@ -5,6 +5,7 @@ import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
 import 'icono_app.dart';
+import 'pildora.dart';
 
 /// Píldora de plazo de una apelación (Figma 21): radio 999, relleno 8×2,
 /// separación 4.
@@ -12,8 +13,8 @@ import 'icono_app.dart';
 ///   +1 vida" en texto/en-primario;
 /// - futura: fondo/superficie-alt con `clock` de 12 y "Día 3 · mañana" o
 ///   "Día 7 · en 2 días" en texto/secundario.
-class PildoraPlazo extends StatelessWidget {
-  const PildoraPlazo({required this.dia, required this.dias, super.key});
+class _PildoraPlazo extends StatelessWidget {
+  const _PildoraPlazo({required this.dia, required this.dias});
 
   /// Día de repaso (3, 7 o 14).
   final int dia;
@@ -27,10 +28,10 @@ class PildoraPlazo extends StatelessWidget {
     final hoy = dias <= 0;
     final fondo = hoy ? tokens.estadoIlegal : tokens.fondoSuperficieAlt;
     final color = hoy ? tokens.textoEnPrimario : tokens.textoSecundario;
-    return Container(
-      key: const ValueKey('pildora-plazo'),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: fondo, borderRadius: BorderRadius.circular(999)),
+    return Pildora(
+      clave: const ValueKey('pildora-plazo'),
+      fondo: fondo,
+      relleno: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -123,7 +124,7 @@ class FilaApelacion extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(tema, style: estilos.leyenda.copyWith(color: tokens.textoSecundario)),
                   const SizedBox(height: 3),
-                  PildoraPlazo(dia: dia, dias: dias),
+                  _PildoraPlazo(dia: dia, dias: dias),
                 ],
               ),
             ),
