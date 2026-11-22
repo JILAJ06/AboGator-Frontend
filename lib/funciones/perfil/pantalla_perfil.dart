@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
+import '../../componentes/aviso_snack.dart';
 import '../../componentes/dialogo_confirmacion.dart';
 import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/navegacion_inferior_app.dart';
@@ -80,14 +81,7 @@ class _PerfilState extends ConsumerState<_Perfil> {
     } on Object {
       _cerrando = false;
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            key: const ValueKey('error-cerrar-sesion'),
-            content: Semantics(liveRegion: true, child: const Text(Textos.errorCerrarSesion)),
-          ),
-        );
+      mostrarAviso(context, Textos.errorCerrarSesion, clave: const ValueKey('error-cerrar-sesion'));
     }
   }
 

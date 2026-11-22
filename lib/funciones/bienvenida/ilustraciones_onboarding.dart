@@ -6,6 +6,7 @@ import '../../componentes/boton_veredicto.dart';
 import '../../componentes/chip_hud.dart';
 import '../../componentes/corazon_vida.dart';
 import '../../componentes/indicadores_startup.dart';
+import '../../componentes/pildora.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/textos/textos.dart';
@@ -181,12 +182,9 @@ class _MiniTarjetaCaso extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: t.textoAcento.withValues(alpha: EfectosApp.opacidadEtiquetaCaso),
-              borderRadius: BorderRadius.circular(999),
-            ),
+          Pildora(
+            fondo: t.textoAcento.withValues(alpha: EfectosApp.opacidadEtiquetaCaso),
+            relleno: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             child: Text(Textos.casoEtiqueta, style: mini(e.etiqueta, 6.8, t.textoAcento)),
           ),
           const SizedBox(height: 12),

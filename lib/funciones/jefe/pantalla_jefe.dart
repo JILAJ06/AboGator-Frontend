@@ -10,6 +10,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/rutas.dart';
 import '../../componentes/acciones_veredicto.dart';
 import '../../componentes/aviso_conexion.dart';
+import '../../componentes/aviso_snack.dart';
 import '../../componentes/barra_juego.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
@@ -22,6 +23,7 @@ import '../../componentes/mensaje_pantalla.dart';
 import '../../componentes/panel_lateral_juego.dart';
 import '../../componentes/piezas_jefe.dart';
 import '../../componentes/piezas_perfil.dart';
+import '../../componentes/pildora.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/sello_veredicto.dart';
 import '../../componentes/tarjeta_caso.dart';
@@ -149,14 +151,7 @@ class _PantallaCrisisState extends ConsumerState<PantallaCrisis> {
   }
 
   static void _avisar(ScaffoldMessengerState mensajero, String texto) {
-    mensajero
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          key: const ValueKey('aviso-examen'),
-          content: Semantics(liveRegion: true, child: Text(texto)),
-        ),
-      );
+    mostrarAvisoEn(mensajero, texto, clave: const ValueKey('aviso-examen'));
   }
 
   @override
@@ -231,13 +226,10 @@ class _Crisis extends ConsumerWidget {
       ),
     );
 
-    final alerta = Container(
-      key: const ValueKey('alerta-jefe'),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: EfectosApp.alertaCrisis,
-        borderRadius: BorderRadius.circular(999),
-      ),
+    final alerta = Pildora(
+      clave: const ValueKey('alerta-jefe'),
+      fondo: EfectosApp.alertaCrisis,
+      relleno: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -294,13 +286,10 @@ class _Crisis extends ConsumerWidget {
         const SizedBox(height: 16),
         Align(
           alignment: Alignment.centerLeft,
-          child: Container(
-            key: const ValueKey('alerta-jefe'),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: EfectosApp.alertaCrisis,
-              borderRadius: BorderRadius.circular(999),
-            ),
+          child: Pildora(
+            clave: const ValueKey('alerta-jefe'),
+            fondo: EfectosApp.alertaCrisis,
+            relleno: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -539,14 +528,11 @@ class _DecisionState extends ConsumerState<_Decision> {
       _reintento++;
       _arrastre.value = const ArrastreVisible();
     });
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          key: const ValueKey('error-respuesta-examen'),
-          content: Semantics(liveRegion: true, child: const Text(Textos.errorRespuestaExamen)),
-        ),
-      );
+    mostrarAviso(
+      context,
+      Textos.errorRespuestaExamen,
+      clave: const ValueKey('error-respuesta-examen'),
+    );
   }
 
   Future<void> _responder(Veredicto? veredicto) async {

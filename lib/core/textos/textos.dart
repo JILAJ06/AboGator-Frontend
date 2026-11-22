@@ -467,7 +467,6 @@ abstract final class Textos {
       ? '1 respuesta guardada en el dispositivo, pendiente de sincronizar'
       : '$n respuestas guardadas en el dispositivo, pendientes de sincronizar';
   static const String simularSinConexion = 'Simular sin conexión';
-  static String veredictoAnuncio(String accion) => 'Veredicto: $accion';
 
   // ---------------------------------------------------------------------
   // 12, 12b, 12c, 14 y 14b Panel de veredicto
@@ -689,7 +688,6 @@ abstract final class Textos {
   static const String notificacionApelacionTitulo = '⚖️ Tienes un juicio de apelación pendiente';
   static String notificacionApelacionCuerpo(String titulo, int dias) =>
       'Hace $dias días fallaste “$titulo”. Gánala y recupera 1 vida.';
-  static const String notificacionApelacionPie = 'Toca para abrir el juicio de apelación';
 
   // ---------------------------------------------------------------------
   // 26 Ajustes de accesibilidad
@@ -1077,6 +1075,9 @@ abstract final class Textos {
   static const String galeriaAjustes = 'Piezas de los Ajustes';
   static const String galeriaJefe = 'Piezas del Examen Final';
   static const String galeriaCuenta = 'Cuenta, legal y notificaciones';
+  static const String galeriaPiezasPequenas = 'Piezas pequeñas (agarre, botón de caja y píldora)';
+  static const String galeriaPildoraEjemplo = 'Píldora';
+  static const String galeriaBotonMas = 'Más';
   static const String galeriaLogos = 'Logos (4 formas × 5 tonos)';
   static String galeriaLogo(String forma, String tono) => '$forma · $tono';
   static const String galeriaIconos = 'Íconos';

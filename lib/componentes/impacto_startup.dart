@@ -5,6 +5,7 @@ import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'icono_app.dart';
 import 'indicadores_startup.dart';
+import 'pildora.dart';
 
 /// Fila "Impacto:" que aparece tras un veredicto, con un chip por cada
 /// indicador que cambia. El cambio se comunica con signo y color.
@@ -49,12 +50,9 @@ class _ChipImpacto extends StatelessWidget {
     return Semantics(
       label: Textos.impactoSemantica(indicador.nombre, cambio),
       excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.only(left: 6, right: 8, top: 3, bottom: 3),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: EfectosApp.opacidadChipImpacto),
-          borderRadius: BorderRadius.circular(999),
-        ),
+      child: Pildora(
+        fondo: color.withValues(alpha: EfectosApp.opacidadChipImpacto),
+        relleno: const EdgeInsets.only(left: 6, right: 8, top: 3, bottom: 3),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

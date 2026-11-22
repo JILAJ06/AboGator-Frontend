@@ -7,6 +7,7 @@ import '../core/utilidades/extensiones_contexto.dart';
 import '../datos/modelos/vidas.dart';
 import 'corazon_vida.dart';
 import 'icono_app.dart';
+import 'pildora.dart';
 
 enum TipoChipHud { vidas, monedas, racha, comodines, amparo }
 
@@ -89,13 +90,10 @@ class ChipHud extends StatelessWidget {
     return Semantics(
       label: etiquetaSemantica,
       excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.only(left: 10, right: 12, top: 6, bottom: 6),
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficie,
-          borderRadius: BorderRadius.circular(999),
-          border: borde,
-        ),
+      child: Pildora(
+        fondo: tokens.fondoSuperficie,
+        relleno: const EdgeInsets.only(left: 10, right: 12, top: 6, bottom: 6),
+        borde: borde,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

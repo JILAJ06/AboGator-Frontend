@@ -8,6 +8,7 @@ import 'accion_enfocable.dart';
 import 'chip_hud.dart';
 import 'foco_retorno.dart';
 import 'icono_app.dart';
+import 'pildora.dart';
 
 /// Saldo de la Tienda (Figma 24): píldora fondo/destacado, relleno 12/16/8,
 /// separación 8, moneda de 22 y el saldo en Título/H3. Se lee "Tienes N
@@ -24,13 +25,10 @@ class PildoraSaldo extends StatelessWidget {
       container: true,
       label: Textos.saldoSemantica(monedas),
       excludeSemantics: true,
-      child: Container(
-        key: const ValueKey('pildora-saldo'),
-        padding: const EdgeInsets.only(left: 12, right: 16, top: 8, bottom: 8),
-        decoration: BoxDecoration(
-          color: tokens.fondoDestacado,
-          borderRadius: BorderRadius.circular(999),
-        ),
+      child: Pildora(
+        clave: const ValueKey('pildora-saldo'),
+        fondo: tokens.fondoDestacado,
+        relleno: const EdgeInsets.only(left: 12, right: 16, top: 8, bottom: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -74,13 +72,10 @@ class PildoraInventario extends StatelessWidget {
       container: true,
       label: Textos.inventarioSemantica(nombre, cantidad),
       excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.only(left: 10, right: 12, top: 8, bottom: 8),
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficie,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: tokens.bordeDefault),
-        ),
+      child: Pildora(
+        fondo: tokens.fondoSuperficie,
+        relleno: const EdgeInsets.only(left: 10, right: 12, top: 8, bottom: 8),
+        borde: Border.all(color: tokens.bordeDefault),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -5,9 +5,10 @@
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../componentes/accion_enfocable.dart';
+import '../../componentes/agarre_hoja.dart';
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/boton_icono_caja.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
 import '../../core/textos/textos.dart';
@@ -171,19 +172,7 @@ class _SelectorHoraState extends State<SelectorHora> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (!widget.enDialogo) ...[
-            Center(
-              child: Container(
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: tokens.bordeDefault,
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
+          if (!widget.enDialogo) ...[const Center(child: AgarreHoja()), const SizedBox(height: 16)],
           Semantics(
             header: true,
             child: Text(
@@ -425,30 +414,10 @@ class _BotonPaso extends StatelessWidget {
   final VoidCallback alPresionar;
 
   @override
-  Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    return AccionEnfocable(
-      key: ValueKey(clave),
-      alPresionar: alPresionar,
-      radio: 12,
-      semantica: (hijo) => Semantics(
-        button: true,
-        label: etiqueta,
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
-      child: Container(
-        width: 48,
-        height: 48,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficie,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: tokens.bordeDefault),
-        ),
-        child: Text(simbolo, style: context.estilos.h2.copyWith(color: tokens.textoPrimario)),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => BotonIconoCaja(
+    key: ValueKey(clave),
+    etiqueta: etiqueta,
+    alPresionar: alPresionar,
+    hijo: Text(simbolo, style: context.estilos.h2.copyWith(color: context.tokens.textoPrimario)),
+  );
 }

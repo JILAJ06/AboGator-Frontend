@@ -49,10 +49,8 @@ abstract final class Rutas {
   /// 21 Buzón de Apelaciones
   static const String buzon = '/buzon';
 
-  /// 22 Juicio de apelación (21b la notificación abre esta ruta)
-  static const String juicioApelacion = '/buzon/:apelacionId';
-
-  /// Juicio de una apelación (enlace profundo de la notificación 21b).
+  /// 22 Juicio de una apelación, `/buzon/:apelacionId` (enlace profundo de la
+  /// notificación 21b).
   static String juicioApelacionDe(String apelacionId) =>
       '/buzon/${Uri.encodeComponent(apelacionId)}';
 

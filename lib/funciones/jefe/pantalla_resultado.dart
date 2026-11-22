@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/rutas.dart';
+import '../../componentes/aviso_snack.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/confeti_sprint.dart';
@@ -226,14 +227,11 @@ class _AuditoriaSuperadaState extends _EstadoResultado<PantallaAuditoriaSuperada
     final mensajero = ScaffoldMessenger.of(context);
     final vista = View.of(context);
     await Clipboard.setData(ClipboardData(text: LogicaResultado.textoCompartir(c)));
-    mensajero
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          key: const ValueKey('aviso-certificado-copiado'),
-          content: Semantics(liveRegion: true, child: const Text(Textos.certificadoCopiado)),
-        ),
-      );
+    mostrarAvisoEn(
+      mensajero,
+      Textos.certificadoCopiado,
+      clave: const ValueKey('aviso-certificado-copiado'),
+    );
     unawaited(
       SemanticsService.sendAnnouncement(vista, Textos.certificadoCopiado, TextDirection.ltr),
     );

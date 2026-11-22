@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/marco_principal.dart';
 import '../../app/rutas.dart';
+import '../../componentes/aviso_snack.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/fila_apelacion.dart';
@@ -118,14 +119,11 @@ class _Buzon extends ConsumerWidget {
       _iniciar(context, ref, [a.id]);
       return;
     }
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          key: const ValueKey('aviso-apelacion-futura'),
-          content: Semantics(liveRegion: true, child: Text(Textos.avisoApelacionFutura(dias))),
-        ),
-      );
+    mostrarAviso(
+      context,
+      Textos.avisoApelacionFutura(dias),
+      clave: const ValueKey('aviso-apelacion-futura'),
+    );
   }
 
   @override

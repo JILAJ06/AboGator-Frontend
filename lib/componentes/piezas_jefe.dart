@@ -7,14 +7,16 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import '../datos/modelos/examen.dart';
+import 'agarre_hoja.dart';
 import 'hoja_lateral.dart';
 import 'icono_app.dart';
 import 'opcion_justificacion.dart';
+import 'pildora.dart';
 
 /// Avatar de la Inspectora Vega (Figma 33:424): 44, radio 14, `#6B4BA1` y el
 /// mazo blanco de 24. Decorativo.
-class AvatarJefe extends StatelessWidget {
-  const AvatarJefe({super.key});
+class _AvatarJefe extends StatelessWidget {
+  const _AvatarJefe();
 
   @override
   Widget build(BuildContext context) => Container(
@@ -60,7 +62,7 @@ class BarraDelJefe extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const AvatarJefe(),
+            const _AvatarJefe(),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -210,13 +212,10 @@ class ChipHoraCrisis extends StatelessWidget {
     container: true,
     label: Textos.horaCrisis(hora),
     excludeSemantics: true,
-    child: Container(
-      key: const ValueKey('hora-crisis'),
-      padding: const EdgeInsets.only(left: 10, right: 12, top: 5, bottom: 5),
-      decoration: BoxDecoration(
-        color: EfectosApp.alertaCrisis,
-        borderRadius: BorderRadius.circular(999),
-      ),
+    child: Pildora(
+      clave: const ValueKey('hora-crisis'),
+      fondo: EfectosApp.alertaCrisis,
+      relleno: const EdgeInsets.only(left: 10, right: 12, top: 5, bottom: 5),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -278,7 +277,7 @@ class TemporizadorCrisis extends StatelessWidget {
         child: SizedBox.square(
           dimension: anillo,
           child: CustomPaint(
-            painter: PintorAnillo(
+            painter: _PintorAnillo(
               fraccion: fraccion,
               color: color,
               pista: tokens.fondoSuperficieAlt,
@@ -300,8 +299,8 @@ class TemporizadorCrisis extends StatelessWidget {
 
 /// Anillo del temporizador: pista completa y arco desde arriba, en sentido
 /// horario, con punta redonda.
-class PintorAnillo extends CustomPainter {
-  const PintorAnillo({required this.fraccion, required this.color, required this.pista});
+class _PintorAnillo extends CustomPainter {
+  const _PintorAnillo({required this.fraccion, required this.color, required this.pista});
 
   final double fraccion;
   final Color color;
@@ -337,7 +336,7 @@ class PintorAnillo extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(PintorAnillo old) =>
+  bool shouldRepaint(_PintorAnillo old) =>
       old.fraccion != fraccion || old.color != color || old.pista != pista;
 }
 
@@ -369,15 +368,12 @@ class ChipGolpe extends StatelessWidget {
       liveRegion: true,
       label: etiquetaSemantica,
       excludeSemantics: true,
-      child: Container(
-        key: ValueKey(danio ? 'chip-danio' : 'chip-fallo'),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: danio ? EfectosApp.alertaCrisis : tokens.fondoSuperficie,
-          borderRadius: BorderRadius.circular(999),
-          border: danio ? null : Border.all(color: tokens.estadoIlegal, width: 1.5),
-          boxShadow: EfectosApp.sombraChipDanio,
-        ),
+      child: Pildora(
+        clave: ValueKey(danio ? 'chip-danio' : 'chip-fallo'),
+        fondo: danio ? EfectosApp.alertaCrisis : tokens.fondoSuperficie,
+        relleno: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        borde: danio ? null : Border.all(color: tokens.estadoIlegal, width: 1.5),
+        sombra: EfectosApp.sombraChipDanio,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -409,14 +405,11 @@ class PildoraComodinesBloqueados extends StatelessWidget {
       container: true,
       label: Textos.comodinesDesactivados,
       excludeSemantics: true,
-      child: Container(
-        key: const ValueKey('comodines-bloqueados'),
-        constraints: const BoxConstraints(minHeight: 48),
-        padding: const EdgeInsets.only(left: 10, right: 12, top: 8, bottom: 8),
-        decoration: BoxDecoration(
-          color: tokens.fondoSuperficieAlt,
-          borderRadius: BorderRadius.circular(999),
-        ),
+      child: Pildora(
+        clave: const ValueKey('comodines-bloqueados'),
+        altoMinimo: 48,
+        fondo: tokens.fondoSuperficieAlt,
+        relleno: const EdgeInsets.only(left: 10, right: 12, top: 8, bottom: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -475,14 +468,7 @@ class PanelContraargumento extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 40,
-            height: 5,
-            decoration: BoxDecoration(
-              color: tokens.bordeDefault,
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
+          const AgarreHoja(),
           const SizedBox(height: 14),
           Focus(
             focusNode: nodoFocoReplica,
@@ -494,7 +480,7 @@ class PanelContraargumento extends StatelessWidget {
                 key: const ValueKey('replica-jefe'),
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const AvatarJefe(),
+                  const _AvatarJefe(),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Container(

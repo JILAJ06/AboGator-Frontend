@@ -4,6 +4,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'icono_app.dart';
+import 'pildora.dart';
 
 /// Etiqueta de la Lupa activa (Figma 38:5058): píldora accion/acento con
 /// relleno 10/12/6/6, separación 6, `search` de 14 y "Lupa de Auditor:
@@ -23,13 +24,10 @@ class EtiquetaLupa extends StatelessWidget {
       liveRegion: true,
       label: Textos.lupaActiva,
       excludeSemantics: true,
-      child: Container(
-        key: const ValueKey('etiqueta-lupa'),
-        padding: const EdgeInsets.fromLTRB(10, 6, 12, 6),
-        decoration: BoxDecoration(
-          color: tokens.accionAcento,
-          borderRadius: BorderRadius.circular(999),
-        ),
+      child: Pildora(
+        clave: const ValueKey('etiqueta-lupa'),
+        fondo: tokens.accionAcento,
+        relleno: const EdgeInsets.fromLTRB(10, 6, 12, 6),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

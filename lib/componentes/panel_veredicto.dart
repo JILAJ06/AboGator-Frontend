@@ -6,6 +6,7 @@ import '../core/tema/tokens_color.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import '../datos/modelos/tarjeta.dart';
+import 'agarre_hoja.dart';
 import 'bloque_lectura.dart';
 import 'boton_app.dart';
 import 'hoja_lateral.dart';
@@ -144,17 +145,7 @@ class PanelVeredicto extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(24, 12, 24, abajo),
         child: Column(
           children: [
-            ExcludeSemantics(
-              child: Container(
-                key: const ValueKey('agarre'),
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: tokens.bordeDefault,
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-            ),
+            const AgarreHoja(),
             SizedBox(height: separacion),
             Row(
               children: [
