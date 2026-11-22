@@ -155,16 +155,11 @@ class BotonPrecio extends StatelessWidget {
               ),
             ],
           );
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: cargando ? null : alPresionar,
       radio: radio,
-      semantica: (hijo) => Semantics(
-        button: true,
-        enabled: habilitado,
-        label: cargando ? Textos.comprando : etiquetaSemantica,
-        excludeSemantics: true,
-        child: hijo,
-      ),
+      habilitado: habilitado,
+      etiqueta: cargando ? Textos.comprando : etiquetaSemantica,
       child: Container(
         constraints: const BoxConstraints(minHeight: alto),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),

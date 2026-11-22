@@ -20,6 +20,9 @@ Resultado de la auditoría de la T-13 en móvil y tablet: cómo cumple la app ca
   - "Solo botones" con "Reducir animaciones";
   - información que no depende solo del color;
   - la propia guía de zona táctil.
+- **Acciones de tocar** (`acciones_de_tocar_test.dart`, T-15e): todo control con semántica de botón debe exponer la acción de tocar; la prueba `acciones_de_tocar_test.dart` lo vigila.
+  - Recorre las mismas escenas de la matriz en sus 4 tamaños: 63 escenas, 252 pruebas.
+  - Falla si un botón o enlace habilitado y con etiqueta no tiene `SemanticsAction.tap`.
 - **Pulido** (`pulido_test.dart`): orden de foco 26b en juego, juicio y Examen (móvil y tablet), foco tras los diálogos, anuncio único del Buzón y tarjeta retenida en tablet.
 - **Nota sobre `ZonaTactilMinima`.** Es la guía de Flutter con un arreglo.
   - La original quiere omitir los controles cortados por el borde de su desplazable, pero compara rectángulos en sistemas de coordenadas distintos. Por eso no reconoce el recorte cuando el desplazable no empieza en el origen de su padre, como el mapa bajo su encabezado fijo.
