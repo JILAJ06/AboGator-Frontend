@@ -27,14 +27,18 @@ enum VariantePanelMarca { inicioSesion, registro }
 /// - Registro: círculo de 520 en (−180, −152), logo de 320 en (64, 64), la
 ///   frase (H2 en blanco), el texto (Cuerpo/Grande en crema) y Sarko
 ///   sorprendido de 240 abajo a la derecha.
+///
+/// [pose] cambia la expresión de Sarko (la recuperación de contraseña, T-13b,
+/// usa el panel de inicio de sesión con la expresión de cada paso).
 class PanelMarca extends StatelessWidget {
-  const PanelMarca({required this.variante, super.key});
+  const PanelMarca({required this.variante, this.pose, super.key});
 
   /// Lienzo del panel en Figma (la mitad izquierda de 1194 × 802).
   static const Size lienzo = Size(597, 802);
   static const double diametroCirculo = 520;
 
   final VariantePanelMarca variante;
+  final PoseSarko? pose;
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +56,14 @@ class PanelMarca extends StatelessWidget {
           );
           return ClipRect(
             child: switch (variante) {
-              VariantePanelMarca.inicioSesion => _InicioSesion(escala: escala),
-              VariantePanelMarca.registro => _Registro(escala: escala),
+              VariantePanelMarca.inicioSesion => _InicioSesion(
+                escala: escala,
+                pose: pose ?? PoseSarko.alegre,
+              ),
+              VariantePanelMarca.registro => _Registro(
+                escala: escala,
+                pose: pose ?? PoseSarko.sorprendido,
+              ),
             },
           );
         },
@@ -66,15 +76,18 @@ class PanelMarca extends StatelessWidget {
 /// verde, con el logo y Sarko en fila. Decisión propia (Figma solo dibuja la
 /// tablet en horizontal).
 class FranjaMarca extends StatelessWidget {
-  const FranjaMarca({required this.variante, super.key});
+  const FranjaMarca({required this.variante, this.pose, super.key});
 
   static const double alto = 240;
 
   final VariantePanelMarca variante;
+  final PoseSarko? pose;
 
   @override
   Widget build(BuildContext context) {
-    final pose = variante == VariantePanelMarca.registro ? PoseSarko.sorprendido : PoseSarko.alegre;
+    final pose =
+        this.pose ??
+        (variante == VariantePanelMarca.registro ? PoseSarko.sorprendido : PoseSarko.alegre);
     return ColoredBox(
       key: const ValueKey('franja-marca'),
       color: _Marca.verde,
@@ -146,9 +159,10 @@ class _Circulo extends StatelessWidget {
 }
 
 class _InicioSesion extends StatelessWidget {
-  const _InicioSesion({required this.escala});
+  const _InicioSesion({required this.escala, required this.pose});
 
   final double escala;
+  final PoseSarko pose;
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +190,7 @@ class _InicioSesion extends StatelessWidget {
                 SizedBox(height: 53 * e),
                 SarkoImagen(
                   key: const ValueKey('sarko-panel-marca'),
-                  pose: PoseSarko.alegre,
+                  pose: pose,
                   ancho: 288 * e,
                   decorativa: true,
                 ),
@@ -199,9 +213,10 @@ class _InicioSesion extends StatelessWidget {
 }
 
 class _Registro extends StatelessWidget {
-  const _Registro({required this.escala});
+  const _Registro({required this.escala, required this.pose});
 
   final double escala;
+  final PoseSarko pose;
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +239,7 @@ class _Registro extends StatelessWidget {
                 bottom: 30 * e,
                 child: SarkoImagen(
                   key: const ValueKey('sarko-panel-marca'),
-                  pose: PoseSarko.sorprendido,
+                  pose: pose,
                   ancho: 240 * e,
                   decorativa: true,
                 ),
@@ -271,10 +286,15 @@ class DisposicionAccesoTablet extends StatelessWidget {
     required this.variante,
     required this.formulario,
     this.encabezado,
+    this.pose,
     super.key,
   });
 
   final VariantePanelMarca variante;
+
+  /// Expresión de Sarko en el panel o la franja (por defecto, la de la
+  /// variante).
+  final PoseSarko? pose;
   final Widget formulario;
   final Widget? encabezado;
 
@@ -290,7 +310,7 @@ class DisposicionAccesoTablet extends StatelessWidget {
             children: [
               SizedBox(
                 width: anchoPanel,
-                child: PanelMarca(variante: variante),
+                child: PanelMarca(variante: variante, pose: pose),
               ),
               Expanded(
                 child: SafeArea(
@@ -304,7 +324,7 @@ class DisposicionAccesoTablet extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            FranjaMarca(variante: variante),
+            FranjaMarca(variante: variante, pose: pose),
             Expanded(
               child: SafeArea(
                 top: false,

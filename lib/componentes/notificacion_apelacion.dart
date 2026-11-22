@@ -25,8 +25,8 @@ class NotificacionApelacion extends StatelessWidget {
     super.key,
   });
 
-  static const double ancho = 358;
-  static const double radio = 22;
+  static const double ancho = NotificacionSistema.ancho;
+  static const double radio = NotificacionSistema.radio;
 
   /// Título del caso fallado (va entre comillas en el cuerpo).
   final String tituloCaso;
@@ -38,18 +38,44 @@ class NotificacionApelacion extends StatelessWidget {
   final String hora;
 
   @override
+  Widget build(BuildContext context) => NotificacionSistema(
+    claveContenedor: const ValueKey('notificacion-apelacion'),
+    titulo: Textos.notificacionApelacionTitulo,
+    cuerpo: Textos.notificacionApelacionCuerpo(tituloCaso, dias),
+    hora: hora,
+  );
+}
+
+/// Maqueta de una notificación del sistema de AboGator (21b y 34b, T-13b):
+/// la misma de [NotificacionApelacion] con otro [titulo] y [cuerpo].
+class NotificacionSistema extends StatelessWidget {
+  const NotificacionSistema({
+    required this.titulo,
+    required this.cuerpo,
+    this.hora = Textos.notificacionAhora,
+    this.claveContenedor = const ValueKey('notificacion-sistema'),
+    super.key,
+  });
+
+  static const double ancho = 358;
+  static const double radio = 22;
+
+  final String titulo;
+  final String cuerpo;
+  final String hora;
+  final Key claveContenedor;
+
+  @override
   Widget build(BuildContext context) {
     final estilos = context.estilos;
     const secundario = EfectosApp.textoSecundarioNotificacion;
     const principal = EfectosApp.textoNotificacion;
     return Semantics(
       container: true,
-      label:
-          '${Textos.notificacionApp}, $hora. ${Textos.notificacionApelacionTitulo}. '
-          '${Textos.notificacionApelacionCuerpo(tituloCaso, dias)}',
+      label: '${Textos.notificacionApp}, $hora. $titulo. $cuerpo',
       excludeSemantics: true,
       child: Container(
-        key: const ValueKey('notificacion-apelacion'),
+        key: claveContenedor,
         width: ancho,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(radio),
@@ -101,15 +127,9 @@ class NotificacionApelacion extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          Textos.notificacionApelacionTitulo,
-                          style: estilos.cuerpoEnfasis.copyWith(color: principal),
-                        ),
+                        Text(titulo, style: estilos.cuerpoEnfasis.copyWith(color: principal)),
                         const SizedBox(height: 2),
-                        Text(
-                          Textos.notificacionApelacionCuerpo(tituloCaso, dias),
-                          style: estilos.cuerpoBase.copyWith(color: principal),
-                        ),
+                        Text(cuerpo, style: estilos.cuerpoBase.copyWith(color: principal)),
                       ],
                     ),
                   ),

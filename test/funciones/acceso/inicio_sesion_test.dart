@@ -142,14 +142,12 @@ void main() {
     expect(find.byType(PantallaRegistro), findsOneWidget);
   });
 
-  testWidgets('"¿Olvidaste tu contraseña?" muestra un aviso breve', (tester) async {
+  testWidgets('"¿Olvidaste tu contraseña?" abre la recuperación (31, T-13b)', (tester) async {
     await abrirEn(tester, Rutas.inicioSesion);
+    await tester.ensureVisible(find.text(Textos.olvidasteContrasena));
     await tester.tap(find.text(Textos.olvidasteContrasena));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text(Textos.recuperacionPronto), findsOneWidget);
-    await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
+    expect(find.text(Textos.recuperarTitulo), findsOneWidget);
   });
 
   testWidgets('la contraseña no aparece en ningún texto semántico', (tester) async {

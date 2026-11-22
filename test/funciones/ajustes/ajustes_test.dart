@@ -20,6 +20,7 @@ import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_tarjetas.dart';
 import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
 import 'package:abogator/datos/modelos/ajustes.dart';
+import 'package:abogator/datos/modelos/ajustes_notificaciones.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
 import 'package:abogator/datos/repositorios/repositorio_ajustes.dart';
@@ -568,7 +569,8 @@ void main() {
         for (final t in [Textos.seccionVisual, Textos.seccionMotora, Textos.seccionCognitiva]) {
           expect(find.text(t), findsOneWidget);
         }
-        expect(find.byType(FilaAjuste), findsNWidgets(7));
+        // 7 de accesibilidad + Notificaciones + Aviso y Términos (T-13b).
+        expect(find.byType(FilaAjuste), findsNWidgets(10));
         for (final f in tester.widgetList<FilaAjuste>(find.byType(FilaAjuste))) {
           expect(tester.getSize(find.byWidget(f)).height, greaterThanOrEqualTo(56));
         }
@@ -714,4 +716,10 @@ class RepositorioQueNoCarga implements RepositorioAjustes {
 
   @override
   Future<void> guardar(Ajustes ajustes) async {}
+
+  @override
+  Future<AjustesNotificaciones> cargarNotificaciones() async => const AjustesNotificaciones();
+
+  @override
+  Future<void> guardarNotificaciones(AjustesNotificaciones notificaciones) async {}
 }

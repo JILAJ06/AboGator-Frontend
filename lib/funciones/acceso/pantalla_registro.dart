@@ -13,7 +13,9 @@ import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/iconos_app.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
+import '../../datos/modelos/ajustes_notificaciones.dart';
 import '../../datos/modelos/usuario.dart';
+import '../notificaciones/estado_notificaciones.dart';
 import 'aviso_error.dart';
 import 'estado_registro.dart';
 import 'panel_marca.dart';
@@ -58,7 +60,18 @@ class _PantallaRegistroState extends ConsumerState<PantallaRegistro> {
         .enviar(nombre: _nombre.text, correo: _correo.text, contrasena: _contrasena.text);
     if (!mounted) return;
     if (resultado.exitoso) {
-      context.go(Rutas.inicio);
+      // Tras el primer registro se ofrecen las notificaciones de racha (34),
+      // una sola vez; si ya se decidió, directo al Inicio (T-13b).
+      final enrutador = GoRouter.of(context);
+      final notificaciones = await ref
+          .read(ajustesNotificacionesProvider.future)
+          .then<AjustesNotificaciones?>((n) => n, onError: (Object _) => null);
+      if (!mounted) return;
+      enrutador.go(
+        notificaciones == null || notificaciones.decidido
+            ? Rutas.inicio
+            : '${Rutas.notificacionesRacha}?${Rutas.desdeRegistro}',
+      );
       return;
     }
     final campo = resultado.campoConError;
@@ -186,6 +199,21 @@ class _PantallaRegistroState extends ConsumerState<PantallaRegistro> {
         nodoFoco: _focos[CampoRegistro.terminos],
         error: estado.errorDe(CampoRegistro.terminos),
         alCambiar: estado.enviando ? null : notifier.cambiarTerminos,
+      ),
+      // T-13b: los documentos se leen sin perder lo escrito (push).
+      Wrap(
+        key: const ValueKey('enlaces-legales-registro'),
+        spacing: 16,
+        children: [
+          EnlaceTexto(
+            texto: Textos.leerAvisoPrivacidad,
+            alPresionar: estado.enviando ? null : () => context.push(Rutas.legalAviso),
+          ),
+          EnlaceTexto(
+            texto: Textos.leerTerminos,
+            alPresionar: estado.enviando ? null : () => context.push(Rutas.legalTerminos),
+          ),
+        ],
       ),
       if (estado.errorGeneral != null) ...[
         const SizedBox(height: 8),

@@ -1,5 +1,4 @@
 import 'package:abogator/app/enrutador.dart';
-import 'package:abogator/app/pantalla_pendiente.dart';
 import 'package:abogator/app/rutas.dart';
 import 'package:abogator/componentes/dialogo_confirmacion.dart';
 import 'package:abogator/componentes/navegacion_inferior_app.dart';
@@ -22,6 +21,8 @@ import 'package:abogator/datos/sincronizacion/servicio_conexion.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/apelaciones/sesion_apelaciones.dart';
+import 'package:abogator/funciones/legal/pantalla_legal.dart';
+import 'package:abogator/funciones/notificaciones/pantalla_notificaciones.dart';
 import 'package:abogator/funciones/perfil/logica_perfil.dart';
 import 'package:abogator/funciones/perfil/pantalla_perfil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -65,6 +66,12 @@ class AutenticacionDePrueba implements RepositorioAutenticacion {
 
   @override
   Future<Usuario?> usuarioActual() async => ana;
+
+  @override
+  Future<void> solicitarRecuperacion(String correo) async {}
+
+  @override
+  Future<void> restablecer({required String token, required String nueva}) async {}
 }
 
 /// Perfil con insignias de sobra (para el desplazamiento horizontal).
@@ -198,13 +205,13 @@ void main() {
           PestanaApp.perfil,
         );
         expect(tester.getSize(find.byKey(const ValueKey('boton-ajustes'))), const Size(48, 48));
-        // Tres divisores entre cuatro filas (sin divisor al final).
+        // Cuatro divisores entre cinco filas (T-13b suma "Términos de uso").
         expect(
           find.descendant(
             of: find.byKey(const ValueKey('menu-perfil')),
             matching: find.byType(Divider),
           ),
-          findsNWidgets(3),
+          findsNWidgets(4),
         );
         for (final k in [
           'menu-accesibilidad',
@@ -250,22 +257,27 @@ void main() {
       expect(tester.getRect(find.byKey(const ValueKey('insignia-i0'))).left, lessThan(0));
     });
 
-    for (final (clave, ruta, texto) in [
-      ('menu-notificaciones', Rutas.notificacionesRacha, Textos.pendienteNotificacionesRacha),
-      ('menu-aviso', Rutas.avisoPrivacidad, Textos.pendienteAvisoPrivacidad),
+    for (final (clave, pantalla) in [
+      ('menu-notificaciones', PantallaNotificaciones),
+      ('menu-aviso', PantallaLegal),
+      ('menu-terminos', PantallaLegal),
     ]) {
-      testWidgets('$clave va a $ruta sin barra inferior y atrás vuelve', (tester) async {
+      testWidgets('$clave abre $pantalla sin barra inferior y atrás vuelve', (tester) async {
         await abrirPerfil(tester);
         await tocar(tester, find.byKey(ValueKey(clave)));
-        expect(rutaActual(tester), ruta);
-        expect(find.text(texto), findsOneWidget);
-        expect(find.byType(PantallaPendiente), findsOneWidget);
+        expect(find.byType(pantalla), findsOneWidget);
         expect(find.byType(NavegacionInferiorApp), findsNothing);
-        await tocar(tester, find.bySemanticsLabel(Textos.atras));
+        await tocar(tester, find.bySemanticsLabel(Textos.atras).first);
         expect(rutaActual(tester), Rutas.perfil);
         expect(find.byType(PantallaPerfil), findsOneWidget);
       });
     }
+
+    testWidgets('el Aviso y los Términos abren su documento', (tester) async {
+      await abrirPerfil(tester);
+      await tocar(tester, find.byKey(const ValueKey('menu-terminos')));
+      expect(find.text(Textos.terminosTitulo), findsOneWidget);
+    });
 
     testWidgets('atrás del sistema desde ajustes vuelve al Perfil', (tester) async {
       await abrirPerfil(tester);

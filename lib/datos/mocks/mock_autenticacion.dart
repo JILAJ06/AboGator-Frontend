@@ -68,4 +68,27 @@ class MockAutenticacion implements RepositorioAutenticacion {
     await esperar(espera);
     _actual = null;
   }
+
+  /// Token que el mock trata como caducado (31e).
+  static const String tokenCaducado = 'caducado';
+
+  /// Token de demostración que abre "Abrir correo" en el mock.
+  static const String tokenDemo = 'demo';
+
+  /// Correos para los que se pidió un enlace (pruebas).
+  final List<String> solicitudesRecuperacion = [];
+
+  @override
+  Future<void> solicitarRecuperacion(String correo) async {
+    await esperar(espera);
+    // Siempre responde igual, exista o no la cuenta.
+    solicitudesRecuperacion.add(correo.trim());
+  }
+
+  @override
+  Future<void> restablecer({required String token, required String nueva}) async {
+    await esperar(espera);
+    if (token == tokenCaducado) throw const ExcepcionEnlaceCaducado();
+    // T-14: el servidor guarda la contraseña y cierra las otras sesiones.
+  }
 }

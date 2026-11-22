@@ -65,16 +65,37 @@ abstract final class Rutas {
   /// Tramos hijos del Perfil (rutas anidadas: atrás vuelve al Perfil).
   static const String segmentoAjustes = 'ajustes';
   static const String segmentoNotificaciones = 'notificaciones';
-  static const String segmentoAvisoPrivacidad = 'aviso-privacidad';
 
   /// 26 / 26b Ajustes de accesibilidad (T-10b), sin navegación inferior.
   static const String ajustes = '$perfil/$segmentoAjustes';
 
-  /// Notificaciones de racha (desde el Perfil; sin diseño en Figma).
-  static const String notificacionesRacha = '$perfil/$segmentoNotificaciones';
+  /// 34 Notificaciones de racha (T-13b): "Ajustes → Notificaciones" (con
+  /// push), desde el Perfil y tras el registro. Es de primer nivel: abrirla
+  /// directo solo construye esta página (sin Perfil ni Ajustes debajo).
+  static const String notificacionesRacha = '/ajustes/$segmentoNotificaciones';
 
-  /// Aviso de privacidad (desde el Perfil; sin diseño en Figma).
-  static const String avisoPrivacidad = '$perfil/$segmentoAvisoPrivacidad';
+  /// Parámetro de [notificacionesRacha] cuando se abre tras el registro: al
+  /// cerrar va al Inicio en lugar de regresar.
+  static const String desdeRegistro = 'desde=registro';
+
+  // T-13b · Recuperar contraseña (31 a 31e), sin sesión.
+  static const String recuperar = '/recuperar';
+  static const String segmentoEnviado = 'enviado';
+  static const String segmentoNueva = 'nueva';
+  static const String segmentoListo = 'listo';
+  static const String segmentoCaducado = 'caducado';
+  static const String recuperarEnviado = '$recuperar/$segmentoEnviado';
+  static const String recuperarNueva = '$recuperar/$segmentoNueva';
+  static const String recuperarListo = '$recuperar/$segmentoListo';
+  static const String recuperarCaducado = '$recuperar/$segmentoCaducado';
+
+  /// 31c con el token del enlace (`?token=…`).
+  static String recuperarNuevaCon(String token) =>
+      '$recuperarNueva?token=${Uri.encodeQueryComponent(token)}';
+
+  // T-13b · Aviso de Privacidad (32) y Términos de uso (33), sin sesión.
+  static const String legalAviso = '/legal/aviso';
+  static const String legalTerminos = '/legal/terminos';
 
   // Flujo 3 · Juego
   /// 10–18, 10b, 10c: tarjetas, veredictos, evidencia y comodines.

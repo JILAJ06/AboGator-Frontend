@@ -4,6 +4,7 @@ import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/boton_veredicto.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/datos/mocks/mock_apelaciones.dart';
+import 'package:abogator/datos/mocks/mock_autenticacion.dart';
 import 'package:abogator/datos/mocks/mock_tarjetas.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
 import 'package:abogator/datos/modelos/ajustes.dart';
@@ -332,5 +333,72 @@ final escenasExamen = <Escena>[
     await empezar(tester, tamano: t, ajustes: a);
     await perderPorVidas(tester, 5);
     await tester.pumpAndSettle();
+  }),
+];
+
+Future<void> _cuenta(WidgetTester tester, Ajustes a, Size t, String ruta) => abrirJuego(
+  tester,
+  ruta: ruta,
+  tamano: t,
+  ajustes: a,
+  conSesion: false,
+  autenticacion: MockAutenticacion(espera: Duration.zero),
+);
+
+Finder _editable(String clave) =>
+    find.descendant(of: find.byKey(ValueKey(clave)), matching: find.byType(EditableText));
+
+/// Cuenta, legal y notificaciones (31 a 34c, T-13b).
+final escenasCuenta = <Escena>[
+  Escena('31 Recuperar contraseña', (tester, a, t) => _cuenta(tester, a, t, Rutas.recuperar)),
+  Escena('31 Recuperar con error', (tester, a, t) async {
+    await _cuenta(tester, a, t, Rutas.recuperar);
+    await pulsar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
+  }),
+  Escena('31b Revisa tu correo', (tester, a, t) async {
+    await _cuenta(tester, a, t, Rutas.recuperar);
+    await tester.enterText(_editable('campo-correo-recuperacion'), 'ana@ejemplo.mx');
+    await pulsar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
+  }),
+  Escena(
+    '31c Nueva contraseña',
+    (tester, a, t) => _cuenta(tester, a, t, Rutas.recuperarNuevaCon('demo')),
+  ),
+  Escena('31c Nueva contraseña con errores', (tester, a, t) async {
+    await _cuenta(tester, a, t, Rutas.recuperarNuevaCon('demo'));
+    await tester.enterText(_editable('campo-nueva-contrasena'), 'corta');
+    await pulsar(tester, find.byKey(const ValueKey('boton-guardar-contrasena')));
+  }),
+  Escena(
+    '31d Contraseña actualizada',
+    (tester, a, t) => _cuenta(tester, a, t, Rutas.recuperarListo),
+  ),
+  Escena('31e Enlace caducado', (tester, a, t) => _cuenta(tester, a, t, Rutas.recuperarCaducado)),
+  Escena('32 Aviso de Privacidad', (tester, a, t) => _cuenta(tester, a, t, Rutas.legalAviso)),
+  Escena('32 Aviso con otra sección abierta', (tester, a, t) async {
+    await _cuenta(tester, a, t, Rutas.legalAviso);
+    // La lista es perezosa: primero se desplaza hasta la sección.
+    await tester.scrollUntilVisible(
+      find.text('Tus derechos ARCO'),
+      200,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('secciones-legales')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await pulsar(tester, find.text('Tus derechos ARCO'));
+  }),
+  Escena('33 Términos de uso', (tester, a, t) => _cuenta(tester, a, t, Rutas.legalTerminos)),
+  Escena(
+    '34 Notificaciones de racha',
+    (tester, a, t) => _ruta(tester, a, t, Rutas.notificacionesRacha),
+  ),
+  Escena('34c Hora del recordatorio', (tester, a, t) async {
+    await _ruta(tester, a, t, Rutas.notificacionesRacha);
+    await pulsar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
+  }),
+  Escena('34c Hora con Solo botones', (tester, a, t) async {
+    await _ruta(tester, a.copyWith(soloBotones: true), t, Rutas.notificacionesRacha);
+    await pulsar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
   }),
 ];

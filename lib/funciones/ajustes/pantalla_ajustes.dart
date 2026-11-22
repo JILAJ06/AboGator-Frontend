@@ -9,6 +9,7 @@ import '../../app/rutas.dart';
 import '../../componentes/bloque_lectura.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/foco_retorno.dart';
+import '../../componentes/icono_app.dart';
 import '../../componentes/navegacion_inferior_app.dart';
 import '../../componentes/piezas_ajustes.dart';
 import '../../componentes/piezas_perfil.dart';
@@ -200,6 +201,42 @@ class _PantallaAjustesState extends ConsumerState<PantallaAjustes> {
       ],
     );
 
+    // T-13b: Notificaciones (34) y Legal (32 y 33); se abren con push para
+    // volver aquí.
+    Widget chevron() => IconoApp(IconosApp.chevron, tamano: 20, color: tokens.textoSecundario);
+    final notificaciones = MenuAgrupado(
+      filas: [
+        FilaAjuste(
+          key: const ValueKey('ajuste-notificaciones'),
+          icono: IconosApp.bell,
+          titulo: Textos.menuNotificaciones,
+          detalle: Textos.menuNotificacionesDetalle,
+          control: chevron(),
+          alPresionar: () => context.push(Rutas.notificacionesRacha),
+        ),
+      ],
+    );
+    final legal = MenuAgrupado(
+      filas: [
+        FilaAjuste(
+          key: const ValueKey('ajuste-aviso'),
+          icono: IconosApp.doc,
+          titulo: Textos.avisoPrivacidadTitulo,
+          detalle: Textos.versionLegal,
+          control: chevron(),
+          alPresionar: () => context.push(Rutas.legalAviso),
+        ),
+        FilaAjuste(
+          key: const ValueKey('ajuste-terminos'),
+          icono: IconosApp.doc,
+          titulo: Textos.terminosTitulo,
+          detalle: Textos.versionLegal,
+          control: chevron(),
+          alPresionar: () => context.push(Rutas.legalTerminos),
+        ),
+      ],
+    );
+
     final encabezado = Row(
       children: [
         // El botón va 4 antes del margen, como en Figma (móvil y tablet).
@@ -250,6 +287,8 @@ class _PantallaAjustesState extends ConsumerState<PantallaAjustes> {
         usarSistema: usarSistema,
         motora: motora,
         cognitiva: cognitiva,
+        notificaciones: notificaciones,
+        legal: legal,
         vistaPrevia: VistaPreviaTexto(porcentaje: ajustes.escalaTexto),
       );
     }
@@ -281,6 +320,14 @@ class _PantallaAjustesState extends ConsumerState<PantallaAjustes> {
               const EncabezadoSeccionAjustes(Textos.seccionCognitiva),
               const SizedBox(height: 6),
               cognitiva,
+              const SizedBox(height: 22),
+              const EncabezadoSeccionAjustes(Textos.menuNotificaciones),
+              const SizedBox(height: 6),
+              notificaciones,
+              const SizedBox(height: 22),
+              const EncabezadoSeccionAjustes(Textos.seccionLegal),
+              const SizedBox(height: 6),
+              legal,
             ],
           ),
         ),
@@ -301,6 +348,8 @@ class _AjustesTablet extends StatelessWidget {
     required this.usarSistema,
     required this.motora,
     required this.cognitiva,
+    required this.notificaciones,
+    required this.legal,
     required this.vistaPrevia,
   });
 
@@ -317,6 +366,8 @@ class _AjustesTablet extends StatelessWidget {
   final Widget? usarSistema;
   final Widget motora;
   final Widget cognitiva;
+  final Widget notificaciones;
+  final Widget legal;
   final Widget vistaPrevia;
 
   @override
@@ -338,6 +389,14 @@ class _AjustesTablet extends StatelessWidget {
       const EncabezadoSeccionAjustes(Textos.seccionCognitiva),
       const SizedBox(height: bajoTitulo),
       cognitiva,
+      const SizedBox(height: entreSecciones),
+      const EncabezadoSeccionAjustes(Textos.menuNotificaciones),
+      const SizedBox(height: bajoTitulo),
+      notificaciones,
+      const SizedBox(height: entreSecciones),
+      const EncabezadoSeccionAjustes(Textos.seccionLegal),
+      const SizedBox(height: bajoTitulo),
+      legal,
     ];
     final Widget cuerpo = dosColumnas
         ? Row(

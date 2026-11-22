@@ -26,11 +26,13 @@ import '../../componentes/estadisticas_sprint.dart';
 import '../../componentes/estrellas_sprint.dart';
 import '../../componentes/etiqueta_lupa.dart';
 import '../../componentes/etiqueta_quiebra.dart';
+import '../../componentes/fila_acordeon.dart';
 import '../../componentes/fila_apelacion.dart';
 import '../../componentes/fila_detalle_sprint.dart';
 import '../../componentes/globo_sprint_actual.dart';
 import '../../componentes/hoja_lateral.dart';
 import '../../componentes/icono_app.dart';
+import '../../componentes/ilustracion_insignia.dart';
 import '../../componentes/impacto_startup.dart';
 import '../../componentes/indicador_pendientes.dart';
 import '../../componentes/indicadores_startup.dart';
@@ -72,13 +74,17 @@ import '../../core/tema/modo_tema.dart';
 import '../../core/tema/tipografia.dart';
 import '../../core/tema/tokens_color.dart';
 import '../../core/textos/textos.dart';
+import '../../core/textos/textos_legales.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
 import '../../datos/mocks/mock_tarjetas.dart';
+import '../../datos/modelos/ajustes_notificaciones.dart';
 import '../../datos/modelos/estado_startup.dart';
 import '../../datos/modelos/examen.dart';
 import '../../datos/modelos/tarjeta.dart';
 import '../apelaciones/pantalla_juicio.dart';
 import '../inicio/logica_inicio.dart';
+import '../notificaciones/pantalla_notificaciones.dart';
+import '../notificaciones/selector_hora.dart';
 import '../vidas/pantalla_sin_vidas.dart';
 
 /// Tarjeta 6 (evidencia, Figma 15) y 10 (dilema, Figma 17) del sprint 3.
@@ -708,6 +714,80 @@ class _GaleriaComponentesState extends ConsumerState<GaleriaComponentes> {
                   ],
                 ),
                 OpcionTamano(porcentaje: 120, elegida: true, alElegir: () {}),
+              ],
+            ),
+            // T-13b: recuperación, legal y notificaciones.
+            _Seccion(
+              titulo: Textos.galeriaCuenta,
+              hijos: [
+                IlustracionInsignia(
+                  pose: PoseSarko.alegre,
+                  insignia: InsigniaCircular(
+                    icono: IconosApp.mail,
+                    color: context.tokens.accionPrimaria,
+                    etiqueta: Textos.insigniaCorreo,
+                  ),
+                ),
+                IlustracionInsignia(
+                  pose: PoseSarko.alegre,
+                  insignia: InsigniaCircular(
+                    icono: IconosApp.check,
+                    color: context.tokens.accionPrimaria,
+                    etiqueta: Textos.insigniaListo,
+                  ),
+                ),
+                IlustracionInsignia(
+                  pose: PoseSarko.triste,
+                  insignia: InsigniaCircular(
+                    icono: IconosApp.alert,
+                    color: context.tokens.accionAcento,
+                    etiqueta: Textos.insigniaAlerta,
+                  ),
+                ),
+                SizedBox(
+                  width: 342,
+                  child: FilaAcordeon(
+                    titulo: TextosLegales.avisoPrivacidad.secciones.first.titulo,
+                    cuerpo: TextosLegales.avisoPrivacidad.secciones.first.cuerpo,
+                    abierta: false,
+                    alAlternar: () {},
+                  ),
+                ),
+                SizedBox(
+                  width: 342,
+                  child: FilaAcordeon(
+                    titulo: TextosLegales.avisoPrivacidad.secciones[1].titulo,
+                    cuerpo: TextosLegales.avisoPrivacidad.secciones[1].cuerpo,
+                    abierta: true,
+                    alAlternar: () {},
+                  ),
+                ),
+                const InterruptorApp(valor: true, grande: true),
+                const InterruptorApp(valor: false, grande: true),
+                InterruptorTocable(
+                  valor: true,
+                  etiqueta: Textos.recordatorioDiario,
+                  alCambiar: (_) {},
+                ),
+                // T34 · ilustración del panel de tablet.
+                const IlustracionRacha(),
+                // 34b · notificaciones del sistema simuladas.
+                NotificacionSistema(
+                  titulo: Textos.notificacionRachaRiesgoTitulo(7),
+                  cuerpo: Textos.notificacionRachaRiesgoCuerpo,
+                ),
+                NotificacionSistema(
+                  titulo: Textos.notificacionRachaPerdidaTitulo(7),
+                  cuerpo: Textos.notificacionRachaPerdidaCuerpo,
+                ),
+                const SizedBox(
+                  width: 390,
+                  child: SelectorHora(inicial: AjustesNotificaciones.horaPorDefecto),
+                ),
+                const SizedBox(
+                  width: 390,
+                  child: SelectorHora(inicial: 8 * 60 + 30, soloBotones: true),
+                ),
               ],
             ),
             _Seccion(

@@ -6,7 +6,7 @@ Dos instancias de Claude trabajan con el usuario como intermediario:
 - El usuario hace los merges.
 
 ## Archivos
-- `ai/conocimiento/`: esta base de conocimiento.
+- `ai/conocimiento/`: esta base de conocimiento (leer `00` a `08` en orden).
 - `ai/siguiente.md`: la tarea actual. **Solo la escribe Claude Chat.**
 - `ai/reporte.md`: estado, lo hecho y dudas numeradas (D1, D2…). **Solo lo escribe Claude Code** y lo reescribe completo en cada tarea.
 - `ai/grafo.md`: **grafo de conocimiento** del proyecto (qué existe, dónde y con qué se relaciona). Lo actualizan las dos instancias; reglas en `06-grafo-de-conocimiento.md`.

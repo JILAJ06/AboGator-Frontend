@@ -132,6 +132,11 @@ void main() {
       'Perfil': Rutas.perfil,
       'Ajustes': Rutas.ajustes,
       'Buzón': Rutas.buzon,
+      // T-13b
+      'Recuperar contraseña': Rutas.recuperar,
+      'Nueva contraseña': Rutas.recuperarNuevaCon('demo'),
+      'Aviso de Privacidad': Rutas.legalAviso,
+      'Notificaciones': Rutas.notificacionesRacha,
     };
     for (final t in [Tamano.movil, Tamano.tabletHorizontal]) {
       for (final MapEntry(key: nombre, value: ruta) in pantallas.entries) {

@@ -74,6 +74,12 @@ class AutenticacionFalsa implements RepositorioAutenticacion {
 
   @override
   Future<void> cerrarSesion() async {}
+
+  @override
+  Future<void> solicitarRecuperacion(String correo) async {}
+
+  @override
+  Future<void> restablecer({required String token, required String nueva}) async {}
 }
 
 /// Monta la app y abre [ruta] directamente.

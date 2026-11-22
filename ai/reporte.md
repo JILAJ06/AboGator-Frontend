@@ -1,139 +1,112 @@
 # Reporte
-- **Tarea:** T-13 · Accesibilidad y pulido (WCAG 2.1 AA)
-- **Rama:** `13-accesibilidad-y-pulido`
+- **Tarea:** T-13b · Pantallas de cuenta, legal y notificaciones (ronda 2: correcciones tras la revisión)
+- **Rama:** `13b-pantallas-cuenta-y-legal`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11. **Sin dependencias nuevas.**
-- Figma (solo lectura) para el punto 7: T28c `101:5420`.
+- Medidas de T34 tomadas de `siguiente.md` (Figma `150:5709`).
 
-## Parte A · Pulido (los 10 puntos hechos; el 11 no)
-1. **Foco tras los diálogos.**
-   - Tienda: cada tarjeta tiene un nodo de regreso (`FocoRetorno`, sin parada de Tab ni nodo semántico propio). Al cerrar la compra (confirmar, cancelar o Esc) el foco vuelve ahí, aunque el botón haya quedado deshabilitado ("Máximo").
-   - Ajustes: el foco vuelve a la fila "Tamaño de texto" al cerrar el selector (hoja o diálogo, con o sin elección).
-2. **Salir del examen.** El texto termina con "El tiempo sigue corriendo.". El botón fantasma dice "Seguir en el examen" y lleva el foco inicial (`DialogoConfirmacion` ganó `textoCancelar` y `focoEnCancelar`). Los demás diálogos no cambian.
-3. **Barra del examen** con relleno `accion/secundaria`, en móvil y tablet (`BarraProgreso.colorRelleno`). Contraste contra la pista: 13.4:1 en claro y 11.7:1 en oscuro.
-4. **Orden 26b verificado** en juego, juicio y Examen, en 390×844 y 1194×834. Encontré dos fallos y los corregí:
-   - **la tarjeta no era parada de Tab.** Ahora lo es, con anillo de radio 28 solo con teclado; las flechas, Enter y Esc siguen llegando a la pantalla.
-   - **En tablet, "Tu Startup" del panel lateral era parada de Tab.** Ahora es solo lectura: el lector la lee, Tab no se detiene.
-   - Órdenes resultantes:
-     - Móvil: Salir → indicadores → tarjeta → Ilegal → Escalar → Condicional → Legal → comodines.
-     - Tablet: Salir → Pausa → tarjeta → botones → comodines.
-     - Juicio y Examen: no tienen comodines enfocables; la pausa del Examen aparece solo con tiempo extendido.
-5. **Onboarding en tablet se desliza** (izquierda = siguiente, derecha = anterior; umbral de 48 dp o 300 dp/s). Con "Solo botones" no se desliza (ver D2).
-6. **La tarjeta se queda con su sello** (solo `ClasePantalla.ancho`; juego, juicio y Examen).
-   - `MazoSwipe.retenerAlConfirmar`: al confirmar, la tarjeta va al umbral con su sello completo, en los mismos 280 ms del vuelo. `alConfirmar` se llama en el mismo momento que antes, así que el estado, el veredicto, el guardado y el orden de eventos no cambian.
-   - Cuando llega la siguiente tarjeta (al cerrar la hoja), una copia de la anterior sale volando por encima.
-   - Con "Reducir animaciones" simplemente desaparece.
-   - Móvil y 600–959: igual que antes.
-7. **Chip del golpe (T28c).** En Figma (`101:5587`, 214 × 28) está **dentro de la tarjeta "El Jefe"**, a 14 de su borde superior y 16 del derecho. En tablet ahora va ahí (`TarjetaJefe.chip`); en móvil sigue sobre la barra del Jefe.
-8. **Confeti proporcional** (`ConfetiSprint.proporcional`): en tablet las `x` se escalan con el ancho real del panel y ninguna pieza sale de él. Con 597 queda igual que Figma.
-9. **`saldoJuegoProvider`** está ahora en `lib/funciones/juego/saldo_juego.dart`; el juego y el Examen lo importan de ahí.
-10. **Anuncio del Buzón:** uno por cambio real.
-    - Volver a tocar la fila seleccionada, o topar con el extremo con las flechas, no anuncia.
-    - El detalle ya no es región en vivo; antes duplicaba el anuncio.
-11. **Consejo de la Tienda según el inventario: no lo hice.** Requiere texto nuevo para cada caso (D3).
+## Ronda 2 · lo corregido
+### A · Notificaciones de racha en tablet (T34): panel de ilustración
+- **Composición nueva** `DisposicionIlustracionTablet` (`lib/componentes/disposicion_ilustracion_tablet.dart`, para la T-15).
+  - No reutilicé `DisposicionAccesoTablet`: su panel es el verde de marca, con logo y lema. Este es el panel `fondo/destacado` del onboarding, sin logo.
+- **1194×834:**
+  - Panel izquierdo de 597 × 834 en `fondo/destacado` con `IlustracionRacha` centrada:
+    - círculo `fondo/superficie` de 340;
+    - Sarko alegre de 230 de ancho, a (+55, +12) del círculo;
+    - insignia de 84 `accionPrimaria` con `flame` de 40, a (+257, −18): arriba a la derecha del círculo, como en Figma.
+  - La ilustración no crece y se reduce si el panel es más chico.
+  - Atrás de 48 × 48 en el panel, en (32, 32).
+  - A la derecha, la columna de 470 centrada en alto, **sin** Sarko ni atrás: título, descripción, tarjeta de tres filas (470 de ancho), nota, "Activar notificaciones" y "Ahora no".
+- **834×1194 y 600–959:** el panel pasa a una franja de 260 arriba, con la misma ilustración reducida y el atrás, y la columna de 470 debajo (el mismo patrón que Recuperar).
+- **Selector de hora (34c) en tablet:** sigue siendo el diálogo de 440 sobre el velo del 40 %; no cambió.
+- **Móvil:** como antes, salvo las filas (B).
 
-## Parte B · Auditoría automática (`test/auditoria/`)
-- **Matriz:** 50 escenas × 4 tamaños (360×640, 390×844, 834×1194, 1194×834) × claro y oscuro × texto al 100, 160 y 200 % = **1200 pruebas**.
-  - Escenas: 01 a 30 en sus estados principales (incluidas 11, 12, 12c, 14, 14b, 16, 18, 10b, 10c, 19, 19b, 20, 21 vacío, 22b ganada y perdida, 23, 28b, 28c y el fallo), más Ajustes, el selector de tamaño y los diálogos de compra, cerrar sesión, salir del juego, salir del Examen y pausa.
-  - En cada una se verifica:
-    - que no haya desbordes ni excepciones;
-    - zona táctil Android (48) e iOS (44);
-    - etiquetas (`labeledTapTargetGuideline`);
-    - contraste de texto (`textContrastGuideline`).
-  - Está repartida en cinco archivos para que corra en paralelo.
-- **Contrastes** (`contrastes_test.dart`): **43 pares** de tokens con su uso, en claro y oscuro. Todos cumplen; la tabla con las razones está en `08-accesibilidad.md`.
-- **Criterios** (`criterios_test.dart`):
-  - orientación permitida y rotación a mitad del juego, del Buzón y del Examen;
-  - anillo de foco visible y dentro de la pantalla en cada parada de Tab (8 pantallas y el acceso, en móvil y tablet);
-  - Shift+Tab;
-  - diálogo que encierra el foco, Esc y regreso del foco;
-  - Enter y Espacio;
-  - panel de veredicto no descartable;
-  - un sprint completo con "Solo botones" y sin animaciones;
-  - tecla P;
-  - información que no depende solo del color (sellos, botones, impacto, plazo);
-  - la guía `ZonaTactilMinima`.
+### B · Filas de 34 sin íconos
+- `FilaAjuste.icono` ahora es opcional (Ajustes lo sigue pasando) y hay `rellenoHorizontal`: 16 en móvil y 20 en tablet.
+- Las tres filas de 34 (y la del recordatorio, que es propia) ya no llevan `flame`, `gavel` ni `clock`.
+- El texto empieza en x16 (móvil) o x20 (tablet) y el interruptor de 52 × 32 queda a la derecha.
 
-### Fallos que encontró la auditoría y cómo se corrigieron
-| # | Fallo | Dónde | Corrección |
-|---|---|---|---|
-| 1 | Zona táctil de los campos de texto de 24 a 38 de alto (el nodo era solo la línea de texto, no la caja de 52) | 05 y 06, todos los tamaños | El relleno vertical de 14 pasó de un `Padding` externo al `contentPadding` del `TextField`; el aspecto no cambia y la caja completa es tocable. |
-| 2 | Chip de perfil cortado 2 dp al enfocar el primer error | 06 con errores, 834×1194 al 200 % | Al marcar el error de perfil se desplaza hasta mostrar el grupo completo de chips. |
-| 3 | Desborde de la insignia "Vidas al máximo" en la barra del juicio | 22, 22b; 360 y 390 al 160 y 200 % | La insignia es `Flexible` y parte su texto. |
-| 4 | **La app se bloqueaba en vertical también en tablet** (WCAG 1.3.4) | `main.dart` | `orientacionesPermitidas`: teléfono (lado corto < 600) vertical; tablet, todas. iOS y Android ya lo permitían. |
-| 5 | Al rotar, el Buzón perdía la apelación seleccionada | 21 en tablet | La selección vive en `seleccionBuzonProvider` (se libera al salir del Buzón). |
-| 6 | Al dar la vuelta con Tab, el control enfocado quedaba fuera de la vista (Flutter usa la política del extremo contrario) | Ajustes en móvil; mapa e intro en tablet | `FocoSiempreVisible` en la app: solo con teclado, desplaza para mostrar el control enfocado. |
-| 7 | "Mostrar contraseña" sin anillo de foco | 05 y 06 | Usa `AccionEnfocable` (anillo de radio 24) en lugar de `InkResponse`. |
-| 8 | La tarjeta no era parada de Tab (26b) y el panel lateral sí | Juego, juicio y Examen | Ver el punto A4. |
-| 9 | Los atajos del Examen anuncian "P pausa" y la tecla no hacía nada | 28 | P pausa con la misma regla que el botón (solo con tiempo extendido). |
-| — | Falsos positivos de zona táctil en nodos del mapa medio ocultos bajo el encabezado fijo | 08 y 09 | No es un fallo de la app: ver D5. |
+### Respuestas aplicadas
+- D1, D2, D3 y D6: sin cambios.
+- D7: Claude Chat agregó PANT-31 a PANT-34; `PantallaPendiente` se borra en la T-15.
+- D8: queda "el correo del equipo del proyecto".
 
-**Sin fallos:** etiquetas, contraste de texto pintado, desbordes en el resto de pantallas, información solo por color, diálogos y trampas de teclado.
+## Qué hay en la T-13b (resumen de la ronda 1, aprobada)
+- **Recuperar contraseña (31 a 31e):**
+  - Rutas `/recuperar`, `/enviado`, `/nueva?token=`, `/listo` y `/caducado`.
+  - Mock con `solicitarRecuperacion` y `restablecer`: el token `caducado` lleva a 31e.
+  - Cuenta de 45 s para reenviar, anunciada una vez.
+  - Validaciones con foco en el primer campo con error.
+  - En tablet, el panel de marca con la expresión de cada paso y la insignia de 96 en la columna.
+- **Aviso de Privacidad y Términos de uso (32, 33):**
+  - `PantallaLegal` con `FilaAcordeon`: una sección abierta a la vez, con borde de 2 `accionAcento` y semántica expandida.
+  - Textos en `textos_legales.dart`, marcados como BORRADOR.
+  - En tablet, columna de 640.
+  - Accesos desde el Registro (enlaces con push), el Perfil y Ajustes ("Legal").
+- **Notificaciones de racha (34, 34c, 34b):**
+  - `/ajustes/notificaciones`, de primer nivel.
+  - Interruptores guardados al instante en el repositorio de ajustes.
+  - Selector de hora aislado: hoja en móvil, diálogo en tablet, ajustable con lector y teclado, y botones + y − con "Solo botones".
+  - Se abre tras el primer registro, una vez.
+  - En la galería, las dos notificaciones de 34b con `NotificacionSistema`.
 
-## Parte C · Documento
-`ai/conocimiento/08-accesibilidad.md`:
-- matriz WCAG 2.1 AA (criterio → cómo → verificación, con los criterios que quedan solo manuales);
-- tabla de contrastes;
-- orden de foco de las pantallas complejas;
-- alternativas al gesto y atajos de teclado;
-- lista de verificación manual por herramienta (TalkBack, VoiceOver, teclado físico, texto grande, rotación, modo oscuro) y por flujo (acceso, sprint, Buzón, Examen, cuenta).
+## Componentes compartidos (para la T-15)
+- **Nuevo en la ronda 2:** `DisposicionIlustracionTablet`.
+- **De la ronda 1:**
+  - `InsigniaCircular` (ahora con `tamanoIcono`) e `IlustracionInsignia`;
+  - `FilaAcordeon`;
+  - `InterruptorApp(grande:)` e `InterruptorTocable`;
+  - `NotificacionSistema`;
+  - `RuedaSelector`;
+  - `PanelMarca`, `FranjaMarca` y `DisposicionAccesoTablet` con `pose`.
+- **Sin compartir:** `IlustracionRacha` vive en `pantalla_notificaciones.dart` porque es propia de T34.
 
-No hay un índice aparte en `ai/conocimiento/`: agregué DOC-08 al grafo (D4).
+## Decisiones propias (ronda 2)
+- **Círculo del panel en `fondo/superficie`:** así se distingue del panel `fondo/destacado`, como el del onboarding.
+- **Sarko de 230 × 287.5:** `SarkoImagen` guarda la relación 4:5, así que no llega a los 301 de alto de Figma. No lo deformé.
+- **La franja vertical mide 260:** la ilustración de 341 × 358 se reduce para caber.
+- **El atrás de la franja** va en (32, 32), igual que en el panel.
 
-## Decisiones propias
-- **Tarjeta retenida:** la salida se anima con una copia de la tarjeta anterior cuando cambia la tarjeta. Así `MazoSwipe` no necesita que la pantalla le avise del cierre de la hoja, y no cambia ningún tiempo del estado. En 28b el Examen ya dibujaba su "tarjeta enviada" con sello (T-11), así que ahí no cambió nada.
-- **Foco de regreso en la Tienda:** va a la tarjeta, no al botón de precio, porque el botón puede quedar deshabilitado tras la compra. La tarjeta no es parada de Tab: desde ella, Tab sigue con su botón.
-- **Panel lateral solo lectura en tablet:** "Tu Startup" se lee como un bloque, sin parada de Tab.
-- **Anillo de la tarjeta:** radio 28 (el de la tarjeta), solo con teclado.
-- **Orientación:** se decide por el lado corto del dispositivo, que no cambia al rotar.
-- **"P" del Examen:** solo con tiempo extendido y durante la decisión, como el botón.
-- **Guía de zona táctil propia** para la auditoría (D5).
+## Accesibilidad
+- La auditoría de cuenta (13 escenas × 4 tamaños × claro y oscuro × 100, 160 y 200 % = 312 combinaciones) y el foco visible en 31, 31c, 32 y 34 siguen verdes con la composición nueva.
+- Se verifica: sin desbordes, zona táctil Android e iOS, etiquetas, contraste y anillo en cada parada de Tab.
+- En tablet el orden de foco es: atrás (en el panel) → título → filas → botones.
 
 ## Verificación
 - `dart format`: sin cambios pendientes.
 - `flutter analyze`: `No issues found!`
-- `flutter test`: **2650 pruebas** (antes de T-13, 1281; nuevas 1369: matriz 1200, contrastes 89, criterios 42, pulido 38):
+- `flutter test`: **3025 pruebas** (3019 en la ronda 1; 6 más en esta):
 ```
-+2650: All tests passed!
++3025: All tests passed!
 ```
-- **Pruebas existentes que ajusté** (sin cambiar su tamaño de pantalla): dos de `juego_test.dart` que fijaban el orden 26b sin la tarjeta ("con el foco en un botón, Enter y Espacio…" ahora usa 4 Tab en lugar de 3, y "orden de foco de Figma 26b" incluye la tarjeta). Las demás siguen verdes sin cambios.
+- **Pruebas nuevas o ajustadas en la ronda 2:**
+  - notificaciones: 20 (antes 14). La de "columna de 470 centrada" se reemplazó por:
+    - panel de 597 con círculo, Sarko, insignia y atrás en (32, 32);
+    - columna de 470 a la derecha, sin Sarko ni atrás, y cuyo atrás cierra;
+    - franja en 834×1194 y en 600×960;
+    - selector como diálogo;
+    - filas sin íconos en móvil y tablet, con el texto en x16 o x20.
+  - galería: la ilustración de T34 suma una imagen de Sarko.
 
 ## Grafo actualizado
-- **`en curso`:**
-  - núcleo y app: MAIN, APP, ADAPTATIVO, TEXTOS;
-  - componentes: COMP-BARRA-JUEGO, COMP-PROGRESO, COMP-BOTON, COMP-CAMPO, COMP-CONFETI, COMP-DIALOGO-CONFIRMACION, COMP-PANEL-LATERAL-JUEGO, COMP-PIEZAS-AJUSTES, COMP-PIEZAS-JEFE, COMP-PIEZAS-TIENDA;
-  - pantallas: MAZO-SWIPE y CODIGO-PANT-02..04, 06, 10, 19, 21, 22, 24, 26, 27 y 29;
-  - pruebas: TEST-JUEGO.
-- **Nuevos:** FOCO-SIEMPRE-VISIBLE, COMP-FOCO-RETORNO, SALDO-JUEGO, TEST-AUDITORIA, TEST-PULIDO, DEC-TARJETA-RETENIDA, DEC-ORIENTACION, DEC-GUIA-ZONA-TACTIL y DOC-08.
-- PANT-26b anota la tarjeta en el orden.
-- Obsoletos: ninguno.
+- **`en curso`:** COMP-PIEZAS-AJUSTES, COMP-ILUSTRACION-INSIGNIA, CODIGO-PANT-34, PANT-GALERIA, TEST-NOTIFICACIONES y TEST-GALERIA.
+- **Nuevo:** COMP-DISPOSICION-ILUSTRACION.
+- **Obsoletos:** sin nuevos (PANT-PENDIENTE sigue `obsoleto` desde la ronda 1).
 - Línea nueva en el registro de cambios.
 
-## Solo para prueba manual
-- Cómo suenan TalkBack y VoiceOver: que el anuncio de la selección del Buzón y el de los segundos del Examen no se repitan, y que la tarjeta se lea completa.
-- Teclado físico en tablet real: el anillo de la tarjeta, la tecla P y la vuelta con Tab.
-- Texto grande del sistema (la auditoría usa el ajuste de la app, que pasa por el mismo `MediaQuery`).
-- Rotación en dispositivo: la orientación solo se puede comprobar en un iPad o una tablet Android.
-- El vuelo de la tarjeta retenida al cerrar la hoja: se ve bien en pruebas, pero conviene mirarlo.
-
-## Para la T-14 (lo que depende del servidor)
-- **Hora del servidor:**
-  - regeneración de vidas (`MockVidas.ahoraServidor`, cuenta de 20 y de 30);
-  - plazos de las apelaciones (`MockApelaciones.ahoraServidor`: días 3, 7 y 14, "hoy" o "en N días");
-  - reloj del Examen (límite de 15 o 22 s);
-  - fecha y folio del certificado.
-- **Conectividad:** `ServicioConexion` (hoy simulado con el interruptor de depuración) y la cola de respuestas en SQLite con UUID de cliente, que el servidor debe recibir una sola vez.
-- **Compras:** saldo y máximo de 9 los valida el servidor (`ExcepcionTienda`); `saldoJuegoProvider` lee el saldo una vez al abrir el juego.
-- **Resultados:** registro del Examen y desbloqueo del módulo siguiente, avance del mapa y estrellas.
-- **Sesión:** tokens en almacenamiento seguro (hoy simulado).
+## Para la T-14 (sin cambios desde la ronda 1)
+- **Recuperación:**
+  - el enlace profundo del correo y "Abrir correo" (hoy, el token `demo`);
+  - la caducidad real (30 minutos) y el uso único del token;
+  - el reenvío con límite del servidor;
+  - el cierre de las sesiones en otros dispositivos.
+- **Notificaciones:**
+  - el permiso del sistema y el alta del dispositivo al "Activar";
+  - el envío real (racha, días 3, 7 y 14, máximo 2 al día);
+  - la hora del recordatorio programada por el servidor, con la zona horaria.
+- **Legal:** la versión y la fecha vigentes del Aviso y los Términos, y qué versión aceptó cada usuario.
 
 ## Dudas
-- **D1.** La tarjeta ahora es parada de Tab (26b de esta tarea) y eso me obligó a actualizar dos pruebas de la T-05 que fijaban el orden sin ella. ¿Bien?
-- **D2.** "Solo botones" también apaga el deslizamiento del onboarding en **móvil** (el `PageView`), no solo en tablet, por coherencia con el nombre del ajuste ("Botones en lugar de deslizar"). ¿Lo dejamos así?
-- **D3.** Punto 11 (consejo de la Tienda según el inventario): no lo hice porque necesita textos nuevos para cada caso (por ejemplo, "Ya tienes 9 Lupas; prueba el Amparo"). Si me das los textos, es un cambio pequeño en `_ConsejoTienda` y `LogicaTienda`.
-- **D4.** No hay índice en `ai/conocimiento/`, así que agregué la fila DOC-08 al grafo aunque los DOC-* son de Claude Chat. Revísala, y si quieres menciona 08 en `01-flujo-de-trabajo.md` ("leer 00 a 08").
-- **D5.** La guía de zona táctil de Flutter marcaba como pequeños los nodos del mapa medio ocultos bajo el encabezado fijo: compara rectángulos en sistemas de coordenadas distintos. La auditoría usa `ZonaTactilMinima`, la misma guía con esa comparación corregida; detecta igual un control de 40 × 40 (hay prueba). ¿Te parece bien o prefieres que esas escenas desplacen el mapa antes de medir?
-- **D6.** `borde/control` sobre `fondo/destacado` da 2.6:1 en oscuro. No se usa en ninguna pantalla, así que lo dejé fuera de la tabla y con una prueba que lo documenta. Si en el futuro se usa, habría que aclarar `borde/control` en oscuro.
-- **D7.** En móvil el paso "progreso/HUD" del 26b es la parada de los indicadores de la Startup. La barra de progreso y el chip de vidas los lee el lector dentro de la barra, pero no son paradas de Tab propias (no hacen nada al activarlos). ¿Bien?
+- **D1.** Sarko del panel de T34 mide 230 × 287.5 (4:5) y no 230 × 301 como en Figma, para no deformar la imagen. ¿Bien así, o lo hago de 240 de ancho para acercarme a los 301 de alto?
