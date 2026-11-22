@@ -5,6 +5,7 @@ import '../core/tema/iconos_app.dart';
 import '../core/textos/textos.dart';
 import '../core/utilidades/extensiones_contexto.dart';
 import 'accion_enfocable.dart';
+import 'boton_icono_caja.dart';
 import 'caja_superficie.dart';
 import 'icono_app.dart';
 
@@ -217,11 +218,10 @@ class FilaMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final color = peligro ? tokens.estadoIlegal : tokens.textoPrimario;
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: alPresionar,
       radio: 12,
-      semantica: (hijo) =>
-          Semantics(button: true, label: texto, excludeSemantics: true, child: hijo),
+      etiqueta: texto,
       child: Container(
         constraints: const BoxConstraints(minHeight: 48),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -268,23 +268,8 @@ class BotonIconoCuadrado extends StatelessWidget {
   final VoidCallback alPresionar;
 
   @override
-  Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    return AccionEnfocable(
-      alPresionar: alPresionar,
-      radio: 12,
-      semantica: (hijo) =>
-          Semantics(button: true, label: etiqueta, excludeSemantics: true, child: hijo),
-      child: CajaSuperficie(
-        ancho: 48,
-        alto: 48,
-        alineacion: Alignment.center,
-        radio: 12,
-        conBorde: true,
-        child: IconoApp(icono, tamano: 20, color: tokens.textoPrimario),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      BotonIconoCaja(icono: icono, etiqueta: etiqueta, alPresionar: alPresionar);
 }
 
 /// Avance de un módulo para [TarjetaProgresoModulos].
