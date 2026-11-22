@@ -1,37 +1,46 @@
-# T-15e · Corrección: acción de tocar en controles con `excludeSemantics`
+# T-15f · Fin de sprint, Examen y resúmenes
 
-**Rama:** `fix/15-accion-de-tocar-en-controles` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-15e-fix**).
-**Figma:** no hace falta.
+**Rama:** `15f-fin-de-sprint-examen-y-resumenes` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-15f**).
+**Figma:** no hace falta. Lote de **cero cambios visibles**; mandan las reglas de `ai/conocimiento/09-duplicacion.md` y lo aprendido en la T-15b, T-15c, T-15e y la corrección de accesibilidad (ahorro neto, puntos de cambio, nada de forzar lo que no coincide exactamente, controles con acción de tocar).
 
-## Problema
-En la revisión de la T-15e saliste con un hallazgo (D1): `BotonIconoCuadrado` (`lib/componentes/piezas_perfil.dart`) arma su semántica como `Semantics(button: true, label: …, excludeSemantics: true, child: hijo)` **sin `onTap`**. Con `excludeSemantics: true` se descartan las acciones del hijo, así que un lector de pantalla (TalkBack, VoiceOver) anuncia «botón» pero **no puede activarlo** con el gesto de doble toque. Hay al menos 4 piezas así: `BotonIconoCuadrado` (Perfil: ajustes; Ajustes: atrás; Examen: pausa), la fila de acción de `piezas_perfil.dart` (la del `peligro`, ~220), la segunda de `piezas_perfil.dart` (~273) y `BotonPrecio` de `piezas_tienda.dart` (~158, que además usa `enabled`).
+## Objetivo
+Quinto lote de la T-15: la duplicación **móvil/tablet** de las pantallas de fin de sprint, el Examen y unos repetidos dentro de un mismo archivo. Es riesgo **medio-alto** por el foco y el cronómetro del Examen.
 
-Es un fallo de accesibilidad real que la auditoría WCAG de la T-13 no detectó porque revisa etiquetas, foco y desbordes, no que el control tenga la acción de tocar.
+**Decisión de alcance:** el **P-14 (`MarcoMazo`, el teclado del mazo copiado en juego, Examen y juicio)** es el patrón más delicado y el catálogo pide que vaya **solo y al final**. Lo dejo para un lote propio, **T-15g**. **No lo hagas aquí.**
 
-## Qué hacer
-1. **Busca todos los casos** en `lib/` donde un `Semantics(button: true, …)` (o `link`) con `excludeSemantics: true` **no tenga `onTap`** (y tampoco el control dentro de un `AccionEnfocable` que ya lo agregue). Lista en el reporte cada archivo:línea con el estado antes/después. Revisa también los 3 que dejaste fuera en la T-15e por llevar `checked`, `toggled`, grupo o sin `onTap` (casilla, chip, opción de justificación, comodines, Ajustes ×3, Perfil ×2, Tienda ×1): confirma si **tienen** acción o no.
-2. **Agrega la acción** a cada uno: `onTap: alPresionar` (con `null` si el control está deshabilitado: ya lo respetan `habilitado`/`cargando`). Donde coincida con `AccionEnfocable.boton`, úsalo en vez del `Semantics` a mano. **No cambies** etiqueta, `enabled`, `selected`, `checked`, `toggled`, orden de foco, medidas ni nada visible.
-3. **Segunda parte de la D1 de la T-15e:** con la acción ya presente, pasa `BotonIconoCuadrado` a **envoltura de una línea de `BotonIconoCaja`** (conserva su nombre, sus claves y su aspecto: 48 × 48, radio 12, borde, ícono 20). Si algo difiere, `BotonIconoCaja` lo recibe por parámetro. Las otras 3 piezas se quedan como están salvo que sean exactamente iguales.
-4. **Prueba que lo demuestre** (nueva, sin tocar las existentes):
-   - En `test/componentes/` (o en `marcos_y_disposiciones_test.dart` si es más natural, agregando al final) para cada pieza arreglada: con `tester.ensureSemantics()`, el nodo del botón `hasAction(SemanticsAction.tap)` cuando está habilitado, y **no** cuando está deshabilitado; y `tester.semantics.tap(...)` ejecuta `alPresionar`.
-   - **Prueba de auditoría nueva** `test/auditoria/acciones_de_tocar_test.dart` que recorra **las mismas escenas** de la auditoría actual (sin modificarlas ni sus ayudantes; reutilízalos) y compruebe que **todo nodo con bandera de botón o enlace que esté habilitado y tenga etiqueta tenga `SemanticsAction.tap`**. Si encuentra más casos, arréglalos en este mismo lote (si son muchos o delicados, lístalos como D# y no los toques). Si una escena no se puede recorrer sin cambiarla, di cuál y por qué.
-5. **Documenta en `ai/conocimiento/08-accesibilidad.md`** una línea nueva: «Todo control con semántica de botón debe exponer la acción de tocar; la prueba `acciones_de_tocar_test.dart` lo vigila.»
+## Reglas de medición (igual que antes)
+Ahorro neto = líneas quitadas − líneas del componente nuevo; en «Resultados por lote» de `09` anota líneas antes y después de `lib/`, ahorro neto y puntos de cambio. Un patrón sin 3 usos reales, o con ahorro ≤ 0 y sin reducir puntos de cambio, **no se hace** (D#). Lo que no coincide exactamente se deja y se anota.
 
-## Reglas
-- Cambios **solo de semántica** (más una envoltura). Cero cambios visibles: medidas, colores, claves, foco y orden de lectura iguales; todas las pruebas existentes verdes **sin cambiar**, y la auditoría actual sin tocar sus escenas.
+## 1 · P-11 · Contenido doble en `ColumnaFinSprint`
+`pantalla_sprint_completado.dart:112-207`, `pantalla_startup_quiebra.dart:97` y `pantalla_juicio.dart:581-651` arman las mismas piezas (`IlustracionSarko`, `ElementoOrdenado`, estrellas, vidas, títulos) **dos veces**: en `contenido` y en `contenidoTablet` o `ilustracionTablet`.
+- Armado único: cada pantalla crea sus piezas **una vez** (variables locales o métodos privados) y las pasa a las dos listas. Opcional: que `ColumnaFinSprint` reciba `ilustracion` + `cuerpo` y reparta ella las piezas, **solo si** el orden de foco y las escalas de tablet quedan idénticos.
+- **Conserva** el orden de foco (`ElementoOrdenado`), las escalas del Sarko en tablet, las claves y las etiquetas.
+
+## 2 · P-15 · Examen móvil y tablet
+`pantalla_jefe.dart:353-417` y `:1118-1174` (pie «Enfrentar auditoría», aviso sin conexión, «Ahora no», la alerta del jefe), `:235` y `:298`, y `piezas_jefe.dart:216`.
+- Piezas **privadas** en `pantalla_jefe.dart` (`_PieEnfrentar`, `_AlertaJefe`) que usen la vista móvil y `_CrisisTablet`.
+- **No crees `BotonTextoApp`:** «Ahora no» tiene 2 usos (D5 de la T-15a).
+- **No toques** el cronómetro, el foco propio del Examen, la tecla P, ni las políticas de error/sin conexión (la T-15c ya dejó el Examen fuera de `VistaAsincrona` a propósito).
+- `jefe_test`, `examen_tablet_test` y la auditoría del Examen deben pasar **sin cambios**.
+
+## 3 · P-20 · Repetidos dentro de un mismo archivo
+`FilaVidas` (`pantalla_sin_vidas.dart:149` y `:182`), las piezas de `PanelMarca` (`panel_marca.dart:182` y `:251`), los parámetros de `BarraJuego` contra `BarraJuegoTablet` (`barra_juego.dart:39` y `:122`) y el confeti (`confeti_sprint.dart:52` y `:88`). Variables locales, una clase de parámetros compartida o un método privado; **sin componente global** (menos de 3 usos). Si alguno no mejora claramente, déjalo (D#).
+
+## Reglas del lote
+- **Cero cambios visibles:** medidas, colores, textos, claves, foco, orden de lectura, semántica, tecla P, animaciones y política de errores iguales. La auditoría (incluida `acciones_de_tocar_test.dart`) pasa **sin tocar sus escenas**; las pruebas existentes **no cambian** salvo que un símbolo movido lo exija (anótalo).
 - No toques reglas del juego, repositorios ni mocks. Sin dependencias nuevas.
-- Grafo: nodos de los archivos tocados `en curso` → `hecho` al cerrar yo; agrega TEST-ACCIONES-TOCAR y el registro de cambios.
+- Los controles que armes o muevas deben seguir exponiendo la **acción de tocar** (regla de `08`).
+- Grafo: COMP-* nuevos y obsoletos, registro de cambios y «Resultados por lote» en `09` (y actualiza la fila del T-15g si el catálogo lo pide).
 
 ## Archivos permitidos
-`lib/componentes/` (las piezas afectadas), las pantallas de `lib/funciones/` **solo si** un control está armado allí, `test/` (nuevos), `ai/conocimiento/08-accesibilidad.md`, `ai/grafo.md` y `ai/`.
+`lib/funciones/juego/`, `lib/funciones/jefe/`, `lib/funciones/apelaciones/pantalla_juicio.dart`, `lib/funciones/vidas/`, `lib/funciones/acceso/panel_marca.dart`, `lib/componentes/` (`barra_juego`, `confeti_sprint`, `piezas_jefe`, `ColumnaFinSprint`…), `test/` (solo si un símbolo movido lo exige) y `ai/`. **No modifiques** `mazo_swipe.dart` ni el teclado del mazo (T-15g).
 
 ## Criterios de aceptación
-- [ ] Todos los controles con `excludeSemantics` y semántica de botón o enlace exponen la acción de tocar (deshabilitados, no).
-- [ ] `BotonIconoCuadrado` es envoltura de `BotonIconoCaja`, sin cambios visibles.
-- [ ] Pruebas por pieza y la auditoría nueva `acciones_de_tocar_test.dart`, verdes.
-- [ ] `dart format`, `flutter analyze` limpios; suite completa verde (≥ 3052 pruebas + las nuevas); auditoría actual sin tocar.
+- [ ] P-11, P-15 y P-20 hechos o cada omisión justificada (D#), con ahorro neto y puntos de cambio por patrón en `09`.
+- [ ] Mismo orden de foco, escalas de tablet, claves y etiquetas; Examen con cronómetro, foco y tecla P intactos.
+- [ ] `dart format`, `flutter analyze` limpios; suite completa verde (≥ 3309 pruebas); auditoría sin tocar.
 - [ ] Commits sin prefijo y sin menciones a Claude.
 
 ## Para el reporte
-Lista de controles afectados (antes y después), qué arregló la auditoría nueva, número de pruebas, y dudas numeradas (D1, D2…). Al mencionar el cambio, escríbelo así: «los controles exponen ahora la acción de tocar al lector de pantalla».
+Líneas de `lib/` antes y después, ahorro neto y puntos de cambio por patrón, lo que quedó fuera y por qué, número de pruebas y dudas numeradas (D1, D2…).
