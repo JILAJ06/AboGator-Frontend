@@ -1,151 +1,112 @@
 # Reporte
-- **Tarea:** T-13b · Pantallas de cuenta, legal y notificaciones
+- **Tarea:** T-13b · Pantallas de cuenta, legal y notificaciones (ronda 2: correcciones tras la revisión)
 - **Rama:** `13b-pantallas-cuenta-y-legal`
 - **Estado:** terminada y subida. El Pull Request hacia `develop` lo abre el usuario; no hice merge.
 
 ## Entorno
 - Flutter 3.50.0 (stable) · Dart 3.14.0 · Windows 11. **Sin dependencias nuevas.**
-- Trabajé con las medidas de `siguiente.md`; no abrí Figma. Lo que no venía ahí está en "Decisiones propias" y en las dudas.
+- Medidas de T34 tomadas de `siguiente.md` (Figma `150:5709`).
 
-## Qué se hizo
-### 1 · Recuperar contraseña (31 a 31e)
-- **Rutas sin sesión:** `/recuperar`, `/recuperar/enviado`, `/recuperar/nueva?token=…`, `/recuperar/listo` y `/recuperar/caducado`. El enlace "¿Olvidaste tu contraseña?" del inicio de sesión (móvil y tablet) abre 31.
-- **Repositorio:** `RepositorioAutenticacion` ganó `solicitarRecuperacion(correo)` y `restablecer(token, nueva)`, con `ExcepcionEnlaceCaducado`.
-  - El mock responde igual aunque el correo no exista.
-  - El token `caducado` lanza la excepción; cualquier otro vale.
-  - "Abrir correo" va a `/recuperar/nueva?token=demo`, con la marca `// T-14`.
-- **31:** atrás (48, en x 24); título en H1; Sarko sorprendido de 96 a la derecha; descripción, campo de correo y nota; "Enviar enlace", el fantasma "Volver a iniciar sesión" (48) y el pie "El enlace caduca en 30 minutos" abajo.
-  - El correo usa el validador del Login. El error se anuncia (región en vivo del campo) y el foco va al campo.
-- **31b:** ilustración de 260 (círculo `fondo/destacado` de 230, Sarko alegre de 150 e insignia de 64 `accionPrimaria` con `mail`), título, texto con el correo y "Abrir correo".
-  - "Reenviar enlace en 0:45" deshabilitado, que a los 45 s pasa a "Reenviar enlace" (fantasma) y se anuncia **una sola vez**.
-  - Al reenviar, se anuncia "Te enviamos otro enlace" y la cuenta vuelve a empezar.
-  - Nota de spam.
-- **31c:** cerrar (X); campos "Nueva contraseña", con la ayuda "Mínimo 8 caracteres, incluye un número", y "Confirmar contraseña", los dos con ojo; "Guardar contraseña".
-  - Errores: regla incumplida (validador del Registro) y contraseñas que no coinciden. El foco va al primer campo con error.
-- **31d / 31e:** la ilustración con check `accionPrimaria` (Sarko alegre) o alerta `accionAcento` (Sarko triste), título, texto y botones.
-  - "Pedir un enlace nuevo" vuelve a 31 con el correo ya escrito: el correo vive en `recuperacionProvider`.
-- **Tablet:** el panel de marca (o la franja, en vertical) con Sarko en la expresión de cada paso (`PanelMarca.pose`, nuevo) y el formulario en la columna de 470.
+## Ronda 2 · lo corregido
+### A · Notificaciones de racha en tablet (T34): panel de ilustración
+- **Composición nueva** `DisposicionIlustracionTablet` (`lib/componentes/disposicion_ilustracion_tablet.dart`, para la T-15).
+  - No reutilicé `DisposicionAccesoTablet`: su panel es el verde de marca, con logo y lema. Este es el panel `fondo/destacado` del onboarding, sin logo.
+- **1194×834:**
+  - Panel izquierdo de 597 × 834 en `fondo/destacado` con `IlustracionRacha` centrada:
+    - círculo `fondo/superficie` de 340;
+    - Sarko alegre de 230 de ancho, a (+55, +12) del círculo;
+    - insignia de 84 `accionPrimaria` con `flame` de 40, a (+257, −18): arriba a la derecha del círculo, como en Figma.
+  - La ilustración no crece y se reduce si el panel es más chico.
+  - Atrás de 48 × 48 en el panel, en (32, 32).
+  - A la derecha, la columna de 470 centrada en alto, **sin** Sarko ni atrás: título, descripción, tarjeta de tres filas (470 de ancho), nota, "Activar notificaciones" y "Ahora no".
+- **834×1194 y 600–959:** el panel pasa a una franja de 260 arriba, con la misma ilustración reducida y el atrás, y la columna de 470 debajo (el mismo patrón que Recuperar).
+- **Selector de hora (34c) en tablet:** sigue siendo el diálogo de 440 sobre el velo del 40 %; no cambió.
+- **Móvil:** como antes, salvo las filas (B).
 
-### 2 · Aviso de Privacidad y Términos de uso (32, 33)
-- **Pantalla:** `PantallaLegal`, rutas `/legal/aviso` y `/legal/terminos`, sin sesión.
-  - Atrás, título centrado de 18, la versión y las secciones en `FilaAcordeon`, con separación 10.
-  - "Entendido" fijo abajo: regresa a quien la abrió.
-- **Acordeón:** una sección abierta a la vez; al entrar, "¿Qué datos recopilamos?" en el Aviso y "Contenido educativo" en los Términos. Tocar la abierta la cierra.
-  - Cerrada: 50 de alto, borde 1 `borde/default`.
-  - Abierta: borde 2 `accionAcento`, chevron hacia abajo, título en negrita y el cuerpo.
-  - Se lee como botón expandido o contraído ("…, sección 2 de 7"); el cuerpo se lee aparte. Enter o Espacio la abren.
-  - 200 ms de animación (0 con "Reducir animaciones"). La lista se desplaza con texto al 200 %.
-- **Contenido:** `lib/core/textos/textos_legales.dart` (`SeccionLegal`, `DocumentoLegal`), marcado `// BORRADOR legal: revisar antes de publicar` (también en `textos.dart`).
-  - Escribí los cuerpos que faltaban en 2 o 3 frases: en el Aviso, la LFPDPPP, los ARCO y el correo de contacto del equipo del proyecto.
-- **Tablet:** columna de lectura de 640 centrada, sin riel.
-- **Accesos:**
-  - Registro: enlaces "Leer el Aviso de Privacidad" y "Leer los Términos de uso" bajo las casillas; se abren con push, así no se pierde lo escrito.
-  - Perfil: la fila "Aviso de Privacidad" y la nueva "Términos de uso".
-  - Ajustes: sección nueva "Legal" con las dos.
+### B · Filas de 34 sin íconos
+- `FilaAjuste.icono` ahora es opcional (Ajustes lo sigue pasando) y hay `rellenoHorizontal`: 16 en móvil y 20 en tablet.
+- Las tres filas de 34 (y la del recordatorio, que es propia) ya no llevan `flame`, `gavel` ni `clock`.
+- El texto empieza en x16 (móvil) o x20 (tablet) y el interruptor de 52 × 32 queda a la derecha.
 
-### 3 · Notificaciones de racha (34, 34c, 34b)
-- **34** (ruta `/ajustes/notificaciones`, con sesión): atrás, título "Protege tu racha" con Sarko alegre de 96, descripción y la tarjeta de tres filas.
-  - Las filas tienen interruptor de 52 × 32 (`InterruptorApp(grande: true)`).
-  - **Recordatorio diario:** tocar la fila abre el selector; su interruptor es un control aparte (`InterruptorTocable`).
-  - Nota, "Activar notificaciones" y "Ahora no".
-  - Cada interruptor se guarda al instante. Los dos botones guardan `activadas` (sí o no) y `decidido`, y cierran. `// T-14: permiso del sistema`.
-- **34c:** en móvil, hoja inferior con radio superior 28, agarre de 40 × 5, relleno 24, `sombraGlobo` (la "Elevada") y velo al 40 %. En tablet, diálogo centrado de 440 como máximo.
-  - Título H3, leyenda y tres ruedas: hora 1–12, minutos de 5 en 5 y a. m./p. m. La fila elegida mide 48, sobre `fondo/superficie-alt` con radio 14; las vecinas al 45 %.
-  - "Guardar" y "Cancelar". Esc cancela.
-  - Al cerrar, el foco vuelve a la fila (`devolverFoco`). Al guardar se anuncia "Recordatorio a las 8:10 p. m." y se enciende el recordatorio.
-  - Las ruedas son ajustables para el lector (valor, aumentar y disminuir) y con ↑ ↓ del teclado.
-  - Con "Botones en lugar de deslizar", cada rueda lleva + arriba y − abajo (48 × 48).
-  - Está aislado en `lib/funciones/notificaciones/selector_hora.dart`, para poder quitarlo.
-- **34b:** `NotificacionSistema`, la notificación de 21b generalizada. En la galería, "Tu racha de 7 días está en riesgo" y "Perdiste tu racha de 7 días".
-- **Estado:** `ajustesNotificacionesProvider`. `RepositorioAjustes` ganó `cargarNotificaciones` y `guardarNotificaciones` (claves `notif_*` en la misma tabla de SQLite o memoria; los valores inválidos toman su valor por defecto).
-- **Accesos:**
-  - Tras el **primer registro exitoso** se abre 34 una vez (si aún no se decidió) y al cerrar va al Inicio.
-  - Ajustes: sección "Notificaciones".
-  - Perfil: la fila "Notificaciones de racha".
+### Respuestas aplicadas
+- D1, D2, D3 y D6: sin cambios.
+- D7: Claude Chat agregó PANT-31 a PANT-34; `PantallaPendiente` se borra en la T-15.
+- D8: queda "el correo del equipo del proyecto".
 
-### Galería
-Sección "Cuenta, legal y notificaciones":
-- las tres ilustraciones (31b, 31d, 31e);
-- el acordeón cerrado y abierto;
-- los interruptores grandes y el tocable;
-- las dos notificaciones de 34b;
-- el selector de hora con y sin + y −.
+## Qué hay en la T-13b (resumen de la ronda 1, aprobada)
+- **Recuperar contraseña (31 a 31e):**
+  - Rutas `/recuperar`, `/enviado`, `/nueva?token=`, `/listo` y `/caducado`.
+  - Mock con `solicitarRecuperacion` y `restablecer`: el token `caducado` lleva a 31e.
+  - Cuenta de 45 s para reenviar, anunciada una vez.
+  - Validaciones con foco en el primer campo con error.
+  - En tablet, el panel de marca con la expresión de cada paso y la insignia de 96 en la columna.
+- **Aviso de Privacidad y Términos de uso (32, 33):**
+  - `PantallaLegal` con `FilaAcordeon`: una sección abierta a la vez, con borde de 2 `accionAcento` y semántica expandida.
+  - Textos en `textos_legales.dart`, marcados como BORRADOR.
+  - En tablet, columna de 640.
+  - Accesos desde el Registro (enlaces con push), el Perfil y Ajustes ("Legal").
+- **Notificaciones de racha (34, 34c, 34b):**
+  - `/ajustes/notificaciones`, de primer nivel.
+  - Interruptores guardados al instante en el repositorio de ajustes.
+  - Selector de hora aislado: hoja en móvil, diálogo en tablet, ajustable con lector y teclado, y botones + y − con "Solo botones".
+  - Se abre tras el primer registro, una vez.
+  - En la galería, las dos notificaciones de 34b con `NotificacionSistema`.
 
 ## Componentes compartidos (para la T-15)
-- `InsigniaCircular` e `IlustracionInsignia` (`lib/componentes/ilustracion_insignia.dart`): en 31b, 31d y 31e, y en la galería.
-- `FilaAcordeon` (`lib/componentes/fila_acordeon.dart`): las 15 secciones de 32 y 33.
-- `InterruptorApp(grande:)` e `InterruptorTocable` (`piezas_ajustes.dart`): en 34 y en la galería.
-- `NotificacionSistema` (`notificacion_apelacion.dart`): en 21b y 34b.
-- `RuedaSelector` (en `selector_hora.dart`): una sola rueda reutilizable; si la T-15 la necesita en otro lugar, se puede pasar a `lib/componentes/`.
-- `PanelMarca` y `DisposicionAccesoTablet` aceptan `pose`.
+- **Nuevo en la ronda 2:** `DisposicionIlustracionTablet`.
+- **De la ronda 1:**
+  - `InsigniaCircular` (ahora con `tamanoIcono`) e `IlustracionInsignia`;
+  - `FilaAcordeon`;
+  - `InterruptorApp(grande:)` e `InterruptorTocable`;
+  - `NotificacionSistema`;
+  - `RuedaSelector`;
+  - `PanelMarca`, `FranjaMarca` y `DisposicionAccesoTablet` con `pose`.
+- **Sin compartir:** `IlustracionRacha` vive en `pantalla_notificaciones.dart` porque es propia de T34.
 
-## Decisiones propias
-- **Recuperación en tablet:** como Sarko ya está en el panel de marca, la columna no repite la ilustración de 260; muestra solo la insignia, de 96.
-- **31d y 31e sin botón atrás:** el flujo terminó; sus botones llevan a 31 o al inicio de sesión.
-- **Pie abajo sin medidas intrínsecas:** el marco de la recuperación y la pantalla 34 usan una columna con alto mínimo y `spaceBetween`. `IntrinsicHeight` y `SliverFillRemaining` fallan con `FilaAjuste`, que usa `LayoutBuilder`.
-- **Recordatorio:** elegir una hora enciende el recordatorio.
-- **Ruedas:** hora y minutos son cíclicas (de 12 se pasa a 1); en las ruedas, ↑ aumenta y ↓ disminuye.
-- **Íconos en las filas de 34:** `flame`, `gavel` y `clock`, para seguir el patrón de `FilaAjuste` (ver D5).
-- **Ruta de 34 de primer nivel** (`DEC-NOTIF-RUTA`). Primero la colgué de `/perfil/ajustes`, pero abrirla directo (como hace el registro) construía Perfil y Ajustes debajo, y el foco podía quedar en una página fuera de pantalla: Tab fallaba. Lo encontró la prueba de foco visible.
-- **`PantallaPendiente`** ya no la usa ninguna ruta; la marqué `obsoleto` y no la borré.
-- **"Aviso de Privacidad"** con P mayúscula también en el Perfil, igual que el título de la pantalla.
+## Decisiones propias (ronda 2)
+- **Círculo del panel en `fondo/superficie`:** así se distingue del panel `fondo/destacado`, como el del onboarding.
+- **Sarko de 230 × 287.5:** `SarkoImagen` guarda la relación 4:5, así que no llega a los 301 de alto de Figma. No lo deformé.
+- **La franja vertical mide 260:** la ilustración de 341 × 358 se reduce para caber.
+- **El atrás de la franja** va en (32, 32), igual que en el panel.
 
 ## Accesibilidad
-- **Auditoría:** 13 escenas nuevas en `test/auditoria/auditoria_cuenta_test.dart` (31, 31 con error, 31b, 31c, 31c con errores, 31d, 31e, 32, 32 con otra sección abierta, 33, 34, 34c y 34c con "Solo botones").
-  - Cada una en 4 tamaños × claro y oscuro × 100, 160 y 200 % = **312 combinaciones**, todas en verde.
-  - Se verifica: sin desbordes, zona táctil Android e iOS, etiquetas y contraste de texto.
-- **Foco visible en cada parada de Tab:** se sumaron 31, 31c, 32 y 34, en móvil y tablet.
-- **Foco y anuncios:** foco inicial en el título; errores anunciados y foco al primer campo con error; anuncio único del reenvío; foco de regreso del selector; anuncio de la hora guardada; Esc cierra el selector.
+- La auditoría de cuenta (13 escenas × 4 tamaños × claro y oscuro × 100, 160 y 200 % = 312 combinaciones) y el foco visible en 31, 31c, 32 y 34 siguen verdes con la composición nueva.
+- Se verifica: sin desbordes, zona táctil Android e iOS, etiquetas, contraste y anillo en cada parada de Tab.
+- En tablet el orden de foco es: atrás (en el panel) → título → filas → botones.
 
 ## Verificación
 - `dart format`: sin cambios pendientes.
 - `flutter analyze`: `No issues found!`
-- `flutter test`: **3019 pruebas** (antes de T-13b, 2650):
+- `flutter test`: **3025 pruebas** (3019 en la ronda 1; 6 más en esta):
 ```
-+3019: All tests passed!
++3025: All tests passed!
 ```
-- **Pruebas nuevas (369):** recuperación 14, legal 11, notificaciones 14, componentes 8, auditoría 312, foco visible 8 y 2 del Perfil (la fila de Términos).
-- **Pruebas existentes que ajusté** (por el cambio pedido, sin cambiar su tamaño de pantalla):
-  - **Inicio de sesión:** el enlace ahora abre 31 en lugar del aviso "pronto".
-  - **Registro:** el éxito abre 34 y "Ahora no" lleva al Inicio.
-  - **Perfil:** cinco filas, que abren 34, 32 y 33 en lugar de los marcadores.
-  - **Ajustes:** diez filas.
-  - **Galería:** cuentas de la sección nueva.
-  - **Clases falsas de los repositorios:** implementan los métodos nuevos.
+- **Pruebas nuevas o ajustadas en la ronda 2:**
+  - notificaciones: 20 (antes 14). La de "columna de 470 centrada" se reemplazó por:
+    - panel de 597 con círculo, Sarko, insignia y atrás en (32, 32);
+    - columna de 470 a la derecha, sin Sarko ni atrás, y cuyo atrás cierra;
+    - franja en 834×1194 y en 600×960;
+    - selector como diálogo;
+    - filas sin íconos en móvil y tablet, con el texto en x16 o x20.
+  - galería: la ilustración de T34 suma una imagen de Sarko.
 
 ## Grafo actualizado
-- **`en curso`:**
-  - datos: REPO-AUTH, MOCK-AUTH, REPO-AJUSTES, LOCAL-AJUSTES, MOCK-AJUSTES;
-  - app y textos: TEXTOS, RUTAS, ENRUTADOR;
-  - componentes: PANEL-MARCA, COMP-NOTIFICACION, COMP-PIEZAS-AJUSTES;
-  - pantallas: CODIGO-PANT-05, 06, 25 y 26, PANT-GALERIA;
-  - pruebas: TEST-GALERIA, TEST-AUDITORIA, TEST-ACCESO, TEST-PERFIL y TEST-AJUSTES.
-- **Nuevos:**
-  - datos y textos: MODELO-NOTIF, TEXTOS-LEGALES;
-  - recuperación: EST-RECUPERACION, MARCO-RECUPERACION, CODIGO-PANT-31;
-  - legal: CODIGO-PANT-32;
-  - notificaciones: EST-NOTIFICACIONES, CODIGO-PANT-34, SELECTOR-HORA;
-  - componentes: COMP-ILUSTRACION-INSIGNIA, COMP-FILA-ACORDEON;
-  - pruebas: TEST-RECUPERACION, TEST-LEGAL, TEST-NOTIFICACIONES, TEST-COMP-CUENTA;
-  - decisiones: DEC-NOTIF-RUTA, DEC-LEGAL-PUSH.
-- **Obsoleto:** PANT-PENDIENTE (sin uso).
-- Faltan las filas de pantalla PANT-31 a PANT-34, que son de Claude Chat (D7).
+- **`en curso`:** COMP-PIEZAS-AJUSTES, COMP-ILUSTRACION-INSIGNIA, CODIGO-PANT-34, PANT-GALERIA, TEST-NOTIFICACIONES y TEST-GALERIA.
+- **Nuevo:** COMP-DISPOSICION-ILUSTRACION.
+- **Obsoletos:** sin nuevos (PANT-PENDIENTE sigue `obsoleto` desde la ronda 1).
 - Línea nueva en el registro de cambios.
 
-## Para la T-14 (lo que depende del servidor)
-- **Correo y enlace:** el enlace profundo del correo (`/recuperar/nueva?token=…`) y "Abrir correo", que hoy navega con el token `demo`.
-- **Token:** la caducidad real (30 minutos) y el uso único; hoy solo `caducado` falla.
-- **Reenvío:** con límite real por servidor; hoy solo hay la cuenta de 45 s en el cliente.
-- **Sesiones:** el cierre de las sesiones en otros dispositivos al cambiar la contraseña (hoy solo se dice en el texto).
-- **Notificaciones:** el permiso del sistema y el alta del dispositivo al "Activar"; el envío real (racha en riesgo, días 3, 7 y 14 y el tope de 2 al día); la hora del recordatorio, que guarda el cliente pero debe programar el servidor (con la zona horaria).
-- **Legal:** la versión y la fecha vigentes del Aviso y los Términos, y el registro de qué versión aceptó cada usuario.
+## Para la T-14 (sin cambios desde la ronda 1)
+- **Recuperación:**
+  - el enlace profundo del correo y "Abrir correo" (hoy, el token `demo`);
+  - la caducidad real (30 minutos) y el uso único del token;
+  - el reenvío con límite del servidor;
+  - el cierre de las sesiones en otros dispositivos.
+- **Notificaciones:**
+  - el permiso del sistema y el alta del dispositivo al "Activar";
+  - el envío real (racha, días 3, 7 y 14, máximo 2 al día);
+  - la hora del recordatorio programada por el servidor, con la zona horaria.
+- **Legal:** la versión y la fecha vigentes del Aviso y los Términos, y qué versión aceptó cada usuario.
 
 ## Dudas
-- **D1.** Tras el primer registro abro 34 (una vez) y luego el Inicio. ¿Prefieres otro orden, por ejemplo, ofrecerlas después del primer sprint?
-- **D2.** La ruta de 34 es `/ajustes/notificaciones` de primer nivel (no hija de `/perfil/ajustes`) por el problema de foco descrito arriba. ¿Bien?
-- **D3.** El Registro no tenía enlaces a los documentos (solo las casillas). Agregué "Leer el Aviso de Privacidad" y "Leer los Términos de uso" bajo las casillas. ¿Así, o prefieres que la palabra dentro de cada casilla sea el enlace?
-- **D4.** En tablet no tenía medidas de T34, así que usé la columna de 470 centrada, sin riel; para 32 y 33 usé la de 640, como pediste. ¿Coincide con Figma?
-- **D5.** Puse íconos en las filas de 34 (`flame`, `gavel`, `clock`) como en Ajustes. Si en Figma no llevan, se quitan con un parámetro.
-- **D6.** "Ahora no" guarda `activadas = false`, pero conserva los interruptores tal como quedaron, y cada interruptor se guarda al tocarlo. ¿Bien, o "Ahora no" debería apagarlos todos?
-- **D7.** Faltan las filas PANT-31 a PANT-34 en el grafo (son tuyas). Además, `PantallaPendiente` quedó sin uso: ¿la borramos en la T-15?
-- **D8.** Los textos legales son un borrador mío para validar con el docente; el correo de contacto aparece como "el correo del equipo del proyecto". ¿Tienes la dirección real?
+- **D1.** Sarko del panel de T34 mide 230 × 287.5 (4:5) y no 230 × 301 como en Figma, para no deformar la imagen. ¿Bien así, o lo hago de 240 de ancho para acercarme a los 301 de alto?
