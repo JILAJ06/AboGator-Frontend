@@ -1,37 +1,46 @@
-# T-15e · Corrección: acción de tocar en controles con `excludeSemantics`
+# T-15g · Teclado y tinte del mazo
 
-**Rama:** `fix/15-accion-de-tocar-en-controles` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-15e-fix**).
-**Figma:** no hace falta.
+**Rama:** `15g-teclado-y-tinte-del-mazo` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-15g**).
+**Figma:** no hace falta. Lote de **cero cambios visibles ni de comportamiento** y el **más delicado de la T-15** (teclado y foco del juego, el Examen y el juicio). Mandan las reglas de `ai/conocimiento/09-duplicacion.md` y lo aprendido en los lotes anteriores.
 
-## Problema
-En la revisión de la T-15e saliste con un hallazgo (D1): `BotonIconoCuadrado` (`lib/componentes/piezas_perfil.dart`) arma su semántica como `Semantics(button: true, label: …, excludeSemantics: true, child: hijo)` **sin `onTap`**. Con `excludeSemantics: true` se descartan las acciones del hijo, así que un lector de pantalla (TalkBack, VoiceOver) anuncia «botón» pero **no puede activarlo** con el gesto de doble toque. Hay al menos 4 piezas así: `BotonIconoCuadrado` (Perfil: ajustes; Ajustes: atrás; Examen: pausa), la fila de acción de `piezas_perfil.dart` (la del `peligro`, ~220), la segunda de `piezas_perfil.dart` (~273) y `BotonPrecio` de `piezas_tienda.dart` (~158, que además usa `enabled`).
+## Qué se repite (ya lo leí en el código)
+Las tres pantallas con mazo tienen **`_alTeclear` casi idéntico** y **el mismo tinte detrás de la tarjeta**:
+- `lib/funciones/juego/pantalla_juego.dart:376` (`_alTeclear`) y `:648` (`_envolver`).
+- `lib/funciones/apelaciones/pantalla_juicio.dart:264` y `:372-384`.
+- `lib/funciones/jefe/pantalla_jefe.dart:564` y `:787-810`.
 
-Es un fallo de accesibilidad real que la auditoría WCAG de la T-13 no detectó porque revisa etiquetas, foco y desbordes, no que el control tenga la acción de tocar.
+La lógica compartida: ignorar eventos que no sean `KeyDown`/`KeyRepeat`; **flechas** (← ilegal, → legal, ↑ condicional, ↓ escalar) llaman a `mazo.previsualizar(...)` y devuelven `handled`; con `mazo.previa` no nula, **Enter o NumpadEnter** → `mazo.confirmar(previa)` (handled) y **Esc** → `mazo.cancelarPrevia()` (handled); en cualquier otro caso `ignored`. Y el tinte: `Positioned.fill(ValueListenableBuilder<ArrastreVisible>(valueListenable: _arrastre, builder: TinteVeredicto(veredicto: arrastre.veredicto, opacidad: arrastre.progreso * LogicaSwipe.opacidadTinte)))`.
 
-## Qué hacer
-1. **Busca todos los casos** en `lib/` donde un `Semantics(button: true, …)` (o `link`) con `excludeSemantics: true` **no tenga `onTap`** (y tampoco el control dentro de un `AccionEnfocable` que ya lo agregue). Lista en el reporte cada archivo:línea con el estado antes/después. Revisa también los 3 que dejaste fuera en la T-15e por llevar `checked`, `toggled`, grupo o sin `onTap` (casilla, chip, opción de justificación, comodines, Ajustes ×3, Perfil ×2, Tienda ×1): confirma si **tienen** acción o no.
-2. **Agrega la acción** a cada uno: `onTap: alPresionar` (con `null` si el control está deshabilitado: ya lo respetan `habilitado`/`cargando`). Donde coincida con `AccionEnfocable.boton`, úsalo en vez del `Semantics` a mano. **No cambies** etiqueta, `enabled`, `selected`, `checked`, `toggled`, orden de foco, medidas ni nada visible.
-3. **Segunda parte de la D1 de la T-15e:** con la acción ya presente, pasa `BotonIconoCuadrado` a **envoltura de una línea de `BotonIconoCaja`** (conserva su nombre, sus claves y su aspecto: 48 × 48, radio 12, borde, ícono 20). Si algo difiere, `BotonIconoCaja` lo recibe por parámetro. Las otras 3 piezas se quedan como están salvo que sean exactamente iguales.
-4. **Prueba que lo demuestre** (nueva, sin tocar las existentes):
-   - En `test/componentes/` (o en `marcos_y_disposiciones_test.dart` si es más natural, agregando al final) para cada pieza arreglada: con `tester.ensureSemantics()`, el nodo del botón `hasAction(SemanticsAction.tap)` cuando está habilitado, y **no** cuando está deshabilitado; y `tester.semantics.tap(...)` ejecuta `alPresionar`.
-   - **Prueba de auditoría nueva** `test/auditoria/acciones_de_tocar_test.dart` que recorra **las mismas escenas** de la auditoría actual (sin modificarlas ni sus ayudantes; reutilízalos) y compruebe que **todo nodo con bandera de botón o enlace que esté habilitado y tenga etiqueta tenga `SemanticsAction.tap`**. Si encuentra más casos, arréglalos en este mismo lote (si son muchos o delicados, lístalos como D# y no los toques). Si una escena no se puede recorrer sin cambiarla, di cuál y por qué.
-5. **Documenta en `ai/conocimiento/08-accesibilidad.md`** una línea nueva: «Todo control con semántica de botón debe exponer la acción de tocar; la prueba `acciones_de_tocar_test.dart` lo vigila.»
+**Diferencias que NO pueden cambiar:**
+- **Juicio:** devuelve `ignored` si `_resolviendo` (antes de mirar flechas).
+- **Examen:** devuelve `ignored` si `examenProvider.fase != FaseJefe.decision`; maneja la **tecla P** (solo `KeyDownEvent`, solo con `tiempoExtendido`, llama a `_examen.pausar()`) **antes** de las flechas; y en el `Stack` tiene un **tinte de urgencia** (`ColoredBox` con `estadoIlegal` y `EfectosApp.opacidadUrgencia`, clave `tinte-urgencia`) **antes** del `TinteVeredicto`. Ese tinte de urgencia es del Examen y se queda donde está.
+- **Juego:** devuelve `ignored` si el mazo no existe (`_mazo.currentState == null`); el comentario de Enter/Esc («sin previsualización siguen su camino: Enter activa el botón de veredicto con foco») debe seguir valiendo.
 
-## Reglas
-- Cambios **solo de semántica** (más una envoltura). Cero cambios visibles: medidas, colores, claves, foco y orden de lectura iguales; todas las pruebas existentes verdes **sin cambiar**, y la auditoría actual sin tocar sus escenas.
-- No toques reglas del juego, repositorios ni mocks. Sin dependencias nuevas.
-- Grafo: nodos de los archivos tocados `en curso` → `hecho` al cerrar yo; agrega TEST-ACCIONES-TOCAR y el registro de cambios.
+## Diseño recomendado (más simple que `MarcoMazo` del catálogo)
+No metas un widget que envuelva todo. Hazlo con **dos piezas pequeñas** en `lib/funciones/juego/mazo_swipe.dart` (o un archivo junto a él), que conservan cada guardia en su pantalla:
+1. **`KeyEventResult teclearMazo(MazoSwipeState mazo, KeyEvent evento)`**: la parte común (flechas, Enter, Esc). Cada `_alTeclear` queda con **sus guardias y extras propios** (`_resolviendo`, fase del Examen, tecla P, mazo nulo) y termina llamando a `teclearMazo`. El orden de las comprobaciones debe ser **exactamente** el de hoy (por ejemplo, la tecla P del Examen va antes de las flechas).
+2. **`TinteArrastre({required ValueListenable<ArrastreVisible> arrastre})`**: el `Positioned.fill` con `ValueListenableBuilder` y `TinteVeredicto`. Las tres pantallas lo usan dentro de su `Stack`; el tinte de urgencia del Examen se queda como está, delante.
+Si prefieres otra forma (por ejemplo el `MarcoMazo` del catálogo) hazla solo si cumple lo anterior sin tocar el orden de foco ni las guardias; explica por qué en el reporte.
+
+## Reglas del lote
+- **Cero cambios de comportamiento.** Mismas teclas, mismas guardias, mismo orden de comprobación, mismo foco (`Focus(autofocus: true, skipTraversal: true)` se queda en cada pantalla), mismas claves y mismo árbol de widgets (la clave `pantalla-decision`, `tinte-urgencia`, etc.).
+- Las pruebas existentes **no cambian** (`juego_test`, `veredicto_test`, `jefe_test` con la tecla P, `juicio_test`, `pulido_test`, la auditoría de teclado y todas las demás), **y la auditoría (incluida `acciones_de_tocar_test.dart`) pasa sin tocar sus escenas.**
+- **Pruebas nuevas** para las dos piezas: `teclearMazo` con cada flecha (previsualiza y devuelve handled), Enter y NumpadEnter con y sin previsualización, Esc con y sin previsualización, eventos `KeyUp` y teclas ajenas (ignored); y `TinteArrastre` con veredicto y opacidad (tema claro y oscuro). Un mazo de prueba mínimo o un doble de `MazoSwipeState` según lo que ya usen las pruebas del mazo.
+- No toques las reglas del juego (`logica_swipe`, estados), repositorios ni mocks. Sin dependencias nuevas. No cambies la API pública de `MazoSwipe` más de lo necesario.
+- Mide como siempre (líneas antes y después de `lib/`, ahorro neto y puntos de cambio: **teclado y tinte 3 → 1**). Si el ahorro neto es ≤ 0, no importa: el beneficio es un solo lugar para cambiar el teclado del mazo; dilo en el reporte.
+- Grafo: COMP/PANT afectados, el nodo nuevo (si lo hay) y «Resultados por lote» en `09`; marca el P-14 como hecho.
 
 ## Archivos permitidos
-`lib/componentes/` (las piezas afectadas), las pantallas de `lib/funciones/` **solo si** un control está armado allí, `test/` (nuevos), `ai/conocimiento/08-accesibilidad.md`, `ai/grafo.md` y `ai/`.
+`lib/funciones/juego/mazo_swipe.dart` (o un archivo nuevo junto a él), `pantalla_juego.dart`, `lib/funciones/apelaciones/pantalla_juicio.dart`, `lib/funciones/jefe/pantalla_jefe.dart`, la galería solo si la pieza es visible (no lo es), `test/` (pruebas nuevas) y `ai/`.
 
 ## Criterios de aceptación
-- [ ] Todos los controles con `excludeSemantics` y semántica de botón o enlace exponen la acción de tocar (deshabilitados, no).
-- [ ] `BotonIconoCuadrado` es envoltura de `BotonIconoCaja`, sin cambios visibles.
-- [ ] Pruebas por pieza y la auditoría nueva `acciones_de_tocar_test.dart`, verdes.
-- [ ] `dart format`, `flutter analyze` limpios; suite completa verde (≥ 3052 pruebas + las nuevas); auditoría actual sin tocar.
+- [ ] `teclearMazo` y `TinteArrastre` (o la forma que justifiques) usados en las **tres** pantallas; las guardias y extras propios de cada una intactos y en el mismo orden.
+- [ ] Todas las pruebas existentes verdes **sin cambiar**; auditoría sin tocar escenas.
+- [ ] Pruebas nuevas de las piezas.
+- [ ] Líneas antes y después, ahorro neto y puntos de cambio en `09`; P-14 hecho.
+- [ ] `dart format`, `flutter analyze` limpios; suite completa verde (≥ 3309 pruebas).
 - [ ] Commits sin prefijo y sin menciones a Claude.
 
 ## Para el reporte
-Lista de controles afectados (antes y después), qué arregló la auditoría nueva, número de pruebas, y dudas numeradas (D1, D2…). Al mencionar el cambio, escríbelo así: «los controles exponen ahora la acción de tocar al lector de pantalla».
+Líneas antes y después, ahorro neto, qué dejaste en cada pantalla y por qué, número de pruebas y dudas numeradas (D1, D2…).
