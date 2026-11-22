@@ -247,6 +247,22 @@ class _Crisis extends ConsumerWidget {
       ),
     );
 
+    final reglas = _ReglasCrisis([
+      regla(IconosApp.zap, Textos.reglaDecisiones(info.totalDecisiones, segundos)),
+      regla(IconosApp.megaphone, Textos.reglaContraargumento),
+      regla(IconosApp.lock, Textos.reglaComodines),
+      regla(IconosApp.heart, Textos.reglaVidas),
+    ]);
+    final tiempoExtendido = extendido
+        ? _TiempoExtendido(Textos.tiempoExtendidoActivo(segundos))
+        : null;
+    final pie = _PieEnfrentar(
+      enLinea: enLinea,
+      iniciando: iniciando,
+      alEnfrentar: alEnfrentar,
+      alAhoraNo: alAhoraNo,
+    );
+
     // T27 (Figma 101:4895): alerta, Sarko, la barra del Jefe y la línea de
     // crisis × 1.4 en el panel izquierdo; título, reglas y botones a la derecha.
     if (context.clasePantalla.esAncho) {
@@ -263,17 +279,9 @@ class _Crisis extends ConsumerWidget {
           textAlign: TextAlign.center,
           style: estilos.cuerpoBase.copyWith(color: EfectosApp.textoCrisis),
         ),
-        reglas: [
-          regla(IconosApp.zap, Textos.reglaDecisiones(info.totalDecisiones, segundos)),
-          regla(IconosApp.megaphone, Textos.reglaContraargumento),
-          regla(IconosApp.lock, Textos.reglaComodines),
-          regla(IconosApp.heart, Textos.reglaVidas),
-        ],
-        extendido: extendido ? Textos.tiempoExtendidoActivo(segundos) : null,
-        enLinea: enLinea,
-        iniciando: iniciando,
-        alEnfrentar: alEnfrentar,
-        alAhoraNo: alAhoraNo,
+        reglas: reglas,
+        tiempoExtendido: tiempoExtendido,
+        pie: pie,
       );
     }
 
@@ -281,27 +289,7 @@ class _Crisis extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 16),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Pildora(
-            clave: const ValueKey('alerta-jefe'),
-            fondo: EfectosApp.alertaCrisis,
-            relleno: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const IconoApp(IconosApp.alert, tamano: 16, color: EfectosApp.blancoCrisis),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    Textos.alertaJefe,
-                    style: estilos.etiqueta.copyWith(color: EfectosApp.blancoCrisis),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        Align(alignment: Alignment.centerLeft, child: alerta),
         const SizedBox(height: 12),
         // Título con Sarko a la derecha (detrás, como en Figma).
         Stack(
@@ -332,73 +320,11 @@ class _Crisis extends ConsumerWidget {
         const SizedBox(height: 12),
         const Padding(padding: EdgeInsets.only(left: 8), child: LineaDeCrisis()),
         const SizedBox(height: 16),
-        Container(
-          key: const ValueKey('reglas-crisis'),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: EfectosApp.fondoReglasCrisis,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            children: [
-              regla(IconosApp.zap, Textos.reglaDecisiones(info.totalDecisiones, segundos)),
-              regla(IconosApp.megaphone, Textos.reglaContraargumento),
-              regla(IconosApp.lock, Textos.reglaComodines),
-              regla(IconosApp.heart, Textos.reglaVidas),
-            ],
-          ),
-        ),
-        if (extendido) ...[
-          const SizedBox(height: 14),
-          Row(
-            key: const ValueKey('tiempo-extendido-crisis'),
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const IconoApp(IconosApp.accessibility, tamano: 16, color: EfectosApp.verdeCrisis),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  Textos.tiempoExtendidoActivo(segundos),
-                  style: estilos.leyenda.copyWith(color: EfectosApp.verdeCrisis),
-                ),
-              ),
-            ],
-          ),
-        ],
+        reglas,
+        if (tiempoExtendido != null) ...[const SizedBox(height: 14), tiempoExtendido],
         const SizedBox(height: 28),
         const Spacer(),
-        if (!enLinea) ...[
-          Text(
-            Textos.necesitasConexionExamen,
-            key: const ValueKey('aviso-sin-conexion-examen'),
-            textAlign: TextAlign.center,
-            style: estilos.leyenda.copyWith(color: EfectosApp.textoCrisis),
-          ),
-          const SizedBox(height: 8),
-        ],
-        BotonApp(
-          key: const ValueKey('boton-enfrentar'),
-          texto: Textos.enfrentarAuditoria,
-          tipo: TipoBoton.acento,
-          cargando: iniciando,
-          textoCargando: Textos.iniciandoExamen,
-          alPresionar: enLinea ? alEnfrentar : null,
-        ),
-        const SizedBox(height: 4),
-        Center(
-          child: TextButton(
-            key: const ValueKey('boton-ahora-no'),
-            style: TextButton.styleFrom(
-              minimumSize: const Size(48, 48),
-              foregroundColor: EfectosApp.textoCrisis,
-            ),
-            onPressed: alAhoraNo,
-            child: Text(
-              Textos.ahoraNo,
-              style: estilos.cuerpoEnfasis.copyWith(color: EfectosApp.textoCrisis),
-            ),
-          ),
-        ),
+        pie,
         const SizedBox(height: 8),
       ],
     );
@@ -987,11 +913,8 @@ class _CrisisTablet extends StatelessWidget {
     required this.titulo,
     required this.descripcion,
     required this.reglas,
-    required this.extendido,
-    required this.enLinea,
-    required this.iniciando,
-    required this.alEnfrentar,
-    required this.alAhoraNo,
+    required this.tiempoExtendido,
+    required this.pie,
   });
 
   /// Lienzo de la ilustración (el ancho del móvil) y su escala (Figma: la
@@ -1004,17 +927,13 @@ class _CrisisTablet extends StatelessWidget {
   final Widget alerta;
   final Widget titulo;
   final Widget descripcion;
-  final List<Widget> reglas;
-  final String? extendido;
-  final bool enLinea;
-  final bool iniciando;
-  final VoidCallback alEnfrentar;
-  final VoidCallback alAhoraNo;
+  final Widget reglas;
+  final Widget? tiempoExtendido;
+  final Widget pie;
 
   @override
   Widget build(BuildContext context) {
-    final estilos = context.estilos;
-    final texto = extendido;
+    final extendido = tiempoExtendido;
     return DisposicionResultadoTablet(
       key: const ValueKey('crisis-tablet'),
       colorPanel: EfectosApp.barraJefe,
@@ -1067,67 +986,112 @@ class _CrisisTablet extends StatelessWidget {
           const SizedBox(height: 14),
           descripcion,
           const SizedBox(height: 14),
-          Container(
-            key: const ValueKey('reglas-crisis'),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: EfectosApp.fondoReglasCrisis,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(children: reglas),
-          ),
-          if (texto != null) ...[
-            const SizedBox(height: 14),
-            Row(
-              key: const ValueKey('tiempo-extendido-crisis'),
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const IconoApp(IconosApp.accessibility, tamano: 16, color: EfectosApp.verdeCrisis),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    texto,
-                    style: estilos.leyenda.copyWith(color: EfectosApp.verdeCrisis),
-                  ),
-                ),
-              ],
-            ),
-          ],
+          reglas,
+          if (extendido != null) ...[const SizedBox(height: 14), extendido],
           const SizedBox(height: 14),
-          if (!enLinea) ...[
-            Text(
-              Textos.necesitasConexionExamen,
-              key: const ValueKey('aviso-sin-conexion-examen'),
-              textAlign: TextAlign.center,
-              style: estilos.leyenda.copyWith(color: EfectosApp.textoCrisis),
-            ),
-            const SizedBox(height: 8),
-          ],
-          BotonApp(
-            key: const ValueKey('boton-enfrentar'),
-            texto: Textos.enfrentarAuditoria,
-            tipo: TipoBoton.acento,
-            cargando: iniciando,
-            textoCargando: Textos.iniciandoExamen,
-            alPresionar: enLinea ? alEnfrentar : null,
-          ),
-          const SizedBox(height: 4),
-          Center(
-            child: TextButton(
-              key: const ValueKey('boton-ahora-no'),
-              style: TextButton.styleFrom(
-                minimumSize: const Size(48, 48),
-                foregroundColor: EfectosApp.textoCrisis,
-              ),
-              onPressed: alAhoraNo,
-              child: Text(
-                Textos.ahoraNo,
-                style: estilos.cuerpoEnfasis.copyWith(color: EfectosApp.textoCrisis),
-              ),
-            ),
-          ),
+          pie,
         ],
       ),
+    );
+  }
+}
+
+/// Caja de las reglas de la crisis (`fondoReglasCrisis`, radio 20,
+/// relleno horizontal 16), igual en móvil y tablet.
+class _ReglasCrisis extends StatelessWidget {
+  const _ReglasCrisis(this.reglas);
+
+  final List<Widget> reglas;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const ValueKey('reglas-crisis'),
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    decoration: BoxDecoration(
+      color: EfectosApp.fondoReglasCrisis,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Column(children: reglas),
+  );
+}
+
+/// Aviso del tiempo extendido activo (ícono de accesibilidad y leyenda en
+/// verde), igual en móvil y tablet.
+class _TiempoExtendido extends StatelessWidget {
+  const _TiempoExtendido(this.texto);
+
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    key: const ValueKey('tiempo-extendido-crisis'),
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      const IconoApp(IconosApp.accessibility, tamano: 16, color: EfectosApp.verdeCrisis),
+      const SizedBox(width: 8),
+      Flexible(
+        child: Text(texto, style: context.estilos.leyenda.copyWith(color: EfectosApp.verdeCrisis)),
+      ),
+    ],
+  );
+}
+
+/// Pie de la crisis, igual en móvil y tablet: el aviso sin conexión (si
+/// falta), «Enfrentar auditoría» (deshabilitado sin conexión, cargando al
+/// iniciar) y «Ahora no».
+class _PieEnfrentar extends StatelessWidget {
+  const _PieEnfrentar({
+    required this.enLinea,
+    required this.iniciando,
+    required this.alEnfrentar,
+    required this.alAhoraNo,
+  });
+
+  final bool enLinea;
+  final bool iniciando;
+  final VoidCallback alEnfrentar;
+  final VoidCallback alAhoraNo;
+
+  @override
+  Widget build(BuildContext context) {
+    final estilos = context.estilos;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (!enLinea) ...[
+          Text(
+            Textos.necesitasConexionExamen,
+            key: const ValueKey('aviso-sin-conexion-examen'),
+            textAlign: TextAlign.center,
+            style: estilos.leyenda.copyWith(color: EfectosApp.textoCrisis),
+          ),
+          const SizedBox(height: 8),
+        ],
+        BotonApp(
+          key: const ValueKey('boton-enfrentar'),
+          texto: Textos.enfrentarAuditoria,
+          tipo: TipoBoton.acento,
+          cargando: iniciando,
+          textoCargando: Textos.iniciandoExamen,
+          alPresionar: enLinea ? alEnfrentar : null,
+        ),
+        const SizedBox(height: 4),
+        Center(
+          child: TextButton(
+            key: const ValueKey('boton-ahora-no'),
+            style: TextButton.styleFrom(
+              minimumSize: const Size(48, 48),
+              foregroundColor: EfectosApp.textoCrisis,
+            ),
+            onPressed: alAhoraNo,
+            child: Text(
+              Textos.ahoraNo,
+              style: estilos.cuerpoEnfasis.copyWith(color: EfectosApp.textoCrisis),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

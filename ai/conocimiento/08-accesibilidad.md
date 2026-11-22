@@ -214,3 +214,4 @@ Hacer cada flujo con cada herramienta y anotar lo que falle (pantalla, paso, qu�
 **Flujo 5 · Cuenta**
 1. Tienda: comprar y cancelar; el foco vuelve a la tarjeta y la compra se anuncia.
 2. Ajustes: cambiar el tamaño de texto; el foco vuelve a la fila y el cambio se aplica al instante.
+3. **Con TalkBack y VoiceOver, doble toque** en cada control que antes no se podía activar (corrección T-15e-fix): filas de Ajustes y de Notificaciones de racha, las 4 opciones del tamaño de texto, el menú del Perfil (incluido «Cerrar sesión»), el botón cuadrado (ajustes del Perfil, atrás de Ajustes, pausa del Examen) y el precio de cada artículo de la Tienda. Debe activarse y anunciarse.

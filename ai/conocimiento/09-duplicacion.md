@@ -129,11 +129,12 @@ Cada lote es una rama y un PR. Se ordenan de lo seguro y compartido a lo delicad
 | **T-15c** | `15c-superficies-y-estados` | P-04 (`CajaSuperficie`), P-05 (`TarjetaLista`), P-01 (`EsqueletoPantalla`), P-09 (`VistaAsincrona`), P-10 (`TituloEnfocado`) | ≈ 385 | bajo-medio | claves `esqueleto-*`; pruebas de error con «Reintentar»; foco inicial (`criterios_test`); medidas por clave |
 | **T-15d** | `15d-ayudantes-de-pruebas` | T-01, T-02, T-03 (solo `test/`; sin tocar `lib/`) | neto ≈ −150 en `test/` (antes ≈ 240); puntos: 9 matrices → 1, 4 falsos duplicados → 1 | bajo | el mismo número de pruebas antes y después (salvo D1) |
 | **T-15e** | `15e-marcos-y-disposiciones` | P-08 (`AccionEnfocable.boton`), P-13 (`DesplazableAltoMinimo`), P-12 (`mostrarHojaAdaptativa`), P-17 (`DosColumnasTablet`), P-16 (Inicio), P-19 (Acceso) | neto ≈ −210 (antes ≈ 310): P-08 −75, P-16 −55, P-19 −30, P-13 −25, P-12 −15, P-17 −10; puntos: 18 semánticas → 1, 11 desplazables → 1, 3 hojas → 1 | medio | auditoría completa (etiquetas, desbordes al 200 %); pruebas de tablet de cada área; `ajustes_test` y `notificaciones_test` (hojas) |
-| **T-15f** | `15f-juego-examen-y-fin-de-sprint` | P-11 (`ColumnaFinSprint`), P-15 (Examen), P-14 (`MarcoMazo`), P-20 | neto ≈ −310 (antes ≈ 335): P-11 −100, P-15 −90, P-14 −75, P-20 −45; puntos: teclado del mazo 3 → 1 | medio-alto | `juego_test`, `veredicto_test`, `jefe_test`, `examen_tablet_test`, `juicio_test`, `fin_sprint_test`, `resultados_tablet_test`, `pulido_test`, auditoría de juego y de Examen |
+| **T-15f** | `15f-fin-de-sprint-examen-y-resumenes` | P-11 (`ColumnaFinSprint`), P-15 (Examen), P-20 | real **−92** (estimado ≈ −235: P-11 −100, P-15 −90, P-20 −45) | medio-alto | `jefe_test`, `examen_tablet_test`, `juicio_test`, `fin_sprint_test`, `resultados_tablet_test`, `sin_vidas_test`, auditoría de juego y de Examen |
+| **T-15g** | `15g-marco-del-mazo` | P-14 (`MarcoMazo`), solo | neto ≈ −75; puntos: teclado del mazo 3 → 1 | alto | `juego_test`, `veredicto_test`, `jefe_test` (tecla P), `juicio_test`, `pulido_test`, auditoría de teclado |
 
 - **Total estimado (original):** ≈ 1 310 líneas menos en `lib/` y ≈ 240 en `test/`. **Corregido tras T-15b y T-15c (neto):** T-15b −76 y T-15c −23 (reales); T-15e ≈ −210 y T-15f ≈ −310 (estimados) → ≈ −620 en `lib/` (≈ 1,7 %); T-15d ≈ −150 en `test/`. El beneficio principal de la T-15 son los **puntos de cambio únicos**, más que las líneas.
 - La T-15d puede hacerse cuando se quiera, porque no toca `lib/`. Conviene **no** juntarla con un lote de `lib/`, para que un cambio de app nunca coincida con un cambio de las pruebas que lo protegen.
-- Si un lote queda grande, se puede partir. En la T-15f, P-14 (el mazo) debe ir sola y al final.
+- Si un lote queda grande, se puede partir. P-14 (el mazo) se separó de la T-15f y va sola como T-15g.
 
 ## Resultados por lote
 | Lote | `lib/` antes | `lib/` después | Diferencia | `test/` antes → después | Pruebas |
@@ -141,6 +142,8 @@ Cada lote es una rama y un PR. Se ordenan de lo seguro y compartido a lo delicad
 | T-15b | 35 552 (211 archivos) | 35 476 (214 archivos) | **−76** | 19 673 → 19 832 (+159, pruebas nuevas) | 3025 → 3034 |
 | T-15c | 35 476 (214 archivos) | 35 453 (218 archivos) | **−23** | 19 832 → 20 077 (+245, pruebas nuevas) | 3034 → 3045 |
 | T-15e | 35 453 (218 archivos) | 35 373 (219 archivos) | **−80** | 20 077 → 20 253 (+176, pruebas nuevas) | 3045 → 3052 |
+| T-15e-fix | 35 373 | 35 355 | **−18** | 20 253 → 20 452 (+199, pruebas nuevas) | 3052 → 3309 |
+| T-15f | 35 355 (219 archivos) | 35 263 (219 archivos) | **−92** | 20 452 → 20 452 (sin cambios) | 3309 → 3309 |
 
 - **T-15b, desglose:**
   - En los archivos que ya existían se fueron 237 líneas netas: 49 de `pantalla_pendiente.dart`, 17 de `mostrarAvisoBreve`, unas 100 de los botones de caja y los agarres, unas 50 de las 22 píldoras y unas 20 de los avisos.
@@ -180,6 +183,27 @@ Cada lote es una rama y un PR. Se ordenan de lo seguro y compartido a lo delicad
     - **P-17 `DosColumnasTablet`:** solo Ajustes y Perfil coinciden. Inicio tiene alto mínimo y `spaceBetween` a la derecha, y el Buzón no tiene ese patrón.
     - **`BotonIconoCuadrado` → `BotonIconoCaja`:** su `Semantics` no tiene `onTap`. Pasarlo daría a los lectores de pantalla una acción que hoy no tienen (D1 del reporte de la T-15e).
   - **Quedan con su propia semántica en P-08** (tienen `checked`, `toggled`, grupo excluyente, `container` o no tienen `onTap`): `casilla_app`, `chip_seleccion`, `opcion_justificacion`, `barra_comodines`, `piezas_ajustes` ×3, `piezas_perfil` ×2 y `piezas_tienda`.
+
+- **T-15f, por patrón** (sin componentes nuevos: todo queda en variables locales o widgets privados del mismo archivo, así que el neto es la diferencia de cada archivo):
+
+| Patrón | Dónde | Neto | Puntos de cambio (antes → después) |
+|---|---|---|---|
+| P-11 Sprint completado | Sarko, estrellas, y título con subtítulo (la separación, 16 en tablet y 4 en móvil, es un parámetro) | **−19** | 3 piezas: 2 → 1 cada una |
+| P-11 Startup en quiebra | Sarko triste, etiqueta de la causa y título | **−6** | 3 piezas: 2 → 1 cada una |
+| P-11 Juicio (resultado) | Sarko, corazones e insignia de vida | **−18** | 3 piezas: 2 → 1 cada una |
+| P-15 Examen (`pantalla_jefe.dart`) | `alerta` (ya existía, el móvil la copiaba), `_ReglasCrisis`, `_TiempoExtendido` y `_PieEnfrentar` (aviso sin conexión, «Enfrentar auditoría» y «Ahora no»); `_CrisisTablet` recibe las piezas armadas | **−36** | alerta, reglas, tiempo extendido y pie: 2 → 1 cada uno |
+| P-20 Sin vidas | `FilaVidas` y el Sarko triste | **−13** | 2 piezas: 2 → 1 cada una |
+| **Total** | | **−92** | 15 piezas: 30 → 15 |
+
+  - **El ahorro quedó por debajo de lo estimado** (≈ −235). La estimación contaba como repetidas piezas que no lo son: en las tres pantallas de fin de sprint, el contenido del móvil y el de tablet difieren en separaciones y, a veces, en la composición (el estado final de la Startup va en una caja con borde solo en tablet; en la quiebra, las separaciones del móvil son 10, 12, 8, 8 y 30, y las de tablet, 16).
+  - **No se tocaron** el cronómetro, el foco propio del Examen, la tecla P ni las políticas de error y sin conexión. `jefe_test` y `examen_tablet_test` pasan sin cambios.
+  - **No se hicieron:**
+    - **`ColumnaFinSprint(ilustracion, cuerpo)` (la opción de P-11):** el orden y las separaciones de las piezas cambian entre móvil y tablet en las cuatro pantallas, así que `ColumnaFinSprint` no podría repartirlas sola sin una lista de excepciones.
+    - **`_AlertaJefe` contra `ChipHoraCrisis` (`piezas_jefe.dart:216`):** no coinciden (relleno 12/6 contra 10-12/5, ícono 16 contra 14, texto flexible solo en la alerta) y son 2 usos.
+    - **`BotonTextoApp`:** «Ahora no» sigue con 2 usos, ahora en un solo lugar (`_PieEnfrentar`).
+    - **P-20 `PanelMarca` (`panel_marca.dart:184` y `:253`):** el logo y Sarko cambian de ancho, de posición y de contenedor en cada variante; un ayudante privado agregaría más líneas de las que quita (≈ +4).
+    - **P-20 `BarraJuego` contra `BarraJuegoTablet`:** la columna del progreso usa otro estilo (Leyenda contra Etiqueta) y otra separación (6 contra 8), y los parámetros compartidos son solo 6 campos; una clase de parámetros o un widget privado agregaría ≈ 8 líneas.
+    - **P-20 confeti (`confeti_sprint.dart`):** son coordenadas de Figma. Las `x` de tablet son las del móvil × 1,5, pero las `y` no siguen ninguna regla; derivarlas escondería los valores de Figma sin ahorrar líneas.
 
 ## Reglas de toda la T-15
 1. **Cero cambios visibles.** Se mantienen las mismas medidas, textos, colores, foco, orden de lectura, semántica y animaciones. La auditoría de `test/auditoria/` debe seguir verde **sin tocar sus escenas**. Las demás pruebas solo cambian si un lote lo autoriza de forma explícita (T-15d).

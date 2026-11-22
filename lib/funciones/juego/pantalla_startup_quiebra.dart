@@ -84,6 +84,14 @@ class _PantallaStartupQuiebraState extends ConsumerState<PantallaStartupQuiebra>
         textAlign: TextAlign.center,
       ),
     );
+    final sarko = IlustracionSarko(
+      pose: PoseSarko.triste,
+      diametro: 220,
+      anchoSarko: 176,
+      colorFondo: tokens.fondoSuperficieAlt,
+    );
+    final etiquetaCausa = ElementoOrdenado(orden: 2, child: EtiquetaQuiebra(causa: causa));
+    const titulo = ElementoOrdenado(orden: 1, child: TituloFinSprint(Textos.quiebraTitulo));
     final avisoReinicio = ElementoOrdenado(
       orden: 5,
       child: AvisoInformativo(
@@ -103,22 +111,13 @@ class _PantallaStartupQuiebraState extends ConsumerState<PantallaStartupQuiebra>
         escala: 1.7,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            IlustracionSarko(
-              pose: PoseSarko.triste,
-              diametro: 220,
-              anchoSarko: 176,
-              colorFondo: tokens.fondoSuperficieAlt,
-            ),
-            const SizedBox(height: 16),
-            ElementoOrdenado(orden: 2, child: EtiquetaQuiebra(causa: causa)),
-          ],
+          children: [sarko, const SizedBox(height: 16), etiquetaCausa],
         ),
       ),
       contenidoTablet: [
         indicadores,
         const SizedBox(height: 16),
-        const ElementoOrdenado(orden: 1, child: TituloFinSprint(Textos.quiebraTitulo)),
+        titulo,
         const SizedBox(height: 16),
         descripcion,
         const SizedBox(height: 16),
@@ -130,16 +129,11 @@ class _PantallaStartupQuiebraState extends ConsumerState<PantallaStartupQuiebra>
         const SizedBox(height: 16),
         indicadores,
         const SizedBox(height: 10),
-        IlustracionSarko(
-          pose: PoseSarko.triste,
-          diametro: 220,
-          anchoSarko: 176,
-          colorFondo: tokens.fondoSuperficieAlt,
-        ),
+        sarko,
         const SizedBox(height: 12),
-        ElementoOrdenado(orden: 2, child: EtiquetaQuiebra(causa: causa)),
+        etiquetaCausa,
         const SizedBox(height: 8),
-        const ElementoOrdenado(orden: 1, child: TituloFinSprint(Textos.quiebraTitulo)),
+        titulo,
         const SizedBox(height: 8),
         descripcion,
         const SizedBox(height: 30),

@@ -136,6 +136,19 @@ class _PantallaSinVidasState extends ConsumerState<PantallaSinVidas> {
           )
         : null;
 
+    // Corazones: vacíos sin vidas; se llenan si el servidor devuelve alguna.
+    final corazones = FilaVidas(
+      key: const ValueKey('vidas-sin-vidas'),
+      cantidad: cantidad,
+      tamano: 31.2,
+      hueco: 10.4,
+    );
+    final sarko = IlustracionSarko(
+      pose: PoseSarko.triste,
+      diametro: 220,
+      anchoSarko: 176,
+      colorFondo: tokens.fondoSuperficieAlt,
+    );
     final contenido = Column(
       children: [
         const SizedBox(height: 6),
@@ -145,24 +158,12 @@ class _PantallaSinVidasState extends ConsumerState<PantallaSinVidas> {
             alignment: Alignment.center,
             children: [
               Align(alignment: Alignment.centerLeft, child: cerrar),
-              // Corazones: vacíos sin vidas; se llenan si el servidor
-              // devuelve alguna.
-              FilaVidas(
-                key: const ValueKey('vidas-sin-vidas'),
-                cantidad: cantidad,
-                tamano: 31.2,
-                hueco: 10.4,
-              ),
+              corazones,
             ],
           ),
         ),
         const SizedBox(height: 18),
-        IlustracionSarko(
-          pose: PoseSarko.triste,
-          diametro: 220,
-          anchoSarko: 176,
-          colorFondo: tokens.fondoSuperficieAlt,
-        ),
+        sarko,
         const SizedBox(height: 16),
         ...textos,
         if (sugerencia != null) ...[const SizedBox(height: 30), sugerencia],
@@ -179,21 +180,7 @@ class _PantallaSinVidasState extends ConsumerState<PantallaSinVidas> {
         escala: 1.7,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            FilaVidas(
-              key: const ValueKey('vidas-sin-vidas'),
-              cantidad: cantidad,
-              tamano: 31.2,
-              hueco: 10.4,
-            ),
-            const SizedBox(height: 18),
-            IlustracionSarko(
-              pose: PoseSarko.triste,
-              diametro: 220,
-              anchoSarko: 176,
-              colorFondo: tokens.fondoSuperficieAlt,
-            ),
-          ],
+          children: [corazones, const SizedBox(height: 18), sarko],
         ),
       ),
       contenidoTablet: [
