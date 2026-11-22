@@ -103,6 +103,34 @@ class _PantallaInicioSesionState extends ConsumerState<PantallaInicioSesion> {
 
   /// 05 en tablet (Figma T05, 94:456): el panel de marca y el formulario en
   /// una columna de 470 con separación 16 y los controles a todo el ancho.
+  // Piezas iguales en móvil y tablet (T-15e).
+  List<Widget> _olvidoYError(BuildContext context, EstadoInicioSesion estado) => [
+    Align(
+      alignment: Alignment.centerLeft,
+      child: EnlaceTexto(
+        texto: Textos.olvidasteContrasena,
+        alPresionar: estado.enviando ? null : () => context.go(Rutas.recuperar),
+      ),
+    ),
+    if (estado.errorGeneral != null) ...[
+      const SizedBox(height: 8),
+      AvisoError(mensaje: estado.errorGeneral!),
+    ],
+  ];
+
+  Widget _botonEntrar(EstadoInicioSesion estado) => BotonApp(
+    texto: Textos.botonIniciarSesion,
+    alPresionar: _enviar,
+    cargando: estado.enviando,
+    textoCargando: Textos.iniciandoSesion,
+  );
+
+  Widget _botonCrearCuenta(BuildContext context, EstadoInicioSesion estado) => BotonApp(
+    texto: Textos.botonCrearUnaCuenta,
+    tipo: TipoBoton.secundario,
+    alPresionar: estado.enviando ? null : () => context.go(Rutas.registro),
+  );
+
   Widget _tablet(BuildContext context, EstadoInicioSesion estado, InicioSesionNotifier notifier) {
     final tokens = context.tokens;
     final estilos = context.estilos;
@@ -134,32 +162,13 @@ class _PantallaInicioSesionState extends ConsumerState<PantallaInicioSesion> {
             ),
             hueco,
             _campos(estado, notifier),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: EnlaceTexto(
-                texto: Textos.olvidasteContrasena,
-                alPresionar: estado.enviando ? null : () => context.go(Rutas.recuperar),
-              ),
-            ),
-            if (estado.errorGeneral != null) ...[
-              const SizedBox(height: 8),
-              AvisoError(mensaje: estado.errorGeneral!),
-            ],
+            ..._olvidoYError(context, estado),
             hueco,
-            BotonApp(
-              texto: Textos.botonIniciarSesion,
-              alPresionar: _enviar,
-              cargando: estado.enviando,
-              textoCargando: Textos.iniciandoSesion,
-            ),
+            _botonEntrar(estado),
             hueco,
             const _Separador(anchoLinea: double.infinity),
             hueco,
-            BotonApp(
-              texto: Textos.botonCrearUnaCuenta,
-              tipo: TipoBoton.secundario,
-              alPresionar: estado.enviando ? null : () => context.go(Rutas.registro),
-            ),
+            _botonCrearCuenta(context, estado),
             hueco,
             Text(
               Textos.notaSeguridad,
@@ -225,32 +234,13 @@ class _PantallaInicioSesionState extends ConsumerState<PantallaInicioSesion> {
               ),
               const SizedBox(height: 30),
               _campos(estado, notifier),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: EnlaceTexto(
-                  texto: Textos.olvidasteContrasena,
-                  alPresionar: estado.enviando ? null : () => context.go(Rutas.recuperar),
-                ),
-              ),
-              if (estado.errorGeneral != null) ...[
-                const SizedBox(height: 8),
-                AvisoError(mensaje: estado.errorGeneral!),
-              ],
+              ..._olvidoYError(context, estado),
               const SizedBox(height: 8),
-              BotonApp(
-                texto: Textos.botonIniciarSesion,
-                alPresionar: _enviar,
-                cargando: estado.enviando,
-                textoCargando: Textos.iniciandoSesion,
-              ),
+              _botonEntrar(estado),
               const SizedBox(height: 20),
               const _Separador(),
               const SizedBox(height: 16),
-              BotonApp(
-                texto: Textos.botonCrearUnaCuenta,
-                tipo: TipoBoton.secundario,
-                alPresionar: estado.enviando ? null : () => context.go(Rutas.registro),
-              ),
+              _botonCrearCuenta(context, estado),
               const SizedBox(height: 30),
               Text(
                 Textos.notaSeguridad,

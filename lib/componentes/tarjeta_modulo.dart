@@ -161,17 +161,11 @@ class TarjetaModulo extends StatelessWidget {
       ),
     );
 
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: accion,
       radio: radio,
-      semantica: (hijo) => Semantics(
-        button: true,
-        enabled: !_bloqueado,
-        label: _etiquetaSemantica,
-        onTap: accion,
-        excludeSemantics: true,
-        child: hijo,
-      ),
+      etiqueta: _etiquetaSemantica,
+      habilitado: !_bloqueado,
       child: tarjeta,
     );
   }

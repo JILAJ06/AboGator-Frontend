@@ -45,16 +45,10 @@ class BotonIconoCaja extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: alPresionar,
       radio: radio,
-      semantica: (contenido) => Semantics(
-        button: true,
-        label: etiqueta,
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: contenido,
-      ),
+      etiqueta: etiqueta,
       child: Container(
         key: claveCaja,
         width: lado,

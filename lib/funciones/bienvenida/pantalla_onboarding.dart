@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/boton_app.dart';
+import '../../componentes/desplazable_alto_minimo.dart';
 import '../../componentes/paginador_puntos.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
@@ -299,14 +300,9 @@ class _OnboardingTablet extends StatelessWidget {
       ),
     );
 
-    Widget desplazable(Widget hijo) => LayoutBuilder(
-      builder: (context, restricciones) => SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: MedidasAdaptativas.margen, vertical: 24),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: math.max(0, restricciones.maxHeight - 48)),
-          child: Center(child: hijo),
-        ),
-      ),
+    Widget desplazable(Widget hijo) => DesplazableAltoMinimo(
+      relleno: const EdgeInsets.symmetric(horizontal: MedidasAdaptativas.margen, vertical: 24),
+      child: Center(child: hijo),
     );
 
     final omitir = Align(

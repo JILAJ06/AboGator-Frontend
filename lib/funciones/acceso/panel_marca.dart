@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 
+import '../../componentes/desplazable_alto_minimo.dart';
 import '../../componentes/logo_app.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
@@ -369,20 +370,13 @@ class _ColumnaFormulario extends StatelessWidget {
             child: enColumna(Align(alignment: Alignment.centerLeft, child: cabeza)),
           ),
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, restricciones) => SingleChildScrollView(
-              key: const ValueKey('columna-formulario'),
-              padding: const EdgeInsets.symmetric(
-                horizontal: MedidasAdaptativas.margen,
-                vertical: relleno,
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: math.max(0, restricciones.maxHeight - 2 * relleno),
-                ),
-                child: enColumna(formulario),
-              ),
+          child: DesplazableAltoMinimo(
+            claveDesplazable: const ValueKey('columna-formulario'),
+            relleno: const EdgeInsets.symmetric(
+              horizontal: MedidasAdaptativas.margen,
+              vertical: relleno,
             ),
+            child: enColumna(formulario),
           ),
         ),
       ],

@@ -304,18 +304,12 @@ class _FilaRecordatorio extends StatelessWidget {
       key: const ValueKey('notif-recordatorio'),
       children: [
         Expanded(
-          child: AccionEnfocable(
+          child: AccionEnfocable.boton(
             key: const ValueKey('fila-hora-recordatorio'),
             alPresionar: alAbrir,
             nodoFoco: nodoFoco,
             radio: 12,
-            semantica: (hijo) => Semantics(
-              button: true,
-              label: Textos.cambiarHoraSemantica(hora),
-              onTap: alAbrir,
-              excludeSemantics: true,
-              child: hijo,
-            ),
+            etiqueta: Textos.cambiarHoraSemantica(hora),
             child: Container(
               constraints: const BoxConstraints(minHeight: FilaAjuste.altoMinimo),
               padding: EdgeInsets.fromLTRB(relleno, 12, 8, 12),

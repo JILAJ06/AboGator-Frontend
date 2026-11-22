@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/adaptativo/clase_pantalla.dart';
 import '../core/utilidades/extensiones_contexto.dart';
+import 'desplazable_alto_minimo.dart';
 
 /// Pantallas de resultado en tablet horizontal (T19, T19b, T20, T29 y T30;
 /// Figma `98:5016`…): sin riel; a la izquierda un panel fondo/superficie de la
@@ -74,25 +75,18 @@ class DisposicionResultadoTablet extends StatelessWidget {
             Expanded(
               child: SafeArea(
                 left: false,
-                child: LayoutBuilder(
-                  builder: (context, caja) => SingleChildScrollView(
-                    key: const ValueKey('columna-resultado'),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: MedidasAdaptativas.margen,
-                      vertical: relleno,
-                    ),
+                child: DesplazableAltoMinimo(
+                  claveDesplazable: const ValueKey('columna-resultado'),
+                  relleno: const EdgeInsets.symmetric(
+                    horizontal: MedidasAdaptativas.margen,
+                    vertical: relleno,
+                  ),
+                  child: Center(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: math.max(0, caja.maxHeight - 2 * relleno),
+                      constraints: const BoxConstraints(
+                        maxWidth: MedidasAdaptativas.columnaFormulario,
                       ),
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            maxWidth: MedidasAdaptativas.columnaFormulario,
-                          ),
-                          child: contenido,
-                        ),
-                      ),
+                      child: contenido,
                     ),
                   ),
                 ),

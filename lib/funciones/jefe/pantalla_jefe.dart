@@ -14,6 +14,7 @@ import '../../componentes/aviso_snack.dart';
 import '../../componentes/barra_juego.dart';
 import '../../componentes/boton_app.dart';
 import '../../componentes/composicion_juego_tablet.dart';
+import '../../componentes/desplazable_alto_minimo.dart';
 import '../../componentes/dialogo_confirmacion.dart';
 import '../../componentes/disposicion_resultado_tablet.dart';
 import '../../componentes/esqueleto_pantalla.dart';
@@ -835,14 +836,9 @@ class _DecisionState extends ConsumerState<_Decision> {
                 )
               else
                 SafeArea(
-                  child: LayoutBuilder(
-                    builder: (context, restricciones) => SingleChildScrollView(
-                      key: const ValueKey('decision-desplazable'),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minHeight: restricciones.maxHeight),
-                        child: IntrinsicHeight(child: contenido),
-                      ),
-                    ),
+                  child: DesplazableAltoMinimo(
+                    claveDesplazable: const ValueKey('decision-desplazable'),
+                    child: IntrinsicHeight(child: contenido),
                   ),
                 ),
               // Chip de daño o de fallo, sobre la barra del Jefe (en tablet,

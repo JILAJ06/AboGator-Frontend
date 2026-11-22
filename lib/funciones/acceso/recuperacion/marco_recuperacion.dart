@@ -1,7 +1,6 @@
-import 'dart:math' as math;
-
 import 'package:material_ui/material_ui.dart';
 
+import '../../../componentes/desplazable_alto_minimo.dart';
 import '../../../componentes/sarko_imagen.dart';
 import '../../../componentes/titulo_enfocado.dart';
 import '../../../core/adaptativo/clase_pantalla.dart';
@@ -56,29 +55,24 @@ class MarcoRecuperacion extends StatelessWidget {
     final cabeza = cabecera;
     return Scaffold(
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, restricciones) => SingleChildScrollView(
-            key: const ValueKey('recuperacion-desplazable'),
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-            // El pie queda abajo sin medidas intrínsecas: la columna mide al
-            // menos el alto disponible y reparte el espacio sobrante.
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: math.max(0, restricciones.maxHeight - 36)),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // El pie queda abajo sin medidas intrínsecas: la columna mide al menos
+        // el alto disponible y reparte el espacio sobrante.
+        child: DesplazableAltoMinimo(
+          claveDesplazable: const ValueKey('recuperacion-desplazable'),
+          relleno: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (cabeza != null) Align(alignment: Alignment.centerLeft, child: cabeza),
-                      ...cuerpo,
-                    ],
-                  ),
-                  if (pie != null) Padding(padding: const EdgeInsets.only(top: 24), child: pie),
+                  if (cabeza != null) Align(alignment: Alignment.centerLeft, child: cabeza),
+                  ...cuerpo,
                 ],
               ),
-            ),
+              if (pie != null) Padding(padding: const EdgeInsets.only(top: 24), child: pie),
+            ],
           ),
         ),
       ),

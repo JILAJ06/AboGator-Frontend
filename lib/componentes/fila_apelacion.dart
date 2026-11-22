@@ -87,19 +87,13 @@ class FilaApelacion extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final estilos = context.estilos;
-    return AccionEnfocable(
+    return AccionEnfocable.boton(
       alPresionar: alPresionar,
       radio: 12,
       nodoFoco: nodoFoco,
-      semantica: (hijo) => Semantics(
-        button: true,
-        selected: seleccionada,
-        enabled: alPresionar != null,
-        label: Textos.filaApelacionSemantica(titulo, tema, dia, dias),
-        onTap: alPresionar,
-        excludeSemantics: true,
-        child: hijo,
-      ),
+      etiqueta: Textos.filaApelacionSemantica(titulo, tema, dia, dias),
+      habilitado: alPresionar != null,
+      seleccionado: seleccionada,
       child: Container(
         color: seleccionada == true ? tokens.fondoDestacado : null,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
