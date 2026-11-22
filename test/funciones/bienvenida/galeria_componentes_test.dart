@@ -126,7 +126,8 @@ void main() {
     expect(find.byType(FilaResumenExamen), findsOneWidget);
     expect(find.byType(TrofeoCertificado), findsOneWidget);
     expect(find.byType(PaginadorPuntos), findsOneWidget);
-    expect(find.byType(SarkoImagen), findsNWidgets(14)); // 5 + 5 paneles + 3 ilustraciones y la de T34 (T-13b)
+    // 5 + 5 paneles + 3 ilustraciones y la de T34 (T-13b)
+    expect(find.byType(SarkoImagen), findsNWidgets(14));
     expect(
       find.byType(LogoApp),
       findsNWidgets(26),
