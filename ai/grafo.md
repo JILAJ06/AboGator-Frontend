@@ -2,7 +2,7 @@
 
 Mapa navegable del proyecto: qué existe, dónde está y con qué se relaciona. **Se actualiza cada vez que se crea, mueve, renombra o elimina algo** (reglas en `ai/conocimiento/06-grafo-de-conocimiento.md`). Si algo de aquí no coincide con la realidad, el grafo está mal y hay que corregirlo.
 
-Última actualización: 2026-11-21 · por Claude Chat · tarea: cierre T-13b (ronda 2)
+Última actualización: 2026-11-21 · por Claude Chat · tarea: T-15a (ronda 2)
 
 ## Cómo leerlo
 - Cada fila es un **nodo** con un ID único. La columna **Relaciones** son las **aristas**: `→` apunta a otro nodo, con un verbo corto (`usa`, `muestra`, `navega a`, `implementa`, `depende de`, `define`).
@@ -34,7 +34,7 @@ flowchart LR
 | DOC-07 | Especificación de componentes | ai/conocimiento/07-componentes.md | hecho | → define COMP-*; ← lo usan T-01 y las tareas de pantallas |
 | DOC-08 | Accesibilidad (WCAG 2.1 AA): matriz, contrastes, orden de foco, alternativas al gesto, atajos y verificación manual (lo creó Claude Code en T-13; Claude Chat lo revisa) | ai/conocimiento/08-accesibilidad.md | hecho | ← lo verifica TEST-AUDITORIA; → aplica a todas las PANT-* |
 | GRAFO | Este archivo | ai/grafo.md | hecho | ← lo actualizan Claude Chat y Claude Code |
-| SIG | Tarea actual (T-13b: pantallas de cuenta, legal y notificaciones) | ai/siguiente.md | hecho | → apunta a la tarea vigente |
+| SIG | Tarea actual (T-15a: auditoría de duplicación) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
 | REP | Reporte | ai/reporte.md | hecho | ← lo escribe Claude Code; → responde a SIG |
 
 ## 2 · Externos
@@ -73,6 +73,7 @@ flowchart LR
 | T-12d | 12d-tablet-buzon-y-examen | hecho | T19, T19b, T20–T23, T27–T30 | T-12 |
 | T-13 | 13-accesibilidad-y-pulido | hecho | todas | T-12 |
 | T-13b | 13b-pantallas-cuenta-y-legal | hecho | recuperar contraseña (31–31e), Aviso, Términos, Notificaciones de racha (34, 34b, 34c) | T-13 |
+| T-15a | 15a-auditoria-de-duplicacion | en curso | análisis de duplicación (sin cambios de código) | T-13b |
 | T-15 | 15-componentes-globales | planeado | optimización: componentes globales, menos vistas y duplicación (el usuario explicará el alcance; **recordárselo antes de T-14**) | T-13b |
 | T-14 | 14-integracion-api | planeado | REPO-* → HTTP | EXT-BACK listo, T-15 |
 
@@ -476,3 +477,4 @@ Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
 - 2026-11-21 · Claude Code · T-13b: `en curso` para REPO-AUTH, MOCK-AUTH, REPO-AJUSTES, LOCAL-AJUSTES, MOCK-AJUSTES, TEXTOS, RUTAS, ENRUTADOR, PANEL-MARCA, COMP-NOTIFICACION, COMP-PIEZAS-AJUSTES, CODIGO-PANT-05, 06, 25 y 26, PANT-GALERIA y las pruebas TEST-GALERIA, TEST-AUDITORIA, TEST-ACCESO, TEST-PERFIL y TEST-AJUSTES. Nodos nuevos: MODELO-NOTIF, TEXTOS-LEGALES, EST-RECUPERACION, MARCO-RECUPERACION, CODIGO-PANT-31, CODIGO-PANT-32, EST-NOTIFICACIONES, CODIGO-PANT-34, SELECTOR-HORA, COMP-ILUSTRACION-INSIGNIA, COMP-FILA-ACORDEON, TEST-RECUPERACION, TEST-LEGAL, TEST-NOTIFICACIONES, TEST-COMP-CUENTA, DEC-NOTIF-RUTA y DEC-LEGAL-PUSH. Obsoleto: PANT-PENDIENTE (sin uso). Faltan las filas PANT-31 a PANT-34 (son de Claude Chat).
 - 2026-11-21 · Claude Code · T-13b ronda 2: `en curso` para COMP-PIEZAS-AJUSTES, COMP-ILUSTRACION-INSIGNIA, CODIGO-PANT-34, PANT-GALERIA, TEST-NOTIFICACIONES y TEST-GALERIA. Nodo nuevo: COMP-DISPOSICION-ILUSTRACION. Sin obsoletos nuevos.
 - 2026-11-21 · Claude Chat · cierre de T-13b (PR mergeado): nodos en `hecho`. Siguen: reexportar a 3x, nombres de módulos, verificación legal y T-15 (componentes globales; recordar al usuario) antes de T-14.
+- 2026-11-21 · Claude Chat · T-15a `en curso`: auditoría de duplicación para los componentes globales (solo análisis). El orden de módulos (Licencias, Datos, Delitos, Contratos, Auditoría) queda registrado y se aplica con la API.
