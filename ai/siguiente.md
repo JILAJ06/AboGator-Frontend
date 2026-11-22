@@ -1,46 +1,55 @@
-# T-15a · Auditoría de duplicación (solo análisis, sin cambiar la app)
+# T-15b · Limpieza y piezas pequeñas
 
-**Rama:** `15a-auditoria-de-duplicacion` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-15a**).
-**Figma:** no hace falta.
+**Rama:** `15b-limpieza-y-piezas-pequenas` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-15b**).
+**Figma:** no hace falta. Es un lote de **cero cambios visibles**: las reglas 1 a 8 de `ai/conocimiento/09-duplicacion.md` mandan. Léelas antes de empezar.
 
-## Contexto: qué es la T-15
-Hoy `lib/` tiene ~35 500 líneas (77 archivos solo en `lib/componentes/`) y `test/` ~19 700. Muchas pantallas repiten los mismos bloques (botones con sus estados, campos, filas, encabezados, estados de carga/vacío/error, hojas y diálogos, versiones móvil y tablet casi iguales, textos con el mismo estilo, sombras, espaciados). El objetivo de la T-15 es **pasar todo lo que se repita a componentes globales** que se llamen con parámetros (`BotonApp(tipo:, etiqueta:)`), de modo que cambiar algo en un solo lugar cambie toda la app, con **menos líneas** y **sin cambiar nada de lo que ve o hace el usuario**.
+## Objetivo
+Primer lote de la T-15: borrar el código muerto y pasar a componentes las piezas pequeñas que se repiten (agarre de hoja, botón cuadrado con ícono, píldora, aviso). Debe quedar **menos código, la misma app y las mismas pruebas en verde** (suite completa, auditoría sin tocar sus escenas).
 
-Es una tarea grande y delicada (la app tiene 3025 pruebas que la protegen), así que se hace **por lotes**. Esta T-15a es el primer paso: **solo mirar y medir**. No cambies ningún archivo de `lib/` ni de `test/`.
+## Decisiones ya tomadas (respuestas a D1–D6 de la T-15a)
+- **P-03 (color de texto redundante) NO se hace:** se conserva el `copyWith(color: tokens.textoPrimario)` por claridad y por seguridad en modo oscuro (D6). Sácalo del lote.
+- **D2:** `mostrarAviso` usa el estilo `SnackBar` actual del tema; `mostrarAvisoBreve` se borra.
+- **D3:** `mostrarAviso` queda exenta de la galería.
+- **D4:** las 21 clases públicas de `lib/componentes/` que solo usa su propio archivo se vuelven **privadas** (`_Nombre`), siempre que `flutter analyze` y las pruebas sigan limpios. Si alguna prueba o la galería la importa, déjala pública y anótala en el reporte.
+- **D5:** no se crea nada para «Ahora no» (solo 2 usos).
 
-## Qué hacer
-1. **Mide el punto de partida:** líneas por carpeta de `lib/` (`componentes`, `funciones/<área>`, `core`, `datos`), los 20 archivos más largos y el número de pruebas.
-2. **Busca duplicación** en `lib/funciones/` y `lib/componentes/`, con estas lupas (agrega las que descubras):
-   - Botones, campos, casillas, enlaces, chips y filas **construidos a mano** en vez de usar `BotonApp`, `CampoTextoApp`, etc.; variantes que podrían ser un parámetro.
-   - **Marcos de pantalla** repetidos (Scaffold, SafeArea, padding de 24/32, columna máxima 470/640, botón atrás o cerrar, título con foco, pie fijo con botones).
-   - Pares **móvil/tablet** con el mismo contenido copiado (`_XxxTablet` vs móvil).
-   - **Estados de carga, vacío y error** repetidos (esqueletos, mensajes con reintento).
-   - **Hojas y diálogos** (`showModalBottomSheet`, `showGeneralDialog`, `HojaLateral`, confirmaciones) con el mismo esqueleto.
-   - **Tarjetas, filas e insignias** (borde, radio, relleno, sombra) con valores copiados; colores, radios, espacios y `TextStyle` escritos a mano en vez de tokens.
-   - **Semántica y foco** repetidos (anuncios, `FocoRetorno`, `Semantics` con el mismo patrón).
-   - Funciones o clases **casi idénticas** (misma estructura, cambian 2–3 valores).
-   - **Código muerto:** archivos, clases o métodos sin uso (p. ej. `PantallaPendiente`), textos sin referencias, imports que sobran.
-   - Pruebas con **ayudantes repetidos** (pumps, tamaños, repositorios falsos) que puedan ir a un ayudante común.
-3. **Entrega un catálogo** en un archivo nuevo `ai/conocimiento/09-duplicacion.md` (una fila por patrón): *patrón · dónde está (archivo:línea, mínimo 3 ocurrencias) · líneas aproximadas repetidas · componente propuesto y su API (parámetros) · riesgo (bajo, medio, alto) y por qué · pruebas que lo cubren*. Ordena por **ahorro de líneas ÷ riesgo**.
-4. **Propón los lotes** de la T-15b en adelante (cada lote = una rama, un PR, de 3 a 8 patrones afines, con el orden: primero lo seguro y compartido, al final lo delicado, como el mazo de tarjetas, el Examen y el juego). Cada lote con su ahorro estimado de líneas y qué pruebas lo protegen.
-5. **Reglas que debe cumplir toda la T-15** (déjalas escritas en `09-duplicacion.md`):
-   - Cero cambios visibles: mismas medidas, textos, colores, foco, semántica y animaciones (la auditoría de `test/auditoria/` debe seguir verde sin tocar sus escenas).
-   - Los componentes viven en `lib/componentes/`, con nombre en español, documentados con un comentario breve y una entrada en la galería.
-   - Un componente nuevo solo se crea si se usa **3 veces o más**; si no, se deja donde está.
-   - Se borra lo que quede sin uso; se actualiza el grafo en cada lote.
-   - Las reglas del juego, los repositorios y los mocks no se tocan.
+## 1 · Código muerto (borrar)
+Según la tabla de `09-duplicacion.md`:
+- `lib/app/pantalla_pendiente.dart` completo, y su nodo **PANT-PENDIENTE** en el grafo (déjalo `obsoleto` con la nota «borrado en T-15b» o quítalo según la regla de `06-grafo-de-conocimiento.md`).
+- `mostrarAvisoBreve` (`lib/funciones/acceso/aviso_error.dart:41`).
+- Textos sin uso: `buzonApelaciones`, `veredictoAnuncio`, `sinCambios`, `noSeleccionada`, `noMarcada`, `lineaClave`, `notificacionApelacionPie`. **Antes de borrar cada uno** vuelve a buscar referencias en `lib/` **y en `test/`**; si una prueba lo usa, avísalo como D# en vez de borrarlo.
+- `MedidasAdaptativas.lienzoTablet` y `Rutas.juicioApelacion` (esta última puede quedar como comentario si documenta el patrón de la ruta).
+- Las 21 clases públicas que pasan a privadas (arriba, D4).
+
+## 2 · P-02 · `mostrarAviso`
+Un solo ayudante (`lib/componentes/aviso_snack.dart` o donde ya viva `aviso_error.dart`) que reemplace los 9 bloques `ScaffoldMessenger…hideCurrentSnackBar()..showSnackBar(SnackBar(key, content: Semantics(liveRegion: true, child: Text(…))))` (buzón, juicio, Examen ×2, resultado, tienda, perfil, ajustes y los que encuentres). Firma sugerida: `mostrarAviso(BuildContext, String texto, {Key? clave})`. Conserva las **claves** que usan las pruebas y el anuncio en región en vivo.
+
+## 3 · P-06 · `AgarreHoja`
+`AgarreHoja()` (40 × 5, radio 3, `bordeDefault`, excluido de la semántica, **clave `agarre`**) en `panel_evidencia`, `panel_veredicto`, `piezas_jefe` y `selector_hora`.
+
+## 4 · P-07 · `BotonIconoCaja`
+`BotonIconoCaja({icono, etiqueta, alPresionar, clave?})`: `AccionEnfocable` + semántica de botón + caja de 48 con radio 12, `fondoSuperficie` y borde. Úsalo en `boton_atras`, `boton_cerrar`, `encabezado_modulo` y el de `selector_hora`; `BotonAtras` y `BotonCerrar` quedan como envoltorios de una línea (conservan sus nombres y claves porque muchas pruebas los usan). Si alguno difiere en un detalle (por ejemplo tamaño del ícono o foco), el componente lo recibe por parámetro; **no cambies ningún valor visible**.
+
+## 5 · P-18 · `Pildora`
+`Pildora({fondo, relleno, hijo})` (radio 999) para las píldoras de `piezas_tienda`, `panel_evidencia`, `piezas_apelacion`, `piezas_jefe` y `pantalla_jefe` (2). `PildoraComodin`, `PildoraPlazo` y `PildoraRepaso` pueden quedar como envoltorios o usarla por dentro si coincide exactamente; si no, déjalas.
+
+## Reglas del lote
+- Un componente nuevo solo se crea con **3 usos o más** (aquí los 4 patrones lo cumplen). Cada uno con su comentario de documentación y **una entrada en la galería** (`AgarreHoja`, `BotonIconoCaja` y `Pildora`; `mostrarAviso` está exenta).
+- No cambies medidas, colores, textos, foco, semántica ni animaciones. La auditoría (`test/auditoria/`) debe pasar **sin tocar sus escenas**; las demás pruebas solo cambian si un símbolo borrado o hecho privado lo exige (anótalo).
+- No toques reglas del juego, repositorios ni mocks. Sin dependencias nuevas.
+- Actualiza el grafo: nodos COMP-* nuevos (`AgarreHoja`, `BotonIconoCaja`, `Pildora`, `mostrarAviso`), obsoletos y el registro de cambios; y la tabla de líneas de `09-duplicacion.md` (sección «Resultados por lote», nueva, con **líneas de `lib/` antes y después** del lote).
 
 ## Archivos permitidos
-Solo crear `ai/conocimiento/09-duplicacion.md` y reescribir `ai/reporte.md`; agregar `09` al índice de conocimiento y al grafo (`DOC-09`). **No modifiques `lib/` ni `test/`.** Sin dependencias nuevas.
+`lib/componentes/`, `lib/core/textos/textos.dart`, `lib/core/adaptativo/clase_pantalla.dart`, `lib/app/` (rutas y la pantalla pendiente), las pantallas de `lib/funciones/` solo para llamar a los componentes nuevos, la galería, `test/` solo para lo que un símbolo borrado o privado exija y para pruebas nuevas de los componentes, y `ai/`.
 
 ## Criterios de aceptación
-- [ ] Medición inicial de líneas y pruebas.
-- [ ] Catálogo con al menos 15 patrones (o todos los que haya), cada uno con 3+ ocurrencias ubicadas, ahorro estimado, API propuesta y riesgo.
-- [ ] Lotes propuestos con orden, ahorro y pruebas que los protegen.
-- [ ] Lista de código muerto.
-- [ ] Reglas de la T-15 escritas en `09-duplicacion.md`.
-- [ ] Ningún cambio en `lib/` ni `test/`; commits sin prefijo y sin menciones a Claude.
+- [ ] Código muerto borrado (con la comprobación de referencias en `lib/` y `test/`).
+- [ ] `mostrarAviso`, `AgarreHoja`, `BotonIconoCaja` y `Pildora` creados, usados en todos los lugares del catálogo y con pruebas y galería (salvo `mostrarAviso`).
+- [ ] Las 21 clases públicas solo-locales ahora privadas (o anotadas las excepciones).
+- [ ] Líneas de `lib/` antes y después en `09-duplicacion.md` (ahorro esperado ≈ 200–280).
+- [ ] `dart format`, `flutter analyze` limpios y toda la suite verde (≥ 3025 pruebas); auditoría sin tocar.
+- [ ] Commits sin prefijo y sin menciones a Claude.
 
 ## Para el reporte
-Resumen de hallazgos (los 5 patrones que más líneas ahorrarían), dudas numeradas (D1, D2…) y el plan de lotes para que yo lo revise y escriba la T-15b.
+Líneas antes y después, número de pruebas, qué clases públicas no se pudieron hacer privadas y por qué, textos que no se borraron por usarlos una prueba, y dudas numeradas (D1, D2…).
