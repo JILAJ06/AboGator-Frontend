@@ -139,7 +139,6 @@ class ChipValor extends StatelessWidget {
 /// sin [alPresionar] no es tocable ni recibe foco.
 class FilaAjuste extends StatelessWidget {
   const FilaAjuste({
-    required this.icono,
     required this.titulo,
     required this.detalle,
     required this.control,
@@ -148,12 +147,19 @@ class FilaAjuste extends StatelessWidget {
     this.valorSemantico,
     this.etiquetaSemantica,
     this.nodoFoco,
+    this.icono,
+    this.rellenoHorizontal = 16,
     super.key,
   });
 
   static const double altoMinimo = 56;
 
-  final IconData icono;
+  /// Ícono de 22 a la izquierda; sin él, el texto empieza en el relleno
+  /// (filas de Notificaciones, Figma 34; T-13b).
+  final IconData? icono;
+
+  /// Relleno a los lados (16; 20 en las Notificaciones de tablet).
+  final double rellenoHorizontal;
   final String titulo;
   final String detalle;
   final Widget control;
@@ -175,12 +181,14 @@ class FilaAjuste extends StatelessWidget {
     final estilos = context.estilos;
     final contenido = Container(
       constraints: const BoxConstraints(minHeight: altoMinimo),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: rellenoHorizontal, vertical: 12),
       child: LayoutBuilder(
         builder: (context, restricciones) => Row(
           children: [
-            IconoApp(icono, tamano: 22, color: tokens.textoPrimario),
-            const SizedBox(width: 12),
+            if (icono case final icono?) ...[
+              IconoApp(icono, tamano: 22, color: tokens.textoPrimario),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

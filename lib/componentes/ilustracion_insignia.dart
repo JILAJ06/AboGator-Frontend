@@ -13,6 +13,7 @@ class InsigniaCircular extends StatelessWidget {
     required this.icono,
     required this.color,
     this.diametro = 64,
+    this.tamanoIcono,
     this.etiqueta,
     super.key,
   });
@@ -20,6 +21,9 @@ class InsigniaCircular extends StatelessWidget {
   final IconData icono;
   final Color color;
   final double diametro;
+
+  /// Por defecto, el 44 % del diámetro (28 en la de 64; la de 84 de 34 usa 40).
+  final double? tamanoIcono;
   final String? etiqueta;
 
   @override
@@ -33,7 +37,11 @@ class InsigniaCircular extends StatelessWidget {
         border: Border.all(color: context.tokens.fondoApp, width: 4),
       ),
       alignment: Alignment.center,
-      child: IconoApp(icono, tamano: diametro * 0.44, color: context.tokens.textoEnPrimario),
+      child: IconoApp(
+        icono,
+        tamano: tamanoIcono ?? diametro * 0.44,
+        color: context.tokens.textoEnPrimario,
+      ),
     );
     final texto = etiqueta;
     if (texto == null) return ExcludeSemantics(child: circulo);
