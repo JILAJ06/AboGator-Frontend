@@ -573,6 +573,30 @@ class _ResultadoState extends State<_Resultado> {
         ),
       ),
     );
+    final sarko = IlustracionSarko(
+      pose: ganada ? PoseSarko.alegre : PoseSarko.triste,
+      diametro: 230,
+      anchoSarko: 184,
+      colorFondo: tokens.fondoDestacado,
+    );
+    final vidas = ElementoOrdenado(
+      orden: 2,
+      child: FilaVidas(
+        key: const ValueKey('vidas-resultado'),
+        cantidad: despues,
+        tamano: 31.2,
+        hueco: 10.4,
+      ),
+    );
+    final insigniaVida = ElementoOrdenado(
+      orden: 3,
+      child: InsigniaVida(
+        key: const ValueKey('insignia-resultado'),
+        texto: insignia,
+        destacada: recuperada,
+        grande: true,
+      ),
+    );
     return ColumnaFinSprint(
       // T22b (Figma 100:4281): Sarko, las vidas y la insignia × 1.6 a la
       // izquierda; título, texto, días de repaso y botones a la derecha.
@@ -582,32 +606,11 @@ class _ResultadoState extends State<_Resultado> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IlustracionSarko(
-              pose: ganada ? PoseSarko.alegre : PoseSarko.triste,
-              diametro: 230,
-              anchoSarko: 184,
-              colorFondo: tokens.fondoDestacado,
-            ),
+            sarko,
             const SizedBox(height: 16),
-            ElementoOrdenado(
-              orden: 2,
-              child: FilaVidas(
-                key: const ValueKey('vidas-resultado'),
-                cantidad: despues,
-                tamano: 31.2,
-                hueco: 10.4,
-              ),
-            ),
+            vidas,
             const SizedBox(height: 12),
-            ElementoOrdenado(
-              orden: 3,
-              child: InsigniaVida(
-                key: const ValueKey('insignia-resultado'),
-                texto: insignia,
-                destacada: recuperada,
-                grande: true,
-              ),
-            ),
+            insigniaVida,
           ],
         ),
       ),
@@ -620,32 +623,11 @@ class _ResultadoState extends State<_Resultado> {
       ],
       contenido: [
         const SizedBox(height: 20),
-        IlustracionSarko(
-          pose: ganada ? PoseSarko.alegre : PoseSarko.triste,
-          diametro: 230,
-          anchoSarko: 184,
-          colorFondo: tokens.fondoDestacado,
-        ),
+        sarko,
         const SizedBox(height: 16),
-        ElementoOrdenado(
-          orden: 2,
-          child: FilaVidas(
-            key: const ValueKey('vidas-resultado'),
-            cantidad: despues,
-            tamano: 31.2,
-            hueco: 10.4,
-          ),
-        ),
+        vidas,
         const SizedBox(height: 12),
-        ElementoOrdenado(
-          orden: 3,
-          child: InsigniaVida(
-            key: const ValueKey('insignia-resultado'),
-            texto: insignia,
-            destacada: recuperada,
-            grande: true,
-          ),
-        ),
+        insigniaVida,
         const SizedBox(height: 16),
         tituloResultado,
         const SizedBox(height: 8),
