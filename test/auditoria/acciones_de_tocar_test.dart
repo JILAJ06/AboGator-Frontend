@@ -1,4 +1,4 @@
-import 'dart:ui' show Tristate;
+import 'dart:ui' show CheckedState, Tristate;
 
 import 'package:abogator/datos/modelos/ajustes.dart';
 import 'package:flutter/semantics.dart';
@@ -8,9 +8,10 @@ import 'package:material_ui/material_ui.dart';
 import 'catalogo.dart';
 import 'matriz.dart';
 
-/// Todo control con semántica de botón o de enlace, habilitado y con
-/// etiqueta, expone la acción de tocar al lector de pantalla (corrección de
-/// la T-15e). Recorre las mismas escenas de la auditoría en sus cuatro
+/// Todo control con semántica de botón, enlace, casilla (`checked`: casillas,
+/// opciones de justificación, selector de tamaño) o interruptor (`toggled`),
+/// habilitado, visible y con etiqueta, expone la acción de tocar al lector de
+/// pantalla (corrección de la T-15e; casillas e interruptores desde la T-15d). Recorre las mismas escenas de la auditoría en sus cuatro
 /// tamaños; la semántica no cambia con el tema ni con la escala del texto.
 void main() {
   final todas = <String, List<Escena>>{
@@ -40,14 +41,18 @@ void main() {
   }
 }
 
-/// Etiquetas de los botones o enlaces habilitados que no tienen la acción de
-/// tocar.
+/// Etiquetas de los botones, enlaces, casillas e interruptores habilitados que
+/// no tienen la acción de tocar.
 List<String> controlesSinAccion(WidgetTester tester) {
   final faltan = <String>[];
   void visitar(SemanticsNode nodo) {
     final datos = nodo.getSemanticsData();
     final flags = datos.flagsCollection;
-    final control = flags.isButton || flags.isLink;
+    final control =
+        flags.isButton ||
+        flags.isLink ||
+        flags.isChecked != CheckedState.none ||
+        flags.isToggled != Tristate.none;
     final deshabilitado = flags.isEnabled == Tristate.isFalse;
     if (control && !deshabilitado && !nodo.isInvisible && datos.label.trim().isNotEmpty) {
       if (!datos.hasAction(SemanticsAction.tap)) faltan.add(datos.label);
