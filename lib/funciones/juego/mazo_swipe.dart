@@ -1,12 +1,15 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart' show CustomSemanticsAction;
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../componentes/anillo_foco.dart';
 import '../../componentes/pila_tarjetas.dart';
 import '../../componentes/sello_veredicto.dart';
+import '../../componentes/tinte_veredicto.dart';
 import '../../core/textos/textos.dart';
 import '../../datos/modelos/tarjeta.dart';
 import 'logica_swipe.dart';
@@ -583,4 +586,60 @@ class _FocoTarjetaState extends State<_FocoTarjeta> {
       ),
     );
   }
+}
+
+/// Teclado del mazo, igual en el juego, el Examen y el juicio. Flechas: ←
+/// ilegal, → legal, ↑ condicional y ↓ escalar previsualizan. Con una
+/// previsualización, Enter (o el del teclado numérico) la confirma y Esc la
+/// cancela. Sin ella, Enter y Esc siguen su camino (por ejemplo, Enter activa
+/// el botón de veredicto con foco). Solo cuenta pulsar o mantener una tecla.
+///
+/// Cada pantalla pone antes sus guardias y atajos propios (mazo sin montar,
+/// juicio resolviéndose, fase del Examen, tecla P).
+KeyEventResult teclearMazo(MazoSwipeState mazo, KeyEvent evento) {
+  if (evento is! KeyDownEvent && evento is! KeyRepeatEvent) return KeyEventResult.ignored;
+  final flecha = switch (evento.logicalKey) {
+    LogicalKeyboardKey.arrowLeft => Veredicto.ilegal,
+    LogicalKeyboardKey.arrowRight => Veredicto.legal,
+    LogicalKeyboardKey.arrowUp => Veredicto.condicional,
+    LogicalKeyboardKey.arrowDown => Veredicto.escalar,
+    _ => null,
+  };
+  if (flecha != null) {
+    mazo.previsualizar(flecha);
+    return KeyEventResult.handled;
+  }
+  final previa = mazo.previa;
+  if (previa == null) return KeyEventResult.ignored;
+  if (evento.logicalKey == LogicalKeyboardKey.enter ||
+      evento.logicalKey == LogicalKeyboardKey.numpadEnter) {
+    mazo.confirmar(previa);
+    return KeyEventResult.handled;
+  }
+  if (evento.logicalKey == LogicalKeyboardKey.escape) {
+    mazo.cancelarPrevia();
+    return KeyEventResult.handled;
+  }
+  return KeyEventResult.ignored;
+}
+
+/// Tinte de pantalla completa del arrastre (va en el `Stack` de la pantalla,
+/// detrás de la tarjeta y delante del fondo): el color del veredicto al que
+/// apunta la tarjeta, con opacidad de 0 a [LogicaSwipe.opacidadTinte] según
+/// el progreso hacia el umbral.
+class TinteArrastre extends StatelessWidget {
+  const TinteArrastre({required this.arrastre, super.key});
+
+  final ValueListenable<ArrastreVisible> arrastre;
+
+  @override
+  Widget build(BuildContext context) => Positioned.fill(
+    child: ValueListenableBuilder<ArrastreVisible>(
+      valueListenable: arrastre,
+      builder: (context, visible, _) => TinteVeredicto(
+        veredicto: visible.veredicto,
+        opacidad: visible.progreso * LogicaSwipe.opacidadTinte,
+      ),
+    ),
+  );
 }

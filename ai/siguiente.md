@@ -1,46 +1,46 @@
-# T-15f · Fin de sprint, Examen y resúmenes
+# T-15g · Teclado y tinte del mazo
 
-**Rama:** `15f-fin-de-sprint-examen-y-resumenes` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-15f**).
-**Figma:** no hace falta. Lote de **cero cambios visibles**; mandan las reglas de `ai/conocimiento/09-duplicacion.md` y lo aprendido en la T-15b, T-15c, T-15e y la corrección de accesibilidad (ahorro neto, puntos de cambio, nada de forzar lo que no coincide exactamente, controles con acción de tocar).
+**Rama:** `15g-teclado-y-tinte-del-mazo` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-15g**).
+**Figma:** no hace falta. Lote de **cero cambios visibles ni de comportamiento** y el **más delicado de la T-15** (teclado y foco del juego, el Examen y el juicio). Mandan las reglas de `ai/conocimiento/09-duplicacion.md` y lo aprendido en los lotes anteriores.
 
-## Objetivo
-Quinto lote de la T-15: la duplicación **móvil/tablet** de las pantallas de fin de sprint, el Examen y unos repetidos dentro de un mismo archivo. Es riesgo **medio-alto** por el foco y el cronómetro del Examen.
+## Qué se repite (ya lo leí en el código)
+Las tres pantallas con mazo tienen **`_alTeclear` casi idéntico** y **el mismo tinte detrás de la tarjeta**:
+- `lib/funciones/juego/pantalla_juego.dart:376` (`_alTeclear`) y `:648` (`_envolver`).
+- `lib/funciones/apelaciones/pantalla_juicio.dart:264` y `:372-384`.
+- `lib/funciones/jefe/pantalla_jefe.dart:564` y `:787-810`.
 
-**Decisión de alcance:** el **P-14 (`MarcoMazo`, el teclado del mazo copiado en juego, Examen y juicio)** es el patrón más delicado y el catálogo pide que vaya **solo y al final**. Lo dejo para un lote propio, **T-15g**. **No lo hagas aquí.**
+La lógica compartida: ignorar eventos que no sean `KeyDown`/`KeyRepeat`; **flechas** (← ilegal, → legal, ↑ condicional, ↓ escalar) llaman a `mazo.previsualizar(...)` y devuelven `handled`; con `mazo.previa` no nula, **Enter o NumpadEnter** → `mazo.confirmar(previa)` (handled) y **Esc** → `mazo.cancelarPrevia()` (handled); en cualquier otro caso `ignored`. Y el tinte: `Positioned.fill(ValueListenableBuilder<ArrastreVisible>(valueListenable: _arrastre, builder: TinteVeredicto(veredicto: arrastre.veredicto, opacidad: arrastre.progreso * LogicaSwipe.opacidadTinte)))`.
 
-## Reglas de medición (igual que antes)
-Ahorro neto = líneas quitadas − líneas del componente nuevo; en «Resultados por lote» de `09` anota líneas antes y después de `lib/`, ahorro neto y puntos de cambio. Un patrón sin 3 usos reales, o con ahorro ≤ 0 y sin reducir puntos de cambio, **no se hace** (D#). Lo que no coincide exactamente se deja y se anota.
+**Diferencias que NO pueden cambiar:**
+- **Juicio:** devuelve `ignored` si `_resolviendo` (antes de mirar flechas).
+- **Examen:** devuelve `ignored` si `examenProvider.fase != FaseJefe.decision`; maneja la **tecla P** (solo `KeyDownEvent`, solo con `tiempoExtendido`, llama a `_examen.pausar()`) **antes** de las flechas; y en el `Stack` tiene un **tinte de urgencia** (`ColoredBox` con `estadoIlegal` y `EfectosApp.opacidadUrgencia`, clave `tinte-urgencia`) **antes** del `TinteVeredicto`. Ese tinte de urgencia es del Examen y se queda donde está.
+- **Juego:** devuelve `ignored` si el mazo no existe (`_mazo.currentState == null`); el comentario de Enter/Esc («sin previsualización siguen su camino: Enter activa el botón de veredicto con foco») debe seguir valiendo.
 
-## 1 · P-11 · Contenido doble en `ColumnaFinSprint`
-`pantalla_sprint_completado.dart:112-207`, `pantalla_startup_quiebra.dart:97` y `pantalla_juicio.dart:581-651` arman las mismas piezas (`IlustracionSarko`, `ElementoOrdenado`, estrellas, vidas, títulos) **dos veces**: en `contenido` y en `contenidoTablet` o `ilustracionTablet`.
-- Armado único: cada pantalla crea sus piezas **una vez** (variables locales o métodos privados) y las pasa a las dos listas. Opcional: que `ColumnaFinSprint` reciba `ilustracion` + `cuerpo` y reparta ella las piezas, **solo si** el orden de foco y las escalas de tablet quedan idénticos.
-- **Conserva** el orden de foco (`ElementoOrdenado`), las escalas del Sarko en tablet, las claves y las etiquetas.
-
-## 2 · P-15 · Examen móvil y tablet
-`pantalla_jefe.dart:353-417` y `:1118-1174` (pie «Enfrentar auditoría», aviso sin conexión, «Ahora no», la alerta del jefe), `:235` y `:298`, y `piezas_jefe.dart:216`.
-- Piezas **privadas** en `pantalla_jefe.dart` (`_PieEnfrentar`, `_AlertaJefe`) que usen la vista móvil y `_CrisisTablet`.
-- **No crees `BotonTextoApp`:** «Ahora no» tiene 2 usos (D5 de la T-15a).
-- **No toques** el cronómetro, el foco propio del Examen, la tecla P, ni las políticas de error/sin conexión (la T-15c ya dejó el Examen fuera de `VistaAsincrona` a propósito).
-- `jefe_test`, `examen_tablet_test` y la auditoría del Examen deben pasar **sin cambios**.
-
-## 3 · P-20 · Repetidos dentro de un mismo archivo
-`FilaVidas` (`pantalla_sin_vidas.dart:149` y `:182`), las piezas de `PanelMarca` (`panel_marca.dart:182` y `:251`), los parámetros de `BarraJuego` contra `BarraJuegoTablet` (`barra_juego.dart:39` y `:122`) y el confeti (`confeti_sprint.dart:52` y `:88`). Variables locales, una clase de parámetros compartida o un método privado; **sin componente global** (menos de 3 usos). Si alguno no mejora claramente, déjalo (D#).
+## Diseño recomendado (más simple que `MarcoMazo` del catálogo)
+No metas un widget que envuelva todo. Hazlo con **dos piezas pequeñas** en `lib/funciones/juego/mazo_swipe.dart` (o un archivo junto a él), que conservan cada guardia en su pantalla:
+1. **`KeyEventResult teclearMazo(MazoSwipeState mazo, KeyEvent evento)`**: la parte común (flechas, Enter, Esc). Cada `_alTeclear` queda con **sus guardias y extras propios** (`_resolviendo`, fase del Examen, tecla P, mazo nulo) y termina llamando a `teclearMazo`. El orden de las comprobaciones debe ser **exactamente** el de hoy (por ejemplo, la tecla P del Examen va antes de las flechas).
+2. **`TinteArrastre({required ValueListenable<ArrastreVisible> arrastre})`**: el `Positioned.fill` con `ValueListenableBuilder` y `TinteVeredicto`. Las tres pantallas lo usan dentro de su `Stack`; el tinte de urgencia del Examen se queda como está, delante.
+Si prefieres otra forma (por ejemplo el `MarcoMazo` del catálogo) hazla solo si cumple lo anterior sin tocar el orden de foco ni las guardias; explica por qué en el reporte.
 
 ## Reglas del lote
-- **Cero cambios visibles:** medidas, colores, textos, claves, foco, orden de lectura, semántica, tecla P, animaciones y política de errores iguales. La auditoría (incluida `acciones_de_tocar_test.dart`) pasa **sin tocar sus escenas**; las pruebas existentes **no cambian** salvo que un símbolo movido lo exija (anótalo).
-- No toques reglas del juego, repositorios ni mocks. Sin dependencias nuevas.
-- Los controles que armes o muevas deben seguir exponiendo la **acción de tocar** (regla de `08`).
-- Grafo: COMP-* nuevos y obsoletos, registro de cambios y «Resultados por lote» en `09` (y actualiza la fila del T-15g si el catálogo lo pide).
+- **Cero cambios de comportamiento.** Mismas teclas, mismas guardias, mismo orden de comprobación, mismo foco (`Focus(autofocus: true, skipTraversal: true)` se queda en cada pantalla), mismas claves y mismo árbol de widgets (la clave `pantalla-decision`, `tinte-urgencia`, etc.).
+- Las pruebas existentes **no cambian** (`juego_test`, `veredicto_test`, `jefe_test` con la tecla P, `juicio_test`, `pulido_test`, la auditoría de teclado y todas las demás), **y la auditoría (incluida `acciones_de_tocar_test.dart`) pasa sin tocar sus escenas.**
+- **Pruebas nuevas** para las dos piezas: `teclearMazo` con cada flecha (previsualiza y devuelve handled), Enter y NumpadEnter con y sin previsualización, Esc con y sin previsualización, eventos `KeyUp` y teclas ajenas (ignored); y `TinteArrastre` con veredicto y opacidad (tema claro y oscuro). Un mazo de prueba mínimo o un doble de `MazoSwipeState` según lo que ya usen las pruebas del mazo.
+- No toques las reglas del juego (`logica_swipe`, estados), repositorios ni mocks. Sin dependencias nuevas. No cambies la API pública de `MazoSwipe` más de lo necesario.
+- Mide como siempre (líneas antes y después de `lib/`, ahorro neto y puntos de cambio: **teclado y tinte 3 → 1**). Si el ahorro neto es ≤ 0, no importa: el beneficio es un solo lugar para cambiar el teclado del mazo; dilo en el reporte.
+- Grafo: COMP/PANT afectados, el nodo nuevo (si lo hay) y «Resultados por lote» en `09`; marca el P-14 como hecho.
 
 ## Archivos permitidos
-`lib/funciones/juego/`, `lib/funciones/jefe/`, `lib/funciones/apelaciones/pantalla_juicio.dart`, `lib/funciones/vidas/`, `lib/funciones/acceso/panel_marca.dart`, `lib/componentes/` (`barra_juego`, `confeti_sprint`, `piezas_jefe`, `ColumnaFinSprint`…), `test/` (solo si un símbolo movido lo exige) y `ai/`. **No modifiques** `mazo_swipe.dart` ni el teclado del mazo (T-15g).
+`lib/funciones/juego/mazo_swipe.dart` (o un archivo nuevo junto a él), `pantalla_juego.dart`, `lib/funciones/apelaciones/pantalla_juicio.dart`, `lib/funciones/jefe/pantalla_jefe.dart`, la galería solo si la pieza es visible (no lo es), `test/` (pruebas nuevas) y `ai/`.
 
 ## Criterios de aceptación
-- [ ] P-11, P-15 y P-20 hechos o cada omisión justificada (D#), con ahorro neto y puntos de cambio por patrón en `09`.
-- [ ] Mismo orden de foco, escalas de tablet, claves y etiquetas; Examen con cronómetro, foco y tecla P intactos.
-- [ ] `dart format`, `flutter analyze` limpios; suite completa verde (≥ 3309 pruebas); auditoría sin tocar.
+- [ ] `teclearMazo` y `TinteArrastre` (o la forma que justifiques) usados en las **tres** pantallas; las guardias y extras propios de cada una intactos y en el mismo orden.
+- [ ] Todas las pruebas existentes verdes **sin cambiar**; auditoría sin tocar escenas.
+- [ ] Pruebas nuevas de las piezas.
+- [ ] Líneas antes y después, ahorro neto y puntos de cambio en `09`; P-14 hecho.
+- [ ] `dart format`, `flutter analyze` limpios; suite completa verde (≥ 3309 pruebas).
 - [ ] Commits sin prefijo y sin menciones a Claude.
 
 ## Para el reporte
-Líneas de `lib/` antes y después, ahorro neto y puntos de cambio por patrón, lo que quedó fuera y por qué, número de pruebas y dudas numeradas (D1, D2…).
+Líneas antes y después, ahorro neto, qué dejaste en cada pantalla y por qué, número de pruebas y dudas numeradas (D1, D2…).

@@ -28,7 +28,6 @@ import '../../componentes/pildora.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/sello_veredicto.dart';
 import '../../componentes/tarjeta_caso.dart';
-import '../../componentes/tinte_veredicto.dart';
 import '../../componentes/titulo_enfocado.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/tema/efectos.dart';
@@ -44,7 +43,6 @@ import '../../datos/sincronizacion/servicio_conexion.dart';
 import '../acceso/sesion.dart';
 import '../ajustes/estado_ajustes.dart';
 import '../inicio/logica_inicio.dart';
-import '../juego/logica_swipe.dart';
 import '../juego/mazo_swipe.dart';
 import '../juego/saldo_juego.dart';
 import 'estado_examen.dart';
@@ -500,29 +498,7 @@ class _DecisionState extends ConsumerState<_Decision> {
       unawaited(_examen.pausar());
       return KeyEventResult.handled;
     }
-    final flecha = switch (evento.logicalKey) {
-      LogicalKeyboardKey.arrowLeft => Veredicto.ilegal,
-      LogicalKeyboardKey.arrowRight => Veredicto.legal,
-      LogicalKeyboardKey.arrowUp => Veredicto.condicional,
-      LogicalKeyboardKey.arrowDown => Veredicto.escalar,
-      _ => null,
-    };
-    if (flecha != null) {
-      mazo.previsualizar(flecha);
-      return KeyEventResult.handled;
-    }
-    final previa = mazo.previa;
-    if (previa == null) return KeyEventResult.ignored;
-    if (evento.logicalKey == LogicalKeyboardKey.enter ||
-        evento.logicalKey == LogicalKeyboardKey.numpadEnter) {
-      mazo.confirmar(previa);
-      return KeyEventResult.handled;
-    }
-    if (evento.logicalKey == LogicalKeyboardKey.escape) {
-      mazo.cancelarPrevia();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
+    return teclearMazo(mazo, evento);
   }
 
   @override
@@ -726,15 +702,7 @@ class _DecisionState extends ConsumerState<_Decision> {
                   ),
                 ),
               ),
-              Positioned.fill(
-                child: ValueListenableBuilder<ArrastreVisible>(
-                  valueListenable: _arrastre,
-                  builder: (context, arrastre, _) => TinteVeredicto(
-                    veredicto: arrastre.veredicto,
-                    opacidad: arrastre.progreso * LogicaSwipe.opacidadTinte,
-                  ),
-                ),
-              ),
+              TinteArrastre(arrastre: _arrastre),
               // T28 (Figma 101:5001): la composición del juego en tablet con
               // "El Jefe" y los atajos en el panel lateral.
               if (tablet)

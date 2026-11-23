@@ -23,7 +23,6 @@ import '../../componentes/panel_lateral_juego.dart';
 import '../../componentes/piezas_apelacion.dart';
 import '../../componentes/sarko_imagen.dart';
 import '../../componentes/tarjeta_caso.dart';
-import '../../componentes/tinte_veredicto.dart';
 import '../../core/adaptativo/clase_pantalla.dart';
 import '../../core/textos/textos.dart';
 import '../../core/utilidades/extensiones_contexto.dart';
@@ -35,7 +34,6 @@ import '../../datos/sincronizacion/estado_sincronizacion.dart';
 import '../../datos/sincronizacion/servicio_conexion.dart';
 import '../ajustes/estado_ajustes.dart';
 import '../inicio/logica_inicio.dart';
-import '../juego/logica_swipe.dart';
 import '../juego/mazo_swipe.dart';
 import '../juego/piezas_fin_sprint.dart';
 import 'logica_apelacion.dart';
@@ -265,29 +263,7 @@ class _JuicioState extends ConsumerState<_Juicio> {
     if (evento is! KeyDownEvent && evento is! KeyRepeatEvent) return KeyEventResult.ignored;
     final mazo = _mazo.currentState;
     if (mazo == null || _resolviendo) return KeyEventResult.ignored;
-    final flecha = switch (evento.logicalKey) {
-      LogicalKeyboardKey.arrowLeft => Veredicto.ilegal,
-      LogicalKeyboardKey.arrowRight => Veredicto.legal,
-      LogicalKeyboardKey.arrowUp => Veredicto.condicional,
-      LogicalKeyboardKey.arrowDown => Veredicto.escalar,
-      _ => null,
-    };
-    if (flecha != null) {
-      mazo.previsualizar(flecha);
-      return KeyEventResult.handled;
-    }
-    final previa = mazo.previa;
-    if (previa == null) return KeyEventResult.ignored;
-    if (evento.logicalKey == LogicalKeyboardKey.enter ||
-        evento.logicalKey == LogicalKeyboardKey.numpadEnter) {
-      mazo.confirmar(previa);
-      return KeyEventResult.handled;
-    }
-    if (evento.logicalKey == LogicalKeyboardKey.escape) {
-      mazo.cancelarPrevia();
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
+    return teclearMazo(mazo, evento);
   }
 
   @override
@@ -374,15 +350,7 @@ class _JuicioState extends ConsumerState<_Juicio> {
       onKeyEvent: _alTeclear,
       child: Stack(
         children: [
-          Positioned.fill(
-            child: ValueListenableBuilder<ArrastreVisible>(
-              valueListenable: _arrastre,
-              builder: (context, arrastre, _) => TinteVeredicto(
-                veredicto: arrastre.veredicto,
-                opacidad: arrastre.progreso * LogicaSwipe.opacidadTinte,
-              ),
-            ),
-          ),
+          TinteArrastre(arrastre: _arrastre),
           // T22 (Figma 100:4212): la composición del juego en tablet, con el
           // contexto de la apelación y los atajos en el panel lateral.
           if (context.clasePantalla.esAncho)
