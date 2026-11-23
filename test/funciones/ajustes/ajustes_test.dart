@@ -36,34 +36,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../../ayudantes/falsos.dart';
 import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 import '../juego/ayudante_juego.dart';
-
-/// Vibraciones registradas por un servicio falso.
-class HapticaFalsa implements ServicioHaptico {
-  final llamadas = <String>[];
-
-  @override
-  Future<void> acierto() async => llamadas.add('acierto');
-  @override
-  Future<void> parcial() async => llamadas.add('parcial');
-  @override
-  Future<void> error() async => llamadas.add('error');
-  @override
-  Future<void> suave() async => llamadas.add('suave');
-}
 
 /// Repositorio que no puede guardar.
 class AjustesQueFallan extends AjustesEnMemoria {
   @override
   Future<void> guardar(Ajustes ajustes) async => throw Exception('disco lleno');
-}
-
-Future<void> tocar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
 }
 
 Future<AjustesEnMemoria> abrirAjustes(
@@ -677,34 +658,18 @@ void main() {
       }
     });
 
-    group('sin desbordes', () {
-      for (final (tamano, escala) in [
-        (const Size(390, 844), 1.0),
-        (const Size(390, 844), 2.0),
-        (const Size(360, 640), 1.0),
-        (const Size(360, 640), 2.0),
-        (const Size(320, 640), 1.0),
-        (const Size(320, 640), 2.0),
-      ]) {
-        testWidgets('${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x', (tester) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          await abrirAjustes(
-            tester,
-            tamano: tamano,
-            ajustes: const Ajustes(modoTema: ThemeMode.dark),
-          );
-          expect(tester.takeException(), isNull);
-          await tester.drag(
-            find.byKey(const ValueKey('ajustes-desplazable')),
-            const Offset(0, -3000),
-          );
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull);
-          await tocar(tester, find.byKey(const ValueKey('ajuste-animaciones')));
-          expect(tester.takeException(), isNull);
-        });
-      }
+    probarSinDesbordes((tester, tamano, _) async {
+      await abrirAjustes(
+        tester,
+        tamano: tamano,
+        ajustes: const Ajustes(modoTema: ThemeMode.dark),
+      );
+      expect(tester.takeException(), isNull);
+      await tester.drag(find.byKey(const ValueKey('ajustes-desplazable')), const Offset(0, -3000));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tocar(tester, find.byKey(const ValueKey('ajuste-animaciones')));
+      expect(tester.takeException(), isNull);
     });
   });
 }

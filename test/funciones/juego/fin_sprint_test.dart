@@ -25,6 +25,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/sin_desbordes.dart';
 import 'ayudante_juego.dart';
 
 /// Tarjeta de prueba con respuesta [correcta] y sus impactos.
@@ -386,42 +387,34 @@ void main() {
   });
 
   group('sin desbordes', () {
-    for (final (tamano, escala) in [
-      (const Size(390, 844), 1.0),
-      (const Size(390, 844), 2.0),
-      (const Size(360, 640), 2.0),
-      (const Size(320, 640), 1.0),
-      (const Size(320, 640), 2.0),
-    ]) {
-      for (final brillo in Brightness.values) {
-        final nombre = '${tamano.width.toInt()}×${tamano.height.toInt()} texto ${escala}x';
-        for (final quiebra in [false, true]) {
-          testWidgets('${quiebra ? '19b' : '19'} $nombre ${brillo.name}', (tester) async {
-            tester.platformDispatcher.textScaleFactorTestValue = escala;
-            tester.platformDispatcher.platformBrightnessTestValue = brillo;
-            addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-            addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-            if (quiebra) {
-              await quebrarPorRiesgo(tester, tamano: tamano);
-            } else {
-              await abrirJuego(tester, tamano: tamano, tarjetas: mazoLegal(1));
-              await responder(tester, Veredicto.ilegal);
-            }
-            expect(tester.takeException(), isNull);
-            final columna = find.byKey(const ValueKey('columna-fin-sprint'));
-            await tester.drag(columna, const Offset(0, -3000));
-            await tester.pumpAndSettle();
-            expect(tester.takeException(), isNull);
-            // El último botón queda a la vista al final del contenido.
-            final ultimo = find.widgetWithText(
-              BotonApp,
-              quiebra ? Textos.irAlBuzon : Textos.repasarFallos,
-            );
-            expect(ultimo.hitTestable(), findsOneWidget);
-            expect(tester.getRect(ultimo).bottom, lessThanOrEqualTo(tamano.height));
-          });
-        }
-      }
+    for (final quiebra in [false, true]) {
+      probarSinDesbordes(
+        (tester, tamano, _) async {
+          if (quiebra) {
+            await quebrarPorRiesgo(tester, tamano: tamano);
+          } else {
+            await abrirJuego(tester, tamano: tamano, tarjetas: mazoLegal(1));
+            await responder(tester, Veredicto.ilegal);
+          }
+          expect(tester.takeException(), isNull);
+          final columna = find.byKey(const ValueKey('columna-fin-sprint'));
+          await tester.drag(columna, const Offset(0, -3000));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          // El último botón queda a la vista al final del contenido.
+          final ultimo = find.widgetWithText(
+            BotonApp,
+            quiebra ? Textos.irAlBuzon : Textos.repasarFallos,
+          );
+          expect(ultimo.hitTestable(), findsOneWidget);
+          expect(tester.getRect(ultimo).bottom, lessThanOrEqualTo(tamano.height));
+        },
+        grupo: null,
+        casos: casosMovilCinco,
+        ambosBrillos: true,
+        prefijo: quiebra ? '19b ' : '19 ',
+        texto: 'texto ',
+      );
     }
 
     // La fuente de prueba es más ancha que Fredoka e Inter: se mide en una

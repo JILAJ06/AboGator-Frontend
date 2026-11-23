@@ -28,13 +28,6 @@ import '../juego/ayudante_juego.dart' show contenedorDe;
 import '../tienda/tienda_test.dart' show abrirTienda;
 import 'perfil_test.dart' show abrirPerfil;
 
-Future<void> tocar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
-}
-
 /// Caja visible del diálogo de confirmación (su contenido desplazable).
 Rect cajaDialogo(WidgetTester tester) => tester.getRect(
   find
@@ -44,8 +37,6 @@ Rect cajaDialogo(WidgetTester tester) => tester.getRect(
       )
       .first,
 );
-
-const tamanosTablet = [Tamano.tabletHorizontal, Tamano.tabletVertical, Tamano.tabletMinima];
 
 void main() {
   group('24 Tienda en tablet (T24)', () {
@@ -224,21 +215,14 @@ void main() {
       'Ajustes': (t, m) => abrirAjustes(t, tamano: m),
     };
     for (final MapEntry(key: pantalla, value: abrir) in pantallas.entries) {
-      for (final tamano in tamanosTablet) {
-        for (final escala in [1.0, 2.0]) {
-          for (final brillo in Brightness.values) {
-            final nombre = '${tamano.name} al ${(escala * 100).round()} % (${brillo.name})';
-            testWidgets('$pantalla: $nombre', (tester) async {
-              tester.platformDispatcher.textScaleFactorTestValue = escala;
-              tester.platformDispatcher.platformBrightnessTestValue = brillo;
-              addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-              addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-              await abrir(tester, tamano.medida);
-              expect(tester.takeException(), isNull);
-            });
-          }
-        }
-      }
+      probarSinDesbordesTablet(
+        (tester, tamano) async {
+          await abrir(tester, tamano.medida);
+          expect(tester.takeException(), isNull);
+        },
+        grupo: null,
+        prefijo: '$pantalla: ',
+      );
     }
   });
 

@@ -15,6 +15,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 import 'ayudante_juego.dart';
 
 /// Tarjeta 6 de spr-1-3 (Figma 15, 16 y 16b): registro_form.dart, clave 4-6.
@@ -51,13 +53,6 @@ Future<void> abrirVisor(WidgetTester tester) async {
 Future<void> marcar(WidgetTester tester, int n) async {
   await tester.ensureVisible(linea(n));
   await tester.tap(linea(n));
-  await tester.pumpAndSettle();
-}
-
-Future<void> pulsar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
   await tester.pumpAndSettle();
 }
 
@@ -140,7 +135,7 @@ void main() {
       expect(snippet.marcadas, {4});
       expect(snippet.alMarcar, isNull, reason: 'se marca una sola vez');
       expect(estadoJuego(tester).evidenciaMarcada, {registro.id: true});
-      await pulsar(tester, botonDe<PanelEvidencia>());
+      await tocar(tester, botonDe<PanelEvidencia>());
       expect(find.byType(PanelEvidencia), findsNothing);
       // El foco vuelve al botón de evidencia.
       final enFoco = FocusManager.instance.primaryFocus!.context!;
@@ -151,7 +146,7 @@ void main() {
       await abrirJuego(tester, tarjetas: mazo([registro, normal]));
       await abrirVisor(tester);
       await marcar(tester, 5);
-      await pulsar(tester, botonDe<PanelEvidencia>());
+      await tocar(tester, botonDe<PanelEvidencia>());
       await elegir(tester, Veredicto.ilegal);
       expect(panel(tester).tipo, TipoPanelVeredicto.bonus);
       expect(find.text('+15 XP en total  ·  +5 monedas'), findsOneWidget);
@@ -168,7 +163,7 @@ void main() {
       await abrirJuego(tester, tarjetas: mazo([registro, normal]));
       await abrirVisor(tester);
       await marcar(tester, 4);
-      await pulsar(tester, botonDe<PanelEvidencia>());
+      await tocar(tester, botonDe<PanelEvidencia>());
       await elegir(tester, Veredicto.legal);
       expect(panel(tester).tipo, TipoPanelVeredicto.incorrecto);
       final e = estadoJuego(tester);
@@ -185,7 +180,7 @@ void main() {
       expect(find.byType(ChipBonusEvidencia), findsNothing);
       expect(find.text(Textos.volverYDecidir), findsOneWidget);
       expect(estadoJuego(tester).evidenciaMarcada, {registro.id: false});
-      await pulsar(tester, botonDe<PanelEvidencia>());
+      await tocar(tester, botonDe<PanelEvidencia>());
       await elegir(tester, Veredicto.ilegal);
       expect(panel(tester).tipo, TipoPanelVeredicto.correcto);
       expect(find.text('+10 XP  ·  +5 monedas'), findsOneWidget);
@@ -204,7 +199,7 @@ void main() {
       await abrirJuego(tester, tarjetas: mazo([registro, normal]));
       await abrirVisor(tester);
       await marcar(tester, 1);
-      await pulsar(tester, botonDe<PanelEvidencia>());
+      await tocar(tester, botonDe<PanelEvidencia>());
       await abrirVisor(tester);
       expect(find.text(Textos.lineaEquivocadaTitulo), findsOneWidget);
       await marcar(tester, 4);
@@ -356,16 +351,16 @@ void main() {
     ) async {
       await abrirJuego(tester, tarjetas: mazo([dilema, normal]));
       await elegir(tester, Veredicto.ilegal);
-      await pulsar(tester, find.byType(OpcionJustificacion).first);
+      await tocar(tester, find.byType(OpcionJustificacion).first);
       expect(find.byType(PanelJustificacion), findsOneWidget);
       expect(find.byType(PanelVeredicto), findsNothing);
       final opciones = tester.widgetList<OpcionJustificacion>(find.byType(OpcionJustificacion));
       expect(opciones.map((o) => o.seleccionada), [true, false, false]);
       expect(boton<PanelJustificacion>(tester).alPresionar, isNotNull);
       // Se puede cambiar de opción antes de confirmar.
-      await pulsar(tester, find.byType(OpcionJustificacion).at(1));
-      await pulsar(tester, find.byType(OpcionJustificacion).first);
-      await pulsar(tester, botonDe<PanelJustificacion>());
+      await tocar(tester, find.byType(OpcionJustificacion).at(1));
+      await tocar(tester, find.byType(OpcionJustificacion).first);
+      await tocar(tester, botonDe<PanelJustificacion>());
       expect(find.byType(PanelJustificacion), findsNothing);
       expect(panel(tester).tipo, TipoPanelVeredicto.bonus);
       expect(find.text('+15 XP en total  ·  +10 monedas'), findsOneWidget);
@@ -380,8 +375,8 @@ void main() {
     ) async {
       await abrirJuego(tester, tarjetas: mazo([dilema, normal]));
       await elegir(tester, Veredicto.ilegal);
-      await pulsar(tester, find.byType(OpcionJustificacion).at(2));
-      await pulsar(tester, botonDe<PanelJustificacion>());
+      await tocar(tester, find.byType(OpcionJustificacion).at(2));
+      await tocar(tester, botonDe<PanelJustificacion>());
       expect(panel(tester).tipo, TipoPanelVeredicto.correcto);
       expect(panel(tester).microPregunta, isNull);
       expect(find.text('+10 XP  ·  +5 monedas'), findsOneWidget);
@@ -396,8 +391,8 @@ void main() {
     ) async {
       await abrirJuego(tester, tarjetas: mazo([dilema, normal]));
       await elegir(tester, Veredicto.legal);
-      await pulsar(tester, find.byType(OpcionJustificacion).first);
-      await pulsar(tester, botonDe<PanelJustificacion>());
+      await tocar(tester, find.byType(OpcionJustificacion).first);
+      await tocar(tester, botonDe<PanelJustificacion>());
       expect(panel(tester).tipo, TipoPanelVeredicto.incorrecto);
       final e = estadoJuego(tester);
       expect((e.xp, e.monedas, e.vidas), (0, 0, 4));
@@ -409,8 +404,8 @@ void main() {
     ) async {
       await abrirJuego(tester, tarjetas: mazo([dilema, normal]));
       await elegir(tester, Veredicto.escalar);
-      await pulsar(tester, find.byType(OpcionJustificacion).first);
-      await pulsar(tester, botonDe<PanelJustificacion>());
+      await tocar(tester, find.byType(OpcionJustificacion).first);
+      await tocar(tester, botonDe<PanelJustificacion>());
       expect(panel(tester).tipo, TipoPanelVeredicto.parcial);
       expect(estadoJuego(tester).xp, LogicaVeredicto.xpParcial);
     });
@@ -435,7 +430,7 @@ void main() {
       expect(find.bySemanticsLabel('Dictaste ILEGAL. ¿Por qué es ilegal?'), findsOneWidget);
       final enFoco = FocusManager.instance.primaryFocus!.context!;
       expect(enFoco.findAncestorWidgetOfExactType<PanelJustificacion>(), isNotNull);
-      await pulsar(tester, find.byType(OpcionJustificacion).first);
+      await tocar(tester, find.byType(OpcionJustificacion).first);
       expect(find.bySemanticsLabel(RegExp(r'^Opción 1 de 3: .*; seleccionada$')), findsOneWidget);
       expect(
         find.bySemanticsLabel(RegExp(r'^Opción 2 de 3: .*; no seleccionada$')),
@@ -446,65 +441,58 @@ void main() {
   });
 
   group('sin desbordes', () {
-    for (final (tamano, escala) in [
-      (const Size(390, 844), 1.0),
-      (const Size(390, 844), 2.0),
-      (const Size(360, 640), 2.0),
-      (const Size(320, 640), 1.0),
-      (const Size(320, 640), 2.0),
-    ]) {
-      for (final brillo in Brightness.values) {
-        final nombre = '${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x ${brillo.name}';
-        Future<void> preparar(WidgetTester tester, List<Tarjeta> tarjetas) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          tester.platformDispatcher.platformBrightnessTestValue = brillo;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-          await abrirJuego(tester, tamano: tamano, tarjetas: mazo(tarjetas));
-          expect(tester.takeException(), isNull);
-        }
-
-        testWidgets('evidencia $nombre', (tester) async {
-          await preparar(tester, [registro, normal]);
-          // Con texto grande el botón queda dentro del desplazamiento de la
-          // tarjeta: se abre tocando la tarjeta.
-          await tester.ensureVisible(find.byKey(const ValueKey('etiqueta-caso')));
-          await tester.pumpAndSettle();
-          await tester.tapAt(tester.getTopLeft(tarjeta) + const Offset(40, 40));
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull);
-          expect(
-            tester.getSize(find.byType(PanelEvidencia)).height,
-            lessThanOrEqualTo(tamano.height),
-          );
-          await marcar(tester, 4);
-          await tester.drag(
-            find.byKey(const ValueKey('snippet-desplazable')),
-            const Offset(-300, 0),
-          );
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull);
-          await pulsar(tester, botonDe<PanelEvidencia>());
-          expect(tester.takeException(), isNull);
-        });
-
-        testWidgets('dilema $nombre', (tester) async {
-          await preparar(tester, [dilema, normal]);
-          await tester.ensureVisible(find.byType(BotonVeredicto).first);
-          await tester.pumpAndSettle();
-          await elegir(tester, Veredicto.ilegal);
-          expect(tester.takeException(), isNull);
-          expect(
-            tester.getSize(find.byType(PanelJustificacion)).height,
-            lessThanOrEqualTo(tamano.height),
-          );
-          await pulsar(tester, find.byType(OpcionJustificacion).first);
-          await pulsar(tester, botonDe<PanelJustificacion>());
-          expect(tester.takeException(), isNull);
-          expect(find.byType(PanelVeredicto), findsOneWidget);
-        });
-      }
+    Future<void> preparar(WidgetTester tester, Size tamano, List<Tarjeta> tarjetas) async {
+      await abrirJuego(tester, tamano: tamano, tarjetas: mazo(tarjetas));
+      expect(tester.takeException(), isNull);
     }
+
+    probarSinDesbordes(
+      (tester, tamano, _) async {
+        await preparar(tester, tamano, [registro, normal]);
+        // Con texto grande el botón queda dentro del desplazamiento de la
+        // tarjeta: se abre tocando la tarjeta.
+        await tester.ensureVisible(find.byKey(const ValueKey('etiqueta-caso')));
+        await tester.pumpAndSettle();
+        await tester.tapAt(tester.getTopLeft(tarjeta) + const Offset(40, 40));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(
+          tester.getSize(find.byType(PanelEvidencia)).height,
+          lessThanOrEqualTo(tamano.height),
+        );
+        await marcar(tester, 4);
+        await tester.drag(find.byKey(const ValueKey('snippet-desplazable')), const Offset(-300, 0));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await tocar(tester, botonDe<PanelEvidencia>());
+        expect(tester.takeException(), isNull);
+      },
+      grupo: null,
+      casos: casosMovilCinco,
+      ambosBrillos: true,
+      prefijo: 'evidencia ',
+    );
+    probarSinDesbordes(
+      (tester, tamano, _) async {
+        await preparar(tester, tamano, [dilema, normal]);
+        await tester.ensureVisible(find.byType(BotonVeredicto).first);
+        await tester.pumpAndSettle();
+        await elegir(tester, Veredicto.ilegal);
+        expect(tester.takeException(), isNull);
+        expect(
+          tester.getSize(find.byType(PanelJustificacion)).height,
+          lessThanOrEqualTo(tamano.height),
+        );
+        await tocar(tester, find.byType(OpcionJustificacion).first);
+        await tocar(tester, botonDe<PanelJustificacion>());
+        expect(tester.takeException(), isNull);
+        expect(find.byType(PanelVeredicto), findsOneWidget);
+      },
+      grupo: null,
+      casos: casosMovilCinco,
+      ambosBrillos: true,
+      prefijo: 'dilema ',
+    );
 
     testWidgets('la tarjeta de evidencia y la de dilema caben sin desbordes', (tester) async {
       for (final t in [registro, dilema]) {

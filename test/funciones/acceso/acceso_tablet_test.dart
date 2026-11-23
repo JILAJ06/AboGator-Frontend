@@ -162,23 +162,22 @@ void main() {
 
   group('sin desbordes', () {
     for (final ruta in [Rutas.inicioSesion, Rutas.registro]) {
-      for (final tamano in [Tamano.tabletHorizontal, Tamano.tabletVertical, Tamano.tabletMinima]) {
-        for (final escala in [1.0, 2.0]) {
-          testWidgets('$ruta en ${tamano.name} al ${(escala * 100).round()} %', (tester) async {
-            tester.platformDispatcher.textScaleFactorTestValue = escala;
-            addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-            await abrirEn(tester, ruta, tamano: tamano.medida);
-            expect(tester.takeException(), isNull);
-            // El último control se alcanza desplazando la columna.
-            final ultimo = ruta == Rutas.registro
-                ? find.text(Textos.yaTienesCuenta)
-                : find.text(Textos.notaSeguridad);
-            await tester.ensureVisible(ultimo);
-            await tester.pumpAndSettle();
-            expect(tester.takeException(), isNull);
-          });
-        }
-      }
+      probarSinDesbordesTablet(
+        (tester, tamano) async {
+          await abrirEn(tester, ruta, tamano: tamano.medida);
+          expect(tester.takeException(), isNull);
+          // El último control se alcanza desplazando la columna.
+          final ultimo = ruta == Rutas.registro
+              ? find.text(Textos.yaTienesCuenta)
+              : find.text(Textos.notaSeguridad);
+          await tester.ensureVisible(ultimo);
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        },
+        grupo: null,
+        ambosBrillos: false,
+        prefijo: '$ruta en ',
+      );
     }
   });
 

@@ -6,71 +6,21 @@ import 'package:abogator/componentes/cuenta_regresiva_vida.dart';
 import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/core/utilidades/contraste.dart';
-import 'package:abogator/core/utilidades/cronometro.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
-import 'package:abogator/datos/modelos/apelacion.dart';
-import 'package:abogator/datos/modelos/buzon_apelaciones.dart';
-import 'package:abogator/datos/modelos/resultado_apelacion.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
-import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
 import 'package:abogator/funciones/vidas/pantalla_sin_vidas.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/falsos.dart';
 import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 import '../juego/ayudante_juego.dart';
-
-/// Reloj monótono controlado por la prueba (sin la hora del dispositivo).
-class CronometroFalso implements Cronometro {
-  @override
-  Duration transcurrido = Duration.zero;
-
-  @override
-  void reiniciar() => transcurrido = Duration.zero;
-}
-
-/// Buzón con [n] apelaciones de hoy.
-class BuzonFalso implements RepositorioApelaciones {
-  BuzonFalso(this.n);
-
-  final int n;
-
-  @override
-  Future<BuzonApelaciones> obtenerBuzon() async => BuzonApelaciones(
-    ahoraServidor: DateTime.utc(2026),
-    apelaciones: [
-      for (var i = 0; i < n; i++)
-        Apelacion(
-          id: 'a$i',
-          tarjetaId: 't$i',
-          moduloId: 'mod-1',
-          titulo: 'Caso $i',
-          tema: 'Tema',
-          diaRepaso: 3,
-          disponibleEl: DateTime.utc(2026),
-        ),
-    ],
-  );
-
-  @override
-  Future<void> registrarFallos(List<NuevaApelacion> fallos) async {}
-
-  @override
-  Future<ResultadoApelacion> resolverApelacion(String apelacionId, {required bool ganada}) =>
-      throw UnimplementedError();
-}
 
 FilaVidas filaVidas(WidgetTester tester) =>
     tester.widget<FilaVidas>(find.byKey(const ValueKey('vidas-sin-vidas')));
-
-Future<void> tocar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
-}
 
 void main() {
   test('formato HH:MM:SS con ceros', () {
@@ -171,7 +121,7 @@ void main() {
         ProviderScope(
           overrides: [
             repositorioVidasProvider.overrideWithValue(vidas),
-            repositorioApelacionesProvider.overrideWithValue(BuzonFalso(2)),
+            repositorioApelacionesProvider.overrideWithValue(ApelacionesFalsas(2)),
           ],
           child: PantallaSinVidas(moduloId: 'mod-1', crearCronometro: () => reloj),
         ),
@@ -203,7 +153,7 @@ void main() {
               repositorioVidasProvider.overrideWithValue(
                 MockVidas(espera: Duration.zero, cantidad: 0),
               ),
-              repositorioApelacionesProvider.overrideWithValue(BuzonFalso(n)),
+              repositorioApelacionesProvider.overrideWithValue(ApelacionesFalsas(n)),
             ],
             child: const PantallaSinVidas(crearCronometro: CronometroFalso.new),
           ),
@@ -221,7 +171,7 @@ void main() {
             repositorioVidasProvider.overrideWithValue(
               MockVidas(espera: Duration.zero, cantidad: 0),
             ),
-            repositorioApelacionesProvider.overrideWithValue(BuzonFalso(0)),
+            repositorioApelacionesProvider.overrideWithValue(ApelacionesFalsas(0)),
           ],
           child: const PantallaSinVidas(crearCronometro: CronometroFalso.new),
         ),
@@ -286,38 +236,18 @@ void main() {
       expect(visitados, containsAll([Textos.irAlBuzon, Textos.volverAlMapa, 'cerrar']));
     });
 
-    group('sin desbordes', () {
-      for (final (tamano, escala) in [
-        (const Size(390, 844), 1.0),
-        (const Size(390, 844), 2.0),
-        (const Size(360, 640), 1.0),
-        (const Size(360, 640), 2.0),
-        (const Size(320, 640), 1.0),
-        (const Size(320, 640), 2.0),
-      ]) {
-        for (final brillo in Brightness.values) {
-          testWidgets(
-            '${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x ${brillo.name}',
-            (tester) async {
-              tester.platformDispatcher.textScaleFactorTestValue = escala;
-              tester.platformDispatcher.platformBrightnessTestValue = brillo;
-              addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-              addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-              await abrirJuego(tester, tamano: tamano, ruta: Rutas.sinVidasDe('mod-1'), vidas: 0);
-              expect(tester.takeException(), isNull);
-              // El tiempo nunca pasa de su caja de 64.
-              expect(
-                // Medido ya dibujado (después de que FittedBox lo encoja).
-                tester.getRect(find.byKey(const ValueKey('tiempo-vida'))).height,
-                lessThanOrEqualTo(CuentaRegresivaVida.alto),
-              );
-              await tester.ensureVisible(find.widgetWithText(BotonApp, Textos.volverAlMapa));
-              await tester.pumpAndSettle();
-              expect(tester.takeException(), isNull);
-            },
-          );
-        }
-      }
-    });
+    probarSinDesbordes((tester, tamano, _) async {
+      await abrirJuego(tester, tamano: tamano, ruta: Rutas.sinVidasDe('mod-1'), vidas: 0);
+      expect(tester.takeException(), isNull);
+      // El tiempo nunca pasa de su caja de 64.
+      expect(
+        // Medido ya dibujado (después de que FittedBox lo encoja).
+        tester.getRect(find.byKey(const ValueKey('tiempo-vida'))).height,
+        lessThanOrEqualTo(CuentaRegresivaVida.alto),
+      );
+      await tester.ensureVisible(find.widgetWithText(BotonApp, Textos.volverAlMapa));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }, ambosBrillos: true);
   });
 }

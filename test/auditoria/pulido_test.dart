@@ -24,7 +24,7 @@ import '../ayudantes/tamano_pantalla.dart';
 import '../funciones/apelaciones/buzon_test.dart' show abrirBuzon;
 import '../funciones/apelaciones/juicio_test.dart' show abrirJuicio;
 import '../funciones/bienvenida/bienvenida_test.dart' show abrirOnboarding, montarApp;
-import '../funciones/jefe/jefe_test.dart' show abrirCrisis, elegir, escenario, estado, tocar;
+import '../funciones/jefe/jefe_test.dart' show abrirCrisis, elegir, escenario, estado;
 import '../funciones/juego/ayudante_juego.dart';
 import '../funciones/tienda/tienda_test.dart' show abrirTienda, precioDe;
 import 'ayudante_auditoria.dart';

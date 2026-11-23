@@ -14,15 +14,8 @@ import 'package:abogator/datos/mocks/mock_progreso.dart';
 import 'package:abogator/datos/mocks/mock_tienda.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
 import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
-import 'package:abogator/datos/modelos/apelacion.dart';
-import 'package:abogator/datos/modelos/buzon_apelaciones.dart';
-import 'package:abogator/datos/modelos/estado_startup.dart';
 import 'package:abogator/datos/modelos/modulo.dart';
-import 'package:abogator/datos/modelos/resultado_apelacion.dart';
-import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
-import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
-import 'package:abogator/datos/repositorios/repositorio_progreso.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/inicio/pantalla_inicio.dart';
@@ -35,16 +28,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../ayudantes/datos.dart';
-
-const ana = Usuario(
-  id: 'u-ana',
-  nombre: 'Ana López',
-  correo: 'ana@startup.mx',
-  perfil: PerfilUsuario.desarrollador,
-  nivel: 4,
-  xp: 0,
-  racha: 7,
-);
+import '../../ayudantes/falsos.dart';
+import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 
 Modulo moduloDe(int n, List<EstadoSprint> estados) => Modulo(
   id: 'mod-$n',
@@ -67,67 +53,6 @@ final modulosDePrueba = [
   moduloDe(4, [b, b, b, b, b]),
   moduloDe(5, [b, b, b, b, b]),
 ];
-
-class ProgresoFalso implements RepositorioProgreso {
-  ProgresoFalso(this.modulos);
-
-  List<Modulo> modulos;
-  bool fallar = false;
-  Completer<void>? bloqueo;
-  int llamadas = 0;
-
-  @override
-  Future<List<Modulo>> obtenerModulos() async {
-    llamadas++;
-    await bloqueo?.future;
-    if (fallar) throw Exception('sin red');
-    return modulos;
-  }
-
-  @override
-  Future<EstadoStartup> obtenerEstadoStartup() async =>
-      const EstadoStartup(presupuesto: 0, reputacion: 0, velocidad: 0, riesgoLegal: 0);
-
-  @override
-  Future<void> registrarSprintCompletado({
-    required String sprintId,
-    required int estrellas,
-    required EstadoStartup estadoFinal,
-  }) async {}
-
-  @override
-  Future<void> registrarExamenAprobado({required String moduloId}) async {}
-}
-
-class ApelacionesFalsas implements RepositorioApelaciones {
-  ApelacionesFalsas(this.cantidad);
-
-  final int cantidad;
-
-  @override
-  Future<BuzonApelaciones> obtenerBuzon() async => BuzonApelaciones(
-    ahoraServidor: DateTime.utc(2026),
-    apelaciones: [
-      for (var i = 0; i < cantidad; i++)
-        Apelacion(
-          id: 'a$i',
-          tarjetaId: 't$i',
-          moduloId: 'mod-1',
-          titulo: 'Caso $i',
-          tema: 'Tema',
-          diaRepaso: 3,
-          disponibleEl: DateTime.utc(2026),
-        ),
-    ],
-  );
-
-  @override
-  Future<void> registrarFallos(List<NuevaApelacion> fallos) async {}
-
-  @override
-  Future<ResultadoApelacion> resolverApelacion(String apelacionId, {required bool ganada}) =>
-      throw UnimplementedError();
-}
 
 /// Monta la app con sesión de Ana y abre el Inicio.
 Future<ProgresoFalso> abrirInicio(
@@ -170,13 +95,6 @@ Future<ProgresoFalso> abrirInicio(
 
 List<TarjetaModulo> tarjetas(WidgetTester tester) =>
     tester.widgetList<TarjetaModulo>(find.byType(TarjetaModulo, skipOffstage: false)).toList();
-
-Future<void> tocar(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
-  await tester.pumpAndSettle();
-  await tester.tap(finder);
-  await tester.pumpAndSettle();
-}
 
 void main() {
   testWidgets('muestra encabezado, héroe, reto, título y los 5 módulos con su estado', (
@@ -374,31 +292,18 @@ void main() {
     expect(orden, ['heroe', '1', '2', '3', 'buzon', 'pestana']);
   });
 
-  group('sin desbordes', () {
-    for (final (tamano, escala) in [
-      (const Size(390, 844), 2.0),
-      (const Size(360, 640), 2.0),
-      (const Size(320, 640), 1.0),
-      (const Size(320, 640), 2.0),
-    ]) {
-      for (final brillo in Brightness.values) {
-        testWidgets(
-          '${tamano.width.toInt()}×${tamano.height.toInt()} texto ${escala}x ${brillo.name}',
-          (tester) async {
-            tester.platformDispatcher.textScaleFactorTestValue = escala;
-            tester.platformDispatcher.platformBrightnessTestValue = brillo;
-            addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-            addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-            await abrirInicio(tester, tamano: tamano);
-            expect(tester.takeException(), isNull);
-            for (var i = 0; i < 8; i++) {
-              await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
-              await tester.pumpAndSettle();
-              expect(tester.takeException(), isNull);
-            }
-          },
-        );
+  probarSinDesbordes(
+    (tester, tamano, _) async {
+      await abrirInicio(tester, tamano: tamano);
+      expect(tester.takeException(), isNull);
+      for (var i = 0; i < 8; i++) {
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
       }
-    }
-  });
+    },
+    casos: casosTextoGrande,
+    ambosBrillos: true,
+    texto: 'texto ',
+  );
 }

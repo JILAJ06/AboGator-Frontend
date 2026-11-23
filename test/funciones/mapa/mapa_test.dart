@@ -17,15 +17,8 @@ import 'package:abogator/datos/mocks/mock_tarjetas.dart';
 import 'package:abogator/datos/mocks/mock_tienda.dart';
 import 'package:abogator/datos/mocks/mock_vidas.dart';
 import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
-import 'package:abogator/datos/modelos/apelacion.dart';
-import 'package:abogator/datos/modelos/buzon_apelaciones.dart';
-import 'package:abogator/datos/modelos/estado_startup.dart';
 import 'package:abogator/datos/modelos/modulo.dart';
-import 'package:abogator/datos/modelos/resultado_apelacion.dart';
-import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
-import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
-import 'package:abogator/datos/repositorios/repositorio_progreso.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
 import 'package:abogator/funciones/acceso/sesion.dart';
 import 'package:abogator/funciones/inicio/pantalla_inicio.dart';
@@ -39,73 +32,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../ayudantes/datos.dart';
-
-const ana = Usuario(
-  id: 'u-ana',
-  nombre: 'Ana López',
-  correo: 'ana@startup.mx',
-  perfil: PerfilUsuario.desarrollador,
-  nivel: 4,
-  xp: 0,
-  racha: 7,
-);
-
-class ProgresoFalso implements RepositorioProgreso {
-  ProgresoFalso(this.modulos);
-
-  List<Modulo> modulos;
-  bool fallar = false;
-  Completer<void>? bloqueo;
-  int llamadas = 0;
-
-  @override
-  Future<List<Modulo>> obtenerModulos() async {
-    llamadas++;
-    await bloqueo?.future;
-    if (fallar) throw Exception('sin red');
-    return modulos;
-  }
-
-  @override
-  Future<EstadoStartup> obtenerEstadoStartup() async =>
-      const EstadoStartup(presupuesto: 0, reputacion: 0, velocidad: 0, riesgoLegal: 0);
-
-  @override
-  Future<void> registrarSprintCompletado({
-    required String sprintId,
-    required int estrellas,
-    required EstadoStartup estadoFinal,
-  }) async {}
-
-  @override
-  Future<void> registrarExamenAprobado({required String moduloId}) async {}
-}
-
-class ApelacionesFalsas implements RepositorioApelaciones {
-  @override
-  Future<BuzonApelaciones> obtenerBuzon() async => BuzonApelaciones(
-    ahoraServidor: DateTime.utc(2026),
-    apelaciones: [
-      for (var i = 0; i < 6; i++)
-        Apelacion(
-          id: 'a$i',
-          tarjetaId: 't$i',
-          moduloId: 'mod-1',
-          titulo: 'Caso $i',
-          tema: 'Tema',
-          diaRepaso: 3,
-          disponibleEl: DateTime.utc(2026),
-        ),
-    ],
-  );
-
-  @override
-  Future<void> registrarFallos(List<NuevaApelacion> fallos) async {}
-
-  @override
-  Future<ResultadoApelacion> resolverApelacion(String apelacionId, {required bool ganada}) =>
-      throw UnimplementedError();
-}
+import '../../ayudantes/falsos.dart';
+import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 
 /// Módulo con los 5 sprints completados (el Examen final se puede abrir).
 final moduloCompleto = moduloDePrueba(
@@ -168,13 +97,6 @@ List<NodoSprint> nodos(WidgetTester tester) =>
     tester.widgetList<NodoSprint>(find.byType(NodoSprint, skipOffstage: false)).toList();
 
 Finder nodo(int indice) => find.byType(NodoSprint, skipOffstage: false).at(indice);
-
-Future<void> tocar(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
-  await tester.pumpAndSettle();
-  await tester.tap(finder);
-  await tester.pumpAndSettle();
-}
 
 void main() {
   group('Mapa de sprints (08)', () {
@@ -538,53 +460,47 @@ void main() {
   });
 
   group('sin desbordes', () {
-    for (final (tamano, escala) in [
-      (const Size(390, 844), 1.0),
-      (const Size(390, 844), 2.0),
-      (const Size(360, 640), 2.0),
-      (const Size(320, 640), 1.0),
-      (const Size(320, 640), 2.0),
-    ]) {
-      for (final brillo in Brightness.values) {
-        final nombre = '${tamano.width.toInt()}×${tamano.height.toInt()} texto ${escala}x';
-        testWidgets('mapa $nombre ${brillo.name}', (tester) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          tester.platformDispatcher.platformBrightnessTestValue = brillo;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-          await abrir(tester, tamano: tamano);
-          expect(tester.takeException(), isNull);
-          final mapa = find.byKey(const ValueKey('mapa-sprints'));
-          await tester.drag(mapa, const Offset(0, 2000));
+    probarSinDesbordes(
+      (tester, tamano, _) async {
+        await abrir(tester, tamano: tamano);
+        expect(tester.takeException(), isNull);
+        final mapa = find.byKey(const ValueKey('mapa-sprints'));
+        await tester.drag(mapa, const Offset(0, 2000));
+        await tester.pumpAndSettle();
+        for (var i = 0; i < 8; i++) {
+          await tester.drag(mapa, const Offset(0, -300));
           await tester.pumpAndSettle();
-          for (var i = 0; i < 8; i++) {
-            await tester.drag(mapa, const Offset(0, -300));
-            await tester.pumpAndSettle();
-            expect(tester.takeException(), isNull);
-          }
-          // El último nodo queda por encima del Buzón al final del desplazamiento.
-          final ultimo = tester.getRect(nodo(5));
-          expect(ultimo.bottom, lessThanOrEqualTo(tester.getRect(find.byType(BotonBuzon)).top));
-        });
-
-        testWidgets('intro $nombre ${brillo.name}', (tester) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          tester.platformDispatcher.platformBrightnessTestValue = brillo;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-          await abrir(tester, tamano: tamano, ruta: Rutas.introSprintDe('mod-1', 'spr-1-3'));
           expect(tester.takeException(), isNull);
-          final intro = find.byKey(const ValueKey('intro-sprint'));
-          for (var i = 0; i < 6; i++) {
-            await tester.drag(intro, const Offset(0, -300));
-            await tester.pumpAndSettle();
-            expect(tester.takeException(), isNull);
-          }
-          // El botón sigue a la vista.
-          expect(find.text(Textos.comenzarSprint).hitTestable(), findsOneWidget);
-        });
-      }
-    }
+        }
+        // El último nodo queda por encima del Buzón al final del desplazamiento.
+        final ultimo = tester.getRect(nodo(5));
+        expect(ultimo.bottom, lessThanOrEqualTo(tester.getRect(find.byType(BotonBuzon)).top));
+      },
+      grupo: null,
+      casos: casosMovilCinco,
+      ambosBrillos: true,
+      prefijo: 'mapa ',
+      texto: 'texto ',
+    );
+    probarSinDesbordes(
+      (tester, tamano, _) async {
+        await abrir(tester, tamano: tamano, ruta: Rutas.introSprintDe('mod-1', 'spr-1-3'));
+        expect(tester.takeException(), isNull);
+        final intro = find.byKey(const ValueKey('intro-sprint'));
+        for (var i = 0; i < 6; i++) {
+          await tester.drag(intro, const Offset(0, -300));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        }
+        // El botón sigue a la vista.
+        expect(find.text(Textos.comenzarSprint).hitTestable(), findsOneWidget);
+      },
+      grupo: null,
+      casos: casosMovilCinco,
+      ambosBrillos: true,
+      prefijo: 'intro ',
+      texto: 'texto ',
+    );
   });
 
   testWidgets('sprint completado sin un sprint terminado muestra un mensaje', (tester) async {

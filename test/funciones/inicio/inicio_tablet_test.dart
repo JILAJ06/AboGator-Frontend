@@ -28,9 +28,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/falsos.dart';
 import '../../ayudantes/tamano_pantalla.dart';
-import 'inicio_test.dart'
-    show ApelacionesFalsas, ProgresoFalso, ana, b, c, h, moduloDe, modulosDePrueba;
+import 'inicio_test.dart' show b, c, h, moduloDe, modulosDePrueba;
 
 class _PerfilQueFalla implements RepositorioPerfil {
   @override

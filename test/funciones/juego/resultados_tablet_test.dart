@@ -145,28 +145,10 @@ void main() {
     });
   });
 
-  group('sin desbordes', () {
-    for (final tamano in [Tamano.tabletHorizontal, Tamano.tabletVertical, Tamano.tabletMinima]) {
-      for (final escala in [1.0, 2.0]) {
-        for (final brillo in Brightness.values) {
-          final nombre = '${tamano.name} al ${(escala * 100).round()} % (${brillo.name})';
-          testWidgets('19, 19b y 20 en $nombre', (tester) async {
-            tester.platformDispatcher.textScaleFactorTestValue = escala;
-            tester.platformDispatcher.platformBrightnessTestValue = brillo;
-            addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-            addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-            await completar(tester, tamano: tamano);
-            expect(tester.takeException(), isNull);
-            await abrirJuego(
-              tester,
-              ruta: Rutas.sinVidasDe('mod-1'),
-              vidas: 0,
-              tamano: tamano.medida,
-            );
-            expect(tester.takeException(), isNull);
-          });
-        }
-      }
-    }
-  });
+  probarSinDesbordesTablet((tester, tamano) async {
+    await completar(tester, tamano: tamano);
+    expect(tester.takeException(), isNull);
+    await abrirJuego(tester, ruta: Rutas.sinVidasDe('mod-1'), vidas: 0, tamano: tamano.medida);
+    expect(tester.takeException(), isNull);
+  }, prefijo: '19, 19b y 20 en ');
 }

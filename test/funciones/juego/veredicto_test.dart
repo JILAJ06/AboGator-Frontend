@@ -15,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/sin_desbordes.dart';
 import 'ayudante_juego.dart';
 
 Tarjeta tarjeta(
@@ -340,41 +341,26 @@ void main() {
     ]);
   });
 
-  group('sin desbordes con el panel abierto', () {
-    for (final (tamano, escala) in [
-      (const Size(390, 844), 2.0),
-      (const Size(360, 640), 2.0),
-      (const Size(320, 640), 1.0),
-      (const Size(320, 640), 2.0),
-    ]) {
-      for (final brillo in Brightness.values) {
-        testWidgets('${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x ${brillo.name}', (
-          tester,
-        ) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          tester.platformDispatcher.platformBrightnessTestValue = brillo;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-          await abrirJuego(tester, tamano: tamano, tarjetas: mazo());
-          await tester.ensureVisible(find.byType(BotonVeredicto).first);
-          await tester.pumpAndSettle();
-          await elegir(tester, Veredicto.ilegal); // micro-pregunta, la variante más alta
-          expect(tester.takeException(), isNull);
-          // El panel cabe en la pantalla y su contenido se desplaza.
-          expect(
-            tester.getSize(find.byType(PanelVeredicto)).height,
-            lessThanOrEqualTo(tamano.height),
-          );
-          await tester.drag(find.byKey(const ValueKey('panel-desplazable')), const Offset(0, -600));
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull);
-          await tester.tap(find.text(Textos.saltarBonus));
-          await tester.pumpAndSettle();
-          await pulsarBotonDelPanel(tester);
-          expect(tester.takeException(), isNull);
-          expect(estadoJuego(tester).indice, 1);
-        });
-      }
-    }
-  });
+  probarSinDesbordes(
+    (tester, tamano, _) async {
+      await abrirJuego(tester, tamano: tamano, tarjetas: mazo());
+      await tester.ensureVisible(find.byType(BotonVeredicto).first);
+      await tester.pumpAndSettle();
+      await elegir(tester, Veredicto.ilegal); // micro-pregunta, la variante más alta
+      expect(tester.takeException(), isNull);
+      // El panel cabe en la pantalla y su contenido se desplaza.
+      expect(tester.getSize(find.byType(PanelVeredicto)).height, lessThanOrEqualTo(tamano.height));
+      await tester.drag(find.byKey(const ValueKey('panel-desplazable')), const Offset(0, -600));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text(Textos.saltarBonus));
+      await tester.pumpAndSettle();
+      await pulsarBotonDelPanel(tester);
+      expect(tester.takeException(), isNull);
+      expect(estadoJuego(tester).indice, 1);
+    },
+    grupo: 'sin desbordes con el panel abierto',
+    casos: casosTextoGrande,
+    ambosBrillos: true,
+  );
 }

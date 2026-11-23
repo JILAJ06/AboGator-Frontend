@@ -19,6 +19,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 import 'ayudante_juego.dart';
 
 final tarjetas = MockTarjetas.tarjetasPorSprint['spr-1-3']!;
@@ -40,13 +42,6 @@ PildoraComodin pildora(WidgetTester tester, String nombre) => tester.widget<Pild
 
 Finder pildoraDe(String nombre) =>
     find.byWidgetPredicate((w) => w is PildoraComodin && w.nombre == nombre);
-
-Future<void> tocar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
-}
 
 Future<void> elegir(WidgetTester tester, Veredicto v) =>
     tocar(tester, find.byWidgetPredicate((w) => w is BotonVeredicto && w.veredicto == v));
@@ -427,33 +422,18 @@ void main() {
       expect(find.text('Lupa ×1'), findsOneWidget);
     });
 
-    group('sin desbordes', () {
-      for (final (tamano, escala) in [
-        (const Size(390, 844), 1.0),
-        (const Size(390, 844), 2.0),
-        (const Size(360, 640), 2.0),
-        (const Size(320, 640), 1.0),
-        (const Size(320, 640), 2.0),
-      ]) {
-        testWidgets('${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x', (tester) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          await abrirJuego(tester, tamano: tamano, tarjetas: mazo([primera, segunda]));
-          await tocar(tester, pildoraDe(Textos.comodinLupa));
-          expect(tester.takeException(), isNull);
-          await tocar(tester, pildoraDe(Textos.comodinAbogado));
-          expect(tester.takeException(), isNull);
-          expect(
-            tester.getSize(find.byType(PanelAbogado)).height,
-            lessThanOrEqualTo(tamano.height),
-          );
-          await tocar(
-            tester,
-            find.descendant(of: find.byType(PanelAbogado), matching: find.byType(BotonApp)),
-          );
-          expect(tester.takeException(), isNull);
-        });
-      }
-    });
+    probarSinDesbordes((tester, tamano, _) async {
+      await abrirJuego(tester, tamano: tamano, tarjetas: mazo([primera, segunda]));
+      await tocar(tester, pildoraDe(Textos.comodinLupa));
+      expect(tester.takeException(), isNull);
+      await tocar(tester, pildoraDe(Textos.comodinAbogado));
+      expect(tester.takeException(), isNull);
+      expect(tester.getSize(find.byType(PanelAbogado)).height, lessThanOrEqualTo(tamano.height));
+      await tocar(
+        tester,
+        find.descendant(of: find.byType(PanelAbogado), matching: find.byType(BotonApp)),
+      );
+      expect(tester.takeException(), isNull);
+    }, casos: casosMovilCinco);
   });
 }

@@ -46,13 +46,6 @@ Future<void> elegir(WidgetTester tester, Veredicto v) async {
   await tester.pumpAndSettle();
 }
 
-Future<void> pulsar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
-}
-
 /// Comprueba que [hoja] es la lateral de Figma: 376 de ancho, a 24 del borde
 /// derecho y 22 del inferior.
 void esperarHojaLateral(WidgetTester tester) {
@@ -153,7 +146,7 @@ void main() {
 
     testWidgets('la evidencia se abre en la hoja y se cierra con Esc', (tester) async {
       await abrirTablet(tester, tarjetas: [registro]);
-      await pulsar(tester, find.byKey(const ValueKey('boton-evidencia')));
+      await tocar(tester, find.byKey(const ValueKey('boton-evidencia')));
       expect(find.byType(PanelEvidencia), findsOneWidget);
       esperarHojaLateral(tester);
       expect(find.bySemanticsLabel(Textos.hojaEvidencia), findsOneWidget);
@@ -164,7 +157,7 @@ void main() {
 
     testWidgets('la evidencia se cierra tocando fuera', (tester) async {
       await abrirTablet(tester, tarjetas: [registro]);
-      await pulsar(tester, find.byKey(const ValueKey('boton-evidencia')));
+      await tocar(tester, find.byKey(const ValueKey('boton-evidencia')));
       await tester.tapAt(const Offset(60, 400));
       await tester.pumpAndSettle();
       expect(find.byType(PanelEvidencia), findsNothing);
@@ -178,8 +171,8 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(find.byType(PanelJustificacion), findsOneWidget);
-      await pulsar(tester, find.byType(OpcionJustificacion).first);
-      await pulsar(
+      await tocar(tester, find.byType(OpcionJustificacion).first);
+      await tocar(
         tester,
         find.descendant(of: find.byType(PanelJustificacion), matching: find.byType(BotonApp)),
       );
@@ -189,7 +182,7 @@ void main() {
 
     testWidgets('el Abogado Senior se abre en la hoja y se cierra con atrás', (tester) async {
       await abrirTablet(tester, tarjetas: [normal]);
-      await pulsar(tester, find.byKey(const ValueKey('comodin-abogado')));
+      await tocar(tester, find.byKey(const ValueKey('comodin-abogado')));
       expect(find.byType(PanelAbogado), findsOneWidget);
       esperarHojaLateral(tester);
       expect(find.bySemanticsLabel(Textos.hojaAbogado), findsOneWidget);
@@ -228,7 +221,7 @@ void main() {
   group('Pausa', () {
     testWidgets('"Seguir jugando" cierra y "Salir del sprint" pide confirmación', (tester) async {
       await abrirTablet(tester);
-      await pulsar(tester, find.byKey(const ValueKey('boton-pausa')));
+      await tocar(tester, find.byKey(const ValueKey('boton-pausa')));
       expect(find.text(Textos.pausaTitulo), findsOneWidget);
       final dialogo = tester.getRect(
         find.descendant(
@@ -237,13 +230,13 @@ void main() {
         ),
       );
       expect(dialogo.width, lessThanOrEqualTo(440));
-      await pulsar(tester, find.byKey(const ValueKey('boton-seguir-jugando')));
+      await tocar(tester, find.byKey(const ValueKey('boton-seguir-jugando')));
       expect(find.text(Textos.pausaTitulo), findsNothing);
 
-      await pulsar(tester, find.byKey(const ValueKey('boton-pausa')));
-      await pulsar(tester, find.byKey(const ValueKey('boton-salir-sprint')));
+      await tocar(tester, find.byKey(const ValueKey('boton-pausa')));
+      await tocar(tester, find.byKey(const ValueKey('boton-salir-sprint')));
       expect(find.text(Textos.salirTitulo), findsOneWidget);
-      await pulsar(tester, salirDelDialogo);
+      await tocar(tester, salirDelDialogo);
       expect(find.byType(PantallaJuego), findsNothing);
     });
   });
@@ -264,8 +257,8 @@ void main() {
       final tarjetaActual = MockTarjetas.tarjetasPorSprint[sprintMock]![actual];
       await elegir(tester, tarjetaActual.respuestaCorrecta);
       if (find.byType(PanelJustificacion).evaluate().isNotEmpty) {
-        await pulsar(tester, find.byType(OpcionJustificacion).first);
-        await pulsar(
+        await tocar(tester, find.byType(OpcionJustificacion).first);
+        await tocar(
           tester,
           find.descendant(of: find.byType(PanelJustificacion), matching: find.byType(BotonApp)),
         );
@@ -296,25 +289,11 @@ void main() {
     }
   });
 
-  group('sin desbordes', () {
-    for (final tamano in [Tamano.tabletHorizontal, Tamano.tabletVertical, Tamano.tabletMinima]) {
-      for (final escala in [1.0, 2.0]) {
-        for (final brillo in Brightness.values) {
-          testWidgets('${tamano.name} al ${(escala * 100).round()} % (${brillo.name})', (
-            tester,
-          ) async {
-            tester.platformDispatcher.textScaleFactorTestValue = escala;
-            tester.platformDispatcher.platformBrightnessTestValue = brillo;
-            addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-            addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-            await abrirTablet(tester, tamano: tamano, tarjetas: [normal, normal]);
-            expect(tester.takeException(), isNull);
-            await elegir(tester, normal.respuestaCorrecta);
-            expect(tester.takeException(), isNull);
-          });
-        }
-      }
-    }
+  probarSinDesbordesTablet((tester, tamano) async {
+    await abrirTablet(tester, tamano: tamano, tarjetas: [normal, normal]);
+    expect(tester.takeException(), isNull);
+    await elegir(tester, normal.respuestaCorrecta);
+    expect(tester.takeException(), isNull);
   });
 
   enAmbosModos('contrastes del panel lateral', (tester, brillo) async {

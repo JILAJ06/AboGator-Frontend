@@ -20,15 +20,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../auditoria/ayudante_auditoria.dart';
+import '../../ayudantes/montar.dart';
 import '../../ayudantes/tamano_pantalla.dart';
 import '../juego/ayudante_juego.dart';
-
-Future<void> pulsar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
-}
 
 /// Abre Ajustes y desde ahí Notificaciones (así "cerrar" regresa a Ajustes).
 Future<AjustesEnMemoria> abrirNotificaciones(
@@ -39,7 +33,7 @@ Future<AjustesEnMemoria> abrirNotificaciones(
 }) async {
   final r = repo ?? AjustesEnMemoria();
   await abrirJuego(tester, ruta: Rutas.ajustes, tamano: tamano, ajustes: ajustes, repoAjustes: r);
-  await pulsar(tester, find.byKey(const ValueKey('ajuste-notificaciones')));
+  await tocar(tester, find.byKey(const ValueKey('ajuste-notificaciones')));
   expect(find.byType(PantallaNotificaciones), findsOneWidget);
   return r;
 }
@@ -102,9 +96,9 @@ void main() {
 
     testWidgets('los interruptores se guardan al instante', (tester) async {
       final repo = await abrirNotificaciones(tester);
-      await pulsar(tester, find.byKey(const ValueKey('notif-racha')));
+      await tocar(tester, find.byKey(const ValueKey('notif-racha')));
       expect((await guardadas(repo)).rachaEnRiesgo, isFalse);
-      await pulsar(tester, find.byKey(const ValueKey('interruptor-recordatorio')));
+      await tocar(tester, find.byKey(const ValueKey('interruptor-recordatorio')));
       expect((await guardadas(repo)).recordatorioDiario, isTrue);
     });
 
@@ -112,7 +106,7 @@ void main() {
       tester,
     ) async {
       final repo = await abrirNotificaciones(tester);
-      await pulsar(tester, find.byKey(const ValueKey('boton-activar-notificaciones')));
+      await tocar(tester, find.byKey(const ValueKey('boton-activar-notificaciones')));
       final n = await guardadas(repo);
       expect(n.activadas, isTrue);
       expect(n.decidido, isTrue);
@@ -121,7 +115,7 @@ void main() {
 
     testWidgets('"Ahora no" guarda apagadas y vuelve', (tester) async {
       final repo = await abrirNotificaciones(tester);
-      await pulsar(tester, find.byKey(const ValueKey('boton-ahora-no')));
+      await tocar(tester, find.byKey(const ValueKey('boton-ahora-no')));
       final n = await guardadas(repo);
       expect(n.activadas, isFalse);
       expect(n.decidido, isTrue);
@@ -142,7 +136,7 @@ void main() {
   group('34c Hora del recordatorio', () {
     testWidgets('móvil: hoja inferior con radio 28, agarre y tres ruedas', (tester) async {
       await abrirNotificaciones(tester);
-      await pulsar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
+      await tocar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
       expect(find.byType(BottomSheet), findsOneWidget);
       final caja = tester.widget<Container>(find.byKey(const ValueKey('selector-hora')));
       expect(
@@ -157,7 +151,7 @@ void main() {
 
     testWidgets('tablet: diálogo centrado de 440 como máximo', (tester) async {
       await abrirNotificaciones(tester, tamano: Tamano.tabletHorizontal.medida);
-      await pulsar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
+      await tocar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
       expect(find.byType(Dialog), findsOneWidget);
       final r = tester.getRect(find.byKey(const ValueKey('selector-hora')));
       expect(r.width, lessThanOrEqualTo(SelectorHora.anchoDialogo));
@@ -171,11 +165,11 @@ void main() {
         tester,
         ajustes: const Ajustes(soloBotones: true, reducirAnimaciones: true),
       );
-      await pulsar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
-      await pulsar(tester, find.byKey(const ValueKey('mas-hora')));
-      await pulsar(tester, find.byKey(const ValueKey('mas-minutos')));
-      await pulsar(tester, find.byKey(const ValueKey('mas-minutos')));
-      await pulsar(tester, find.byKey(const ValueKey('boton-guardar-hora')));
+      await tocar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
+      await tocar(tester, find.byKey(const ValueKey('mas-hora')));
+      await tocar(tester, find.byKey(const ValueKey('mas-minutos')));
+      await tocar(tester, find.byKey(const ValueKey('mas-minutos')));
+      await tocar(tester, find.byKey(const ValueKey('boton-guardar-hora')));
       final n = await guardadas(repo);
       expect(n.minutosRecordatorio, 20 * 60 + 10);
       expect(n.recordatorioDiario, isTrue);
@@ -189,7 +183,7 @@ void main() {
         tester,
         ajustes: const Ajustes(reducirAnimaciones: true),
       );
-      await pulsar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
+      await tocar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
       // Tab hasta la primera rueda (la de la hora).
       var enRueda = false;
       for (var i = 0; i < 4 && !enRueda; i++) {
@@ -214,7 +208,7 @@ void main() {
     testWidgets('las ruedas son ajustables para el lector', (tester) async {
       final semantica = tester.ensureSemantics();
       await abrirNotificaciones(tester);
-      await pulsar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
+      await tocar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
       final datos = tester.getSemantics(find.bySemanticsLabel(Textos.ruedaHora)).getSemanticsData();
       expect(datos.value, '7');
       expect(datos.increasedValue, '8');
@@ -292,7 +286,7 @@ void main() {
       expect(find.descendant(of: columna, matching: find.byType(BotonAtras)), findsNothing);
       expect(tester.getSize(find.byKey(const ValueKey('tarjeta-notificaciones'))).width, 470);
       // El atrás del panel cierra.
-      await pulsar(tester, find.byType(BotonAtras));
+      await tocar(tester, find.byType(BotonAtras));
       expect(find.byType(PantallaAjustes), findsOneWidget);
     });
 
@@ -314,7 +308,7 @@ void main() {
 
     testWidgets('el selector de hora sigue siendo el diálogo de 440', (tester) async {
       await abrirNotificaciones(tester, tamano: Tamano.tabletHorizontal.medida);
-      await pulsar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
+      await tocar(tester, find.byKey(const ValueKey('fila-hora-recordatorio')));
       expect(find.byType(Dialog), findsOneWidget);
     });
   });

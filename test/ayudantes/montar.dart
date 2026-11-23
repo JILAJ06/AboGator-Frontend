@@ -44,6 +44,14 @@ Future<void> montar(
   await tester.pumpAndSettle();
 }
 
+/// Lleva [f] a la vista, lo toca y espera a que todo se asiente.
+Future<void> tocar(WidgetTester tester, Finder f) async {
+  await tester.ensureVisible(f);
+  await tester.pumpAndSettle();
+  await tester.tap(f);
+  await tester.pumpAndSettle();
+}
+
 /// Tokens del modo que se está mostrando.
 TokensColor tokensDe(Brightness brillo) =>
     brillo == Brightness.dark ? TokensColor.oscuro : TokensColor.claro;

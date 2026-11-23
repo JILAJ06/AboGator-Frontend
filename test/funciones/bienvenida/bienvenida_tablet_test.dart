@@ -116,34 +116,26 @@ void main() {
     });
   });
 
-  group('sin desbordes', () {
-    for (final tamano in [Tamano.tabletHorizontal, Tamano.tabletVertical, Tamano.tabletMinima]) {
-      for (final escala in [1.0, 2.0]) {
-        testWidgets('Splash y onboarding en ${tamano.name} al ${(escala * 100).round()} %', (
-          tester,
-        ) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          await montarApp(tester, tamano: tamano.medida);
-          expect(tester.takeException(), isNull);
-          await pasarSplash(tester);
-          for (var i = 0; i < 4; i++) {
-            expect(tester.takeException(), isNull);
-            final boton = find.text(
-              i == 3 ? Textos.onboardingComenzar : Textos.onboardingSiguiente,
-            );
-            await tester.ensureVisible(boton);
-            await tester.pumpAndSettle();
-            if (i < 3) {
-              await tester.tap(boton);
-              await tester.pumpAndSettle();
-            }
-          }
-          expect(find.text(Textos.onboarding4Titulo), findsOneWidget);
-        });
+  probarSinDesbordesTablet(
+    (tester, tamano) async {
+      await montarApp(tester, tamano: tamano.medida);
+      expect(tester.takeException(), isNull);
+      await pasarSplash(tester);
+      for (var i = 0; i < 4; i++) {
+        expect(tester.takeException(), isNull);
+        final boton = find.text(i == 3 ? Textos.onboardingComenzar : Textos.onboardingSiguiente);
+        await tester.ensureVisible(boton);
+        await tester.pumpAndSettle();
+        if (i < 3) {
+          await tester.tap(boton);
+          await tester.pumpAndSettle();
+        }
       }
-    }
-  });
+      expect(find.text(Textos.onboarding4Titulo), findsOneWidget);
+    },
+    ambosBrillos: false,
+    prefijo: 'Splash y onboarding en ',
+  );
 
   testWidgets('al pasar de tablet a móvil el onboarding sigue en la misma página', (tester) async {
     await montarApp(tester, tamano: Tamano.tabletHorizontal.medida);
