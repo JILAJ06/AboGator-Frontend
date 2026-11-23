@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../auditoria/ayudante_auditoria.dart';
+import '../../ayudantes/montar.dart';
 import '../../ayudantes/tamano_pantalla.dart';
 import '../juego/ayudante_juego.dart';
 
@@ -22,13 +23,6 @@ Finder get campoCorreo => find.descendant(
 
 Finder campo(String clave) =>
     find.descendant(of: find.byKey(ValueKey(clave)), matching: find.byType(EditableText));
-
-Future<void> pulsar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
-}
 
 Future<MockAutenticacion> abrirRecuperacion(
   WidgetTester tester, {
@@ -62,11 +56,11 @@ void main() {
 
     testWidgets('correo vacío o inválido: error anunciado y foco en el campo', (tester) async {
       final auth = await abrirRecuperacion(tester);
-      await pulsar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
+      await tocar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
       expect(find.text(Textos.errorCorreo), findsOneWidget);
       expect(enfocadoDentroDe(find.byKey(const ValueKey('campo-correo-recuperacion'))), isTrue);
       await tester.enterText(campoCorreo, 'no-es-correo');
-      await pulsar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
+      await tocar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
       expect(find.text(Textos.errorCorreo), findsOneWidget);
       expect(auth.solicitudesRecuperacion, isEmpty);
     });
@@ -74,7 +68,7 @@ void main() {
     testWidgets('correo válido: pide el enlace y pasa a 31b con el correo', (tester) async {
       final auth = await abrirRecuperacion(tester);
       await tester.enterText(campoCorreo, '  ana@ejemplo.mx ');
-      await pulsar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
+      await tocar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
       expect(auth.solicitudesRecuperacion, ['ana@ejemplo.mx']);
       expect(find.byType(PantallaCorreoEnviado), findsOneWidget);
       expect(find.text(Textos.enlaceEnviadoA('ana@ejemplo.mx')), findsOneWidget);
@@ -82,7 +76,7 @@ void main() {
 
     testWidgets('"Volver a iniciar sesión" y atrás regresan al inicio de sesión', (tester) async {
       await abrirRecuperacion(tester);
-      await pulsar(tester, find.byKey(const ValueKey('boton-volver-inicio-sesion')));
+      await tocar(tester, find.byKey(const ValueKey('boton-volver-inicio-sesion')));
       expect(find.byType(PantallaInicioSesion), findsOneWidget);
     });
   });
@@ -91,7 +85,7 @@ void main() {
     Future<void> llegar(WidgetTester tester, {Size tamano = const Size(390, 844)}) async {
       await abrirRecuperacion(tester, tamano: tamano);
       await tester.enterText(campoCorreo, 'ana@ejemplo.mx');
-      await pulsar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
+      await tocar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
     }
 
     testWidgets('ilustración con Sarko alegre e insignia de correo', (tester) async {
@@ -116,14 +110,14 @@ void main() {
       expect(boton(tester, 'boton-reenviar').alPresionar, isNotNull);
       await tester.pump(const Duration(seconds: 5));
       expect(anuncios.where((a) => a == Textos.reenvioDisponible), hasLength(1));
-      await pulsar(tester, find.byKey(const ValueKey('boton-reenviar')));
+      await tocar(tester, find.byKey(const ValueKey('boton-reenviar')));
       expect(anuncios, contains(Textos.enlaceReenviado));
       expect(find.text(Textos.reenviarEnlaceEn(45)), findsOneWidget);
     });
 
     testWidgets('"Abrir correo" abre 31c con el token de demostración', (tester) async {
       await llegar(tester);
-      await pulsar(tester, find.byKey(const ValueKey('boton-abrir-correo')));
+      await tocar(tester, find.byKey(const ValueKey('boton-abrir-correo')));
       final pantalla = tester.widget<PantallaNuevaContrasena>(find.byType(PantallaNuevaContrasena));
       expect(pantalla.token, tokenDemoRecuperacion);
     });
@@ -144,7 +138,7 @@ void main() {
       await abrir(tester, 'demo');
       await tester.enterText(campo('campo-nueva-contrasena'), 'corta');
       await tester.enterText(campo('campo-confirmar-contrasena'), 'corta');
-      await pulsar(tester, find.byKey(const ValueKey('boton-guardar-contrasena')));
+      await tocar(tester, find.byKey(const ValueKey('boton-guardar-contrasena')));
       expect(find.text(Textos.errorContrasenaRegistro), findsOneWidget);
       expect(enfocadoDentroDe(find.byKey(const ValueKey('campo-nueva-contrasena'))), isTrue);
     });
@@ -153,7 +147,7 @@ void main() {
       await abrir(tester, 'demo');
       await tester.enterText(campo('campo-nueva-contrasena'), 'segura123');
       await tester.enterText(campo('campo-confirmar-contrasena'), 'segura124');
-      await pulsar(tester, find.byKey(const ValueKey('boton-guardar-contrasena')));
+      await tocar(tester, find.byKey(const ValueKey('boton-guardar-contrasena')));
       expect(find.text(Textos.errorContrasenasNoCoinciden), findsOneWidget);
       expect(enfocadoDentroDe(find.byKey(const ValueKey('campo-confirmar-contrasena'))), isTrue);
     });
@@ -162,11 +156,11 @@ void main() {
       await abrir(tester, 'demo');
       await tester.enterText(campo('campo-nueva-contrasena'), 'segura123');
       await tester.enterText(campo('campo-confirmar-contrasena'), 'segura123');
-      await pulsar(tester, find.byKey(const ValueKey('boton-guardar-contrasena')));
+      await tocar(tester, find.byKey(const ValueKey('boton-guardar-contrasena')));
       expect(find.byKey(const ValueKey('recuperacion-listo')), findsOneWidget);
       expect(find.text(Textos.contrasenaActualizadaTitulo), findsOneWidget);
       expect(find.bySemanticsLabel(Textos.insigniaListo), findsOneWidget);
-      await pulsar(tester, find.byKey(const ValueKey('boton-iniciar-sesion-recuperacion')));
+      await tocar(tester, find.byKey(const ValueKey('boton-iniciar-sesion-recuperacion')));
       expect(find.byType(PantallaInicioSesion), findsOneWidget);
     });
 
@@ -175,7 +169,7 @@ void main() {
     ) async {
       await abrirRecuperacion(tester);
       await tester.enterText(campoCorreo, 'ana@ejemplo.mx');
-      await pulsar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
+      await tocar(tester, find.byKey(const ValueKey('boton-enviar-enlace')));
       expect(contenedorDe(tester).read(recuperacionProvider).correo, 'ana@ejemplo.mx');
       // Abre el enlace caducado (como el enlace profundo del correo).
       contenedorDe(tester)
@@ -184,11 +178,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(campo('campo-nueva-contrasena'), 'segura123');
       await tester.enterText(campo('campo-confirmar-contrasena'), 'segura123');
-      await pulsar(tester, find.byKey(const ValueKey('boton-guardar-contrasena')));
+      await tocar(tester, find.byKey(const ValueKey('boton-guardar-contrasena')));
       expect(find.byKey(const ValueKey('recuperacion-caducado')), findsOneWidget);
       expect(find.text(Textos.enlaceCaducadoTitulo), findsOneWidget);
       expect(tester.widget<SarkoImagen>(find.byType(SarkoImagen)).pose, PoseSarko.triste);
-      await pulsar(tester, find.byKey(const ValueKey('boton-pedir-enlace')));
+      await tocar(tester, find.byKey(const ValueKey('boton-pedir-enlace')));
       expect(find.byType(PantallaRecuperar), findsOneWidget);
       expect(tester.widget<EditableText>(campoCorreo).controller.text, 'ana@ejemplo.mx');
     });

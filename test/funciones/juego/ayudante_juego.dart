@@ -19,7 +19,6 @@ import 'package:abogator/datos/mocks/mock_vidas.dart';
 import 'package:abogator/datos/mocks/onboarding_en_memoria.dart';
 import 'package:abogator/datos/modelos/ajustes.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
-import 'package:abogator/datos/modelos/usuario.dart';
 import 'package:abogator/datos/repositorios/proveedores_repositorios.dart';
 import 'package:abogator/datos/repositorios/repositorio_ajustes.dart';
 import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
@@ -37,15 +36,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
-const ana = Usuario(
-  id: 'u-ana',
-  nombre: 'Ana López',
-  correo: 'ana@startup.mx',
-  perfil: PerfilUsuario.desarrollador,
-  nivel: 4,
-  xp: 0,
-  racha: 7,
-);
+import '../../ayudantes/falsos.dart';
 
 /// Sprint del mock con 10 tarjetas.
 const sprintMock = 'spr-1-3';

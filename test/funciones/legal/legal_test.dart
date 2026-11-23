@@ -15,13 +15,6 @@ import '../../ayudantes/montar.dart';
 import '../../ayudantes/tamano_pantalla.dart';
 import '../juego/ayudante_juego.dart';
 
-Future<void> pulsar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
-}
-
 List<FilaAcordeon> filas(WidgetTester tester) =>
     tester.widgetList<FilaAcordeon>(find.byType(FilaAcordeon)).toList();
 
@@ -62,9 +55,9 @@ void main() {
       tester,
     ) async {
       await abrirJuego(tester, ruta: Rutas.legalAviso, conSesion: false);
-      await pulsar(tester, find.text('Tus derechos ARCO'));
+      await tocar(tester, find.text('Tus derechos ARCO'));
       expect(filas(tester).where((f) => f.abierta).single.titulo, 'Tus derechos ARCO');
-      await pulsar(tester, find.text('Tus derechos ARCO'));
+      await tocar(tester, find.text('Tus derechos ARCO'));
       expect(filas(tester).where((f) => f.abierta), isEmpty);
     });
 
@@ -102,9 +95,9 @@ void main() {
 
     testWidgets('"Entendido" cierra y regresa', (tester) async {
       await abrirJuego(tester, ruta: Rutas.ajustes);
-      await pulsar(tester, find.byKey(const ValueKey('ajuste-aviso')));
+      await tocar(tester, find.byKey(const ValueKey('ajuste-aviso')));
       expect(find.byType(PantallaLegal), findsOneWidget);
-      await pulsar(tester, find.byKey(const ValueKey('boton-entendido-legal')));
+      await tocar(tester, find.byKey(const ValueKey('boton-entendido-legal')));
       expect(find.byType(PantallaAjustes), findsOneWidget);
     });
   });
@@ -129,9 +122,9 @@ void main() {
         matching: find.byType(EditableText),
       );
       await tester.enterText(nombre.first, 'Ana');
-      await pulsar(tester, find.text(Textos.leerTerminos));
+      await tocar(tester, find.text(Textos.leerTerminos));
       expect(find.byType(PantallaLegal), findsOneWidget);
-      await pulsar(tester, find.byKey(const ValueKey('boton-entendido-legal')));
+      await tocar(tester, find.byKey(const ValueKey('boton-entendido-legal')));
       expect(find.byType(PantallaRegistro), findsOneWidget);
       expect(tester.widget<EditableText>(nombre.first).controller.text, 'Ana');
     });
@@ -139,7 +132,7 @@ void main() {
     testWidgets('desde Ajustes: Aviso y Términos en la sección Legal', (tester) async {
       await abrirJuego(tester, ruta: Rutas.ajustes);
       expect(find.text(Textos.seccionLegal), findsOneWidget);
-      await pulsar(tester, find.byKey(const ValueKey('ajuste-terminos')));
+      await tocar(tester, find.byKey(const ValueKey('ajuste-terminos')));
       expect(find.text(Textos.terminosTitulo), findsOneWidget);
     });
   });

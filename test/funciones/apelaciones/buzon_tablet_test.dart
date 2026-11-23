@@ -24,13 +24,6 @@ Finder get detalle => find.byKey(const ValueKey('panel-detalle-juicio'));
 FilaApelacion fila(WidgetTester tester, String id) =>
     tester.widget<FilaApelacion>(find.byKey(ValueKey('fila-$id')));
 
-Future<void> pulsar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
-}
-
 void main() {
   group('T21 Buzón en lista-detalle (1194×834)', () {
     testWidgets('riel con insignia, lista de 500 y detalle de 526', (tester) async {
@@ -59,7 +52,7 @@ void main() {
       expect(fila(tester, 'ape-001').seleccionada, isTrue);
       expect(fila(tester, 'ape-002').seleccionada, isFalse);
       final titulo2 = fila(tester, 'ape-002').titulo;
-      await pulsar(tester, find.byKey(const ValueKey('fila-ape-002')));
+      await tocar(tester, find.byKey(const ValueKey('fila-ape-002')));
       // No navega: sigue en el Buzón.
       expect(rutaActual(tester), Rutas.buzon);
       expect(fila(tester, 'ape-002').seleccionada, isTrue);
@@ -68,7 +61,7 @@ void main() {
 
     testWidgets('flechas arriba y abajo recorren la selección', (tester) async {
       await abrirBuzon(tester, tamano: Tamano.tabletHorizontal.medida);
-      await pulsar(tester, find.byKey(const ValueKey('fila-ape-001')));
+      await tocar(tester, find.byKey(const ValueKey('fila-ape-001')));
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
       expect(fila(tester, 'ape-002').seleccionada, isTrue);
@@ -79,16 +72,16 @@ void main() {
 
     testWidgets('"Iniciar juicio" abre el juicio de la apelación seleccionada', (tester) async {
       await abrirBuzon(tester, tamano: Tamano.tabletHorizontal.medida);
-      await pulsar(tester, find.byKey(const ValueKey('fila-ape-002')));
-      await pulsar(tester, find.byKey(const ValueKey('boton-iniciar-juicio')));
+      await tocar(tester, find.byKey(const ValueKey('fila-ape-002')));
+      await tocar(tester, find.byKey(const ValueKey('boton-iniciar-juicio')));
       expect(rutaActual(tester), Rutas.juicioApelacionDe('ape-002'));
       expect(find.byType(PantallaJuicio), findsOneWidget);
     });
 
     testWidgets('una apelación futura avisa cuándo se abre', (tester) async {
       await abrirBuzon(tester, tamano: Tamano.tabletHorizontal.medida);
-      await pulsar(tester, find.byKey(const ValueKey('fila-ape-003')));
-      await pulsar(tester, find.byKey(const ValueKey('boton-iniciar-juicio')));
+      await tocar(tester, find.byKey(const ValueKey('fila-ape-003')));
+      await tocar(tester, find.byKey(const ValueKey('boton-iniciar-juicio')));
       expect(rutaActual(tester), Rutas.buzon);
       expect(find.byKey(const ValueKey('aviso-apelacion-futura')), findsOneWidget);
     });
@@ -116,7 +109,7 @@ void main() {
           tester.getSize(find.byKey(const ValueKey('lista-apelaciones'))).width,
           lessThanOrEqualTo(640),
         );
-        await pulsar(tester, find.byKey(const ValueKey('fila-ape-001')));
+        await tocar(tester, find.byKey(const ValueKey('fila-ape-001')));
         expect(find.byType(PantallaJuicio), findsOneWidget);
       });
     }
@@ -143,7 +136,7 @@ void main() {
       final gpl = MockTarjetas.tarjetasPorSprint.values
           .expand((l) => l)
           .firstWhere((t) => t.id == 'tar-gpl-01');
-      await pulsar(
+      await tocar(
         tester,
         find.byWidgetPredicate((w) => w is BotonVeredicto && w.veredicto == gpl.respuestaCorrecta),
       );
@@ -153,23 +146,10 @@ void main() {
     });
   });
 
-  group('sin desbordes', () {
-    for (final tamano in [Tamano.tabletHorizontal, Tamano.tabletVertical, Tamano.tabletMinima]) {
-      for (final escala in [1.0, 2.0]) {
-        for (final brillo in Brightness.values) {
-          final nombre = '${tamano.name} al ${(escala * 100).round()} % (${brillo.name})';
-          testWidgets('Buzón y juicio en $nombre', (tester) async {
-            tester.platformDispatcher.textScaleFactorTestValue = escala;
-            tester.platformDispatcher.platformBrightnessTestValue = brillo;
-            addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-            addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-            await abrirBuzon(tester, tamano: tamano.medida);
-            expect(tester.takeException(), isNull);
-          });
-        }
-      }
-    }
-  });
+  probarSinDesbordesTablet((tester, tamano) async {
+    await abrirBuzon(tester, tamano: tamano.medida);
+    expect(tester.takeException(), isNull);
+  }, prefijo: 'Buzón y juicio en ');
 
   enAmbosModos('contrastes de los chips de plazo y de la recompensa', (tester, brillo) async {
     final t = tokensDe(brillo);

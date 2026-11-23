@@ -27,6 +27,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/sin_desbordes.dart';
 import 'ayudante_juego.dart';
 
 final tarjetasMock = MockTarjetas.tarjetasPorSprint[sprintMock]!;
@@ -474,56 +475,42 @@ void main() {
     });
   });
 
-  group('sin desbordes', () {
-    for (final (tamano, escala) in [
-      (const Size(390, 844), 1.0),
-      (const Size(390, 844), 2.0),
-      (const Size(360, 640), 1.0),
-      (const Size(360, 640), 2.0),
-      (const Size(320, 640), 1.0),
-      (const Size(320, 640), 2.0),
-    ]) {
-      for (final brillo in Brightness.values) {
-        final nombre = '${tamano.width.toInt()}×${tamano.height.toInt()} texto ${escala}x';
-        testWidgets('$nombre ${brillo.name}', (tester) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          tester.platformDispatcher.platformBrightnessTestValue = brillo;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-          await abrirJuego(tester, tamano: tamano);
-          expect(tester.takeException(), isNull);
-          final posicion = tester
-              .state<ScrollableState>(
-                find
-                    .descendant(
-                      of: find.byKey(const ValueKey('juego-desplazable')),
-                      matching: find.byType(Scrollable),
-                    )
-                    .first,
-              )
-              .position;
-          // Recorrer toda la pantalla.
-          posicion.jumpTo(posicion.maxScrollExtent);
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull);
-          posicion.jumpTo(0);
-          await tester.pumpAndSettle();
-          // Si se desplaza, se hace desde fuera de la tarjeta (la barra).
-          if (posicion.maxScrollExtent > 0) {
-            await tester.drag(find.byType(BarraJuego), const Offset(0, -60));
-            await tester.pumpAndSettle();
-            expect(posicion.pixels, greaterThan(0));
-          }
-          // El gesto es de la tarjeta aunque la pantalla se pueda desplazar.
-          await tester.ensureVisible(tarjeta);
-          await tester.pumpAndSettle();
-          final antesDelGesto = posicion.pixels;
-          await arrastrar(tester, const Offset(0, -150));
-          expect(estadoJuego(tester).respuestas.single.veredicto, Veredicto.condicional);
-          expect(posicion.pixels, antesDelGesto);
-          expect(tester.takeException(), isNull);
-        });
+  probarSinDesbordes(
+    (tester, tamano, _) async {
+      await abrirJuego(tester, tamano: tamano);
+      expect(tester.takeException(), isNull);
+      final posicion = tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byKey(const ValueKey('juego-desplazable')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      // Recorrer toda la pantalla.
+      posicion.jumpTo(posicion.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      posicion.jumpTo(0);
+      await tester.pumpAndSettle();
+      // Si se desplaza, se hace desde fuera de la tarjeta (la barra).
+      if (posicion.maxScrollExtent > 0) {
+        await tester.drag(find.byType(BarraJuego), const Offset(0, -60));
+        await tester.pumpAndSettle();
+        expect(posicion.pixels, greaterThan(0));
       }
-    }
-  });
+      // El gesto es de la tarjeta aunque la pantalla se pueda desplazar.
+      await tester.ensureVisible(tarjeta);
+      await tester.pumpAndSettle();
+      final antesDelGesto = posicion.pixels;
+      await arrastrar(tester, const Offset(0, -150));
+      expect(estadoJuego(tester).respuestas.single.veredicto, Veredicto.condicional);
+      expect(posicion.pixels, antesDelGesto);
+      expect(tester.takeException(), isNull);
+    },
+    ambosBrillos: true,
+    texto: 'texto ',
+  );
 }

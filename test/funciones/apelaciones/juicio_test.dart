@@ -24,6 +24,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 import '../juego/ayudante_juego.dart';
 
 final ahora = DateTime.utc(2026, 11, 20, 10);
@@ -59,13 +60,6 @@ class BuzonQueFalla implements RepositorioApelaciones {
 }
 
 Finder boton(String texto) => find.widgetWithText(BotonApp, texto);
-
-Future<void> tocar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
-}
 
 Future<void> elegir(WidgetTester tester, Veredicto v) =>
     tocar(tester, find.byWidgetPredicate((w) => w is BotonVeredicto && w.veredicto == v));
@@ -367,25 +361,12 @@ void main() {
       }
     });
 
-    group('sin desbordes', () {
-      for (final (tamano, escala) in [
-        (const Size(390, 844), 1.0),
-        (const Size(390, 844), 2.0),
-        (const Size(360, 640), 1.0),
-        (const Size(360, 640), 2.0),
-        (const Size(320, 640), 1.0),
-        (const Size(320, 640), 2.0),
-      ]) {
-        testWidgets('${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x', (tester) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          await abrirJuicio(tester, tamano: tamano);
-          expect(tester.takeException(), isNull);
-          await elegir(tester, Veredicto.ilegal);
-          expect(tester.takeException(), isNull);
-          expect(find.text(Textos.apelacionGanadaTitulo), findsOneWidget);
-        });
-      }
+    probarSinDesbordes((tester, tamano, _) async {
+      await abrirJuicio(tester, tamano: tamano);
+      expect(tester.takeException(), isNull);
+      await elegir(tester, Veredicto.ilegal);
+      expect(tester.takeException(), isNull);
+      expect(find.text(Textos.apelacionGanadaTitulo), findsOneWidget);
     });
   });
 

@@ -28,15 +28,10 @@ import 'package:abogator/funciones/perfil/pantalla_perfil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/falsos.dart';
 import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 import '../juego/ayudante_juego.dart';
-
-Future<void> tocar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
-}
 
 /// Autenticación que cuenta los cierres y puede fallar.
 class AutenticacionDePrueba implements RepositorioAutenticacion {
@@ -385,29 +380,13 @@ void main() {
       }
     });
 
-    group('sin desbordes', () {
-      for (final (tamano, escala) in [
-        (const Size(390, 844), 1.0),
-        (const Size(390, 844), 2.0),
-        (const Size(360, 640), 1.0),
-        (const Size(360, 640), 2.0),
-        (const Size(320, 640), 1.0),
-        (const Size(320, 640), 2.0),
-      ]) {
-        testWidgets('${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x', (tester) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          await abrirPerfil(tester, tamano: tamano);
-          expect(tester.takeException(), isNull);
-          await tester.drag(
-            find.byKey(const ValueKey('perfil-desplazable')),
-            const Offset(0, -3000),
-          );
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull);
-          expect(find.text(Textos.cerrarSesion), findsOneWidget);
-        });
-      }
+    probarSinDesbordes((tester, tamano, _) async {
+      await abrirPerfil(tester, tamano: tamano);
+      expect(tester.takeException(), isNull);
+      await tester.drag(find.byKey(const ValueKey('perfil-desplazable')), const Offset(0, -3000));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(Textos.cerrarSesion), findsOneWidget);
     });
   });
 }

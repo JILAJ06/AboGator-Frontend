@@ -11,8 +11,9 @@ import 'package:abogator/funciones/jefe/pantalla_resultado.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/montar.dart';
 import '../../ayudantes/tamano_pantalla.dart';
-import 'jefe_test.dart' show abrirCrisis, elegir, escenario, tocar;
+import 'jefe_test.dart' show abrirCrisis, elegir, escenario;
 import 'resultado_test.dart' show empezar, ganar, perderPorVidas;
 
 void main() {
@@ -113,23 +114,10 @@ void main() {
     });
   });
 
-  group('sin desbordes', () {
-    for (final tamano in [Tamano.tabletHorizontal, Tamano.tabletVertical, Tamano.tabletMinima]) {
-      for (final escala in [1.0, 2.0]) {
-        for (final brillo in Brightness.values) {
-          final nombre = '${tamano.name} al ${(escala * 100).round()} % (${brillo.name})';
-          testWidgets('crisis y decisión en $nombre', (tester) async {
-            tester.platformDispatcher.textScaleFactorTestValue = escala;
-            tester.platformDispatcher.platformBrightnessTestValue = brillo;
-            addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-            addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-            await abrirCrisis(tester, tamano: tamano.medida);
-            expect(tester.takeException(), isNull);
-            await tocar(tester, find.byKey(const ValueKey('boton-enfrentar')));
-            expect(tester.takeException(), isNull);
-          });
-        }
-      }
-    }
-  });
+  probarSinDesbordesTablet((tester, tamano) async {
+    await abrirCrisis(tester, tamano: tamano.medida);
+    expect(tester.takeException(), isNull);
+    await tocar(tester, find.byKey(const ValueKey('boton-enfrentar')));
+    expect(tester.takeException(), isNull);
+  }, prefijo: 'crisis y decisión en ');
 }

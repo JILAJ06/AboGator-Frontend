@@ -16,9 +16,6 @@ import 'package:abogator/core/textos/textos.dart';
 import 'package:abogator/core/utilidades/contraste.dart';
 import 'package:abogator/datos/mocks/mock_apelaciones.dart';
 import 'package:abogator/datos/mocks/mock_tarjetas.dart';
-import 'package:abogator/datos/modelos/apelacion.dart';
-import 'package:abogator/datos/modelos/buzon_apelaciones.dart';
-import 'package:abogator/datos/modelos/resultado_apelacion.dart';
 import 'package:abogator/datos/modelos/tarjeta.dart';
 import 'package:abogator/datos/repositorios/repositorio_apelaciones.dart';
 import 'package:abogator/funciones/acceso/pantalla_inicio_sesion.dart';
@@ -28,7 +25,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/falsos.dart';
 import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 import '../juego/ayudante_juego.dart';
 
 final ahoraServidor = DateTime.utc(2026, 11, 20, 10);
@@ -38,44 +37,6 @@ MockApelaciones servidor({bool conSemilla = true}) => MockApelaciones(
   ahoraServidor: () => ahoraServidor,
   conSemilla: conSemilla,
 );
-
-/// Buzón fijo (para los casos que la semilla no tiene).
-class BuzonFijo implements RepositorioApelaciones {
-  BuzonFijo(this.dias, {this.fallar = false});
-
-  /// Días hasta cada apelación (0 = hoy).
-  final List<int> dias;
-  bool fallar;
-  Completer<void>? bloqueo;
-
-  @override
-  Future<BuzonApelaciones> obtenerBuzon() async {
-    await bloqueo?.future;
-    if (fallar) throw StateError('sin red');
-    return BuzonApelaciones(
-      ahoraServidor: ahoraServidor,
-      apelaciones: [
-        for (final (i, d) in dias.indexed)
-          Apelacion(
-            id: 'a$i',
-            tarjetaId: 't$i',
-            moduloId: 'mod-1',
-            titulo: 'Caso $i',
-            tema: 'Tema',
-            diaRepaso: 3,
-            disponibleEl: ahoraServidor.add(Duration(days: d)),
-          ),
-      ],
-    );
-  }
-
-  @override
-  Future<void> registrarFallos(List<NuevaApelacion> fallos) async {}
-
-  @override
-  Future<ResultadoApelacion> resolverApelacion(String apelacionId, {required bool ganada}) =>
-      throw UnimplementedError();
-}
 
 Finder fila(String id) => find.byKey(ValueKey('fila-$id'));
 
@@ -94,13 +55,6 @@ Future<void> abrirBuzon(
     tamano: tamano,
     esperar: esperar,
   );
-}
-
-Future<void> tocar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
 }
 
 Future<void> elegir(WidgetTester tester, Veredicto v) =>
@@ -201,9 +155,15 @@ void main() {
     });
 
     testWidgets('singular y sin apelaciones de hoy (botón deshabilitado)', (tester) async {
-      await abrirBuzon(tester, apelaciones: BuzonFijo([0, 3]));
+      await abrirBuzon(
+        tester,
+        apelaciones: ApelacionesFalsas.conDias([0, 3], ahora: ahoraServidor),
+      );
       expect(find.text('1 juicio de apelación hoy'), findsOneWidget);
-      await abrirBuzon(tester, apelaciones: BuzonFijo([1, 3]));
+      await abrirBuzon(
+        tester,
+        apelaciones: ApelacionesFalsas.conDias([1, 3], ahora: ahoraServidor),
+      );
       expect(find.text(Textos.juiciosHoy(0)), findsOneWidget);
       expect(find.text(Textos.proximasApelaciones), findsOneWidget);
       expect(tester.widget<BotonApp>(botonIniciar).alPresionar, isNull);
@@ -219,7 +179,7 @@ void main() {
     });
 
     testWidgets('cargando, error y reintento', (tester) async {
-      final repo = BuzonFijo([0])..bloqueo = Completer();
+      final repo = ApelacionesFalsas.conDias([0], ahora: ahoraServidor)..bloqueo = Completer();
       await abrirBuzon(tester, apelaciones: repo, esperar: false);
       expect(find.byKey(const ValueKey('esqueleto-buzon')), findsOneWidget);
       repo
@@ -281,28 +241,12 @@ void main() {
       }
     });
 
-    group('sin desbordes', () {
-      for (final (tamano, escala) in [
-        (const Size(390, 844), 1.0),
-        (const Size(390, 844), 2.0),
-        (const Size(360, 640), 1.0),
-        (const Size(360, 640), 2.0),
-        (const Size(320, 640), 1.0),
-        (const Size(320, 640), 2.0),
-      ]) {
-        testWidgets('${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x', (tester) async {
-          tester.platformDispatcher.textScaleFactorTestValue = escala;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          await abrirBuzon(tester, tamano: tamano);
-          expect(tester.takeException(), isNull);
-          await tester.drag(
-            find.byKey(const ValueKey('buzon-desplazable')),
-            const Offset(0, -2000),
-          );
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull);
-        });
-      }
+    probarSinDesbordes((tester, tamano, _) async {
+      await abrirBuzon(tester, tamano: tamano);
+      expect(tester.takeException(), isNull);
+      await tester.drag(find.byKey(const ValueKey('buzon-desplazable')), const Offset(0, -2000));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('"Ir al Buzón de Apelaciones" de la 20 lleva aquí', (tester) async {

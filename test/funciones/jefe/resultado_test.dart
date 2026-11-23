@@ -32,11 +32,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/falsos.dart';
 import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 import '../juego/ayudante_juego.dart';
 import 'jefe_test.dart'
     show
-        HapticaFalsa,
         RelojFalso,
         VidasDeSobra,
         avanzar,
@@ -45,8 +46,7 @@ import 'jefe_test.dart'
         estado,
         golpear,
         incorrecto,
-        pasarChip,
-        tocar;
+        pasarChip;
 
 class Escena {
   Escena({
@@ -588,19 +588,8 @@ void main() {
   });
 
   group('desbordes', () {
-    for (final (tamano, escala) in [
-      (const Size(390, 844), 1.0),
-      (const Size(390, 844), 2.0),
-      (const Size(360, 640), 1.0),
-      (const Size(360, 640), 2.0),
-      (const Size(320, 640), 1.0),
-      (const Size(320, 640), 2.0),
-    ]) {
-      testWidgets('29 a ${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x', (
-        tester,
-      ) async {
-        tester.platformDispatcher.textScaleFactorTestValue = escala;
-        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    probarSinDesbordes(
+      (tester, tamano, _) async {
         await empezar(tester, tamano: tamano);
         await ganar(tester);
         expect(tester.takeException(), isNull);
@@ -610,13 +599,12 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
-      });
-
-      testWidgets('30 a ${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x', (
-        tester,
-      ) async {
-        tester.platformDispatcher.textScaleFactorTestValue = escala;
-        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      },
+      grupo: null,
+      prefijo: '29 a ',
+    );
+    probarSinDesbordes(
+      (tester, tamano, escala) async {
         await empezar(
           tester,
           tamano: tamano,
@@ -634,8 +622,10 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
-      });
-    }
+      },
+      grupo: null,
+      prefijo: '30 a ',
+    );
 
     testWidgets('reducir animaciones: el confeti queda quieto', (tester) async {
       await empezar(tester, ajustes: const Ajustes(reducirAnimaciones: true));

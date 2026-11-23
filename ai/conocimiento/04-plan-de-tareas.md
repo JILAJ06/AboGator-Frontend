@@ -28,7 +28,7 @@ Una rama por tarea, desde `develop`. El orden va de lo que todo necesita a lo qu
 | T-12d | `12d-tablet-buzon-y-examen` | Pantallas de resultado: Sprint completado y Startup en quiebra (T19, T19b), Sin vidas (T20), Buzón + Juicio en lista-detalle (T21, T21b, T22, T22b), Sin conexión (T23) y Examen Final (T27–T30) |
 | T-13 | `13-accesibilidad-y-pulido` | Revisión WCAG 2.1 AA, lector de pantalla, texto dinámico, reducir animaciones |
 | T-13b | `13b-pantallas-cuenta-y-legal` | Recuperar contraseña (5 pantallas), Aviso de Privacidad, Términos de uso y Notificaciones de racha con selector de hora; móvil y tablet, solo mocks |
-| T-15 | `15-componentes-globales` | Optimización con componentes globales (menos vistas y duplicación). **Recordar al usuario antes de empezarla: él explicará el alcance.** Va antes de T-14 |
+| T-15 | `15-componentes-globales` | Optimización con componentes globales (menos vistas y duplicación). **Hecha** en los lotes T-15a a T-15g (ver `09-duplicacion.md`): `lib/` −326 líneas netas y 3324 pruebas sin cambios de comportamiento; `test/` −385 con los ayudantes comunes de la T-15d. Va antes de T-14 |
 | T-14 | `14-integracion-api` | (después de T-15) Cuando el backend esté listo: reemplazar mocks por llamadas HTTP (contrato lo define el equipo de backend) |
 
 Las tareas pueden reordenarse o dividirse si una resulta demasiado grande para un solo Pull Request.

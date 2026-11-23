@@ -4,7 +4,6 @@ import 'package:abogator/componentes/boton_app.dart';
 import 'package:abogator/componentes/boton_veredicto.dart';
 import 'package:abogator/componentes/opcion_justificacion.dart';
 import 'package:abogator/componentes/piezas_jefe.dart';
-import 'package:abogator/core/servicios/servicio_haptico.dart';
 import 'package:abogator/core/tema/efectos.dart';
 import 'package:abogator/core/tema/tokens_color.dart';
 import 'package:abogator/core/textos/textos.dart';
@@ -31,7 +30,9 @@ import 'package:abogator/funciones/vidas/pantalla_sin_vidas.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ayudantes/falsos.dart';
 import '../../ayudantes/montar.dart';
+import '../../ayudantes/sin_desbordes.dart';
 import '../juego/ayudante_juego.dart';
 
 /// Reloj compartido: los cronómetros y el servidor avanzan juntos.
@@ -71,20 +72,6 @@ class VidasDeSobra implements RepositorioVidas {
 
   @override
   Future<Vidas> recuperarVida() async => Vidas(cantidad: ++cantidad);
-}
-
-/// Vibraciones registradas.
-class HapticaFalsa implements ServicioHaptico {
-  final llamadas = <String>[];
-
-  @override
-  Future<void> acierto() async => llamadas.add('acierto');
-  @override
-  Future<void> parcial() async => llamadas.add('parcial');
-  @override
-  Future<void> error() async => llamadas.add('error');
-  @override
-  Future<void> suave() async => llamadas.add('suave');
 }
 
 List<DecisionEscenario> get escenario => EscenarioRansomware.decisiones;
@@ -129,13 +116,6 @@ Future<Montaje> abrirCrisis(
     tamano: tamano,
   );
   return Montaje(reloj, repoVidas, haptica);
-}
-
-Future<void> tocar(WidgetTester tester, Finder f) async {
-  await tester.ensureVisible(f);
-  await tester.pumpAndSettle();
-  await tester.tap(f);
-  await tester.pumpAndSettle();
 }
 
 Future<Montaje> empezarExamen(
@@ -740,19 +720,8 @@ void main() {
       }
     });
 
-    for (final (tamano, escala) in [
-      (const Size(390, 844), 1.0),
-      (const Size(390, 844), 2.0),
-      (const Size(360, 640), 1.0),
-      (const Size(360, 640), 2.0),
-      (const Size(320, 640), 1.0),
-      (const Size(320, 640), 2.0),
-    ]) {
-      testWidgets('sin desbordes ${tamano.width.toInt()}×${tamano.height.toInt()} ${escala}x', (
-        tester,
-      ) async {
-        tester.platformDispatcher.textScaleFactorTestValue = escala;
-        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    probarSinDesbordes(
+      (tester, tamano, _) async {
         final m = await abrirCrisis(
           tester,
           tamano: tamano,
@@ -768,7 +737,9 @@ void main() {
         await avanzar(tester, m.reloj, Duration.zero);
         await pasarChip(tester);
         expect(tester.takeException(), isNull);
-      });
-    }
+      },
+      grupo: null,
+      prefijo: 'sin desbordes ',
+    );
   });
 }
