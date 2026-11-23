@@ -2,7 +2,7 @@
 
 Mapa navegable del proyecto: qué existe, dónde está y con qué se relaciona. **Se actualiza cada vez que se crea, mueve, renombra o elimina algo** (reglas en `ai/conocimiento/06-grafo-de-conocimiento.md`). Si algo de aquí no coincide con la realidad, el grafo está mal y hay que corregirlo.
 
-Última actualización: 2026-11-22 · por Claude Chat · tarea: T-15g
+Última actualización: 2026-11-22 · por Claude Chat · tarea: T-15d
 
 ## Cómo leerlo
 - Cada fila es un **nodo** con un ID único. La columna **Relaciones** son las **aristas**: `→` apunta a otro nodo, con un verbo corto (`usa`, `muestra`, `navega a`, `implementa`, `depende de`, `define`).
@@ -35,7 +35,7 @@ flowchart LR
 | DOC-08 | Accesibilidad (WCAG 2.1 AA): matriz, contrastes, orden de foco, alternativas al gesto, atajos y verificación manual (lo creó Claude Code en T-13; Claude Chat lo revisa) T-15e (corrección): línea nueva sobre la acción de tocar y `acciones_de_tocar_test.dart`. | ai/conocimiento/08-accesibilidad.md | en curso | ← lo verifica TEST-AUDITORIA; → aplica a todas las PANT-* |
 | DOC-09 | Duplicación: medición inicial, catálogo de 20 patrones de `lib/` y 3 de `test/`, código muerto, lotes T-15b a T-15f y reglas de la T-15 (lo creó Claude Code en T-15a; Claude Chat lo revisa) | ai/conocimiento/09-duplicacion.md | en curso | → guía T-15; → señala PANT-PENDIENTE como código muerto |
 | GRAFO | Este archivo | ai/grafo.md | hecho | ← lo actualizan Claude Chat y Claude Code |
-| SIG | Tarea actual (T-15g: teclado y tinte del mazo) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
+| SIG | Tarea actual (T-15d: ayudantes de pruebas) | ai/siguiente.md | en curso | → apunta a la tarea vigente |
 | REP | Reporte | ai/reporte.md | hecho | ← lo escribe Claude Code; → responde a SIG |
 
 ## 2 · Externos
@@ -80,8 +80,8 @@ flowchart LR
 | T-15e | 15e-marcos-y-disposiciones | hecho | AccionEnfocable.boton, DesplazableAltoMinimo, mostrarHojaAdaptativa, DosColumnasTablet, BotonIconoCuadrado | T-15c |
 | T-15e-fix | fix/15-accion-de-tocar-en-controles | hecho | acción de tocar en controles con excludeSemantics; BotonIconoCuadrado → BotonIconoCaja | T-15e |
 | T-15f | 15f-fin-de-sprint-examen-y-resumenes | hecho | P-11 fin de sprint, P-15 Examen móvil/tablet, P-20 repetidos locales | T-15e |
-| T-15g | 15g-teclado-y-tinte-del-mazo | en curso | P-14: teclado y tinte del mazo en juego, Examen y juicio | T-15f |
-| T-15d | 15d-ayudantes-de-pruebas | planeado | ayudantes de pruebas (T-01, T-02, T-03) y extender la auditoría de acciones de tocar a casillas e interruptores | T-15g |
+| T-15g | 15g-teclado-y-tinte-del-mazo | hecho | P-14: teclado y tinte del mazo en juego, Examen y juicio | T-15f |
+| T-15d | 15d-ayudantes-de-pruebas | en curso | ayudantes de pruebas (T-01, T-02, T-03) y extender la auditoría de acciones de tocar a casillas e interruptores | T-15g |
 | T-15 | 15-componentes-globales | planeado | optimización: componentes globales, menos vistas y duplicación (el usuario explicará el alcance; **recordárselo antes de T-14**) | T-13b |
 | T-14 | 14-integracion-api | planeado | REPO-* → HTTP | EXT-BACK listo, T-15 |
 
@@ -513,3 +513,4 @@ Código de cada pantalla: `lib/funciones/<área>/` (— hasta que exista).
 - 2026-11-22 · Claude Code · T-15f: cada pantalla de fin de sprint (19, 19b, 20 y el resultado del juicio) y la crisis del Examen arman sus piezas una vez para móvil y tablet. `en curso` para CODIGO-PANT-19, CODIGO-PANT-19b, CODIGO-PANT-20, CODIGO-PANT-22, CODIGO-PANT-27 y DOC-09 (resultados de la T-15f y fila de la T-15g). Sin nodos nuevos ni obsoletos (solo piezas privadas).
 - 2026-11-22 · Claude Chat · cierre de T-15f (PR mergeado, lib/ −92 líneas netas, 3309 pruebas). T-15g `en curso` (rama `15g-teclado-y-tinte-del-mazo`): teclado y tinte del mazo en juego, Examen y juicio.
 - 2026-11-22 · Claude Code · T-15g: el teclado y el tinte del mazo viven en un solo lugar (`teclearMazo` y `TinteArrastre` en `mazo_swipe.dart`); cada pantalla conserva sus guardias. Traje `develop` (T-15f) a la rama antes de medir. `en curso` para MAZO-SWIPE (CODIGO-PANT-10, CODIGO-PANT-22, CODIGO-PANT-27 y DOC-09 ya lo estaban). Nodo nuevo: TEST-TECLADO-MAZO. Sin obsoletos.
+- 2026-11-22 · Claude Chat · cierre de T-15g (PR #34 mergeado, lib/ −37 líneas netas, 3324 pruebas). T-15d `en curso` (último lote de la T-15, solo `test/`).

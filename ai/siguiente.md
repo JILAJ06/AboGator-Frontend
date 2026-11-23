@@ -1,46 +1,43 @@
-# T-15g · Teclado y tinte del mazo
+# T-15d · Ayudantes de pruebas y auditoría de acciones de tocar
 
-**Rama:** `15g-teclado-y-tinte-del-mazo` (ya creada desde `develop`)
-**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-15g**).
-**Figma:** no hace falta. Lote de **cero cambios visibles ni de comportamiento** y el **más delicado de la T-15** (teclado y foco del juego, el Examen y el juicio). Mandan las reglas de `ai/conocimiento/09-duplicacion.md` y lo aprendido en los lotes anteriores.
+**Rama:** `15d-ayudantes-de-pruebas` (ya creada desde `develop`)
+**Escribe este archivo:** Claude Chat. **Escribe `reporte.md`:** Claude Code (ID **T-15d**).
+**Figma:** no hace falta. Último lote de la T-15: **solo `test/` y `ai/`; no toques `lib/`.** Mandan las reglas de `ai/conocimiento/09-duplicacion.md` y lo aprendido en los lotes anteriores.
 
-## Qué se repite (ya lo leí en el código)
-Las tres pantallas con mazo tienen **`_alTeclear` casi idéntico** y **el mismo tinte detrás de la tarjeta**:
-- `lib/funciones/juego/pantalla_juego.dart:376` (`_alTeclear`) y `:648` (`_envolver`).
-- `lib/funciones/apelaciones/pantalla_juicio.dart:264` y `:372-384`.
-- `lib/funciones/jefe/pantalla_jefe.dart:564` y `:787-810`.
+## Objetivo
+Quitar la duplicación de las pruebas con ayudantes comunes (T-01, T-02 y T-03 del catálogo) y, de paso, extender la auditoría de acciones de tocar a casillas e interruptores (D1 de la corrección de accesibilidad). **El número de pruebas y lo que cada una comprueba no cambian** (salvo lo que digan D1 de T-01 y la auditoría ampliada); la T-15d es para que las pruebas sean más cortas y sin copias.
 
-La lógica compartida: ignorar eventos que no sean `KeyDown`/`KeyRepeat`; **flechas** (← ilegal, → legal, ↑ condicional, ↓ escalar) llaman a `mazo.previsualizar(...)` y devuelven `handled`; con `mazo.previa` no nula, **Enter o NumpadEnter** → `mazo.confirmar(previa)` (handled) y **Esc** → `mazo.cancelarPrevia()` (handled); en cualquier otro caso `ignored`. Y el tinte: `Positioned.fill(ValueListenableBuilder<ArrastreVisible>(valueListenable: _arrastre, builder: TinteVeredicto(veredicto: arrastre.veredicto, opacidad: arrastre.progreso * LogicaSwipe.opacidadTinte)))`.
+## 1 · T-01 · `probarSinDesbordes`
+`test/ayudantes/sin_desbordes.dart` con `probarSinDesbordes(String nombre, Future<void> Function(WidgetTester, Size) abrir, {List<(Size, double)> casos = casosMovil})` que arma el `group('sin desbordes')` con las 6 combinaciones (390×844, 360×640 y 320×640, a 1.0 y 2.0), `textScaleFactorTestValue` y la comprobación de que no hay excepciones. Úsalo en los 9 archivos del catálogo (`perfil_test`, `ajustes_test`, `buzon_test`, `juicio_test`, `inicio_test`, `comodines_test`, `fin_sprint_test`, `tienda_test` y el que falte).
+- Si algún archivo comprueba algo **extra** dentro de su matriz (otra expectativa, otro tamaño), el ayudante lo recibe por parámetro o ese archivo conserva su propia versión; no pierdas ninguna comprobación. Cuenta las pruebas antes y después de cada archivo: deben coincidir.
+- Resuelve la D1 que ya anotaste en el catálogo para T-01 y dilo en el reporte.
 
-**Diferencias que NO pueden cambiar:**
-- **Juicio:** devuelve `ignored` si `_resolviendo` (antes de mirar flechas).
-- **Examen:** devuelve `ignored` si `examenProvider.fase != FaseJefe.decision`; maneja la **tecla P** (solo `KeyDownEvent`, solo con `tiempoExtendido`, llama a `_examen.pausar()`) **antes** de las flechas; y en el `Stack` tiene un **tinte de urgencia** (`ColoredBox` con `estadoIlegal` y `EfectosApp.opacidadUrgencia`, clave `tinte-urgencia`) **antes** del `TinteVeredicto`. Ese tinte de urgencia es del Examen y se queda donde está.
-- **Juego:** devuelve `ignored` si el mazo no existe (`_mazo.currentState == null`); el comentario de Enter/Esc («sin previsualización siguen su camino: Enter activa el botón de veredicto con foco») debe seguir valiendo.
+## 2 · T-02 · Falsos y datos repetidos
+`test/ayudantes/falsos.dart` con `ProgresoFalso`, `ApelacionesFalsas` (y su lista de `Apelacion(...)` de ejemplo), `HapticaFalsa`, `CronometroFalso`, el usuario `ana` y `tocar`. Elimina las copias de `inicio_test`, `mapa_test`, `buzon_test`, `sin_vidas_test`, `ajustes_test`, `jefe_test`, `juicio_test`, `comodines_test` y `ayudante_juego.dart`. Si dos copias **no son idénticas** (un falso con una diferencia útil para una prueba), el ayudante recibe esa diferencia por parámetro; no cambies lo que la prueba comprueba.
 
-## Diseño recomendado (más simple que `MarcoMazo` del catálogo)
-No metas un widget que envuelva todo. Hazlo con **dos piezas pequeñas** en `lib/funciones/juego/mazo_swipe.dart` (o un archivo junto a él), que conservan cada guardia en su pantalla:
-1. **`KeyEventResult teclearMazo(MazoSwipeState mazo, KeyEvent evento)`**: la parte común (flechas, Enter, Esc). Cada `_alTeclear` queda con **sus guardias y extras propios** (`_resolviendo`, fase del Examen, tecla P, mazo nulo) y termina llamando a `teclearMazo`. El orden de las comprobaciones debe ser **exactamente** el de hoy (por ejemplo, la tecla P del Examen va antes de las flechas).
-2. **`TinteArrastre({required ValueListenable<ArrastreVisible> arrastre})`**: el `Positioned.fill` con `ValueListenableBuilder` y `TinteVeredicto`. Las tres pantallas lo usan dentro de su `Stack`; el tinte de urgencia del Examen se queda como está, delante.
-Si prefieres otra forma (por ejemplo el `MarcoMazo` del catálogo) hazla solo si cumple lo anterior sin tocar el orden de foco ni las guardias; explica por qué en el reporte.
+## 3 · T-03 · Bloques de tablet repetidos
+Suma a `test/ayudantes/tamano_pantalla.dart` el cierre de prueba de tamaño u orientación que repiten `buzon_tablet_test`, `examen_tablet_test`, `juego_tablet_test` y `resultados_tablet_test`.
 
-## Reglas del lote
-- **Cero cambios de comportamiento.** Mismas teclas, mismas guardias, mismo orden de comprobación, mismo foco (`Focus(autofocus: true, skipTraversal: true)` se queda en cada pantalla), mismas claves y mismo árbol de widgets (la clave `pantalla-decision`, `tinte-urgencia`, etc.).
-- Las pruebas existentes **no cambian** (`juego_test`, `veredicto_test`, `jefe_test` con la tecla P, `juicio_test`, `pulido_test`, la auditoría de teclado y todas las demás), **y la auditoría (incluida `acciones_de_tocar_test.dart`) pasa sin tocar sus escenas.**
-- **Pruebas nuevas** para las dos piezas: `teclearMazo` con cada flecha (previsualiza y devuelve handled), Enter y NumpadEnter con y sin previsualización, Esc con y sin previsualización, eventos `KeyUp` y teclas ajenas (ignored); y `TinteArrastre` con veredicto y opacidad (tema claro y oscuro). Un mazo de prueba mínimo o un doble de `MazoSwipeState` según lo que ya usen las pruebas del mazo.
-- No toques las reglas del juego (`logica_swipe`, estados), repositorios ni mocks. Sin dependencias nuevas. No cambies la API pública de `MazoSwipe` más de lo necesario.
-- Mide como siempre (líneas antes y después de `lib/`, ahorro neto y puntos de cambio: **teclado y tinte 3 → 1**). Si el ahorro neto es ≤ 0, no importa: el beneficio es un solo lugar para cambiar el teclado del mazo; dilo en el reporte.
-- Grafo: COMP/PANT afectados, el nodo nuevo (si lo hay) y «Resultados por lote» en `09`; marca el P-14 como hecho.
+## 4 · Auditoría ampliada (D1 de la corrección)
+En `test/auditoria/acciones_de_tocar_test.dart` (sin cambiar las escenas ni sus ayudantes), amplía la comprobación para que **también** valga para nodos habilitados, visibles y con etiqueta que tengan `checked` (casillas, opciones de justificación, selector de tamaño) o `toggled` (interruptores): deben tener `SemanticsAction.tap`. Hoy todos la tienen, así que debe pasar; si encuentra alguno que no, **lístalo como D#** y no lo arregles aquí (iría a una corrección en `lib/`). Actualiza la línea de `08-accesibilidad.md` que describe la regla («todo control con semántica de botón, casilla o interruptor…»).
+
+## Reglas
+- **No toques `lib/`.** Si una prueba necesita un cambio en `lib/` para poder compartirse, déjala como está y anótalo.
+- Mismo número de pruebas por archivo y misma cobertura; la auditoría de escenas sin tocar; `flutter analyze` y `dart format` limpios; suite completa verde (≥ 3324 pruebas, y las de la auditoría ampliada si agregas casos).
+- Los ayudantes nuevos llevan un comentario de documentación breve y, si merece la pena, una prueba mínima de sí mismos (por ejemplo, que `probarSinDesbordes` registra las 6 pruebas); no pongas pruebas por pruebas.
+- Medición: líneas de `test/` antes y después, y puntos de cambio (9 matrices → 1, 4 falsos duplicados → 1). Anótalo en «Resultados por lote» de `09` y marca la T-15d como hecha.
+- Grafo: nodos de los ayudantes nuevos (si el grafo lleva ayudantes de pruebas; si no, no inventes nodos), registro de cambios y estado. **Al terminar, deja la T-15 completa:** actualiza la fila de la T-15 en el plan y el grafo para que yo cierre con el merge.
 
 ## Archivos permitidos
-`lib/funciones/juego/mazo_swipe.dart` (o un archivo nuevo junto a él), `pantalla_juego.dart`, `lib/funciones/apelaciones/pantalla_juicio.dart`, `lib/funciones/jefe/pantalla_jefe.dart`, la galería solo si la pieza es visible (no lo es), `test/` (pruebas nuevas) y `ai/`.
+`test/` (incluido `test/ayudantes/` y `test/auditoria/acciones_de_tocar_test.dart`), `ai/conocimiento/08-accesibilidad.md`, `ai/conocimiento/09-duplicacion.md`, `ai/grafo.md`, `ai/conocimiento/04-plan-de-tareas.md` y `ai/reporte.md`.
 
 ## Criterios de aceptación
-- [ ] `teclearMazo` y `TinteArrastre` (o la forma que justifiques) usados en las **tres** pantallas; las guardias y extras propios de cada una intactos y en el mismo orden.
-- [ ] Todas las pruebas existentes verdes **sin cambiar**; auditoría sin tocar escenas.
-- [ ] Pruebas nuevas de las piezas.
-- [ ] Líneas antes y después, ahorro neto y puntos de cambio en `09`; P-14 hecho.
-- [ ] `dart format`, `flutter analyze` limpios; suite completa verde (≥ 3309 pruebas).
-- [ ] Commits sin prefijo y sin menciones a Claude.
+- [ ] `probarSinDesbordes`, falsos comunes y cierre de tablet creados y usados; sin copias en los archivos del catálogo (o cada excepción justificada).
+- [ ] Mismo número de pruebas por archivo; cobertura intacta.
+- [ ] Auditoría de acciones de tocar ampliada a `checked` y `toggled`, verde (o D# con los controles que falten).
+- [ ] `lib/` sin cambios.
+- [ ] Líneas de `test/` antes y después en `09`; T-15d hecha.
+- [ ] `dart format`, `flutter analyze` limpios; suite completa verde; commits sin prefijo y sin menciones a Claude.
 
 ## Para el reporte
-Líneas antes y después, ahorro neto, qué dejaste en cada pantalla y por qué, número de pruebas y dudas numeradas (D1, D2…).
+Líneas de `test/` antes y después, número de pruebas por archivo tocado (antes y después), qué quedó fuera y por qué, resultado de la auditoría ampliada y dudas numeradas (D1, D2…).
